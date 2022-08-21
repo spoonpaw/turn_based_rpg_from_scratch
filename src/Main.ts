@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import BootScene from './scenes/BootScene';
+import TitleScene from './scenes/TitleScene';
+import GameScene from './scenes/GameScene';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -12,7 +14,8 @@ const config: Phaser.Types.Core.GameConfig = {
             gravity: { y: 0 }
         }
     },
-    scene: [BootScene],
+    antialias: false,
+    scene: [BootScene, TitleScene, GameScene],
     backgroundColor: '#000000'
 };
 
