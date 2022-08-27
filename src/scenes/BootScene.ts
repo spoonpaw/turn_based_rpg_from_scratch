@@ -19,7 +19,7 @@ export default class BootScene extends Phaser.Scene {
     }
 
     create() {
-        this.scene.start('Game');
+        this.scene.start('Title');
     }
 
     loadImages() {
@@ -27,11 +27,18 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('button1', 'assets/images/ui/blue_button01.png');
         this.load.image('button2', 'assets/images/ui/blue_button02.png');
 
+        this.load.image('prefab1', 'assets/images/ui/prefab1.png');
+        this.load.image('prefab2', 'assets/images/ui/prefab2.png');
+
         this.load.image('pic', 'assets/images/baal-loader.png');
         this.load.image('pic2', 'assets/images/atari-fujilogo.png');
         this.load.image('title', 'assets/images/afterlife-title-screen.png');
 
         this.load.image('tiles', 'assets/images/basictiles.png');
+        this.load.image('heart', 'assets/images/heart.png');
+
+        this.load.image('dragonblue', 'assets/images/dragonblue.png');
+        this.load.image('dragonorange', 'assets/images/dragonorange.png');
     }
 
     loadSpriteSheets() {

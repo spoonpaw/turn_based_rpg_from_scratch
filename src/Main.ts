@@ -2,6 +2,9 @@ import Phaser from 'phaser';
 import BootScene from './scenes/BootScene';
 import TitleScene from './scenes/TitleScene';
 import GameScene from './scenes/GameScene';
+import UIScene from './scenes/UIScene';
+import BattleScene from './scenes/BattleScene';
+import BattleUIScene from './scenes/BattleUIScene';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -10,12 +13,19 @@ const config: Phaser.Types.Core.GameConfig = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: true,
+            debug: false,
             gravity: { y: 0 }
         }
     },
     antialias: false,
-    scene: [BootScene, TitleScene, GameScene],
+    scene: [
+        BootScene,
+        TitleScene,
+        GameScene,
+        UIScene,
+        BattleScene,
+        BattleUIScene
+    ],
     backgroundColor: '#000000'
 };
 
