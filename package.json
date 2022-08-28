@@ -3,6 +3,9 @@
   "version": "1.0.0.220827432",
   "description": "A modern Phaser 3 template with TypeScript, Snowpack & ESLint",
   "main": "src/main.ts",
+  "engines": {
+    "node": "17.x"
+  },
   "scripts": {
     "start": "snowpack dev",
     "prebuild": "tsc && npm run lint",
