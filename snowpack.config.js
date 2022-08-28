@@ -4,7 +4,7 @@ module.exports = {
         src: "/dist"
     },
     devOptions: {
-        port: 8000,
+        port: process.env.PORT || 8000,
         open: "none"
     },
     buildOptions: {
