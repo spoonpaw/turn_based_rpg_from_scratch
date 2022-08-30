@@ -5,13 +5,17 @@ export default class Player {
     public health: number;
     public maxHealth: number;
     public damage: number;
+    public gold: number;
+    public experience: number;
 
     constructor(
         private sprite: Phaser.GameObjects.Sprite,
         private tilePos: Phaser.Math.Vector2,
         health: number,
         maxHealth: number,
-        damage: number
+        damage: number,
+        gold: number,
+        experience: number
     ) {
         const offsetX = GameScene.TILE_SIZE / 2;
         const offsetY = GameScene.TILE_SIZE;
@@ -26,6 +30,8 @@ export default class Player {
         this.health = health;
         this.maxHealth = maxHealth;
         this.damage = damage;
+        this.gold = gold;
+        this.experience = experience;
     }
 
     getPosition(): Phaser.Math.Vector2 {

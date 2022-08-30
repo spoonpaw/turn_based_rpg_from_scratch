@@ -36,7 +36,7 @@ export default class GameScene extends Phaser.Scene {
         playerSprite.setDepth(2);
         this.cameras.main.startFollow(playerSprite);
         this.cameras.main.roundPixels = true;
-        this.player = new Player(playerSprite, new Phaser.Math.Vector2(6, 6), 100, 100, 20);
+        this.player = new Player(playerSprite, new Phaser.Math.Vector2(6, 6), 100, 100, 50, 0, 0);
 
         this.gridPhysics = new GridPhysics(this.player, overworldTilemap);
         this.gridControls = new GridControls(this.input, this.gridPhysics);

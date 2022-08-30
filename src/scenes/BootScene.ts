@@ -41,6 +41,7 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('dragonorange', 'assets/images/dragonorange.png');
 
         this.load.image('sword', 'assets/images/icons/sword.png');
+        this.load.image('coin', 'assets/images/icons/coin.png');
     }
 
     loadSpriteSheets() {

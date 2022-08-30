@@ -71,7 +71,15 @@ export default class BattleScene extends Phaser.Scene {
         // display the gold message
         this.events.emit(
             'Message',
-            'You receive 10 gold pieces.'
+            'You receive 3 gold pieces.'
+        );
+    }
+
+    sendExperienceMessage() {
+        // display the gold message
+        this.events.emit(
+            'Message',
+            'You receive 10 experience points.'
         );
     }
 
@@ -81,11 +89,16 @@ export default class BattleScene extends Phaser.Scene {
 
             this.sendVictoryMessage();
 
-            // add timer for the next turn, so gameplay will be smooth
             this.time.addEvent({
-                delay: 3000,
-                callback: this.endBattle,
-                callbackScope: this
+                delay: 3000, callback: this.sendGoldMessage, callbackScope: this
+            });
+
+            this.time.addEvent({
+                delay: 6000, callback: this.sendExperienceMessage, callbackScope: this
+            });
+
+            this.time.addEvent({
+                delay: 8500, callback: this.endBattle, callbackScope: this
             });
 
             // this.endBattle();
@@ -180,6 +193,12 @@ export default class BattleScene extends Phaser.Scene {
             if (unit.type === 'Warrior'){
                 gameScene.player.health = unit.hp;
                 eventsCenter.emit('updateHP', gameScene.player.health);
+
+                gameScene.player.gold += 3;
+                eventsCenter.emit('updateGold', gameScene.player.gold);
+
+                gameScene.player.experience += 10;
+                eventsCenter.emit('updateXP', gameScene.player.experience);
             }
         }
     }
