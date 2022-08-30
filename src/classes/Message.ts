@@ -27,6 +27,7 @@ export default class Message extends Phaser.GameObjects.Container {
                 }
             }
         );
+        this.text.setResolution(10);
         this.text.setFontSize(50);
         this.add(this.text);
         this.text.setOrigin(0.5);

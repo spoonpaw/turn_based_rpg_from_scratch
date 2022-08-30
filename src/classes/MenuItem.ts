@@ -8,6 +8,7 @@ export default class MenuItem extends Phaser.GameObjects.Text {
         scene: Phaser.Scene
     ) {
         super(scene, x, y, text, {color: '#ffffff', align: 'left', fontFamily: 'CustomFont'});
+        this.setResolution(10);
         this.setFontSize(60);
     }
 

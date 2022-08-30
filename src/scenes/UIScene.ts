@@ -1,10 +1,14 @@
 import Phaser from 'phaser';
 import GameScene from './GameScene';
+import eventsCenter from '../utils/EventsCenter';
+
 
 export default class UIScene extends Phaser.Scene {
     public gameScene!: GameScene;
-    public scoreText!: Phaser.GameObjects.Text;
+    public hpText!: Phaser.GameObjects.Text;
     public heartIcon!: Phaser.GameObjects.Image;
+    private warriorText!: Phaser.GameObjects.Text;
+    private swordIcon!: Phaser.GameObjects.Image;
 
     constructor() {
         super('UI');
@@ -21,17 +25,22 @@ export default class UIScene extends Phaser.Scene {
     }
 
     setupUiElements() {
-        // create the score text game object
-        this.scoreText = this.add.text(35, 2, `Hit Points: ${this.gameScene.player.health}`, { fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont' });
+        // set up warrior icons
+        this.warriorText = this.add.text(35, -5, 'Warrior', { fontSize: '50px', color: '#ffffff', fontFamily: 'CustomFont' }).setStroke('#000000', 2).setResolution(10);
+        this.swordIcon = this.add.image(18, 20, 'sword').setScale(1.5);
+
+        // create the hp text game object
+        this.hpText = this.add.text(35, 30, `Hit Points: ${this.gameScene.player.health}`, { fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont' }).setStroke('#000000', 2).setResolution(10);
         // create heart icon
-        // this.heartIcon = this.add.image(15, 15, 'items', 3);
-        this.heartIcon = this.add.image(18, 18, 'heart');
+        this.heartIcon = this.add.image(18, 45, 'heart');
     }
 
     setupEvents() {
-        // listen for the updateScore event from the game scene
-        this.gameScene.events.on('updateScore', (score) => {
-            this.scoreText.setText(`Coins: ${score}`);
-        });
+        // listen for the updateHP event from the events center
+        eventsCenter.on('updateHP', this.updateHP, this);
+    }
+
+    updateHP(hp) {
+        this.hpText.text = `Hit Points: ${hp}`;
     }
 }

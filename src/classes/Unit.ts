@@ -4,7 +4,7 @@ import MenuItem from './MenuItem';
 export default class Unit extends Phaser.GameObjects.Sprite{
     private maxHp: number;
     private damage: number;
-    private hp: number;
+    public hp: number;
     public living: boolean;
     private menuItem!: MenuItem | undefined;
     

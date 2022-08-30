@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
 import PlayerCharacter from '../classes/PlayerCharacter';
 import Enemy from '../classes/Enemy';
+import GameScene from './GameScene';
+import eventsCenter from '../utils/EventsCenter';
+// import UIScene from './UIScene';
 
 export default class BattleScene extends Phaser.Scene {
     heroes!: PlayerCharacter[];
@@ -22,14 +25,17 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     startBattle() {
+        // game scene reference
+        const gameScene = <GameScene>this.scene.get('Game');
+
         // player character - warrior
-        const warrior = new PlayerCharacter(this, 700, 155, 'player', 16, 'Warrior', 100, 100);
+        const warrior = new PlayerCharacter(this, 700, 155, 'player', 16, 'Warrior', gameScene.player.health, 50);
         this.add.existing(warrior);
 
         // add second player
         // player character - mage
-        const mage = new PlayerCharacter(this, 700, 360, 'player', 19, 'Mage', 80, 100);
-        this.add.existing(mage);
+        // const mage = new PlayerCharacter(this, 700, 360, 'player', 19, 'Mage', 80, 49);
+        // this.add.existing(mage);
 
         const dragonBlue = new Enemy(this, 125, 100, 'dragonblue', null, 'Dragon', 50, 3);
         this.add.existing(dragonBlue);
@@ -38,7 +44,8 @@ export default class BattleScene extends Phaser.Scene {
         this.add.existing(dragonOrange);
 
         // array with heroes
-        this.heroes = [warrior, mage];
+        this.heroes = [warrior];
+        // this.heroes = [warrior, mage];
 
         // array with enemies
         this.enemies = [dragonBlue, dragonOrange];
@@ -52,10 +59,36 @@ export default class BattleScene extends Phaser.Scene {
         this.scene.run('BattleUI');
     }
 
+    sendVictoryMessage() {
+        // display the victory message
+        this.events.emit(
+            'Message',
+            'Thine enemies are slain!'
+        );
+    }
+
+    sendGoldMessage() {
+        // display the gold message
+        this.events.emit(
+            'Message',
+            'You receive 10 gold pieces.'
+        );
+    }
+
     nextTurn() {
         // if we have victory or game over
         if (this.checkEndBattle()) {
-            this.endBattle();
+
+            this.sendVictoryMessage();
+
+            // add timer for the next turn, so gameplay will be smooth
+            this.time.addEvent({
+                delay: 3000,
+                callback: this.endBattle,
+                callbackScope: this
+            });
+
+            // this.endBattle();
             return;
         }
 
@@ -120,6 +153,9 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     endBattle() {
+        // send the player info to the game scene ui
+        this.sendPlayerInfoToGameScene();
+
         // clear state, remove sprites
         this.heroes.length = 0;
         this.enemies.length = 0;
@@ -128,9 +164,23 @@ export default class BattleScene extends Phaser.Scene {
             this.units[i].destroy();
         }
         this.units.length = 0;
+
+
         // sleep the ui
         this.scene.sleep('BattleUI');
+
         // return to game scene and sleep current battle scene
         this.scene.switch('Game');
+    }
+
+    sendPlayerInfoToGameScene() {
+        const gameScene = <GameScene>this.scene.get('Game');
+
+        for (const unit of this.heroes) {
+            if (unit.type === 'Warrior'){
+                gameScene.player.health = unit.hp;
+                eventsCenter.emit('updateHP', gameScene.player.health);
+            }
+        }
     }
 }

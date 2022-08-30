@@ -94,6 +94,7 @@ export default class BattleUIScene extends Phaser.Scene{
         const enemies = this.battleScene.enemies;
         this.enemiesMenu.remap(enemies);
     }
+
     onKeyInput(event: KeyboardEvent) {
         if (this.currentMenu && this.currentMenu.selected) {
             if (event.code === 'ArrowUp') {

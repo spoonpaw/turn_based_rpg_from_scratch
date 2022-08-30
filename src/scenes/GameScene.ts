@@ -8,10 +8,10 @@ export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
     private gridControls!: GridControls;
     private gridPhysics!: GridPhysics;
-    player!: Player;
+    public player!: Player;
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-    playerTileX!: number;
-    playerTileY!: number;
+    public playerTileX!: number;
+    public playerTileY!: number;
 
     constructor() {
         super('Game');

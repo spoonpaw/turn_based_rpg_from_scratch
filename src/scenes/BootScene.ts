@@ -19,7 +19,7 @@ export default class BootScene extends Phaser.Scene {
     }
 
     create() {
-        this.scene.start('Title');
+        this.scene.start('Game');
     }
 
     loadImages() {
@@ -39,6 +39,8 @@ export default class BootScene extends Phaser.Scene {
 
         this.load.image('dragonblue', 'assets/images/dragonblue.png');
         this.load.image('dragonorange', 'assets/images/dragonorange.png');
+
+        this.load.image('sword', 'assets/images/icons/sword.png');
     }
 
     loadSpriteSheets() {
