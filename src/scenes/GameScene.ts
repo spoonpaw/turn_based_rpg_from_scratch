@@ -56,6 +56,7 @@ export default class GameScene extends Phaser.Scene {
         this.cursors.right.reset();
         this.cursors.up.reset();
         this.cursors.down.reset();
+
     }
 
     public update(_time: number, delta: number) {

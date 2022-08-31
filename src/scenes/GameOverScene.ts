@@ -36,27 +36,33 @@ export default class GameOverScene extends Phaser.Scene{
 
         TweenHelper.flashElement(this, pressAnyKeyText);
 
+        this.sys.events.on('wake', this.wake, this);
+
         this.resetGameScene();
 
         this.setupKeyListeners();
 
-        this.sys.events.on('wake', this.wake, this);
     }
 
     setupKeyListeners() {
+        this.input.enabled = true;
         this.cameras.main.once('camerafadeincomplete', (camera) => {
             this.input.keyboard.once('keydown', () => {
-                // this.input.enabled = false;
+                this.input.enabled = false;
                 camera.fadeOut(3000);
                 this.cameras.main.once('camerafadeoutcomplete', () => {
-                    this.scene.switch('Game');
+                    this.scene.wake('Game');
+                    this.scene.stop();
+                    return;
                 });
             });
             this.input.once('pointerdown', () => {
-                // this.input.enabled = false;
+                this.input.enabled = false;
                 camera.fadeOut(3000);
                 this.cameras.main.once('camerafadeoutcomplete', () => {
-                    this.scene.switch('Game');
+                    this.scene.wake('Game');
+                    this.scene.stop();
+                    return;
                 });
             });
         });
@@ -89,6 +95,8 @@ export default class GameOverScene extends Phaser.Scene{
     wake() {
         this.cameras.main.fadeIn(3000);
         this.resetGameScene();
-        this.setupKeyListeners();
+        this.cameras.main.once('camerafadeincomplete', () => {
+            this.setupKeyListeners();
+        });
     }
 }
