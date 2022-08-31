@@ -67,6 +67,14 @@ export default class BattleScene extends Phaser.Scene {
         );
     }
 
+    sendDefeatMessage() {
+        // display the victory message
+        this.events.emit(
+            'Message',
+            'Thou hast been vanquished!'
+        );
+    }
+
     sendGoldMessage() {
         // display the gold message
         this.events.emit(
@@ -83,25 +91,72 @@ export default class BattleScene extends Phaser.Scene {
         );
     }
 
+    endBattleGameOver() {
+        // cut gold in half, set hit points to full, cut to game over screen, respawn
+        const gameScene = <GameScene>this.scene.get('Game');
+        gameScene.player.gold = Math.floor(gameScene.player.gold / 2);
+        eventsCenter.emit('updateGold', gameScene.player.gold);
+        gameScene.player.health = gameScene.player.maxHealth;
+        eventsCenter.emit('updateHP', gameScene.player.health);
+
+        const battleUIScene = this.scene.get('BattleUI');
+        battleUIScene.cameras.main.fadeOut(2000);
+        this.cameras.main.fadeOut(3000);
+
+        this.cameras.main.once('camerafadeoutcomplete', () => {
+            // clear state, remove sprites
+            this.heroes.length = 0;
+            this.enemies.length = 0;
+            for (let i = 0; i < this.units.length; i++) {
+                // link item
+                this.units[i].destroy();
+            }
+            this.units.length = 0;
+
+
+            // sleep the ui
+            this.scene.sleep('BattleUI');
+
+
+            const battleUIScene = this.scene.get('BattleUI');
+            battleUIScene.cameras.main.fadeIn(0);
+            const battleScene = this.scene.get('Battle');
+            battleScene.cameras.main.fadeIn(0);
+
+            // return to game scene and sleep current battle scene
+            this.scene.switch('GameOver');
+        });
+
+    }
+
     nextTurn() {
         // if we have victory or game over
-        if (this.checkEndBattle()) {
+        if (this.checkEndBattle() === 'victory') {
 
             this.sendVictoryMessage();
 
             this.time.addEvent({
-                delay: 3000, callback: this.sendGoldMessage, callbackScope: this
+                delay: 3000, callback: this.sendExperienceMessage, callbackScope: this
             });
 
             this.time.addEvent({
-                delay: 6000, callback: this.sendExperienceMessage, callbackScope: this
+                delay: 6000, callback: this.sendGoldMessage, callbackScope: this
             });
 
             this.time.addEvent({
                 delay: 8500, callback: this.endBattle, callbackScope: this
             });
 
-            // this.endBattle();
+            return;
+        }
+        else if (this.checkEndBattle() === 'gameover') {
+            // Add death message 'Thou hast been vanquished.'
+            this.sendDefeatMessage();
+
+            this.time.addEvent({
+                delay: 2500, callback: this.endBattleGameOver, callbackScope: this
+            });
+
             return;
         }
 
@@ -154,7 +209,12 @@ export default class BattleScene extends Phaser.Scene {
                 gameOver =false;
             }
         }
-        return victory || gameOver;
+        if (victory) {
+            return 'victory';
+        }
+        else if (gameOver) {
+            return 'gameover';
+        }
     }
 
     receivePlayerSelection(action: string, target: number) {

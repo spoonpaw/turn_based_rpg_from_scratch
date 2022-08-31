@@ -1,9 +1,8 @@
 import Phaser from 'phaser';
-import UiButton from '../classes/UiButton';
+import TweenHelper from '../utils/TweenHelper';
 
 export default class TitleScene extends Phaser.Scene {
     public titleText!: Phaser.GameObjects.Text;
-    public startGameButton!: UiButton;
 
     constructor() {
         super('Title');
@@ -19,7 +18,6 @@ export default class TitleScene extends Phaser.Scene {
             camera.fadeOut(3000);
         });
         this.cameras.main.fadeIn(3000);
-        //this.add.image(400, 3000, 'pic2');
 
         this.cameras.main.once('camerafadeoutcomplete', (camera) => {
             phaserImage.destroy();
@@ -48,14 +46,14 @@ export default class TitleScene extends Phaser.Scene {
             TweenHelper.flashElement(this, pressAnyKeyText);
 
             this.cameras.main.once('camerafadeincomplete', (camera) => {
-                this.input.keyboard.on('keydown', () => {
+                this.input.keyboard.once('keydown', () => {
                     this.input.enabled = false;
                     camera.fadeOut(3000);
                     this.cameras.main.once('camerafadeoutcomplete', () => {
                         this.startScene('Game');
                     });
                 });
-                this.input.on('pointerdown', () => {
+                this.input.once('pointerdown', () => {
                     this.input.enabled = false;
                     camera.fadeOut(3000);
                     this.cameras.main.once('camerafadeoutcomplete', () => {
@@ -71,47 +69,5 @@ export default class TitleScene extends Phaser.Scene {
 
     startScene(targetScene) {
         this.scene.start(targetScene);
-    }
-}
-
-class TweenHelper {
-    static flashElement(scene, element, repeat = true, easing = 'Linear', overallDuration = 1500, visiblePauseDuration = 500) {
-        if (scene && element) {
-            const flashDuration = overallDuration - visiblePauseDuration / 2;
-
-            scene.tweens.timeline({
-                tweens: [
-                    {
-                        targets: element,
-                        duration: 0,
-                        alpha: 0,
-                        ease: easing
-                    },
-                    {
-                        targets: element,
-                        duration: flashDuration,
-                        alpha: 1,
-                        ease: easing
-                    },
-                    {
-                        targets: element,
-                        duration: visiblePauseDuration,
-                        alpha: 1,
-                        ease: easing
-                    },
-                    {
-                        targets: element,
-                        duration: flashDuration,
-                        alpha: 0,
-                        ease: easing,
-                        onComplete: () => {
-                            if (repeat === true) {
-                                this.flashElement(scene, element);
-                            }
-                        }
-                    }
-                ]
-            });
-        }
     }
 }

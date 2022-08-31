@@ -5,6 +5,7 @@ import GameScene from './scenes/GameScene';
 import UIScene from './scenes/UIScene';
 import BattleScene from './scenes/BattleScene';
 import BattleUIScene from './scenes/BattleUIScene';
+import GameOverScene from './scenes/GameOverScene';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -24,7 +25,8 @@ const config: Phaser.Types.Core.GameConfig = {
         GameScene,
         UIScene,
         BattleScene,
-        BattleUIScene
+        BattleUIScene,
+        GameOverScene
     ],
     backgroundColor: '#000000'
 };
