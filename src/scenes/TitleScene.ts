@@ -15,9 +15,9 @@ export default class TitleScene extends Phaser.Scene {
         phaserImage.displayWidth = this.sys.canvas.width;
 
         this.cameras.main.once('camerafadeincomplete', (camera) => {
-            camera.fadeOut(3000);
+            camera.fadeOut(1500);
         });
-        this.cameras.main.fadeIn(3000);
+        this.cameras.main.fadeIn(1500);
 
         this.cameras.main.once('camerafadeoutcomplete', (camera) => {
             phaserImage.destroy();
@@ -26,7 +26,7 @@ export default class TitleScene extends Phaser.Scene {
             titleImage.displayHeight = this.sys.canvas.height;
             titleImage.displayWidth = this.sys.canvas.width;
 
-            camera.fadeIn(3000);
+            camera.fadeIn(1500);
 
             // create title text
             this.titleText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Afterlife', {
@@ -48,14 +48,14 @@ export default class TitleScene extends Phaser.Scene {
             this.cameras.main.once('camerafadeincomplete', (camera) => {
                 this.input.keyboard.once('keydown', () => {
                     this.input.enabled = false;
-                    camera.fadeOut(3000);
+                    camera.fadeOut(1500);
                     this.cameras.main.once('camerafadeoutcomplete', () => {
                         this.startScene('Game');
                     });
                 });
                 this.input.once('pointerdown', () => {
                     this.input.enabled = false;
-                    camera.fadeOut(3000);
+                    camera.fadeOut(1500);
                     this.cameras.main.once('camerafadeoutcomplete', () => {
                         this.startScene('Game');
                     });

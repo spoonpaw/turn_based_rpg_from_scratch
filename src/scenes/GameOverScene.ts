@@ -4,8 +4,7 @@ import GameScene from './GameScene';
 import eventsCenter from '../utils/EventsCenter';
 
 export default class GameOverScene extends Phaser.Scene{
-    public gameOverText!: Phaser.GameObjects.Text;
-    private titleText!: Phaser.GameObjects.Text;
+    private gameOverText!: Phaser.GameObjects.Text;
 
     constructor() {
         super('GameOver');
@@ -19,12 +18,12 @@ export default class GameOverScene extends Phaser.Scene{
         this.cameras.main.fadeIn(3000);
 
         // create title text
-        this.titleText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Afterlife', {
+        this.gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Afterlife', {
             fontSize: '128px',
             color: '#fff',
             fontFamily: 'CustomFont'
         });
-        this.titleText.setOrigin(0.5);
+        this.gameOverText.setOrigin(0.5);
 
         const pressAnyKeyText = this.add.text(this.scale.width / 2, this.scale.height * 0.65, 'Press Any Key', {
             fontSize: '40px',
@@ -38,7 +37,9 @@ export default class GameOverScene extends Phaser.Scene{
 
         this.sys.events.on('wake', this.wake, this);
 
-        this.resetGameScene();
+        const gameScene = <GameScene>this.scene.get('Game');
+
+        gameScene.resetGameScene();
 
         this.setupKeyListeners();
 
@@ -94,7 +95,8 @@ export default class GameOverScene extends Phaser.Scene{
 
     wake() {
         this.cameras.main.fadeIn(3000);
-        this.resetGameScene();
+        const gameScene = <GameScene>this.scene.get('Game');
+        gameScene.resetGameScene();
         this.cameras.main.once('camerafadeincomplete', () => {
             this.setupKeyListeners();
         });

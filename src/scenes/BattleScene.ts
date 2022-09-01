@@ -29,7 +29,7 @@ export default class BattleScene extends Phaser.Scene {
         const gameScene = <GameScene>this.scene.get('Game');
 
         // player character - warrior
-        const warrior = new PlayerCharacter(this, 700, 155, 'player', 16, 'Warrior', gameScene.player.health, 50);
+        const warrior = new PlayerCharacter(this, 700, 155, 'player', 16, 'Warrior', gameScene.player.health, 5);
         this.add.existing(warrior);
 
         // add second player
@@ -37,10 +37,10 @@ export default class BattleScene extends Phaser.Scene {
         // const mage = new PlayerCharacter(this, 700, 360, 'player', 19, 'Mage', 80, 49);
         // this.add.existing(mage);
 
-        const dragonBlue = new Enemy(this, 125, 100, 'dragonblue', null, 'Dragon', 50, 3);
+        const dragonBlue = new Enemy(this, 125, 100, 'dragonblue', null, 'Dragon', 5, 3);
         this.add.existing(dragonBlue);
 
-        const dragonOrange = new Enemy(this, 125, 300, 'dragonorange', null, 'Dragon2', 50, 3);
+        const dragonOrange = new Enemy(this, 125, 300, 'dragonorange', null, 'Dragon2', 5, 3);
         this.add.existing(dragonOrange);
 
         // array with heroes

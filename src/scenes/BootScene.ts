@@ -59,5 +59,6 @@ export default class BootScene extends Phaser.Scene {
     loadTileMap() {
         // load tile maps
         this.load.tilemapTiledJSON('overworld-map', 'assets/tilemaps/afterlife.json');
+        this.load.tilemapTiledJSON('town-map', 'assets/tilemaps/town.json');
     }
 }
