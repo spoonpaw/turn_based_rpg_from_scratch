@@ -16,6 +16,7 @@ export default class GameScene extends Phaser.Scene {
     private overworldTilemap!: Phaser.Tilemaps.Tilemap;
     private enteringTown!: boolean;
     private currentMap!: string;
+    private inTown!: boolean;
 
     constructor() {
         super('Game');
@@ -88,41 +89,15 @@ export default class GameScene extends Phaser.Scene {
             this.enteringTown = true;
             // enter the town
             this.time.delayedCall(240, () => {
-                this.resetGameScene();
                 this.currentMap = 'town';
-                // TODO: switch to the town spritesheet
-                // console.log('here are all the current children:');
-                // console.log(this.children.list);
-                //
-                // const allSprites = this.children.list.filter(x => x instanceof Phaser.GameObjects.Sprite);
-                // allSprites.forEach(x => x.destroy());
-                //
-                // const allTilemaps = this.children.list.filter(x => x instanceof Phaser.Tilemaps.TilemapLayer);
-                // allTilemaps.forEach(x => x.destroy());
-                //
-                // this.overworldTilemap = this.make.tilemap({key: 'town-map'});
-                // this.overworldTilemap.addTilesetImage('Basic Tiles', 'tiles');
-                // for (let i = 0; i < this.overworldTilemap.layers.length; i++) {
-                //     const layer = this.overworldTilemap
-                //         .createLayer(i, 'Basic Tiles', 0, 0);
-                //     layer.setDepth(i);
-                // }
-                //
-                // const playerSprite = this.add.sprite(0, 0, 'player');
-                // playerSprite.setDepth(2);
-                // this.cameras.main.startFollow(playerSprite);
-                // this.cameras.main.roundPixels = true;
-                //
-                // this.gridPhysics = new GridPhysics(this.player, this.overworldTilemap);
-                // this.gridControls = new GridControls(this.input, this.gridPhysics);
-                //
-                // this.playerTileX = this.player.getTilePos().x;
-                // this.playerTileY = this.player.getTilePos().y;
+                // switch to the town tilemap
+                this.loadTown();
+                this.inTown = true;
 
             });
         }
 
-        if (checkForAFight) {
+        if (checkForAFight && !this.inTown) {
             // randomly determine if fight will occur
             if (this.checkForRandomEncounter()) {
                 // start combat
@@ -179,5 +154,43 @@ export default class GameScene extends Phaser.Scene {
         eventsCenter.emit('updateHP', this.player.health);
         eventsCenter.emit('updateGold', this.player.gold);
         eventsCenter.emit('updateXP', this.player.experience);
+    }
+
+    loadTown() {
+
+        const allSprites = this.children.list.filter(x => x instanceof Phaser.GameObjects.Sprite);
+        allSprites.forEach(x => x.destroy());
+
+        const allTilemaps = this.children.list.filter(x => x instanceof Phaser.Tilemaps.TilemapLayer);
+        allTilemaps.forEach(x => x.destroy());
+
+        this.overworldTilemap = this.make.tilemap({key: 'town-map'});
+        this.overworldTilemap.addTilesetImage('Basic Tiles', 'tiles');
+        for (let i = 0; i < this.overworldTilemap.layers.length; i++) {
+            const layer = this.overworldTilemap
+                .createLayer(i, 'Basic Tiles', 0, 0);
+            layer.setDepth(i);
+        }
+
+        const playerSprite = this.add.sprite(0, 0, 'player');
+        playerSprite.setDepth(2);
+        this.cameras.main.startFollow(playerSprite);
+        this.cameras.main.roundPixels = true;
+        this.player = new Player(playerSprite, new Phaser.Math.Vector2(0, 0), this.player.health, this.player.maxHealth, this.player.damage, this.player.gold, this.player.experience);
+
+        this.gridPhysics = new GridPhysics(this.player, this.overworldTilemap);
+        this.gridControls = new GridControls(this.input, this.gridPhysics);
+
+        this.createPlayerAnimation(Direction.UP, 39, 41);
+        this.createPlayerAnimation(Direction.RIGHT, 27, 29);
+        this.createPlayerAnimation(Direction.DOWN, 3, 5);
+        this.createPlayerAnimation(Direction.LEFT, 15, 17);
+
+
+        this.playerTileX = this.player.getTilePos().x;
+        this.playerTileY = this.player.getTilePos().y;
+
+        this.wake();
+
     }
 }
