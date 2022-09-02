@@ -6,6 +6,7 @@ const Vector2 = Phaser.Math.Vector2;
 type Vector2 = Phaser.Math.Vector2;
 
 export default class GridPhysics {
+    public facingDirection = Direction.NONE;
     private lastMovementIntent = Direction.NONE;
     private tileSizePixelsWalked = 0;
     private movementDirectionVectors: {
@@ -24,6 +25,7 @@ export default class GridPhysics {
 
     movePlayer(direction: Direction): void {
         this.lastMovementIntent = direction;
+        this.facingDirection = direction;
         if (this.isMoving()) return;
         if (this.isBlockingDirection(direction)) {
             this.player.stopAnimation(direction);

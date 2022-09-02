@@ -1,21 +1,11 @@
 import GameScene from '../scenes/GameScene';
 import {Direction} from '../types/Direction';
 
-export default class Player {
-    public health: number;
-    public maxHealth: number;
-    public damage: number;
-    public gold: number;
-    public experience: number;
+export default class NPC {
 
     constructor(
         public sprite: Phaser.GameObjects.Sprite,
         private tilePos: Phaser.Math.Vector2,
-        health: number,
-        maxHealth: number,
-        damage: number,
-        gold: number,
-        experience: number
     ) {
         const offsetX = GameScene.TILE_SIZE / 2;
         const offsetY = GameScene.TILE_SIZE;
@@ -25,13 +15,7 @@ export default class Player {
             tilePos.x * GameScene.TILE_SIZE + offsetX,
             tilePos.y * GameScene.TILE_SIZE + offsetY
         );
-        this.sprite.setFrame(4);
-
-        this.health = health;
-        this.maxHealth = maxHealth;
-        this.damage = damage;
-        this.gold = gold;
-        this.experience = experience;
+        this.sprite.setFrame(7);
     }
 
     getPosition(): Phaser.Math.Vector2 {
