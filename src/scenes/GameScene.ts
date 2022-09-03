@@ -5,6 +5,7 @@ import GridPhysics from '../classes/GridPhysics';
 import {Direction} from '../types/Direction';
 import eventsCenter from '../utils/EventsCenter';
 import NPC from '../classes/NPC';
+import {levels} from '../levels/Levels';
 
 export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
@@ -14,7 +15,7 @@ export default class GameScene extends Phaser.Scene {
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     public playerTileX!: number;
     public playerTileY!: number;
-    private overworldTilemap!: Phaser.Tilemaps.Tilemap;
+    private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private enteringTown!: boolean;
     private currentMap!: string;
     private inTown!: boolean;
@@ -29,25 +30,75 @@ export default class GameScene extends Phaser.Scene {
         this.scene.launch('UI');
     }
 
-    create() {
-        // create the map
-        this.currentMap = 'overworld';
-        this.enteringTown = false;
-        this.overworldTilemap = this.make.tilemap({key: 'overworld-map'});
-        this.overworldTilemap.addTilesetImage('Basic Tiles', 'tiles');
-        for (let i = 0; i < this.overworldTilemap.layers.length; i++) {
-            const layer = this.overworldTilemap
-                .createLayer(i, 'Basic Tiles', 0, 0);
-            layer.setDepth(i);
+    create(data) {
+
+        console.log('this is the data:');
+        console.log(data);
+        console.log(typeof data);
+
+        if (Object.keys(data).length === 0) {
+
+            // create the game scene when the player initially spawns.
+
+            // create the map
+            this.currentMap = 'overworld';
+            this.enteringTown = false;
+            this.currentTilemap = this.make.tilemap({key: levels.overworld.tilemapKey});
+            this.currentTilemap.addTilesetImage(levels.overworld.tilesetName, levels.overworld.tilesetKey);
+            for (let i = 0; i < this.currentTilemap.layers.length; i++) {
+                const layer = this.currentTilemap
+                    .createLayer(i, levels.overworld.tilesetName, 0, 0);
+                layer.setDepth(i);
+            }
+
+            const playerSprite = this.add.sprite(0, 0, 'player');
+            playerSprite.setDepth(2);
+            this.cameras.main.startFollow(playerSprite);
+            this.cameras.main.roundPixels = true;
+            this.player = new Player(playerSprite, new Phaser.Math.Vector2(levels.overworld.spawnCoords.town.x, levels.overworld.spawnCoords.town.y), 7, 7, 5, 0, 0);
+
+            this.setupPlayerGridPhysics();
+
+            this.sys.events.on('wake', this.wake, this);
+
+            this.playerTileX = this.player.getTilePos().x;
+            this.playerTileY = this.player.getTilePos().y;
+
+        }
+        else {
+            // create the map
+            this.currentMap = data.levelData.name;
+            // todo: change the logic of checking if entering town to a more generic 'exitingCurrentLevel'
+            this.enteringTown = false;
+            this.currentTilemap = this.make.tilemap({key: levels.overworld.tilemapKey});
+            this.currentTilemap.addTilesetImage(levels.overworld.tilesetName, levels.overworld.tilesetKey);
+            for (let i = 0; i < this.currentTilemap.layers.length; i++) {
+                const layer = this.currentTilemap
+                    .createLayer(i, levels.overworld.tilesetName, 0, 0);
+                layer.setDepth(i);
+            }
+
+            const playerSprite = this.add.sprite(0, 0, 'player');
+            playerSprite.setDepth(2);
+            this.cameras.main.startFollow(playerSprite);
+            this.cameras.main.roundPixels = true;
+            this.player = new Player(playerSprite, new Phaser.Math.Vector2(levels.overworld.spawnCoords.town.x, levels.overworld.spawnCoords.town.y), 7, 7, 5, 0, 0);
+
+            this.setupPlayerGridPhysics();
+
+            this.sys.events.on('wake', this.wake, this);
+
+            this.playerTileX = this.player.getTilePos().x;
+            this.playerTileY = this.player.getTilePos().y;
+
         }
 
-        const playerSprite = this.add.sprite(0, 0, 'player');
-        playerSprite.setDepth(2);
-        this.cameras.main.startFollow(playerSprite);
-        this.cameras.main.roundPixels = true;
-        this.player = new Player(playerSprite, new Phaser.Math.Vector2(4, 16), 7, 7, 5, 0, 0);
+        // todo: start the player in the town using data passed to the restart method
 
-        this.gridPhysics = new GridPhysics(this.player, this.overworldTilemap);
+    }
+
+    setupPlayerGridPhysics() {
+        this.gridPhysics = new GridPhysics(this.player, this.currentTilemap);
         this.gridControls = new GridControls(this.input, this.gridPhysics);
 
         this.createPlayerAnimation(Direction.UP, 39, 41);
@@ -56,12 +107,6 @@ export default class GameScene extends Phaser.Scene {
         this.createPlayerAnimation(Direction.LEFT, 15, 17);
 
         this.cursors = this.input.keyboard.createCursorKeys();
-
-        this.sys.events.on('wake', this.wake, this);
-
-        this.playerTileX = this.player.getTilePos().x;
-        this.playerTileY = this.player.getTilePos().y;
-
     }
 
     wake() {
@@ -84,8 +129,23 @@ export default class GameScene extends Phaser.Scene {
         this.playerTileX = this.player.getTilePos().x;
         this.playerTileY = this.player.getTilePos().y;
 
-        // check if the player is leaving the town
+        // check if the player is moving into the town tile
+        if (this.currentTilemap.getTileAt(this.playerTileX, this.playerTileY, false, 1)?.properties.key === 'town' && !this.enteringTown) {
+            checkForAFight = false;
+            this.enteringTown = true;
+            // enter the town
+            this.time.delayedCall(240, () => {
+                // todo: switch to town scene using scene restart method
+                this.scene.restart({levelData: levels.town, playerData: this.player});
 
+                // switch to the town tilemap
+                // this.loadTown();
+                // this.inTown = true;
+
+            });
+        }
+
+        // check if the player is leaving the town
         if ((this.playerTileX === 0  || this.playerTileY === 0 || this.playerTileX === 19  || this.playerTileY === 19) && this.inTown && !this.leavingTown) {
             this.leavingTown = true;
             // load overworld again
@@ -95,19 +155,6 @@ export default class GameScene extends Phaser.Scene {
                 this.inTown = false;
                 this.enteringTown = false;
                 this.leavingTown = false;
-            });
-        }
-
-        // check if the player is moving into the town tile
-        if (this.overworldTilemap.getTileAt(this.playerTileX, this.playerTileY, false, 1)?.properties.key === 'town' && !this.enteringTown) {
-            checkForAFight = false;
-            this.enteringTown = true;
-            // enter the town
-            this.time.delayedCall(240, () => {
-                // switch to the town tilemap
-                this.loadTown();
-                this.inTown = true;
-
             });
         }
 
@@ -145,7 +192,6 @@ export default class GameScene extends Phaser.Scene {
     }
 
     resetGameScene() {
-
         const health = this.player.health;
         const maxHealth = this.player.maxHealth;
         const damage = this.player.damage;
@@ -179,11 +225,11 @@ export default class GameScene extends Phaser.Scene {
         const allTilemaps = this.children.list.filter(x => x instanceof Phaser.Tilemaps.TilemapLayer);
         allTilemaps.forEach(x => x.destroy());
 
-        this.overworldTilemap = this.make.tilemap({key: 'town-map'});
-        this.overworldTilemap.addTilesetImage('Basic Tiles', 'tiles');
-        for (let i = 0; i < this.overworldTilemap.layers.length; i++) {
-            const layer = this.overworldTilemap
-                .createLayer(i, 'Basic Tiles', 0, 0);
+        this.currentTilemap = this.make.tilemap({key: levels.town.tilemapKey});
+        this.currentTilemap.addTilesetImage(levels.town.tilesetName, levels.town.tilesetKey);
+        for (let i = 0; i < this.currentTilemap.layers.length; i++) {
+            const layer = this.currentTilemap
+                .createLayer(i, levels.town.tilesetName, 0, 0);
             layer.setDepth(i);
         }
 
@@ -191,20 +237,15 @@ export default class GameScene extends Phaser.Scene {
         playerSprite.setDepth(2);
         this.cameras.main.startFollow(playerSprite);
         this.cameras.main.roundPixels = true;
-        this.player = new Player(playerSprite, new Phaser.Math.Vector2(1, 1), this.player.health, this.player.maxHealth, this.player.damage, this.player.gold, this.player.experience);
+        this.player = new Player(playerSprite, new Phaser.Math.Vector2(levels.town.spawnCoords.overworld.x, levels.town.spawnCoords.overworld.y), this.player.health, this.player.maxHealth, this.player.damage, this.player.gold, this.player.experience);
 
-        this.gridPhysics = new GridPhysics(this.player, this.overworldTilemap);
-        this.gridControls = new GridControls(this.input, this.gridPhysics);
+        this.setupPlayerGridPhysics();
 
-        this.createPlayerAnimation(Direction.UP, 39, 41);
-        this.createPlayerAnimation(Direction.RIGHT, 27, 29);
-        this.createPlayerAnimation(Direction.DOWN, 3, 5);
-        this.createPlayerAnimation(Direction.LEFT, 15, 17);
 
         const innKeeperSprite = this.add.sprite(0, 0, 'player');
         innKeeperSprite.setDepth(2);
 
-        this.innKeeper = new NPC(innKeeperSprite, new Phaser.Math.Vector2(6, 2));
+        this.innKeeper = new NPC(innKeeperSprite, new Phaser.Math.Vector2(levels.town.npcs.innkeeper.x, levels.town.npcs.innkeeper.y));
         // implement healing when talking to innkeeper
         this.input.keyboard.removeListener('keydown');
         this.input.keyboard.on('keydown', (event) => {
@@ -241,11 +282,11 @@ export default class GameScene extends Phaser.Scene {
         const allTilemaps = this.children.list.filter(x => x instanceof Phaser.Tilemaps.TilemapLayer);
         allTilemaps.forEach(x => x.destroy());
 
-        this.overworldTilemap = this.make.tilemap({key: 'overworld-map'});
-        this.overworldTilemap.addTilesetImage('Basic Tiles', 'tiles');
-        for (let i = 0; i < this.overworldTilemap.layers.length; i++) {
-            const layer = this.overworldTilemap
-                .createLayer(i, 'Basic Tiles', 0, 0);
+        this.currentTilemap = this.make.tilemap({key: levels.overworld.tilemapKey});
+        this.currentTilemap.addTilesetImage(levels.overworld.tilesetName, levels.overworld.tilesetKey);
+        for (let i = 0; i < this.currentTilemap.layers.length; i++) {
+            const layer = this.currentTilemap
+                .createLayer(i, levels.overworld.tilesetName, 0, 0);
             layer.setDepth(i);
         }
 
@@ -255,14 +296,7 @@ export default class GameScene extends Phaser.Scene {
         this.cameras.main.roundPixels = true;
         this.player = new Player(playerSprite, new Phaser.Math.Vector2(4, 16), this.player.health, this.player.maxHealth, this.player.damage, this.player.gold, this.player.experience);
 
-        this.gridPhysics = new GridPhysics(this.player, this.overworldTilemap);
-        this.gridControls = new GridControls(this.input, this.gridPhysics);
-
-        this.createPlayerAnimation(Direction.UP, 39, 41);
-        this.createPlayerAnimation(Direction.RIGHT, 27, 29);
-        this.createPlayerAnimation(Direction.DOWN, 3, 5);
-        this.createPlayerAnimation(Direction.LEFT, 15, 17);
-
+        this.setupPlayerGridPhysics();
 
         this.playerTileX = this.player.getTilePos().x;
         this.playerTileY = this.player.getTilePos().y;
