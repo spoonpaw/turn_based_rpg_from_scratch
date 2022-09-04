@@ -142,7 +142,8 @@ export default class GameScene extends Phaser.Scene {
                                     this.gridPhysics.facingDirection === 'up'
                                 )
                             ) {
-                                // todo: give the player the option to heal or not. tell them how much it costs to heal. implement dialogue...
+                                // todo: give the player the option to heal or not. tell them how much it costs to heal.
+                                //  & implement dialogue...
                                 if (this.player.gold >= 3) {
                                     this.player.gold -= 3;
                                     this.player.health = this.player.maxHealth;
@@ -189,7 +190,8 @@ export default class GameScene extends Phaser.Scene {
         // determine if the player is in hostile territory
         if (
             (this.playerTileX != this.player.getTilePos().x || this.playerTileY != this.player.getTilePos().y) &&
-            !this.exitingCurrentLevel
+            !this.exitingCurrentLevel &&
+            !this.nonHostileSpace
         ) {
             checkForAFight = true;
         }
