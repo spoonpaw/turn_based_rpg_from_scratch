@@ -4,29 +4,33 @@ export const levels = {
         tilemapKey: 'overworld-map',
         tilesetName: 'Basic Tiles',
         tilesetKey: 'tiles',
-        spawnCoords: {
-            town: {
+        spawnCoords: [
+            {
+                name: 'town',
                 x: 4,
                 y: 16
             }
-        }
+        ],
+        npcs: []
     },
     town: {
+        name: 'town',
         tilemapKey: 'town-map',
         tilesetName: 'Basic Tiles',
         tilesetKey: 'tiles',
-        spawnCoords: {
-            overworld: {
+        spawnCoords: [
+            {
+                name: 'overworld',
                 x: 1,
                 y: 1
             }
-        },
-        npcs: {
-            innkeeper: {
+        ],
+        npcs: [
+            {
+                name: 'innkeeper',
                 x: 6,
                 y: 2
             }
-        }
-
+        ]
     }
 };

@@ -19,6 +19,7 @@ const config: Phaser.Types.Core.GameConfig = {
         }
     },
     antialias: false,
+    antialiasGL: false,
     scene: [
         BootScene,
         TitleScene,

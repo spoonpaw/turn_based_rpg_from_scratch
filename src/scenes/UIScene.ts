@@ -33,7 +33,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(10);
 
         // set up warrior text and icon as well as level text
-        this.warriorText = this.add.text(35, -5, 'Warrior / Level 1', { fontSize: '50px', color: '#ffffff', fontFamily: 'CustomFont' })
+        this.warriorText = this.add.text(35, -5, `Warrior / Level ${Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)))}`, { fontSize: '50px', color: '#ffffff', fontFamily: 'CustomFont' })
             .setStroke('#000000', 2)
             .setResolution(10);
         this.swordIcon = this.add.image(18, 20, 'sword')

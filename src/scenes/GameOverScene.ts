@@ -1,9 +1,8 @@
 import Phaser from 'phaser';
 import TweenHelper from '../utils/TweenHelper';
 import GameScene from './GameScene';
-import eventsCenter from '../utils/EventsCenter';
 
-export default class GameOverScene extends Phaser.Scene{
+export default class GameOverScene extends Phaser.Scene {
     private gameOverText!: Phaser.GameObjects.Text;
 
     constructor() {
@@ -39,7 +38,8 @@ export default class GameOverScene extends Phaser.Scene{
 
         const gameScene = <GameScene>this.scene.get('Game');
 
-        gameScene.resetGameScene();
+        gameScene.player.health = gameScene.player.maxHealth;
+        gameScene.scene.restart();
 
         this.setupKeyListeners();
 
@@ -69,34 +69,11 @@ export default class GameOverScene extends Phaser.Scene{
         });
     }
 
-    resetGameScene() {
-        const gameScene = <GameScene>this.scene.get('Game');
-
-        const health = gameScene.player.health;
-        const maxHealth = gameScene.player.maxHealth;
-        const damage = gameScene.player.damage;
-        const gold = gameScene.player.gold;
-        const experience = gameScene.player.experience;
-
-        const allSprites = gameScene.children.list.filter(x => x instanceof Phaser.GameObjects.Sprite);
-        allSprites.forEach(x => x.destroy());
-
-        gameScene.create();
-        gameScene.player.health = health;
-        gameScene.player.maxHealth = maxHealth;
-        gameScene.player.damage = damage;
-        gameScene.player.gold = gold;
-        gameScene.player.experience = experience;
-
-        eventsCenter.emit('updateHP', gameScene.player.health);
-        eventsCenter.emit('updateGold', gameScene.player.gold);
-        eventsCenter.emit('updateXP', gameScene.player.experience);
-    }
-
     wake() {
         this.cameras.main.fadeIn(3000);
         const gameScene = <GameScene>this.scene.get('Game');
-        gameScene.resetGameScene();
+        gameScene.player.health = gameScene.player.maxHealth;
+        gameScene.scene.restart();
         this.cameras.main.once('camerafadeincomplete', () => {
             this.setupKeyListeners();
         });
