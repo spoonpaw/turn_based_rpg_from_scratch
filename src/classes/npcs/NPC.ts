@@ -1,11 +1,11 @@
-import GameScene from '../scenes/GameScene';
-import {Direction} from '../types/Direction';
+import GameScene from '../../scenes/GameScene';
+import {Direction} from '../../types/Direction';
 
 export default class NPC {
 
     constructor(
         public sprite: Phaser.GameObjects.Sprite,
-        private tilePos: Phaser.Math.Vector2,
+        protected tilePos: Phaser.Math.Vector2
     ) {
         const offsetX = GameScene.TILE_SIZE / 2;
         const offsetY = GameScene.TILE_SIZE;
