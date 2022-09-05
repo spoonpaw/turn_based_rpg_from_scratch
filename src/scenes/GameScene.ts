@@ -3,23 +3,21 @@ import Player from '../classes/Player';
 import GridControls from '../classes/GridControls';
 import GridPhysics from '../classes/GridPhysics';
 import {Direction} from '../types/Direction';
-import eventsCenter from '../utils/EventsCenter';
-import NPC from '../classes/NPC';
 import {levels} from '../levels/Levels';
+import Innkeeper from '../classes/npcs/Innkeeper';
 
 export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
     private gridControls!: GridControls;
-    private gridPhysics!: GridPhysics;
+    gridPhysics!: GridPhysics;
     public player!: Player;
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     public playerTileX!: number;
     public playerTileY!: number;
     private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private exitingCurrentLevel!: boolean;
-    private currentMap!: string;
+    currentMap!: string;
     private nonHostileSpace!: boolean;
-    private innKeeper!: NPC;
 
     constructor() {
         super('Game');
@@ -108,12 +106,15 @@ export default class GameScene extends Phaser.Scene {
             // todo: iterate over the levels npcs and implement their functions
 
             for (const npc of data.levelData.npcs) {
+
+                // todo: generically place sprites; move hard coded innkeeper elements to the innkeeper class
+
                 if (npc.name === 'innkeeper') {
 
                     const innKeeperSprite = this.add.sprite(0, 0, 'player');
                     innKeeperSprite.setDepth(2);
 
-                    this.innKeeper = new NPC(
+                    const innKeeper = new Innkeeper(
                         innKeeperSprite,
                         new Phaser.Math.Vector2(
                             npc.x,
@@ -121,39 +122,10 @@ export default class GameScene extends Phaser.Scene {
                         )
                     );
 
-                    // implement healing when talking to innkeeper
-                    this.input.keyboard.removeListener('keydown');
-                    this.input.keyboard.on('keydown', (event) => {
-                        if (this.currentMap !== 'town') {
-                            return;
-                        }
-                        if (event.code === 'Space') {
-                            // check if in town and looking at innkeeper
+                    innKeeper.removeListener();
 
-                            if (
-                                (
-                                    this.player.getTilePos().x === 5 &&
-                                    this.player.getTilePos().y === 2 &&
-                                    this.gridPhysics.facingDirection === 'right'
-                                ) ||
-                                (
-                                    this.player.getTilePos().x === 6 &&
-                                    this.player.getTilePos().y === 3 &&
-                                    this.gridPhysics.facingDirection === 'up'
-                                )
-                            ) {
-                                // todo: give the player the option to heal or not. tell them how much it costs to heal.
-                                //  & implement dialogue...
-                                if (this.player.gold >= 3) {
-                                    this.player.gold -= 3;
-                                    this.player.health = this.player.maxHealth;
+                    innKeeper.addListener();
 
-                                    eventsCenter.emit('updateHP', this.player.health);
-                                    eventsCenter.emit('updateGold', this.player.gold);
-                                }
-                            }
-                        }
-                    });
                 }
             }
 
