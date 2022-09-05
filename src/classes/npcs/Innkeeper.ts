@@ -15,12 +15,10 @@ export default class Innkeeper extends NPC {
 
     removeListener() {
         // const gameScene = this.sprite.scene;
-        console.log('removing innkeeper gamescene listener');
         this.gameScene.input.keyboard.removeListener('keydown');
     }
 
     addListener() {
-        console.log('adding innkeeper gamescene listener');
         this.gameScene.input.keyboard.on('keydown', (event) => {
             if (this.gameScene.currentMap !== 'town') {
                 return;
@@ -42,9 +40,9 @@ export default class Innkeeper extends NPC {
                 ) {
                     // todo: give the player the option to heal or not. tell them how much it costs to heal.
                     //  & implement dialogue...
-                    console.log('Good day! It costs three gold to sleep hither.');
+                    // console.log('Good day! It costs three gold to sleep hither.');
                     if (this.gameScene.player.gold >= 3) {
-                        console.log('Thank thee! Thou appeareth well rested.');
+                        // console.log('Thank thee! Thou appeareth well rested.');
                         this.gameScene.player.gold -= 3;
                         this.gameScene.player.health = this.gameScene.player.maxHealth;
 
