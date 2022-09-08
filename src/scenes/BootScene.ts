@@ -19,7 +19,7 @@ export default class BootScene extends Phaser.Scene {
     }
 
     create() {
-        this.scene.start('Game');
+        this.scene.start('Title');
     }
 
     loadImages() {
@@ -29,6 +29,7 @@ export default class BootScene extends Phaser.Scene {
 
         this.load.image('prefab1', 'assets/images/ui/prefab1.png');
         this.load.image('prefab2', 'assets/images/ui/prefab2.png');
+        this.load.image('prefab3', 'assets/images/ui/prefab3.png');
 
         this.load.image('pic', 'assets/images/baal-loader.png');
         this.load.image('pic2', 'assets/images/atari-fujilogo.png');
