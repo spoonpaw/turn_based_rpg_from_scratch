@@ -3,7 +3,7 @@ import GridPhysics from './GridPhysics';
 
 export default class GridControls {
     constructor(
-        private input: Phaser.Input.InputPlugin,
+        public input: Phaser.Input.InputPlugin,
         public gridPhysics: GridPhysics
     ) {}
 

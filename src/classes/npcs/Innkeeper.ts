@@ -14,7 +14,6 @@ export default class Innkeeper extends NPC {
     }
 
     removeListener() {
-        // const gameScene = this.sprite.scene;
         this.gameScene.input.keyboard.removeListener('keydown');
     }
 
@@ -25,6 +24,9 @@ export default class Innkeeper extends NPC {
             }
             if (event.code === 'Space') {
                 // check if in town and looking at innkeeper
+                if (this.gameScene.activeDialogScene) {
+                    return;
+                }
 
                 if (
                     (
@@ -38,11 +40,18 @@ export default class Innkeeper extends NPC {
                         this.gameScene.gridPhysics.facingDirection === 'up'
                     )
                 ) {
+                    this.gameScene.activeDialogScene = true;
+
+                    if (this.gameScene.gridPhysics.facingDirection === 'right') this.sprite.setFrame(19);
+                    if (this.gameScene.gridPhysics.facingDirection === 'up') this.sprite.setFrame(7);
+
                     // todo: give the player the option to heal or not. tell them how much it costs to heal.
                     //  & implement dialogue...
-                    // console.log('Good day! It costs three gold to sleep hither.');
-                    if (this.gameScene.player.gold >= 3) {
-                        // console.log('Thank thee! Thou appeareth well rested.');
+                    if (this.gameScene.player.gold < 3) {
+                        this.gameScene.scene.run('Dialog', {text: 'Good day! It costs three gold to sleep hither.'});
+                    }
+                    else if (this.gameScene.player.gold >= 3) {
+                        this.gameScene.scene.run('Dialog', {text: 'Thank thee! Thou appeareth well rested.'});
                         this.gameScene.player.gold -= 3;
                         this.gameScene.player.health = this.gameScene.player.maxHealth;
 

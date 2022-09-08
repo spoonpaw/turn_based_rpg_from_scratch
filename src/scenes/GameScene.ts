@@ -8,15 +8,16 @@ import Innkeeper from '../classes/npcs/Innkeeper';
 
 export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
-    private gridControls!: GridControls;
-    gridPhysics!: GridPhysics;
+    public gridControls!: GridControls;
+    public gridPhysics!: GridPhysics;
     public player!: Player;
-    private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    public cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     public playerTileX!: number;
     public playerTileY!: number;
+    public currentMap!: string;
+    public activeDialogScene!: boolean;
     private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private exitingCurrentLevel!: boolean;
-    currentMap!: string;
     private nonHostileSpace!: boolean;
 
     constructor() {
@@ -28,6 +29,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     create(data?) {
+        this.activeDialogScene = false;
         if (Object.keys(data).length === 0) {
             // create the game scene when the player initially spawns.
             // create the map
@@ -215,7 +217,9 @@ export default class GameScene extends Phaser.Scene {
             // randomly determine if fight will occur
             if (this.checkForRandomEncounter()) {
                 // start combat
-                this.time.delayedCall(240, () => {
+                this.time.delayedCall(210, () => {
+                    // this.scene.launch('Battle', {player: this.player});
+                    // this.scene.pause();
                     this.scene.switch('Battle');
                 });
             }

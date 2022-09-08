@@ -3,18 +3,19 @@ import PlayerCharacter from '../classes/PlayerCharacter';
 import Enemy from '../classes/Enemy';
 import GameScene from './GameScene';
 import eventsCenter from '../utils/EventsCenter';
-// import UIScene from './UIScene';
 
 export default class BattleScene extends Phaser.Scene {
     heroes!: PlayerCharacter[];
     enemies!: Enemy[];
     private units!: (Enemy | PlayerCharacter)[];
     private index!: number;
+
     constructor() {
         super('Battle');
     }
 
     create() {
+
         // set background to blue
         this.cameras.main.setBackgroundColor('rgb(65, 97, 251)');
 
