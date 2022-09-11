@@ -7,10 +7,11 @@ import BattleScene from './scenes/BattleScene';
 import BattleUIScene from './scenes/BattleUIScene';
 import GameOverScene from './scenes/GameOverScene';
 import DialogScene from './scenes/DialogScene';
+import YesNoDialogScene from './scenes/YesNoDialogScene';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
-    width: 768,
+    width: 912,
     height: 720,
     physics: {
         default: 'arcade',
@@ -29,7 +30,8 @@ const config: Phaser.Types.Core.GameConfig = {
         BattleScene,
         BattleUIScene,
         GameOverScene,
-        DialogScene
+        DialogScene,
+        YesNoDialogScene
     ],
     backgroundColor: '#000000'
 };
