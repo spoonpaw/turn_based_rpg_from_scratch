@@ -47,6 +47,7 @@ export default class TitleScene extends Phaser.Scene {
 
             this.cameras.main.once('camerafadeincomplete', (camera) => {
                 this.input.keyboard.once('keydown', () => {
+                    this.input.keyboard.enabled = false;
                     this.input.enabled = false;
                     camera.fadeOut(1500);
                     this.cameras.main.once('camerafadeoutcomplete', () => {
@@ -54,6 +55,7 @@ export default class TitleScene extends Phaser.Scene {
                     });
                 });
                 this.input.once('pointerdown', () => {
+                    this.input.keyboard.enabled = false;
                     this.input.enabled = false;
                     camera.fadeOut(1500);
                     this.cameras.main.once('camerafadeoutcomplete', () => {

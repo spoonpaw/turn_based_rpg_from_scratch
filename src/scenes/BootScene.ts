@@ -24,12 +24,16 @@ export default class BootScene extends Phaser.Scene {
 
     loadImages() {
         // load images
-        this.load.image('button1', 'assets/images/ui/blue_button01.png');
-        this.load.image('button2', 'assets/images/ui/blue_button02.png');
+        this.load.image('button', 'assets/images/ui/button.png');
+        this.load.image('button2', 'assets/images/ui/button2.png');
+        this.load.image('buttonhover', 'assets/images/ui/buttonHover.png');
+        this.load.image('button2hover', 'assets/images/ui/button2Hover.png');
 
         this.load.image('prefab1', 'assets/images/ui/prefab1.png');
         this.load.image('prefab2', 'assets/images/ui/prefab2.png');
         this.load.image('prefab3', 'assets/images/ui/prefab3.png');
+        this.load.image('prefab4', 'assets/images/ui/prefab4.png');
+        this.load.image('prefab5', 'assets/images/ui/prefab5.png');
 
         this.load.image('pic', 'assets/images/baal-loader.png');
         this.load.image('pic2', 'assets/images/atari-fujilogo.png');

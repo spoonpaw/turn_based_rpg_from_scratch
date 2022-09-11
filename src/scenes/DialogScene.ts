@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import GameScene from './GameScene';
-import DialogText from '../classes/DialogText';
 
 export default class DialogScene extends Phaser.Scene {
     private gameScene!: GameScene;
@@ -12,17 +11,21 @@ export default class DialogScene extends Phaser.Scene {
     create(data) {
 
         this.gameScene = <GameScene>this.scene.get('Game');
-        this.add.image(0, 477, 'prefab3')
+        this.add.image(0, 420, 'prefab4')
             .setOrigin(0, 0);
-        this.add.existing(this.addDialogText(data.text));
+        this.add.text(30, 445, data.text, {
+            color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
+                width: 625,
+                useAdvancedWrap: true
+            }
+        })
+            .setResolution(10)
+            .setFontSize(50)
+            .setLineSpacing(-15);
 
         this.gameScene.input.keyboard.enabled = false;
 
         this.input.keyboard.on('keydown', this.listenForPlayerActivity, this);
-    }
-
-    addDialogText(text: string) {
-        return new DialogText(30, 500, text, this);
     }
 
     listenForPlayerActivity(event): void {
