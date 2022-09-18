@@ -34,6 +34,7 @@ export default class GameOverScene extends Phaser.Scene {
 
         TweenHelper.flashElement(this, pressAnyKeyText);
 
+        this.sys.events.removeListener('wake');
         this.sys.events.on('wake', this.wake, this);
 
         const gameScene = <GameScene>this.scene.get('Game');

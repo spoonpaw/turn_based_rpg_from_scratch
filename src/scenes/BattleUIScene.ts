@@ -1,124 +1,186 @@
-import Phaser from 'phaser';
-import HeroesMenu from '../classes/HeroesMenu';
-import ActionsMenu from '../classes/ActionsMenu';
-import EnemiesMenu from '../classes/EnemiesMenu';
+import eventsCenter from '../utils/EventsCenter';
+import UIActionButton from '../classes/UIActionButton';
 import BattleScene from './BattleScene';
 import Message from '../classes/Message';
 
-export default class BattleUIScene extends Phaser.Scene{
-    private menus!: Phaser.GameObjects.Container;
-    private heroesMenu!: HeroesMenu;
-    private actionsMenu!: ActionsMenu;
-    private enemiesMenu!: EnemiesMenu;
-    private currentMenu: (ActionsMenu | HeroesMenu | EnemiesMenu) | undefined;
+export default class BattleUIScene extends Phaser.Scene {
+    private bagButton!: UIActionButton;
+    public attackButton!: UIActionButton;
+    private abilityButton!: UIActionButton;
+    private runButton!: UIActionButton;
     private battleScene!: BattleScene;
     private message!: Message;
+    private commandMenuFrame!: Phaser.GameObjects.Image;
+    private commandMenuText!: Phaser.GameObjects.Text;
+    private hotkeyMenuFrame!: Phaser.GameObjects.Image;
+    private hotkeyButton1!: UIActionButton;
+    private hotkeyBadge1!: Phaser.GameObjects.Image;
+    private actionButtons: UIActionButton[] = [];
+    private confirmMenuFrame!: Phaser.GameObjects.Image;
+    private cancelMenuFrame!: Phaser.GameObjects.Image;
+    private cancelText!: Phaser.GameObjects.Text;
+    private cancelButton!: UIActionButton;
+
     constructor() {
         super('BattleUI');
     }
 
     create() {
-        this.add.image(2, 477, 'prefab1')
-            .setOrigin(0, 0);
-
-        this.add.image(227, 477, 'prefab1')
-            .setOrigin(0, 0);
-
-        this.add.image(453, 477, 'prefab2')
-            .setOrigin(0, 0);
-
-        // basic container to hold all menus
-        this.menus = this.add.container();
-
-        this.heroesMenu = new HeroesMenu(475, 500, this);
-        this.actionsMenu = new ActionsMenu(250, 500, this);
-        this.enemiesMenu = new EnemiesMenu(20, 500, this);
-
-        // the currently selected menu
-        this.currentMenu = this.actionsMenu;
-
-        // add menus to the container
-        this.menus.add(this.heroesMenu);
-        this.menus.add(this.actionsMenu);
-        this.menus.add(this.enemiesMenu);
-
+        // get a reference to the battle scene
         this.battleScene = <BattleScene>this.scene.get('Battle');
 
-        // listen for keyboard events
-        this.input.keyboard.on('keydown', this.onKeyInput, this);
+        // create frames first
+        this.commandMenuFrame = this.add.image(236, 430, 'commandMenuFrame')
+            .setOrigin(0, 0);
+        this.commandMenuFrame.visible = false;
+        this.hotkeyMenuFrame = this.add.image(236, 546, 'hotkeyMenuFrame')
+            .setOrigin(0, 0);
+        this.hotkeyMenuFrame.visible = false;
+        this.confirmMenuFrame = this.add.image(236, 430, 'confirmMenuFrame')
+            .setOrigin(0, 0);
+        this.confirmMenuFrame.visible = false;
+        this.cancelMenuFrame = this.add.image(698, 430, 'cancelMenuFrame')
+            .setOrigin(0, 0);
+        this.cancelMenuFrame.visible = false;
 
-        // when its player cunit turn to move
-        this.battleScene.events.on('PlayerSelect', this.onPlayerSelect, this);
+        // create text second
+        this.commandMenuText = this.add.text(245, 440, 'Command?', { fontSize: '55px', color: '#fff', fontFamily: 'CustomFont'})
+            .setResolution(10);
+        this.commandMenuText.visible = false;
+        this.cancelText = this.add.text(710, 440, 'Cancel', { fontSize: '55px', color: '#fff', fontFamily: 'CustomFont'})
+            .setResolution(10);
+        this.cancelText.visible = false;
 
-        // when the action on the menu is selected
-        // for now we have only one action, so we don't send an action id
-        this.events.on('SelectedAction', this.onSelectedAction, this);
+        // create buttons and badges third
+        this.hotkeyButton1 = new UIActionButton(this, 270, 575, 'attackbutton', 'attackbuttonactive', '', () => {
+            if (this.battleScene.interactionState !== 'mainselect') {
+                return;
+            }
+            this.selectAttack();
 
-        // an enemy is selected
-        this.events.on('Enemy', this.onEnemy, this);
+        });
+        this.hotkeyButton1.visible = false;
+        this.actionButtons.push(this.hotkeyButton1);
+        this.hotkeyBadge1 = this.add.image(278, 583, 'badge1').setScale(2);
+        this.hotkeyBadge1.visible = false;
+        this.attackButton = new UIActionButton(this, 30, 465, 'attackbutton', 'attackbuttonactive', 'Attack', () => {
+            if (this.battleScene.interactionState !== 'mainselect') {
+                return;
+            }
+            this.selectAttack();
 
-        // when the scene receives wake event
-        this.sys.events.on('wake', this.createMenu, this);
+        });
+        this.actionButtons.push(this.attackButton);
 
-        // the message describing the current action
+        this.abilityButton = new UIActionButton(this, 30, 515, 'bookbutton', 'bookbuttonactive', 'Abilities', () => {
+            if (this.battleScene.interactionState !== 'mainselect') {
+                return;
+            }
+            eventsCenter.emit('abilities');
+        });
+        this.actionButtons.push(this.abilityButton);
+
+        this.bagButton = new UIActionButton(this, 30, 565, 'bagbutton', 'bagbuttonactive', 'Inventory', () => {
+            if (this.battleScene.interactionState !== 'mainselect') {
+                return;
+            }
+            eventsCenter.emit('bag');
+        });
+        this.actionButtons.push(this.bagButton);
+
+        this.runButton = new UIActionButton(this, 30, 615, 'runbutton', 'runbuttonactive', 'Run', () => {
+            if (this.battleScene.interactionState !== 'mainselect') {
+                return;
+            }
+            eventsCenter.emit('run');
+        });
+        this.actionButtons.push(this.runButton);
+
+        this.cancelButton = new UIActionButton(this, 865, 465, 'cancelbutton', 'cancelbutton', '', () => {
+            if (this.battleScene.interactionState !== 'attack') {
+                return;
+            }
+            eventsCenter.emit('cancel');
+        });
+        this.cancelButton.visible = false;
+        this.actionButtons.push(this.cancelButton);
+
+
         this.message = new Message(this, this.battleScene.events);
         this.add.existing(this.message);
 
-        this.createMenu();
-    }
+        eventsCenter.removeListener('MessageClose');
+        eventsCenter.on('MessageClose', this.messageCloseHandler, this);
 
-    onEnemy(index: number) {
-        this.heroesMenu.deselect();
-        this.actionsMenu.deselect();
-        this.enemiesMenu.deselect();
-        this.currentMenu = undefined;
-        this.battleScene.receivePlayerSelection('attack', index);
-    }
-
-    onPlayerSelect(id: number) {
-        this.heroesMenu.select(id);
-        this.actionsMenu.select(0);
-        this.currentMenu = this.actionsMenu;
-    }
-    onSelectedAction() {
-        this.currentMenu = this.enemiesMenu;
-        this.enemiesMenu.select(0);
-    }
-
-    remapHeroes() {
-        const heroes = this.battleScene.heroes;
-        this.heroesMenu.remap(heroes);
-    }
-
-    remapEnemies() {
-        const enemies = this.battleScene.enemies;
-        this.enemiesMenu.remap(enemies);
-    }
-
-    onKeyInput(event: KeyboardEvent) {
-        if (this.currentMenu && this.currentMenu.selected) {
-            if (event.code === 'ArrowUp') {
-                this.currentMenu.moveSelectionUp();
+        this.input.keyboard.on('keydown', (event) => {
+            if (event.code === 'Digit1') {
+                if (this.battleScene.interactionState !== 'mainselect') {
+                    return;
+                }
+                this.selectAttack();
             }
-            else if (event.code === 'ArrowDown') {
-                this.currentMenu.moveSelectionDown();
-            }
-            // eslint-disable-next-line no-empty
-            else if (event.code === 'Shift') {
+        });
 
-            }
-            else if (event.code === 'Space') {
-                this.currentMenu.confirm();
-            }
+        this.initiateBattleUI();
+
+        this.sys.events.on('wake', this.initiateBattleUI, this);
+    }
+
+    messageCloseHandler() {
+        if (this.battleScene.interactionState === 'init') {
+            this.showCommandAndHotkeyFrames();
+            this.battleScene.interactionState = 'mainselect';
         }
     }
 
-    createMenu() {
-        // map hero menu items to heroes
-        this.remapHeroes();
-        // map enemies menu items to enemies
-        this.remapEnemies();
-        // first move
-        this.battleScene.nextTurn();
+    showCommandAndHotkeyFrames() {
+        this.commandMenuFrame.visible = true;
+        this.commandMenuText.visible = true;
+        this.hotkeyMenuFrame.visible = true;
+        this.hotkeyButton1.visible = true;
+        this.hotkeyBadge1.visible = true;
+
+    }
+
+    disableAllActionButtons() {
+        this.actionButtons.forEach((button) => {
+            button.deselect();
+        });
+    }
+
+    selectAttack() {
+        eventsCenter.emit('attack');
+
+
+        this.disableAllActionButtons();
+        this.hotkeyButton1.select();
+        this.attackButton.select();
+
+        this.commandMenuFrame.visible = false;
+        this.confirmMenuFrame.visible = true;
+        this.cancelMenuFrame.visible = true;
+        this.cancelText.visible = true;
+        this.cancelButton.visible = true;
+
+        this.commandMenuText.text = 'Choose A Target';
+
+        this.battleScene.interactionState = 'attack';
+    }
+
+    hideUIFrames() {
+        this.cancelButton.visible = false;
+        this.cancelText.visible = false;
+        this.cancelMenuFrame.visible = false;
+        this.confirmMenuFrame.visible = false;
+        this.commandMenuFrame.visible = false;
+        this.commandMenuText.visible = false;
+        this.hotkeyMenuFrame.visible = false;
+        this.hotkeyButton1.visible = false;
+        this.hotkeyBadge1.visible = false;
+    }
+
+    private initiateBattleUI() {
+        this.hideUIFrames();
+        eventsCenter.emit('Message', 'A cyberfly approaches.');
     }
 }

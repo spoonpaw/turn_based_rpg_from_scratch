@@ -30,6 +30,8 @@ export default class GameScene extends Phaser.Scene {
 
     create(data?) {
         this.activeDialogScene = false;
+
+        // if data is empty then the game just started so load the player in the spawn location
         if (Object.keys(data).length === 0) {
             // create the game scene when the player initially spawns.
             // create the map
@@ -44,7 +46,7 @@ export default class GameScene extends Phaser.Scene {
             }
 
             // load the player sprite
-            const playerSprite = this.add.sprite(0, 0, 'player');
+            const playerSprite = this.add.sprite(0, 0, 'hero');
             playerSprite.setDepth(2);
             this.cameras.main.startFollow(playerSprite);
             this.cameras.main.roundPixels = true;
@@ -63,6 +65,7 @@ export default class GameScene extends Phaser.Scene {
 
             this.setupPlayerGridPhysics();
 
+            this.sys.events.removeListener('wake');
             this.sys.events.on('wake', this.wake, this);
 
             this.playerTileX = this.player.getTilePos().x;
@@ -84,7 +87,7 @@ export default class GameScene extends Phaser.Scene {
                 layer.setDepth(i);
             }
 
-            const playerSprite = this.add.sprite(0, 0, 'player');
+            const playerSprite = this.add.sprite(0, 0, 'hero');
             playerSprite.setDepth(2);
             this.cameras.main.startFollow(playerSprite);
             this.cameras.main.roundPixels = true;
@@ -103,13 +106,13 @@ export default class GameScene extends Phaser.Scene {
 
             this.setupPlayerGridPhysics();
 
-            // this.sys.events.on('wake', this.wake, this); // not sure if this is needed after startup
+            this.sys.events.removeListener('wake');
+            this.sys.events.on('wake', this.wake, this);
 
-            // todo: iterate over the levels npcs and implement their functions
-
+            // iterate over the levels npcs and implement their functions
             for (const npc of data.levelData.npcs) {
 
-                // todo: generically place sprites; move hard coded innkeeper elements to the innkeeper class
+                // place npc sprites
 
                 if (npc.name === 'innkeeper') {
 
@@ -140,10 +143,10 @@ export default class GameScene extends Phaser.Scene {
         this.gridPhysics = new GridPhysics(this.player, this.currentTilemap);
         this.gridControls = new GridControls(this.input, this.gridPhysics);
 
-        this.createPlayerAnimation(Direction.UP, 39, 41);
-        this.createPlayerAnimation(Direction.RIGHT, 27, 29);
-        this.createPlayerAnimation(Direction.DOWN, 3, 5);
-        this.createPlayerAnimation(Direction.LEFT, 15, 17);
+        this.createPlayerAnimation(Direction.UP, 6, 7);
+        this.createPlayerAnimation(Direction.RIGHT, 4, 5);
+        this.createPlayerAnimation(Direction.DOWN, 0, 1);
+        this.createPlayerAnimation(Direction.LEFT, 2, 3);
 
         this.cursors = this.input.keyboard.createCursorKeys();
     }
@@ -218,8 +221,6 @@ export default class GameScene extends Phaser.Scene {
             if (this.checkForRandomEncounter()) {
                 // start combat
                 this.time.delayedCall(210, () => {
-                    // this.scene.launch('Battle', {player: this.player});
-                    // this.scene.pause();
                     this.scene.switch('Battle');
                 });
             }
@@ -234,11 +235,11 @@ export default class GameScene extends Phaser.Scene {
     private createPlayerAnimation(name: string, startFrame: number, endFrame: number) {
         this.anims.create({
             key: name,
-            frames: this.anims.generateFrameNumbers('player', {
+            frames: this.anims.generateFrameNumbers('hero', {
                 start: startFrame,
                 end: endFrame,
             }),
-            frameRate: 10,
+            frameRate: 5,
             repeat: -1,
             yoyo: true,
         });

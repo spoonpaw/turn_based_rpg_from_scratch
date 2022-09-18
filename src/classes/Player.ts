@@ -25,7 +25,7 @@ export default class Player {
             tilePos.x * GameScene.TILE_SIZE + offsetX,
             tilePos.y * GameScene.TILE_SIZE + offsetY
         );
-        this.sprite.setFrame(4);
+        this.sprite.setFrame(1);
 
         this.health = health;
         this.maxHealth = maxHealth;

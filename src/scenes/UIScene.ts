@@ -50,12 +50,15 @@ export default class UIScene extends Phaser.Scene {
 
     setupEvents() {
         // listen for the updateHP event from the events center
+        eventsCenter.removeListener('updateHP');
         eventsCenter.on('updateHP', this.updateHP, this);
 
         // listen for the updateGold event from the events center
+        eventsCenter.removeListener('updateGold');
         eventsCenter.on('updateGold', this.updateGold, this);
 
         // listen for the updateXP event from the events center
+        eventsCenter.removeListener('updateXP');
         eventsCenter.on('updateXP', this.updateXP, this);
     }
 

@@ -9,7 +9,8 @@ export default class PlayerCharacter extends Unit{
         frame: string | number | undefined,
         type: string,
         hp: number,
-        damage: number
+        damage: number,
+        initiative: number
     ) {
         super(
             scene,
@@ -19,9 +20,14 @@ export default class PlayerCharacter extends Unit{
             frame,
             type,
             hp,
-            damage
+            damage,
+            initiative
         );
 
-        this.setScale(1.5);
+        this.initiative = initiative;
+
     }
+
+
+
 }
