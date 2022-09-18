@@ -1,37 +1,34 @@
-import Phaser from 'phaser';
+import eventsCenter from '../utils/EventsCenter';
 
-export default class Message extends Phaser.GameObjects.Container {
+export default class NewMessage extends Phaser.GameObjects.Container {
     private text: Phaser.GameObjects.Text;
     private hideEvent: Phaser.Time.TimerEvent | undefined;
+    private _events: Phaser.Events.EventEmitter;
 
     constructor(scene: Phaser.Scene, events: Phaser.Events.EventEmitter) {
-        super(scene, 100, 425);
-        const graphics = this.scene.add.graphics();
-        this.add(graphics);
-        graphics.lineStyle(2, 0xffffff, 0.8);
-        graphics.fillStyle(0x031f4c, 0.3);
-        graphics.strokeRect(-90, -15, 750, 50);
-        graphics.fillRect(-90, -15, 750, 50);
+        super(scene, 0, 0);
+        this._events = events;
+        const image = this.scene.add.image(236, 430, 'messageMenuFrame')
+            .setOrigin(0, 0);
+        this.add(image);
+
         this.text = new Phaser.GameObjects.Text(
-            scene,
-            285,
-            10,
-            '',
-            {
+            this.scene, 475, 465, '', {
                 color: '#ffffff',
-                align: 'center',
                 fontFamily: 'CustomFont',
                 wordWrap: {
-                    width: 750,
+                    width: 665,
                     useAdvancedWrap: true
                 }
             }
         );
         this.text.setResolution(10);
-        this.text.setFontSize(50);
+        this.text.setFontSize(55);
         this.add(this.text);
-        this.text.setOrigin(0.5);
-        events.on('Message', this.showMessage, this);
+        this.text.setOrigin(0);
+        this.text.setPosition(image.x + 10, image.y + 5);
+        eventsCenter.removeListener('NewMessage');
+        eventsCenter.on('NewMessage', this.showMessage, this);
         this.visible = false;
     }
 
@@ -51,5 +48,6 @@ export default class Message extends Phaser.GameObjects.Container {
     hideMessage() {
         this.hideEvent = undefined;
         this.visible = false;
+        eventsCenter.emit('NewMessageClose');
     }
 }
