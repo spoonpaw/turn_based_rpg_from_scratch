@@ -1,15 +1,15 @@
 import eventsCenter from '../utils/EventsCenter';
 import UIActionButton from '../classes/UIActionButton';
-import NewBattleScene from './NewBattleScene';
-import NewMessage from '../classes/NewMessage';
+import BattleScene from './BattleScene';
+import Message from '../classes/Message';
 
-export default class NewBattleUIScene extends Phaser.Scene {
+export default class BattleUIScene extends Phaser.Scene {
     private bagButton!: UIActionButton;
     public attackButton!: UIActionButton;
     private abilityButton!: UIActionButton;
     private runButton!: UIActionButton;
-    private battleScene!: NewBattleScene;
-    private message!: NewMessage;
+    private battleScene!: BattleScene;
+    private message!: Message;
     private commandMenuFrame!: Phaser.GameObjects.Image;
     private commandMenuText!: Phaser.GameObjects.Text;
     private hotkeyMenuFrame!: Phaser.GameObjects.Image;
@@ -22,12 +22,12 @@ export default class NewBattleUIScene extends Phaser.Scene {
     private cancelButton!: UIActionButton;
 
     constructor() {
-        super('NewBattleUI');
+        super('BattleUI');
     }
 
     create() {
         // get a reference to the battle scene
-        this.battleScene = <NewBattleScene>this.scene.get('NewBattle');
+        this.battleScene = <BattleScene>this.scene.get('Battle');
 
         // create frames first
         this.commandMenuFrame = this.add.image(236, 430, 'commandMenuFrame')
@@ -106,11 +106,11 @@ export default class NewBattleUIScene extends Phaser.Scene {
         this.actionButtons.push(this.cancelButton);
 
 
-        this.message = new NewMessage(this, this.battleScene.events);
+        this.message = new Message(this, this.battleScene.events);
         this.add.existing(this.message);
 
-        eventsCenter.removeListener('NewMessageClose');
-        eventsCenter.on('NewMessageClose', this.messageCloseHandler, this);
+        eventsCenter.removeListener('MessageClose');
+        eventsCenter.on('MessageClose', this.messageCloseHandler, this);
 
         this.input.keyboard.on('keydown', (event) => {
             if (event.code === 'Digit1') {
@@ -181,6 +181,6 @@ export default class NewBattleUIScene extends Phaser.Scene {
 
     private initiateBattleUI() {
         this.hideUIFrames();
-        eventsCenter.emit('NewMessage', 'A cyberfly approaches.');
+        eventsCenter.emit('Message', 'A cyberfly approaches.');
     }
 }

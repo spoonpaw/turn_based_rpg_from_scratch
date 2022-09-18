@@ -2,9 +2,9 @@ import GameScene from './GameScene';
 import PlayerCharacter from '../classes/PlayerCharacter';
 import Enemy from '../classes/Enemy';
 import eventsCenter from '../utils/EventsCenter';
-import NewBattleUIScene from './NewBattleUIScene';
+import BattleUIScene from './BattleUIScene';
 
-export default class NewBattleScene extends Phaser.Scene {
+export default class BattleScene extends Phaser.Scene {
     public interactionState!: string;
     private heroes!: PlayerCharacter[];
     private enemies!: Enemy[];
@@ -15,7 +15,7 @@ export default class NewBattleScene extends Phaser.Scene {
     private player2MPText!: Phaser.GameObjects.Text;
 
     constructor() {
-        super('NewBattle');
+        super('Battle');
     }
 
     create() {
@@ -35,7 +35,7 @@ export default class NewBattleScene extends Phaser.Scene {
     handleActionSelection(data: { action: string, target: Enemy | PlayerCharacter }) {
         this.interactionState = `handling${data.action}select`;
 
-        const battleUIScene = <NewBattleUIScene>this.scene.get('NewBattleUI');
+        const battleUIScene = <BattleUIScene>this.scene.get('BattleUI');
         battleUIScene.hideUIFrames();
 
         // see who goes first
@@ -81,7 +81,7 @@ export default class NewBattleScene extends Phaser.Scene {
         // just attack the player for now...
         enemy.attack(this.heroes[0]);
         this.updateBattleScenePlayerStats();
-        eventsCenter.emit('NewMessage', `The ${enemy.type} attacks ${this.heroes[0].type} for ${enemy.damage} damage.`);
+        eventsCenter.emit('Message', `The ${enemy.type} attacks ${this.heroes[0].type} for ${enemy.damage} damage.`);
 
 
         if (!this.heroes[0].living) {
@@ -94,7 +94,7 @@ export default class NewBattleScene extends Phaser.Scene {
     }
 
     gameOver() {
-        eventsCenter.emit('NewMessage', 'Thou art defeated.');
+        eventsCenter.emit('Message', 'Thou art defeated.');
     }
 
     handlePlayerUnitTurn(player: PlayerCharacter, target: PlayerCharacter | Enemy) {
@@ -105,7 +105,7 @@ export default class NewBattleScene extends Phaser.Scene {
 
         if (this.interactionState === 'handlingattackselect') {
             player.attack(target);
-            eventsCenter.emit('NewMessage', `The ${player.type} attacks the ${target.type} for ${player.damage} damage.`);
+            eventsCenter.emit('Message', `The ${player.type} attacks the ${target.type} for ${player.damage} damage.`);
         }
     }
 
@@ -125,7 +125,7 @@ export default class NewBattleScene extends Phaser.Scene {
     }
 
     showGoldAndExperience() {
-        eventsCenter.emit('NewMessage', 'You receive 3 gold pieces.\nYou receive 10 experience points.');
+        eventsCenter.emit('Message', 'You receive 3 gold pieces.\nYou receive 10 experience points.');
     }
 
 
@@ -161,8 +161,7 @@ export default class NewBattleScene extends Phaser.Scene {
         this.interactionState = 'init';
 
         // sleep the ui
-        this.scene.sleep('NewBattleUI');
-        // this.scene.stop('NewBattleUI');
+        this.scene.sleep('BattleUI');
 
         // return to game scene and sleep current battle scene
         this.scene.switch('Game');
@@ -176,12 +175,12 @@ export default class NewBattleScene extends Phaser.Scene {
             return;
         }
 
-        const battleUIScene = <NewBattleUIScene>this.scene.get('NewBattleUI');
+        const battleUIScene = <BattleUIScene>this.scene.get('BattleUI');
         battleUIScene.disableAllActionButtons();
 
         if (this.checkForVictory()) {
             // deliver the victory message and exit the battle
-            eventsCenter.emit('NewMessage', 'Thine enemies are slain.');
+            eventsCenter.emit('Message', 'Thine enemies are slain.');
             this.time.addEvent({
                 delay: 2000,
                 callback: this.showGoldAndExperience,
@@ -246,7 +245,7 @@ export default class NewBattleScene extends Phaser.Scene {
 
         this.index = -1;
 
-        this.scene.run('NewBattleUI');
+        this.scene.run('BattleUI');
 
         eventsCenter.removeListener('actionSelect');
         eventsCenter.on('actionSelect', this.handleActionSelection, this);
@@ -260,7 +259,7 @@ export default class NewBattleScene extends Phaser.Scene {
         this.gameScene.player.health = this.gameScene.player.maxHealth;
         eventsCenter.emit('updateHP', this.gameScene.player.health);
 
-        const battleUIScene = this.scene.get('NewBattleUI');
+        const battleUIScene = this.scene.get('BattleUI');
         battleUIScene.cameras.main.fadeOut(2000);
         this.cameras.main.fadeOut(3000);
 
@@ -276,14 +275,14 @@ export default class NewBattleScene extends Phaser.Scene {
 
 
             // sleep the ui
-            this.scene.sleep('NewBattleUI');
+            this.scene.sleep('BattleUI');
 
 
-            const battleUIScene = <NewBattleUIScene>this.scene.get('NewBattleUI');
+            const battleUIScene = <BattleUIScene>this.scene.get('BattleUI');
             battleUIScene.disableAllActionButtons();
             battleUIScene.cameras.main.fadeIn(0);
 
-            const battleScene = <NewBattleScene>this.scene.get('NewBattle');
+            const battleScene = <BattleScene>this.scene.get('Battle');
             battleScene.interactionState = 'init';
             battleScene.cameras.main.fadeIn(0);
 

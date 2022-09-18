@@ -6,8 +6,8 @@ import UIScene from './scenes/UIScene';
 import GameOverScene from './scenes/GameOverScene';
 import DialogScene from './scenes/DialogScene';
 import YesNoDialogScene from './scenes/YesNoDialogScene';
-import NewBattleScene from './scenes/NewBattleScene';
-import NewBattleUIScene from './scenes/NewBattleUIScene';
+import BattleScene from './scenes/BattleScene';
+import BattleUIScene from './scenes/BattleUIScene';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -27,8 +27,8 @@ const config: Phaser.Types.Core.GameConfig = {
         TitleScene,
         GameScene,
         UIScene,
-        NewBattleScene,
-        NewBattleUIScene,
+        BattleScene,
+        BattleUIScene,
         GameOverScene,
         DialogScene,
         YesNoDialogScene

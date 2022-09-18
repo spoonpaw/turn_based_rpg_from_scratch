@@ -221,7 +221,7 @@ export default class GameScene extends Phaser.Scene {
             if (this.checkForRandomEncounter()) {
                 // start combat
                 this.time.delayedCall(210, () => {
-                    this.scene.switch('NewBattle');
+                    this.scene.switch('Battle');
                 });
             }
         }

@@ -1,6 +1,6 @@
 import eventsCenter from '../utils/EventsCenter';
 
-export default class NewMessage extends Phaser.GameObjects.Container {
+export default class Message extends Phaser.GameObjects.Container {
     private text: Phaser.GameObjects.Text;
     private hideEvent: Phaser.Time.TimerEvent | undefined;
     private _events: Phaser.Events.EventEmitter;
@@ -27,8 +27,8 @@ export default class NewMessage extends Phaser.GameObjects.Container {
         this.add(this.text);
         this.text.setOrigin(0);
         this.text.setPosition(image.x + 10, image.y + 5);
-        eventsCenter.removeListener('NewMessage');
-        eventsCenter.on('NewMessage', this.showMessage, this);
+        eventsCenter.removeListener('Message');
+        eventsCenter.on('Message', this.showMessage, this);
         this.visible = false;
     }
 
@@ -48,6 +48,6 @@ export default class NewMessage extends Phaser.GameObjects.Container {
     hideMessage() {
         this.hideEvent = undefined;
         this.visible = false;
-        eventsCenter.emit('NewMessageClose');
+        eventsCenter.emit('MessageClose');
     }
 }
