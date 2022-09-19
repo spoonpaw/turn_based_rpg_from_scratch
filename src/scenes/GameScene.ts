@@ -116,7 +116,7 @@ export default class GameScene extends Phaser.Scene {
 
                 if (npc.name === 'innkeeper') {
 
-                    const innKeeperSprite = this.add.sprite(0, 0, 'player');
+                    const innKeeperSprite = this.add.sprite(0, 0, 'npc1');
                     innKeeperSprite.setDepth(2);
 
                     const innKeeper = new Innkeeper(

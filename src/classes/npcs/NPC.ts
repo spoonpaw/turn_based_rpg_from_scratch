@@ -15,7 +15,7 @@ export default class NPC {
             tilePos.x * GameScene.TILE_SIZE + offsetX,
             tilePos.y * GameScene.TILE_SIZE + offsetY
         );
-        this.sprite.setFrame(7);
+        this.sprite.setFrame(0);
     }
 
     getPosition(): Phaser.Math.Vector2 {
