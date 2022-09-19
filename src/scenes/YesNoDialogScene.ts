@@ -40,7 +40,17 @@ export default class YesNoDialogScene extends Phaser.Scene {
 
         this.input.keyboard.on('keydown', (event) => {
             if (event.code === 'Space') {
-                this.closeScene();
+                if (!this.gameScene.spaceDown) {
+                    this.closeScene();
+                }
+            }
+        });
+
+        this.input.keyboard.on('keyup', (event) => {
+            if (event.code === 'Space') {
+                if (this.gameScene.spaceDown) {
+                    this.gameScene.spaceDown = false;
+                }
             }
         });
 
@@ -51,6 +61,7 @@ export default class YesNoDialogScene extends Phaser.Scene {
         this.gameScene.input.keyboard.resetKeys();
         this.gameScene.input.keyboard.enabled = true;
         this.gameScene.activeDialogScene = false;
+        this.gameScene.spaceDown = false;
         this.scene.stop();
     }
 }

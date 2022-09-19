@@ -18,11 +18,21 @@ export default class Innkeeper extends NPC {
     }
 
     addListener() {
+        this.gameScene.input.keyboard.on('keyup', (event) => {
+            if (event.code === 'Space') {
+                this.gameScene.spaceDown = false;
+            }
+        });
+
         this.gameScene.input.keyboard.on('keydown', (event) => {
             if (this.gameScene.currentMap !== 'town') {
                 return;
             }
             if (event.code === 'Space') {
+                if (this.gameScene.spaceDown) {
+                    return;
+                }
+                this.gameScene.spaceDown = true;
                 // check if in town and looking at innkeeper
                 if (this.gameScene.activeDialogScene) {
                     return;
