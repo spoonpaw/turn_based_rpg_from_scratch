@@ -25,12 +25,13 @@ export default class GridPhysics {
 
     movePlayer(direction: Direction): void {
         this.lastMovementIntent = direction;
-        this.facingDirection = direction;
         if (this.isMoving()) return;
         if (this.isBlockingDirection(direction)) {
+            this.facingDirection = direction;
             this.player.stopAnimation(direction);
         }
         else {
+            this.facingDirection = direction;
             this.startMoving(direction);
         }
     }

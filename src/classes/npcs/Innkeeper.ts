@@ -42,8 +42,8 @@ export default class Innkeeper extends NPC {
                 ) {
                     this.gameScene.activeDialogScene = true;
 
-                    if (this.gameScene.gridPhysics.facingDirection === 'right') this.sprite.setFrame(19);
-                    if (this.gameScene.gridPhysics.facingDirection === 'up') this.sprite.setFrame(7);
+                    if (this.gameScene.gridPhysics.facingDirection === 'right') this.sprite.setFrame(1);
+                    if (this.gameScene.gridPhysics.facingDirection === 'up') this.sprite.setFrame(0);
 
                     // give the player the option to heal or not. tell them how much it costs to heal.
                     //  & show follow-up dialogue

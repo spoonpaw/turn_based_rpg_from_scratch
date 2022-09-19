@@ -97,10 +97,11 @@ export default class BattleUIScene extends Phaser.Scene {
         this.actionButtons.push(this.runButton);
 
         this.cancelButton = new UIActionButton(this, 865, 465, 'cancelbutton', 'cancelbutton', '', () => {
-            if (this.battleScene.interactionState !== 'attack') {
-                return;
+            if (this.battleScene.interactionState !== 'mainselect') {
+                this.selectCancel();
+                eventsCenter.emit('cancel');
+                // return;
             }
-            eventsCenter.emit('cancel');
         });
         this.cancelButton.visible = false;
         this.actionButtons.push(this.cancelButton);
@@ -151,20 +152,35 @@ export default class BattleUIScene extends Phaser.Scene {
     selectAttack() {
         eventsCenter.emit('attack');
 
-
         this.disableAllActionButtons();
         this.hotkeyButton1.select();
         this.attackButton.select();
 
         this.commandMenuFrame.visible = false;
+
         this.confirmMenuFrame.visible = true;
         this.cancelMenuFrame.visible = true;
         this.cancelText.visible = true;
         this.cancelButton.visible = true;
 
-        this.commandMenuText.text = 'Choose A Target';
+        this.commandMenuText.setText('Choose A Target');
 
         this.battleScene.interactionState = 'attack';
+    }
+
+    selectCancel() {
+        this.disableAllActionButtons();
+
+        this.cancelText.visible = false;
+        this.cancelButton.visible = false;
+        this.cancelMenuFrame.visible = false;
+        this.confirmMenuFrame.visible = false;
+
+        this.commandMenuFrame.visible = true;
+
+        this.commandMenuText.setText('Command?');
+
+        this.battleScene.interactionState = 'mainselect';
     }
 
     hideUIFrames() {
