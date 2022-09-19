@@ -19,6 +19,7 @@ export default class GameScene extends Phaser.Scene {
     private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private exitingCurrentLevel!: boolean;
     private nonHostileSpace!: boolean;
+    public spaceDown!: boolean;
 
     constructor() {
         super('Game');
