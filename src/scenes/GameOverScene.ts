@@ -47,9 +47,11 @@ export default class GameOverScene extends Phaser.Scene {
     }
 
     setupKeyListeners() {
+        this.input.keyboard.enabled = true;
         this.input.enabled = true;
         this.cameras.main.once('camerafadeincomplete', (camera) => {
             this.input.keyboard.once('keydown', () => {
+                this.input.keyboard.enabled = false;
                 this.input.enabled = false;
                 camera.fadeOut(3000);
                 this.cameras.main.once('camerafadeoutcomplete', () => {
@@ -59,6 +61,7 @@ export default class GameOverScene extends Phaser.Scene {
                 });
             });
             this.input.once('pointerdown', () => {
+                this.input.keyboard.enabled = false;
                 this.input.enabled = false;
                 camera.fadeOut(3000);
                 this.cameras.main.once('camerafadeoutcomplete', () => {
