@@ -153,6 +153,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     wake() {
+        this.input.keyboard.enabled = true;
         this.cursors.left.reset();
         this.cursors.right.reset();
         this.cursors.up.reset();

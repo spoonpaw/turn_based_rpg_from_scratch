@@ -163,6 +163,8 @@ export default class BattleScene extends Phaser.Scene {
         // sleep the ui
         this.scene.sleep('BattleUI');
 
+        this.gameScene.input.keyboard.enabled = true;
+
         // return to game scene and sleep current battle scene
         this.scene.switch('Game');
     }
@@ -205,6 +207,8 @@ export default class BattleScene extends Phaser.Scene {
         //     loop: true
         // });
         // song.play();
+
+        this.gameScene.input.keyboard.enabled = false;
 
         this.interactionState = 'init';
 
