@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import TweenHelper from '../utils/TweenHelper';
+import Camera = Phaser.Cameras.Scene2D.Camera;
 
 export default class TitleScene extends Phaser.Scene {
     public titleText!: Phaser.GameObjects.Text;
@@ -14,12 +15,12 @@ export default class TitleScene extends Phaser.Scene {
         phaserImage.displayHeight = this.sys.canvas.height;
         phaserImage.displayWidth = this.sys.canvas.width;
 
-        this.cameras.main.once('camerafadeincomplete', (camera) => {
+        this.cameras.main.once('camerafadeincomplete', (camera: Camera) => {
             camera.fadeOut(1500);
         });
         this.cameras.main.fadeIn(1500);
 
-        this.cameras.main.once('camerafadeoutcomplete', (camera) => {
+        this.cameras.main.once('camerafadeoutcomplete', (camera: Camera) => {
             phaserImage.destroy();
 
             const titleImage = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'title');
@@ -45,22 +46,13 @@ export default class TitleScene extends Phaser.Scene {
             pressAnyKeyText.setOrigin(0.5);
             TweenHelper.flashElement(this, pressAnyKeyText);
 
-            this.cameras.main.once('camerafadeincomplete', (camera) => {
+            this.cameras.main.once('camerafadeincomplete', (camera: Camera) => {
                 this.input.keyboard.once('keydown', () => {
-                    this.input.keyboard.enabled = false;
-                    this.input.enabled = false;
-                    camera.fadeOut(1500);
-                    this.cameras.main.once('camerafadeoutcomplete', () => {
-                        this.startScene('Game');
-                    });
+                    this.handleInput(camera);
+
                 });
                 this.input.once('pointerdown', () => {
-                    this.input.keyboard.enabled = false;
-                    this.input.enabled = false;
-                    camera.fadeOut(1500);
-                    this.cameras.main.once('camerafadeoutcomplete', () => {
-                        this.startScene('Game');
-                    });
+                    this.handleInput(camera);
                 });
             });
 
@@ -69,7 +61,17 @@ export default class TitleScene extends Phaser.Scene {
         });
     }
 
-    startScene(targetScene) {
+    startScene(targetScene: string) {
         this.scene.start(targetScene);
+    }
+
+    handleInput(camera: Camera) {
+        this.input.keyboard.enabled = false;
+        this.input.enabled = false;
+        camera.fadeOut(1500);
+        this.cameras.main.once('camerafadeoutcomplete', () => {
+            this.startScene('Game');
+        });
+
     }
 }

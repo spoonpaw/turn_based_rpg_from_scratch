@@ -1,5 +1,8 @@
+import {Scene} from 'phaser';
+import GameObject = Phaser.GameObjects.GameObject;
+
 export default class TweenHelper {
-    static flashElement(scene, element, repeat = true, easing = 'Linear', overallDuration = 1500, visiblePauseDuration = 500) {
+    static flashElement(scene: Scene, element: GameObject, repeat = true, easing = 'Linear', overallDuration = 1500, visiblePauseDuration = 500) {
         if (scene && element) {
             const flashDuration = overallDuration - visiblePauseDuration / 2;
 

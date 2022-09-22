@@ -3,7 +3,7 @@ import Player from '../classes/Player';
 import GridControls from '../classes/GridControls';
 import GridPhysics from '../classes/GridPhysics';
 import {Direction} from '../types/Direction';
-import {levels} from '../levels/Levels';
+import {ILevelData, levels} from '../levels/Levels';
 import Innkeeper from '../classes/npcs/Innkeeper';
 
 export default class GameScene extends Phaser.Scene {
@@ -29,11 +29,11 @@ export default class GameScene extends Phaser.Scene {
         this.scene.launch('UI');
     }
 
-    create(data?) {
+    create(data?: { levelData?: ILevelData }) {
         this.activeDialogScene = false;
 
         // if data is empty then the game just started so load the player in the spawn location
-        if (Object.keys(data).length === 0) {
+        if (data && Object.keys(data).length === 0) {
             // create the game scene when the player initially spawns.
             // create the map
             this.currentMap = levels.overworld.name;
@@ -57,8 +57,8 @@ export default class GameScene extends Phaser.Scene {
                     levels.overworld.spawnCoords[0].x,
                     levels.overworld.spawnCoords[0].y
                 ),
-                this.player?.health || 7,
-                7,
+                this.player?.health || 8,
+                8,
                 5,
                 this.player?.gold || 0,
                 this.player?.experience || 0
@@ -73,7 +73,7 @@ export default class GameScene extends Phaser.Scene {
             this.playerTileY = this.player.getTilePos().y;
 
         }
-        else {
+        else if (data?.levelData) {
             // spawn the character in the correct position based on data passed to the restart method
             // create the map
             this.currentMap = data.levelData.name;

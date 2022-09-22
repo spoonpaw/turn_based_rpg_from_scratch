@@ -18,13 +18,13 @@ export default class Innkeeper extends NPC {
     }
 
     addListener() {
-        this.gameScene.input.keyboard.on('keyup', (event) => {
+        this.gameScene.input.keyboard.on('keyup', (event: KeyboardEvent) => {
             if (event.code === 'Space') {
                 this.gameScene.spaceDown = false;
             }
         });
 
-        this.gameScene.input.keyboard.on('keydown', (event) => {
+        this.gameScene.input.keyboard.on('keydown', (event: KeyboardEvent) => {
             if (this.gameScene.currentMap !== 'town') {
                 return;
             }

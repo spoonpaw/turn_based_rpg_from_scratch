@@ -6,7 +6,7 @@
         "allowJs": true,
         "allowSyntheticDefaultImports": true,
         "strict": true,
-        "noImplicitAny": false
+        "noImplicitAny": true
     },
     "include": [
         "./src/**/*"

@@ -238,7 +238,7 @@ export default class BattleScene extends Phaser.Scene {
         })
             .setResolution(10);
 
-        const cyberFly = new Enemy(this, Number(this.game.config.width) / 2, 280, 'cyberfly', null, 'CyberFly', 10, 3, 100);
+        const cyberFly = new Enemy(this, Number(this.game.config.width) / 2, 280, 'cyberfly', undefined, 'CyberFly', 10, 3, 100);
         this.add.existing(cyberFly);
 
         this.heroes = [warrior];
