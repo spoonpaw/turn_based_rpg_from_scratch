@@ -113,7 +113,7 @@ export default class BattleUIScene extends Phaser.Scene {
         eventsCenter.removeListener('MessageClose');
         eventsCenter.on('MessageClose', this.messageCloseHandler, this);
 
-        this.input.keyboard.on('keydown', (event) => {
+        this.input.keyboard.on('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Digit1') {
                 if (this.battleScene.interactionState !== 'mainselect') {
                     return;

@@ -62,15 +62,15 @@ export default class UIScene extends Phaser.Scene {
         eventsCenter.on('updateXP', this.updateXP, this);
     }
 
-    updateHP(hp) {
+    updateHP(hp: number) {
         this.hpText.text = `Hit Points: ${hp}`;
     }
 
-    updateGold(gold) {
+    updateGold(gold:  number) {
         this.goldText.text = `Gold: ${gold}`;
     }
 
-    updateXP(xp) {
+    updateXP(xp: number) {
         this.warriorText.text = `Warrior / Level ${Math.max(1, Math.ceil(0.3 * Math.sqrt(xp)))}`;
     }
 }

@@ -1,5 +1,3 @@
-import Phaser from 'phaser';
-
 export default class UiButton extends Phaser.GameObjects.Container {
     public scene: Phaser.Scene;
     public x: number;
@@ -11,7 +9,7 @@ export default class UiButton extends Phaser.GameObjects.Container {
     public button!: Phaser.GameObjects.Image;
     public buttonText!: Phaser.GameObjects.Text;
 
-    constructor(scene, x, y, key, hoverKey, text, targetCallback) {
+    constructor(scene: Phaser.Scene, x: number, y: number, key: string, hoverKey: string, text: string, targetCallback: () => void) {
         super(scene, x, y);
         this.scene = scene; // the scene this container will be added to
         this.x = x; // the x position of our container

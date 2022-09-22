@@ -8,7 +8,7 @@ export default class DialogScene extends Phaser.Scene {
         super('Dialog');
     }
 
-    create(data) {
+    create(data: { text: string | string[]; }) {
 
         this.gameScene = <GameScene>this.scene.get('Game');
         this.add.image(0, 420, 'prefab4')
@@ -28,7 +28,7 @@ export default class DialogScene extends Phaser.Scene {
         this.input.keyboard.on('keydown', this.listenForPlayerActivity, this);
     }
 
-    listenForPlayerActivity(event): void {
+    listenForPlayerActivity(event: KeyboardEvent): void {
         if (event.code === 'Space') {
             this.gameScene.activeDialogScene = false;
             this.gameScene.input.keyboard.enabled = true;

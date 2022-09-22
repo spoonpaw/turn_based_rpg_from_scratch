@@ -34,3 +34,12 @@ export const levels = {
         ]
     }
 };
+
+export interface ILevelData {
+    name: string,
+    tilemapKey: string,
+    tilesetName: string,
+    tilesetKey: string,
+    spawnCoords: {name: string, x: number, y: number}[],
+    npcs: {name: string, x: number, y: number}[]
+}

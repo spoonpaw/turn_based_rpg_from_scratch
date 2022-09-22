@@ -12,7 +12,7 @@ export default class YesNoDialogScene extends Phaser.Scene {
         super('YesNoDialog');
     }
 
-    create(data) {
+    create(data: { text: string | string[]; }) {
         this.gameScene = <GameScene>this.scene.get('Game');
         this.add.image(0, 420, 'prefab4')
             .setOrigin(0, 0);
@@ -38,7 +38,7 @@ export default class YesNoDialogScene extends Phaser.Scene {
             this.closeScene();
         });
 
-        this.input.keyboard.on('keydown', (event) => {
+        this.input.keyboard.on('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Space') {
                 if (!this.gameScene.spaceDown) {
                     this.closeScene();
@@ -46,7 +46,7 @@ export default class YesNoDialogScene extends Phaser.Scene {
             }
         });
 
-        this.input.keyboard.on('keyup', (event) => {
+        this.input.keyboard.on('keyup', (event: KeyboardEvent) => {
             if (event.code === 'Space') {
                 if (this.gameScene.spaceDown) {
                     this.gameScene.spaceDown = false;
