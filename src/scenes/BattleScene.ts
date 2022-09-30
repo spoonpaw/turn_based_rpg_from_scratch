@@ -30,7 +30,7 @@ export default class BattleScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor('rgb(235, 235, 235)');
         this.background = this.add.image(0, 0, 'overworldbackground')
             .setOrigin(0, 0);
-        // Based on your game size, it may "stretch" and distort.
+        // based on your game size, it may "stretch" and distort.
         this.background.displayWidth = this.sys.canvas.width;
         this.background.displayHeight = this.sys.canvas.height - 291;
 
