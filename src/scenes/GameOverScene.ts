@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import TweenHelper from '../utils/TweenHelper';
 import GameScene from './GameScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
@@ -22,15 +21,17 @@ export default class GameOverScene extends Phaser.Scene {
             fontSize: '128px',
             color: '#fff',
             fontFamily: 'CustomFont'
-        });
+        })
+            .setStroke('#000000', 2);
         this.gameOverText.setOrigin(0.5);
 
         const pressAnyKeyText = this.add.text(this.scale.width / 2, this.scale.height * 0.65, 'Press Any Key', {
             fontSize: '40px',
             color: '#fff',
             fontFamily: 'CustomFont',
+        })
+            .setStroke('#000000', 2);
 
-        });
         pressAnyKeyText.setOrigin(0.5);
 
         TweenHelper.flashElement(this, pressAnyKeyText);
@@ -40,7 +41,7 @@ export default class GameOverScene extends Phaser.Scene {
 
         const gameScene = <GameScene>this.scene.get('Game');
 
-        gameScene.player.health = gameScene.player.maxHealth;
+        gameScene.player.stats.currentHP = gameScene.player.stats.maxHP;
         gameScene.scene.restart();
 
         this.setupKeyListeners();
@@ -74,7 +75,7 @@ export default class GameOverScene extends Phaser.Scene {
     wake() {
         this.cameras.main.fadeIn(3000);
         const gameScene = <GameScene>this.scene.get('Game');
-        gameScene.player.health = gameScene.player.maxHealth;
+        gameScene.player.stats.currentHP = gameScene.player.stats.maxHP;
         gameScene.scene.restart();
         this.cameras.main.once('camerafadeincomplete', () => {
             this.setupKeyListeners();

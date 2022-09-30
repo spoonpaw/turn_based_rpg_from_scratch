@@ -66,9 +66,9 @@ export default class Innkeeper extends NPC {
                         else {
                             this.gameScene.scene.run('Dialog', {text: 'Innkeeper:\nThank thee! Thou appeareth well rested.'});
                             this.gameScene.player.gold -= 3;
-                            this.gameScene.player.health = this.gameScene.player.maxHealth;
+                            this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
 
-                            eventsCenter.emit('updateHP', this.gameScene.player.health);
+                            eventsCenter.emit('updateHP', this.gameScene.player.stats.currentHP);
                             eventsCenter.emit('updateGold', this.gameScene.player.gold);
                         }
                     });

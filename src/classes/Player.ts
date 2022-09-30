@@ -1,21 +1,18 @@
 import GameScene from '../scenes/GameScene';
 import {Direction} from '../types/Direction';
+import Stats from '../stats/Stats';
+import Warrior from '../jobs/Warrior';
 
 export default class Player {
-    public health: number;
-    public maxHealth: number;
-    public damage: number;
-    public gold: number;
-    public experience: number;
+    public stats: Stats;
 
     constructor(
         public sprite: Phaser.GameObjects.Sprite,
         private tilePos: Phaser.Math.Vector2,
-        health: number,
-        maxHealth: number,
-        damage: number,
-        gold: number,
-        experience: number
+        public gold: number,
+        public experience: number,
+        public type: string,
+        stats?: Stats
     ) {
         const offsetX = GameScene.TILE_SIZE / 2;
         const offsetY = GameScene.TILE_SIZE;
@@ -26,12 +23,7 @@ export default class Player {
             tilePos.y * GameScene.TILE_SIZE + offsetY
         );
         this.sprite.setFrame(1);
-
-        this.health = health;
-        this.maxHealth = maxHealth;
-        this.damage = damage;
-        this.gold = gold;
-        this.experience = experience;
+        this.stats = stats ?? this.createStatsForNewPlayer(this.type);
     }
 
     getPosition(): Phaser.Math.Vector2 {
@@ -59,5 +51,28 @@ export default class Player {
 
     setTilePos(tilePosition: Phaser.Math.Vector2): void {
         this.tilePos = tilePosition.clone();
+    }
+
+    createStatsForNewPlayer(job: string): Stats {
+        if (job === 'warrior') {
+            return new Stats(
+                Warrior.advancement[0].agi,
+                Warrior.advancement[0].int,
+                0,
+                Warrior.advancement[0].con,
+                Warrior.advancement[0].dex,
+                Warrior.advancement[0].str,
+                0,
+                Warrior.advancement[0].hp,
+                0,
+                Warrior.advancement[0].hp,
+                0
+            );
+        }
+        else {
+            return new Stats(
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            );
+        }
     }
 }

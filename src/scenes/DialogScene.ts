@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import GameScene from './GameScene';
 
 export default class DialogScene extends Phaser.Scene {

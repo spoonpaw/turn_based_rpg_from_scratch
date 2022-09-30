@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import Player from '../classes/Player';
 import GridControls from '../classes/GridControls';
 import GridPhysics from '../classes/GridPhysics';
@@ -34,7 +33,7 @@ export default class GameScene extends Phaser.Scene {
 
         // if data is empty then the game just started so load the player in the spawn location
         if (data && Object.keys(data).length === 0) {
-            // create the game scene when the player initially spawns.
+            // create the game scene when the level 1 player initially spawns.
             // create the map
             this.currentMap = levels.overworld.name;
             this.exitingCurrentLevel = false;
@@ -51,17 +50,16 @@ export default class GameScene extends Phaser.Scene {
             playerSprite.setDepth(2);
             this.cameras.main.startFollow(playerSprite);
             this.cameras.main.roundPixels = true;
+
             this.player = new Player(
                 playerSprite,
                 new Phaser.Math.Vector2(
                     levels.overworld.spawnCoords[0].x,
                     levels.overworld.spawnCoords[0].y
                 ),
-                this.player?.health || 8,
-                8,
-                5,
-                this.player?.gold || 0,
-                this.player?.experience || 0
+                this.player?.gold ?? 0,
+                this.player?.experience ?? 0,
+                'warrior'
             );
 
             this.setupPlayerGridPhysics();
@@ -98,11 +96,10 @@ export default class GameScene extends Phaser.Scene {
                     data.levelData.spawnCoords[0].x,
                     data.levelData.spawnCoords[0].y
                 ),
-                this.player.health,
-                this.player.maxHealth,
-                this.player.damage,
-                this.player.gold,
-                this.player.experience
+                this.player?.gold ?? 0,
+                this.player?.experience ?? 0,
+                'warrior',
+                this.player?.stats
             );
 
             this.setupPlayerGridPhysics();
@@ -114,7 +111,6 @@ export default class GameScene extends Phaser.Scene {
             for (const npc of data.levelData.npcs) {
 
                 // place npc sprites
-
                 if (npc.name === 'innkeeper') {
 
                     const innKeeperSprite = this.add.sprite(0, 0, 'npc1');

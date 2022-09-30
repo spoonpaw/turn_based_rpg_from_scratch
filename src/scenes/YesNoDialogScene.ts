@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import GameScene from './GameScene';
 import UiButton from '../classes/UiButton';
 import eventsCenter from '../utils/EventsCenter';

@@ -57,8 +57,7 @@ export default class GridPhysics {
         this.player.setTilePos(
             this.player
                 .getTilePos()
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                .add(this.movementDirectionVectors[this.movementDirection]!)
+                .add(this.movementDirectionVectors[this.movementDirection] ?? new Vector2())
         );
     }
 
@@ -92,8 +91,7 @@ export default class GridPhysics {
         const movementDistance = directionVec?.multiply(
             new Vector2(pixelsToMove)
         );
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const newPlayerPos = this.player.getPosition().add(movementDistance!);
+        const newPlayerPos = this.player.getPosition().add(movementDistance ?? new Vector2());
         this.player.setPosition(newPlayerPos);
         this.tileSizePixelsWalked += pixelsToMove;
         this.tileSizePixelsWalked %= GameScene.TILE_SIZE;
@@ -124,8 +122,7 @@ export default class GridPhysics {
     private tilePosInDirection(direction: Direction): Vector2 {
         return this.player
             .getTilePos()
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            .add(this.movementDirectionVectors[direction]!);
+            .add(this.movementDirectionVectors[direction] ?? new Vector2());
     }
 
     private hasBlockingTile(pos: Vector2): boolean {
