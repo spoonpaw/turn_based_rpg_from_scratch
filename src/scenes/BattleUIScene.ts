@@ -107,7 +107,7 @@ export default class BattleUIScene extends Phaser.Scene {
         this.actionButtons.push(this.cancelButton);
 
 
-        this.message = new Message(this, this.battleScene.events);
+        this.message = new Message(this);
         this.add.existing(this.message);
 
         eventsCenter.removeListener('MessageClose');
