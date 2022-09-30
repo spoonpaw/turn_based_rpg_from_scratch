@@ -69,7 +69,6 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('confirmMenuFrame', 'assets/images/ui/confirmMenuFrame.png');
         this.load.image('cancelMenuFrame', 'assets/images/ui/cancelMenuFrame.png');
 
-
         this.load.image('pic', 'assets/images/baal-loader.png');
         this.load.image('pic2', 'assets/images/atari-fujilogo.png');
         this.load.image('title', 'assets/images/afterlife-title-screen.png');
@@ -79,10 +78,15 @@ export default class BootScene extends Phaser.Scene {
 
         this.load.image('dragonblue', 'assets/images/dragonblue.png');
         this.load.image('dragonorange', 'assets/images/dragonorange.png');
-        this.load.image('cyberfly', 'assets/images/cyberFly2.png');
+        this.load.image('cyberfly', 'assets/images/cyberFly3.png');
+        this.load.image('deadlyflower', 'assets/images/deadlyFlower.png');
+        this.load.image('sentientrock', 'assets/images/sentientRock.png');
+        this.load.image('seedspiker', 'assets/images/seedSpiker.png');
 
         this.load.image('sword', 'assets/images/icons/sword.png');
         this.load.image('coin', 'assets/images/icons/coin.png');
+
+        this.load.image('overworldbackground', 'assets/images/overworldCombatBackground2.png');
     }
 
     loadSpriteSheets() {

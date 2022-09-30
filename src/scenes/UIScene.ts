@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import GameScene from './GameScene';
 import eventsCenter from '../utils/EventsCenter';
 
@@ -40,7 +39,7 @@ export default class UIScene extends Phaser.Scene {
             .setScale(1.5);
 
         // create the hp text game object
-        this.hpText = this.add.text(35, 30, `Hit Points: ${this.gameScene.player.health}`, { fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont' })
+        this.hpText = this.add.text(35, 30, `Hit Points: ${this.gameScene.player.stats.currentHP}`, { fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont' })
             .setStroke('#000000', 2)
             .setResolution(10);
         // create heart icon
@@ -71,6 +70,6 @@ export default class UIScene extends Phaser.Scene {
     }
 
     updateXP(xp: number) {
-        this.warriorText.text = `Warrior / Level ${Math.max(1, Math.ceil(0.3 * Math.sqrt(xp)))}`;
+        this.warriorText.setText(`Warrior / Level ${Math.max(1, Math.ceil(0.3 * Math.sqrt(xp)))}`);
     }
 }

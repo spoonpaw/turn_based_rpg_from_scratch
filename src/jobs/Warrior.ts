@@ -1,6 +1,17 @@
 const Warrior = {
+    // this is a typed tag
+    kind: 'warrior',
+
+    // the warrior can equip any armor item
     armor: 'any',
+
+    // the warrior can equip any weapon item
     weapons: 'any',
+
+    // the warrior should level up gradually, advancing stats automatically following a stat priority
+    // stat priority (in order of importance): strength, stamina, agility, dexterity, intellect
+    // three levels of stat increase: 3 points per level, 2 points per level, 1 point per level
+    // level up:
     advancement: [
         {
             level: 1,
@@ -9,7 +20,8 @@ const Warrior = {
             str: 15,
             con: 14,
             dex: 12,
-            wis: 10
+            int: 10,
+            agi: 13
         },
         {
             level: 2,
@@ -18,7 +30,8 @@ const Warrior = {
             str: 16,
             con: 14,
             dex: 12,
-            wis: 10
+            int: 10,
+            agi: 13
         },
         {
             level: 3,
@@ -27,7 +40,8 @@ const Warrior = {
             str: 16,
             con: 14,
             dex: 12,
-            wis: 10
+            int: 10,
+            agi: 13
         },
         {
             level: 4,
@@ -36,7 +50,8 @@ const Warrior = {
             str: 16,
             con: 15,
             dex: 12,
-            wis: 10
+            int: 10,
+            agi: 14
         },
         {
             level: 5,
@@ -45,7 +60,8 @@ const Warrior = {
             str: 16,
             con: 15,
             dex: 12,
-            wis: 10
+            int: 10,
+            agi: 14
         },
         {
             level: 6,
@@ -54,7 +70,8 @@ const Warrior = {
             str: 16,
             con: 15,
             dex: 13,
-            wis: 10
+            int: 10,
+            agi: 14
         },
         {
             level: 7,
@@ -63,7 +80,8 @@ const Warrior = {
             str: 16,
             con: 15,
             dex: 13,
-            wis: 10
+            int: 10,
+            agi: 15
         },
         {
             level: 8,
@@ -72,7 +90,8 @@ const Warrior = {
             str: 16,
             con: 15,
             dex: 13,
-            wis: 11
+            int: 11,
+            agi: 15
         },
         {
             level: 9,
@@ -81,7 +100,8 @@ const Warrior = {
             str: 16,
             con: 15,
             dex: 13,
-            wis: 11
+            int: 11,
+            agi: 15
         },
         {
             level: 10,
@@ -90,7 +110,8 @@ const Warrior = {
             str: 17,
             con: 15,
             dex: 13,
-            wis: 11
+            int: 11,
+            agi: 16
         },
         {
             level: 11,
@@ -99,7 +120,8 @@ const Warrior = {
             str: 17,
             con: 15,
             dex: 13,
-            wis: 11
+            int: 11,
+            agi: 16
         },
         {
             level: 12,
@@ -108,7 +130,8 @@ const Warrior = {
             str: 17,
             con: 16,
             dex: 13,
-            wis: 11
+            int: 11,
+            agi: 16
         },
         {
             level: 13,
@@ -117,7 +140,8 @@ const Warrior = {
             str: 17,
             con: 16,
             dex: 13,
-            wis: 11
+            int: 11,
+            agi: 17
         },
         {
             level: 14,
@@ -126,7 +150,8 @@ const Warrior = {
             str: 17,
             con: 16,
             dex: 14,
-            wis: 11
+            int: 11,
+            agi: 17
         },
         {
             level: 15,
@@ -135,7 +160,8 @@ const Warrior = {
             str: 17,
             con: 16,
             dex: 14,
-            wis: 11
+            int: 11,
+            agi: 17
         },
         {
             level: 16,
@@ -144,7 +170,8 @@ const Warrior = {
             str: 17,
             con: 16,
             dex: 14,
-            wis: 12
+            int: 12,
+            agi: 18
         },
         {
             level: 17,
@@ -153,7 +180,8 @@ const Warrior = {
             str: 17,
             con: 16,
             dex: 14,
-            wis: 12
+            int: 12,
+            agi: 18
         },
         {
             level: 18,
@@ -162,7 +190,8 @@ const Warrior = {
             str: 18,
             con: 16,
             dex: 14,
-            wis: 12
+            int: 12,
+            agi: 18
         },
         {
             level: 19,
@@ -171,7 +200,8 @@ const Warrior = {
             str: 18,
             con: 16,
             dex: 14,
-            wis: 12
+            int: 12,
+            agi: 19
         },
         {
             level: 20,
@@ -180,7 +210,8 @@ const Warrior = {
             str: 18,
             con: 17,
             dex: 14,
-            wis: 12
+            int: 12,
+            agi: 19
         },
     ]
 };

@@ -3,11 +3,9 @@ import eventsCenter from '../utils/EventsCenter';
 export default class Message extends Phaser.GameObjects.Container {
     private readonly text: Phaser.GameObjects.Text;
     private hideEvent: Phaser.Time.TimerEvent | undefined;
-    private _events: Phaser.Events.EventEmitter;
 
-    constructor(scene: Phaser.Scene, events: Phaser.Events.EventEmitter) {
+    constructor(scene: Phaser.Scene) {
         super(scene, 0, 0);
-        this._events = events;
         const image = this.scene.add.image(236, 430, 'messageMenuFrame')
             .setOrigin(0, 0);
         this.add(image);

@@ -197,6 +197,6 @@ export default class BattleUIScene extends Phaser.Scene {
 
     private initiateBattleUI() {
         this.hideUIFrames();
-        eventsCenter.emit('Message', 'A cyberfly approaches.');
+        eventsCenter.emit('Message', `A ${this.battleScene.enemies[0].type} approaches.`);
     }
 }

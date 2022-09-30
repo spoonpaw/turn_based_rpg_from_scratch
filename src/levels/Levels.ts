@@ -1,4 +1,4 @@
-export const levels = {
+export const levels: ILevelDataContainer = {
     overworld: {
         name: 'overworld',
         tilemapKey: 'overworld-map',
@@ -11,7 +11,8 @@ export const levels = {
                 y: 16
             }
         ],
-        npcs: []
+        npcs: [],
+        enemies: ['seedspiker', 'sentientrock', 'deadlyflower']
     },
     town: {
         name: 'town',
@@ -41,5 +42,10 @@ export interface ILevelData {
     tilesetName: string,
     tilesetKey: string,
     spawnCoords: {name: string, x: number, y: number}[],
-    npcs: {name: string, x: number, y: number}[]
+    npcs: {name: string, x: number, y: number}[],
+    enemies?: string[]
+}
+
+export interface ILevelDataContainer {
+    [key: string]: ILevelData;
 }

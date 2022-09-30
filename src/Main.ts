@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import BootScene from './scenes/BootScene';
 import TitleScene from './scenes/TitleScene';
 import GameScene from './scenes/GameScene';
@@ -36,4 +35,4 @@ const config: Phaser.Types.Core.GameConfig = {
     backgroundColor: '#000000'
 };
 
-export default new Phaser.Game(config);
+new Phaser.Game(config);
