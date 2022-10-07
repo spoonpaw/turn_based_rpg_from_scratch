@@ -56,17 +56,17 @@ export default class Player {
     createStatsForNewPlayer(job: string): Stats {
         if (job === 'warrior') {
             return new Stats(
-                Warrior.advancement[0].agi,
-                Warrior.advancement[0].int,
+                Warrior.advancement[0].constitution,
+                Warrior.advancement[0].dexterity,
+                Warrior.advancement[0].strength,
+                Warrior.advancement[0].maxHP,
                 0,
-                Warrior.advancement[0].con,
-                Warrior.advancement[0].dex,
-                Warrior.advancement[0].str,
+                Warrior.advancement[0].agility,
+                Warrior.advancement[0].intellect,
+                1,
                 0,
-                Warrior.advancement[0].hp,
                 0,
-                Warrior.advancement[0].hp,
-                0
+                Warrior.advancement[0].maxHP
             );
         }
         else {

@@ -2,12 +2,14 @@ import GameScene from './GameScene';
 
 export default class DialogScene extends Phaser.Scene {
     private gameScene!: GameScene;
+    private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 
     constructor() {
         super('Dialog');
     }
 
     create(data: { text: string | string[]; }) {
+        this.cursors = this.input.keyboard.createCursorKeys();
 
         this.gameScene = <GameScene>this.scene.get('Game');
         this.add.image(0, 420, 'prefab4')
@@ -24,14 +26,20 @@ export default class DialogScene extends Phaser.Scene {
 
         this.gameScene.input.keyboard.enabled = false;
 
-        this.input.keyboard.on('keydown', this.listenForPlayerActivity, this);
     }
 
-    listenForPlayerActivity(event: KeyboardEvent): void {
-        if (event.code === 'Space') {
-            this.gameScene.activeDialogScene = false;
-            this.gameScene.input.keyboard.enabled = true;
-            this.scene.stop();
+    update() {
+        if (Phaser.Input.Keyboard.JustDown(this.cursors.space) && !this.gameScene.spaceDown) {
+            this.closeScene();
         }
+        else if (Phaser.Input.Keyboard.JustUp(this.cursors.space) && this.gameScene.spaceDown) {
+            this.gameScene.spaceDown = false;
+        }
+    }
+
+    closeScene() {
+        this.gameScene.input.keyboard.enabled = true;
+        this.gameScene.activeDialogScene = false;
+        this.scene.stop();
     }
 }
