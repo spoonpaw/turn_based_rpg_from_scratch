@@ -219,6 +219,10 @@ export default class GameScene extends Phaser.Scene {
                 });
             }
         }
+
+        if (this.innKeeper) {
+            this.innKeeper.update();
+        }
     }
 
     checkForRandomEncounter(): boolean {
