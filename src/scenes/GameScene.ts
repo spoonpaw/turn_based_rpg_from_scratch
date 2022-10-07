@@ -19,6 +19,7 @@ export default class GameScene extends Phaser.Scene {
     private exitingCurrentLevel!: boolean;
     private nonHostileSpace!: boolean;
     public spaceDown!: boolean;
+    private innKeeper!: Innkeeper;
 
     constructor() {
         super('Game');
@@ -96,10 +97,10 @@ export default class GameScene extends Phaser.Scene {
                     data.levelData.spawnCoords[0].x,
                     data.levelData.spawnCoords[0].y
                 ),
-                this.player?.gold ?? 0,
-                this.player?.experience ?? 0,
+                this.player.gold,
+                this.player.experience,
                 'warrior',
-                this.player?.stats
+                this.player.stats
             );
 
             this.setupPlayerGridPhysics();
@@ -116,18 +117,13 @@ export default class GameScene extends Phaser.Scene {
                     const innKeeperSprite = this.add.sprite(0, 0, 'npc1');
                     innKeeperSprite.setDepth(2);
 
-                    const innKeeper = new Innkeeper(
+                    this.innKeeper = new Innkeeper(
                         innKeeperSprite,
                         new Phaser.Math.Vector2(
                             npc.x,
                             npc.y
                         )
                     );
-
-                    innKeeper.removeListener();
-
-                    innKeeper.addListener();
-
                 }
             }
 

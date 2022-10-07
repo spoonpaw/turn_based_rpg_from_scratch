@@ -76,8 +76,9 @@ export default class PlayerCharacter extends Unit {
 
     takeDamage(damage: number): void {
         // handle the math of taking damage,
-        this.stats.currentHP -= damage;
-        if (this.stats.currentHP <= 0) {
+        this.stats.currentHP =  this.stats.currentHP - damage;
+
+        if (this.stats.currentHP  <= 0) {
             this.stats.currentHP = 0;
             this.living = false;
         }

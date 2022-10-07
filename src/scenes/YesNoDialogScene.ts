@@ -6,12 +6,17 @@ export default class YesNoDialogScene extends Phaser.Scene {
     private gameScene!: GameScene;
     private yesButton!: UiButton;
     private noButton!: UiButton;
+    private justSpace!: Phaser.Input.Keyboard.Key;
+    private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 
     constructor() {
         super('YesNoDialog');
     }
 
     create(data: { text: string | string[]; }) {
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.justSpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE, true, false);
+
         this.gameScene = <GameScene>this.scene.get('Game');
         this.add.image(0, 420, 'prefab4')
             .setOrigin(0, 0);
@@ -36,31 +41,22 @@ export default class YesNoDialogScene extends Phaser.Scene {
         this.noButton = new UiButton(this, 770, 600, 'button2', 'button2hover', 'No', () => {
             this.closeScene();
         });
-
-        this.input.keyboard.on('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Space') {
-                if (!this.gameScene.spaceDown) {
-                    this.closeScene();
-                }
-            }
-        });
-
-        this.input.keyboard.on('keyup', (event: KeyboardEvent) => {
-            if (event.code === 'Space') {
-                if (this.gameScene.spaceDown) {
-                    this.gameScene.spaceDown = false;
-                }
-            }
-        });
-
         this.gameScene.input.keyboard.enabled = false;
     }
 
     closeScene() {
-        this.gameScene.input.keyboard.resetKeys();
         this.gameScene.input.keyboard.enabled = true;
         this.gameScene.activeDialogScene = false;
-        this.gameScene.spaceDown = false;
         this.scene.stop();
     }
+
+    update() {
+        if (Phaser.Input.Keyboard.JustDown(this.cursors.space) && !this.gameScene.spaceDown) {
+            this.closeScene();
+        }
+        else if (Phaser.Input.Keyboard.JustUp(this.cursors.space) && this.gameScene.spaceDown) {
+            this.gameScene.spaceDown = false;
+        }
+    }
+
 }

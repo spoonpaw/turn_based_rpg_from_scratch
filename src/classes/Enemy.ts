@@ -103,7 +103,7 @@ export class Enemy extends Unit {
     attack(target: Unit): Turn | void {
         if (target.living) {
             // formula for setting the attack amount based on str
-            const damage = Math.floor(this.stats.strength / 3) + Phaser.Math.Between(1, this.stats.weapon);
+            const damage = Math.floor(this.stats.strength / 3) + Phaser.Math.Between(1, this.stats.weapon || 0);
             target.takeDamage(damage);
 
             eventsCenter.emit(

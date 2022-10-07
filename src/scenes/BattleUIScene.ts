@@ -100,7 +100,6 @@ export default class BattleUIScene extends Phaser.Scene {
             if (this.battleScene.interactionState !== 'mainselect') {
                 this.selectCancel();
                 eventsCenter.emit('cancel');
-                // return;
             }
         });
         this.cancelButton.visible = false;

@@ -5,6 +5,7 @@ import eventsCenter from '../utils/EventsCenter';
 import BattleUIScene from './BattleUIScene';
 import {levels} from '../levels/Levels';
 import {Turn} from '../types/Turn';
+import warrior from '../jobs/Warrior';
 
 export default class BattleScene extends Phaser.Scene {
     public interactionState!: string;
@@ -16,12 +17,13 @@ export default class BattleScene extends Phaser.Scene {
     private player1HPText!: Phaser.GameObjects.Text;
     private player1MPText!: Phaser.GameObjects.Text;
     private background!: Phaser.GameObjects.Image;
+    private battleUIScene!: BattleUIScene;
 
     constructor() {
         super('Battle');
     }
 
-    create() {
+    create(): void {
 
         this.gameScene = <GameScene>this.scene.get('Game');
         this.interactionState = 'init';
@@ -37,25 +39,23 @@ export default class BattleScene extends Phaser.Scene {
         this.startBattle();
 
         this.sys.events.on('wake', this.startBattle, this);
-
     }
 
-    startNewTurn() {
+    startNewTurn(): void {
         // check for victory or game over state
         if (this.interactionState === 'gameover') {
             this.endBattleGameOver();
             return;
         }
 
-        const battleUIScene = <BattleUIScene>this.scene.get('BattleUI');
-        battleUIScene.disableAllActionButtons();
+        this.battleUIScene.disableAllActionButtons();
 
         if (this.checkForVictory()) {
             // deliver the victory message and exit the battle
             eventsCenter.emit('Message', 'Thine enemies are slain.');
             this.time.addEvent({
                 delay: 2000,
-                callback: this.showGoldAndExperience,
+                callback: BattleScene.showGoldAndExperience,
                 callbackScope: this
             });
             this.time.addEvent({
@@ -66,16 +66,15 @@ export default class BattleScene extends Phaser.Scene {
             return;
         }
 
-        battleUIScene.disableAllActionButtons();
-        battleUIScene.showCommandAndHotkeyFrames();
+        this.battleUIScene.disableAllActionButtons();
+        this.battleUIScene.showCommandAndHotkeyFrames();
         this.interactionState = 'mainselect';
     }
 
-    handleActionSelection(data: { action: string, target: Enemy | PlayerCharacter }) {
+    handleActionSelection(data: { action: string, target: Enemy | PlayerCharacter }): void {
         this.interactionState = `handling${data.action}select`;
 
-        const battleUIScene = <BattleUIScene>this.scene.get('BattleUI');
-        battleUIScene.hideUIFrames();
+        this.battleUIScene.hideUIFrames();
 
         // see who goes first - sort the unit list
         this.units = this.units.sort((a, b) => {
@@ -152,13 +151,8 @@ export default class BattleScene extends Phaser.Scene {
         });
     }
 
-    handlePlayerUnitTurn(turn: Turn) {
+    private handlePlayerUnitTurn(turn: Turn): void {
         if (turn.actor instanceof PlayerCharacter) {
-            if (!turn.actor.living) {
-                this.interactionState = 'gameover';
-                return;
-            }
-
             if (this.interactionState === 'handlingattackselect') {
                 turn.target.updateSceneOnReceivingDamage();
                 turn.actor.processTurn(turn);
@@ -167,23 +161,30 @@ export default class BattleScene extends Phaser.Scene {
         }
     }
 
-    handleEnemyUnitTurn(turn: Turn) {
+    private handleEnemyUnitTurn(turn: Turn): void {
         if (turn.actor instanceof Enemy) {
             turn.target.updateSceneOnReceivingDamage();
             turn.actor.processTurn(turn);
             this.updateBattleScenePlayerStats();
 
             if (!this.heroes[0].living) {
+
                 this.time.addEvent({
                     delay: 2000,
                     callback: this.gameOver,
+                    callbackScope: this
+                });
+
+                this.time.addEvent({
+                    delay: 4000,
+                    callback: this.endBattleGameOver,
                     callbackScope: this
                 });
             }
         }
     }
 
-    checkForVictory() {
+    private checkForVictory(): boolean {
         let victory = true;
         // if all enemies are dead we have victory
         for (let i = 0; i < this.enemies.length; i++) {
@@ -194,19 +195,20 @@ export default class BattleScene extends Phaser.Scene {
         return victory;
     }
 
-    gameOver() {
+    private gameOver(): void {
+        this.battleUIScene.hideUIFrames();
         eventsCenter.emit('Message', 'Thou art defeated.');
     }
 
-    updateBattleScenePlayerStats() {
+    private updateBattleScenePlayerStats(): void {
         this.player1HPText.setText(`HP: ${this.heroes[0].stats.currentHP}`);
     }
 
-    showGoldAndExperience() {
+    private static showGoldAndExperience(): void {
         eventsCenter.emit('Message', 'You receive 3 gold pieces.\nYou receive 10 experience points.');
     }
 
-    sendPlayerInfoToGameScene() {
+    private sendPlayerInfoToGameScene(): void {
 
         for (const unit of this.heroes) {
             if (unit.type === 'Warrior') {
@@ -216,13 +218,35 @@ export default class BattleScene extends Phaser.Scene {
                 this.gameScene.player.gold += 3;
                 eventsCenter.emit('updateGold', this.gameScene.player.gold);
 
+                const currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)));
                 this.gameScene.player.experience += 10;
+
+                const newLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)));
+
+                if (currentLevel < newLevel) {
+                    // this.gameScene.player.stats = warrior.advancement[newLevel - 1];
+                    this.gameScene.player.stats = {
+                        constitution: warrior.advancement[newLevel - 1].constitution,
+
+                        dexterity: warrior.advancement[newLevel - 1].dexterity,
+                        strength: warrior.advancement[newLevel - 1].strength,
+                        maxHP: warrior.advancement[newLevel - 1].maxHP,
+                        armor: this.heroes[0].stats.armor,
+                        agility: warrior.advancement[newLevel - 1].agility,
+                        intellect: warrior.advancement[newLevel - 1].intellect,
+                        weapon: this.heroes[0].stats.weapon,
+                        currentMP: this.heroes[0].stats.currentMP,
+                        maxMP: warrior.advancement[newLevel - 1].maxHP,
+                        currentHP: this.heroes[0].stats.currentHP,
+
+                    };
+                }
                 eventsCenter.emit('updateXP', this.gameScene.player.experience);
             }
         }
     }
 
-    endBattle() {
+    private endBattle(): void {
         // send the player info to the game scene ui
         this.sendPlayerInfoToGameScene();
 
@@ -246,12 +270,13 @@ export default class BattleScene extends Phaser.Scene {
         this.scene.switch('Game');
     }
 
-    private startBattle() {
+    private startBattle(): void {
         // sets the battle music - muted for now
         // const song = this.sound.add('battlesong', {
         //     loop: true
         // });
         // song.play();
+        this.battleUIScene = <BattleUIScene>this.scene.get('BattleUI');
 
         this.gameScene.input.keyboard.enabled = false;
 
@@ -325,7 +350,7 @@ export default class BattleScene extends Phaser.Scene {
         eventsCenter.on('actionSelect', this.handleActionSelection, this);
     }
 
-    private endBattleGameOver() {
+    private endBattleGameOver(): void {
         // cut gold in half, set hit points to full, cut to game over screen, respawn
 
         this.gameScene.player.gold = Math.floor(this.gameScene.player.gold / 2);
@@ -333,8 +358,7 @@ export default class BattleScene extends Phaser.Scene {
         this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
         eventsCenter.emit('updateHP', this.gameScene.player.stats.currentHP);
 
-        const battleUIScene = this.scene.get('BattleUI');
-        battleUIScene.cameras.main.fadeOut(2000);
+        this.battleUIScene.cameras.main.fadeOut(2000);
         this.cameras.main.fadeOut(3000);
 
         this.cameras.main.once('camerafadeoutcomplete', () => {
@@ -352,13 +376,11 @@ export default class BattleScene extends Phaser.Scene {
             this.scene.sleep('BattleUI');
 
 
-            const battleUIScene = <BattleUIScene>this.scene.get('BattleUI');
-            battleUIScene.disableAllActionButtons();
-            battleUIScene.cameras.main.fadeIn(0);
+            this.battleUIScene.disableAllActionButtons();
+            this.battleUIScene.cameras.main.fadeIn(0);
 
-            const battleScene = <BattleScene>this.scene.get('Battle');
-            battleScene.interactionState = 'init';
-            battleScene.cameras.main.fadeIn(0);
+            this.interactionState = 'init';
+            this.cameras.main.fadeIn(0);
 
             // return to game scene and sleep current battle scene
             this.scene.switch('GameOver');
