@@ -1,3 +1,12 @@
+
+// Add logic for armor decreasing damage taken.
+
+// Remove static nature of exp, it should be a
+//  function of enemy level
+
+// Make enemies have hard coded stats and scale by
+//  level
+
 import GameScene from './GameScene';
 import PlayerCharacter from '../classes/PlayerCharacter';
 import {Enemy} from '../classes/Enemy';
@@ -39,235 +48,6 @@ export default class BattleScene extends Phaser.Scene {
         this.startBattle();
 
         this.sys.events.on('wake', this.startBattle, this);
-    }
-
-    startNewTurn(): void {
-        // check for victory or game over state
-        if (this.interactionState === 'gameover') {
-            this.endBattleGameOver();
-            return;
-        }
-
-        this.battleUIScene.disableAllActionButtons();
-
-        if (this.checkForVictory()) {
-            // deliver the victory message and exit the battle
-            eventsCenter.emit('Message', 'Thine enemies are slain.');
-            this.time.addEvent({
-                delay: 2000,
-                callback: BattleScene.showGoldAndExperience,
-                callbackScope: this
-            });
-            this.time.addEvent({
-                delay: 4000,
-                callback: this.endBattle,
-                callbackScope: this
-            });
-            return;
-        }
-
-        this.battleUIScene.disableAllActionButtons();
-        this.battleUIScene.showCommandAndHotkeyFrames();
-        this.interactionState = 'mainselect';
-    }
-
-    handleActionSelection(data: { action: string, target: Enemy | PlayerCharacter }): void {
-        this.interactionState = `handling${data.action}select`;
-
-        this.battleUIScene.hideUIFrames();
-
-        // see who goes first - sort the unit list
-        this.units = this.units.sort((a, b) => {
-            // randomize the turn order every round based on dexterity
-            const aInitiative = a.getInitiative();
-            const bInitiative = b.getInitiative();
-
-            if (aInitiative > bInitiative) {
-                return -1;
-            }
-            else {
-                return 1;
-            }
-        });
-        // simulate the entire combat ahead of time. storing all turn info.
-        //  that way we will know the exact outcome and be able to precisely plan for
-        //  each message and allow for exactly the right amount of time before ending
-        //  the combat. the turn information will need to be stored and parsed in a way that
-        //  generates the correct messages for the turn and starts the next turn after the correct ms
-
-        const turnArray: Turn[] = [];
-
-        // build the turn list
-        for (const unit of this.units) {
-            // skip the unit if it's dead
-            if (!unit.living) {
-                continue;
-            }
-
-            // if the current unit is an enemy, it will attack the hero
-            if (unit instanceof Enemy) {
-                const currentTurn = unit.calculateAttack(this.heroes[0]);
-                if (currentTurn) {
-                    turnArray.push(currentTurn);
-                }
-            }
-            else {
-                const currentTurn = unit.calculateAttack(data.target);
-                if (currentTurn) {
-                    turnArray.push(currentTurn);
-                }
-            }
-        }
-
-        // get total cutscene time
-
-        const totalCutSceneTime = turnArray.length * 2000;
-
-        // iterate over the turnArray, pass the turn data object to the
-        //  unit turn handler methods
-
-        for (const [index, turn] of turnArray.entries()) {
-            if (turn.actor instanceof Enemy) {
-                this.time.addEvent({
-                    delay: index * 2000,
-                    callback: this.handleEnemyUnitTurn,
-                    callbackScope: this,
-                    args: [turn]
-                });
-            }
-            else {
-                this.time.addEvent({
-                    delay: index * 2000,
-                    callback: this.handlePlayerUnitTurn,
-                    callbackScope: this,
-                    args: [turn]
-                });
-            }
-        }
-        this.time.addEvent({
-            delay: totalCutSceneTime,
-            callback: this.startNewTurn,
-            callbackScope: this
-        });
-    }
-
-    private handlePlayerUnitTurn(turn: Turn): void {
-        if (turn.actor instanceof PlayerCharacter) {
-            if (this.interactionState === 'handlingattackselect') {
-                turn.target.updateSceneOnReceivingDamage();
-                turn.actor.processTurn(turn);
-                this.updateBattleScenePlayerStats();
-            }
-        }
-    }
-
-    private handleEnemyUnitTurn(turn: Turn): void {
-        if (turn.actor instanceof Enemy) {
-            turn.target.updateSceneOnReceivingDamage();
-            turn.actor.processTurn(turn);
-            this.updateBattleScenePlayerStats();
-
-            if (!this.heroes[0].living) {
-
-                this.time.addEvent({
-                    delay: 2000,
-                    callback: this.gameOver,
-                    callbackScope: this
-                });
-
-                this.time.addEvent({
-                    delay: 4000,
-                    callback: this.endBattleGameOver,
-                    callbackScope: this
-                });
-            }
-        }
-    }
-
-    private checkForVictory(): boolean {
-        let victory = true;
-        // if all enemies are dead we have victory
-        for (let i = 0; i < this.enemies.length; i++) {
-            if (this.enemies[i].living) {
-                victory = false;
-            }
-        }
-        return victory;
-    }
-
-    private gameOver(): void {
-        this.battleUIScene.hideUIFrames();
-        eventsCenter.emit('Message', 'Thou art defeated.');
-    }
-
-    private updateBattleScenePlayerStats(): void {
-        this.player1HPText.setText(`HP: ${this.heroes[0].stats.currentHP}`);
-    }
-
-    private static showGoldAndExperience(): void {
-        eventsCenter.emit('Message', 'You receive 3 gold pieces.\nYou receive 10 experience points.');
-    }
-
-    private sendPlayerInfoToGameScene(): void {
-
-        for (const unit of this.heroes) {
-            if (unit.type === 'Warrior') {
-                this.gameScene.player.stats.currentHP = unit.stats.currentHP;
-                eventsCenter.emit('updateHP', this.gameScene.player.stats.currentHP);
-
-                this.gameScene.player.gold += 3;
-                eventsCenter.emit('updateGold', this.gameScene.player.gold);
-
-                const currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)));
-                this.gameScene.player.experience += 10;
-
-                const newLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)));
-
-                if (currentLevel < newLevel) {
-                    // this.gameScene.player.stats = warrior.advancement[newLevel - 1];
-                    this.gameScene.player.stats = {
-                        constitution: warrior.advancement[newLevel - 1].constitution,
-
-                        dexterity: warrior.advancement[newLevel - 1].dexterity,
-                        strength: warrior.advancement[newLevel - 1].strength,
-                        maxHP: warrior.advancement[newLevel - 1].maxHP,
-                        armor: this.heroes[0].stats.armor,
-                        agility: warrior.advancement[newLevel - 1].agility,
-                        intellect: warrior.advancement[newLevel - 1].intellect,
-                        weapon: this.heroes[0].stats.weapon,
-                        currentMP: this.heroes[0].stats.currentMP,
-                        maxMP: warrior.advancement[newLevel - 1].maxHP,
-                        currentHP: this.heroes[0].stats.currentHP,
-
-                    };
-                }
-                eventsCenter.emit('updateXP', this.gameScene.player.experience);
-            }
-        }
-    }
-
-    private endBattle(): void {
-        // send the player info to the game scene ui
-        this.sendPlayerInfoToGameScene();
-
-        // clear state, remove sprites
-        this.heroes.length = 0;
-        this.enemies.length = 0;
-        for (let i = 0; i < this.units.length; i++) {
-            // unlink item
-            this.units[i].destroy();
-        }
-        this.units.length = 0;
-
-        this.interactionState = 'init';
-
-        // sleep the ui
-        this.scene.sleep('BattleUI');
-
-        this.gameScene.input.keyboard.enabled = true;
-
-        // return to game scene and sleep current battle scene
-        this.scene.switch('Game');
     }
 
     private startBattle(): void {
@@ -348,6 +128,234 @@ export default class BattleScene extends Phaser.Scene {
 
         eventsCenter.removeListener('actionSelect');
         eventsCenter.on('actionSelect', this.handleActionSelection, this);
+    }
+
+    private handleActionSelection(data: { action: string, target: Enemy | PlayerCharacter }): void {
+        this.interactionState = `handling${data.action}select`;
+
+        this.battleUIScene.hideUIFrames();
+
+        // see who goes first - sort the unit list
+        this.units = this.units.sort((a, b) => {
+            // randomize the turn order every round based on dexterity
+            const aInitiative = a.getInitiative();
+            const bInitiative = b.getInitiative();
+
+            if (aInitiative > bInitiative) {
+                return -1;
+            }
+            else {
+                return 1;
+            }
+        });
+        // simulate the entire combat ahead of time. storing all turn info.
+        //  that way we will know the exact outcome and be able to precisely plan for
+        //  each message and allow for exactly the right amount of time before ending
+        //  the combat. the turn information will need to be stored and parsed in a way that
+        //  generates the correct messages for the turn and starts the next turn after the correct ms
+
+        const turnArray: Turn[] = [];
+
+        // build the turn list
+        for (const unit of this.units) {
+            // skip the unit if it's dead
+
+            if (!unit.living) {
+                continue;
+            }
+
+            // if the current unit is an enemy, it will attack the hero
+            if (unit instanceof Enemy) {
+                const currentTurn = unit.calculateAttack(this.heroes[0]);
+                if (currentTurn) {
+                    turnArray.push(currentTurn);
+                }
+            }
+            else {
+                const currentTurn = unit.calculateAttack(data.target);
+                if (currentTurn) {
+                    turnArray.push(currentTurn);
+                }
+            }
+        }
+
+        // get total cutscene time
+
+        const totalCutSceneTime = turnArray.length * 2000;
+
+        // iterate over the turnArray, pass the turn data object to the
+        //  unit turn handler methods
+
+        for (const [index, turn] of turnArray.entries()) {
+            if (turn.actor instanceof Enemy) {
+                this.time.addEvent({
+                    delay: index * 2000,
+                    callback: this.handleEnemyUnitTurn,
+                    callbackScope: this,
+                    args: [turn]
+                });
+            }
+            else {
+                this.time.addEvent({
+                    delay: index * 2000,
+                    callback: this.handlePlayerUnitTurn,
+                    callbackScope: this,
+                    args: [turn]
+                });
+            }
+        }
+        this.time.addEvent({
+            delay: totalCutSceneTime,
+            callback: this.startNewTurn,
+            callbackScope: this
+        });
+    }
+
+    private startNewTurn(): void {
+        // check for victory or game over state
+        if (this.interactionState === 'gameover') {
+            this.endBattleGameOver();
+            return;
+        }
+
+        this.battleUIScene.disableAllActionButtons();
+
+        if (this.checkForVictory()) {
+            // deliver the victory message and exit the battle
+            eventsCenter.emit('Message', 'Thine enemies are slain.');
+            this.time.addEvent({
+                delay: 2000,
+                callback: BattleScene.showGoldAndExperience,
+                callbackScope: this
+            });
+            this.time.addEvent({
+                delay: 4000,
+                callback: this.endBattle,
+                callbackScope: this
+            });
+            return;
+        }
+
+        this.battleUIScene.disableAllActionButtons();
+        this.battleUIScene.showCommandAndHotkeyFrames();
+        this.interactionState = 'mainselect';
+    }
+
+    private handlePlayerUnitTurn(turn: Turn): void {
+        if (turn.actor instanceof PlayerCharacter) {
+            if (this.interactionState === 'handlingattackselect') {
+                turn.actor.processTurn(turn);
+                turn.target.updateSceneOnReceivingDamage();
+            }
+        }
+    }
+
+    private handleEnemyUnitTurn(turn: Turn): void {
+        if (turn.actor instanceof Enemy) {
+            turn.actor.processTurn(turn);
+            turn.target.updateSceneOnReceivingDamage();
+            this.updateBattleScenePlayerStats();
+
+            if (!this.heroes[0].living) {
+
+                this.time.addEvent({
+                    delay: 2000,
+                    callback: this.gameOver,
+                    callbackScope: this
+                });
+
+                this.time.addEvent({
+                    delay: 4000,
+                    callback: this.endBattleGameOver,
+                    callbackScope: this
+                });
+            }
+        }
+    }
+
+    private checkForVictory(): boolean {
+        let victory = true;
+        // if all enemies are dead we have victory
+        for (let i = 0; i < this.enemies.length; i++) {
+            if (this.enemies[i].living) {
+                victory = false;
+            }
+        }
+        return victory;
+    }
+
+    private gameOver(): void {
+        this.battleUIScene.hideUIFrames();
+        eventsCenter.emit('Message', 'Thou art defeated.');
+    }
+
+    private updateBattleScenePlayerStats(): void {
+        this.player1HPText.setText(`HP: ${this.heroes[0].stats.currentHP}`);
+    }
+
+    private static showGoldAndExperience(): void {
+        eventsCenter.emit('Message', 'You receive 3 gold pieces.\nYou receive 10 experience points.');
+    }
+
+    private sendPlayerInfoToGameScene(): void {
+
+        for (const unit of this.heroes) {
+            if (unit.type === 'Warrior') {
+                this.gameScene.player.stats.currentHP = unit.stats.currentHP;
+                eventsCenter.emit('updateHP', this.gameScene.player.stats.currentHP);
+
+                this.gameScene.player.gold += 3;
+                eventsCenter.emit('updateGold', this.gameScene.player.gold);
+
+                const currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)));
+                this.gameScene.player.experience += 10;
+
+                const newLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)));
+
+                if (currentLevel < newLevel) {
+                    this.gameScene.player.stats = {
+                        constitution: warrior.advancement[newLevel - 1].constitution,
+
+                        dexterity: warrior.advancement[newLevel - 1].dexterity,
+                        strength: warrior.advancement[newLevel - 1].strength,
+                        maxHP: warrior.advancement[newLevel - 1].maxHP,
+                        armor: this.heroes[0].stats.armor,
+                        agility: warrior.advancement[newLevel - 1].agility,
+                        intellect: warrior.advancement[newLevel - 1].intellect,
+                        weapon: this.heroes[0].stats.weapon,
+                        currentMP: this.heroes[0].stats.currentMP,
+                        maxMP: warrior.advancement[newLevel - 1].maxHP,
+                        currentHP: this.heroes[0].stats.currentHP,
+
+                    };
+                }
+                eventsCenter.emit('updateXP', this.gameScene.player.experience);
+            }
+        }
+    }
+
+    private endBattle(): void {
+        // send the player info to the game scene ui
+        this.sendPlayerInfoToGameScene();
+
+        // clear state, remove sprites
+        this.heroes.length = 0;
+        this.enemies.length = 0;
+        for (let i = 0; i < this.units.length; i++) {
+            // unlink item
+            this.units[i].destroy();
+        }
+        this.units.length = 0;
+
+        this.interactionState = 'init';
+
+        // sleep the ui
+        this.scene.sleep('BattleUI');
+
+        this.gameScene.input.keyboard.enabled = true;
+
+        // return to game scene and sleep current battle scene
+        this.scene.switch('Game');
     }
 
     private endBattleGameOver(): void {

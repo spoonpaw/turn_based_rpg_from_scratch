@@ -27,26 +27,20 @@ export default class PlayerCharacter extends Unit {
     }
 
     calculateAttack(target: Unit): Turn | void {
+        // don't check if target is living here
         if (target.living) {
             // formula for setting the attack amount based on str
-            const damage = Math.floor(this.stats.strength / 2) + Phaser.Math.Between(1, this.stats.weapon);
+            const damage = Phaser.Math.Between(1, Math.floor(this.stats.strength / 3)) + Phaser.Math.Between(1, this.stats.weapon);
+
             target.takeDamage(damage);
             return {actor: this, actionName: 'attack', target, targetHpChange: -damage};
         }
     }
 
 
-    attack(target: Unit): Turn | void {
-        if (target.living) {
-            // formula for setting the attack amount based on strength
-            const damage = Math.floor(this.stats.strength / 2) + Phaser.Math.Between(1, this.stats.weapon);
-            target.takeDamage(damage);
-            eventsCenter.emit('Message', `The ${this.type} attacks the ${target.type} for ${damage} damage.`);
-            return {actor: this, actionName: 'attack', target, targetHpChange: -damage};
-        }
-    }
+    public processTurn(turn: Turn): void {
+        // turn.target.takeDamage(-turn.targetHpChange);
 
-    public processTurn(turn: Turn) {
         eventsCenter.emit(
             'Message',
             `The ${this.type} attacks ${turn.target.type} for ${-turn.targetHpChange} damage.`
@@ -76,9 +70,9 @@ export default class PlayerCharacter extends Unit {
 
     takeDamage(damage: number): void {
         // handle the math of taking damage,
-        this.stats.currentHP =  this.stats.currentHP - damage;
+        this.stats.currentHP = this.stats.currentHP - damage;
 
-        if (this.stats.currentHP  <= 0) {
+        if (this.stats.currentHP <= 0) {
             this.stats.currentHP = 0;
             this.living = false;
         }
