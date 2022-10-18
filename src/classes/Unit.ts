@@ -1,5 +1,6 @@
 import Stats from '../stats/Stats';
 import GameScene from '../scenes/GameScene';
+import {Turn} from '../types/Turn';
 
 export default abstract class Unit extends Phaser.GameObjects.Sprite {
     public living: boolean;
@@ -23,7 +24,7 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         this.living = true;
     }
 
-    abstract attack(target: Unit): void;
+    // abstract attack(target: Unit): void;
 
     abstract takeDamage(damage: number): void;
 
@@ -31,4 +32,7 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
     abstract updateSceneOnReceivingDamage(): void;
 
+    abstract calculateAttack(target: Unit): Turn | void;
+
+    abstract processTurn(turn: Turn): void;
 }

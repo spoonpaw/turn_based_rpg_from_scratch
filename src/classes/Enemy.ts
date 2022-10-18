@@ -88,7 +88,7 @@ export class Enemy extends Unit {
     calculateAttack(target: Unit): Turn | void {
         if (target.living) {
             // formula for setting the attack amount based on strength
-            const damage = Math.floor(this.stats.strength / 3) + Phaser.Math.Between(1, this.stats.weapon);
+            const damage = Phaser.Math.Between(1, Math.floor(this.stats.strength / 3)) + Phaser.Math.Between(1, this.stats.weapon);
             // attack the target, but don't give a visual indication of that yet
             //  takeDamage method needs to return info: did the target take damage? did the target
             //  die? store this info in the turn as this will be parsed later to display messages
@@ -99,23 +99,9 @@ export class Enemy extends Unit {
         }
     }
 
+    public processTurn(turn: Turn): void {
+        // turn.target.takeDamage(-turn.targetHpChange);
 
-    attack(target: Unit): Turn | void {
-        if (target.living) {
-            // formula for setting the attack amount based on str
-            const damage = Math.floor(this.stats.strength / 3) + Phaser.Math.Between(1, this.stats.weapon || 0);
-            target.takeDamage(damage);
-
-            eventsCenter.emit(
-                'Message',
-                `The ${this.type} attacks ${target.type} for ${damage} damage.`
-            );
-
-            return {actor: this, actionName: 'attack', target, targetHpChange: -damage};
-        }
-    }
-
-    public processTurn(turn: Turn) {
         eventsCenter.emit(
             'Message',
             `The ${this.type} attacks ${turn.target.type} for ${-turn.targetHpChange} damage.`
