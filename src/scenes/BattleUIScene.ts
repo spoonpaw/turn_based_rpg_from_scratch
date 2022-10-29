@@ -93,6 +93,7 @@ export default class BattleUIScene extends Phaser.Scene {
                 return;
             }
             eventsCenter.emit('run');
+            // console.log('run');
         });
         this.actionButtons.push(this.runButton);
 
@@ -149,7 +150,7 @@ export default class BattleUIScene extends Phaser.Scene {
     }
 
     selectAttack() {
-        eventsCenter.emit('attack');
+        // eventsCenter.emit('attack');
 
         this.disableAllActionButtons();
         this.hotkeyButton1.select();
@@ -165,6 +166,10 @@ export default class BattleUIScene extends Phaser.Scene {
         this.commandMenuText.setText('Choose A Target');
 
         this.battleScene.interactionState = 'attack';
+    }
+
+    selectRun() {
+        return;
     }
 
     selectCancel() {

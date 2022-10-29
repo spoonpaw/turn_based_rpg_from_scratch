@@ -5,7 +5,7 @@ export default class UIScene extends Phaser.Scene {
     public gameScene!: GameScene;
     public hpText!: Phaser.GameObjects.Text;
     public heartIcon!: Phaser.GameObjects.Image;
-    private warriorText!: Phaser.GameObjects.Text;
+    private soldierText!: Phaser.GameObjects.Text;
     private swordIcon!: Phaser.GameObjects.Image;
     private coinIcon!: Phaser.GameObjects.Image;
     private goldText!: Phaser.GameObjects.Text;
@@ -31,8 +31,8 @@ export default class UIScene extends Phaser.Scene {
             .setStroke('#000000', 2)
             .setResolution(10);
 
-        // set up warrior text and icon as well as level text
-        this.warriorText = this.add.text(35, -5, `Warrior / Level ${Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)))}`, { fontSize: '50px', color: '#ffffff', fontFamily: 'CustomFont' })
+        // set up soldier text and icon as well as level text
+        this.soldierText = this.add.text(35, -5, `Soldier / Level ${Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)))}`, { fontSize: '50px', color: '#ffffff', fontFamily: 'CustomFont' })
             .setStroke('#000000', 2)
             .setResolution(10);
         this.swordIcon = this.add.image(18, 20, 'sword')
@@ -70,6 +70,6 @@ export default class UIScene extends Phaser.Scene {
     }
 
     updateXP(xp: number) {
-        this.warriorText.setText(`Warrior / Level ${Math.max(1, Math.ceil(0.3 * Math.sqrt(xp)))}`);
+        this.soldierText.setText(`Soldier / Level ${Math.max(1, Math.ceil(0.3 * Math.sqrt(xp)))}`);
     }
 }

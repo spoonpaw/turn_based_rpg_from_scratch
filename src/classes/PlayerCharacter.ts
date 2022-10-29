@@ -23,28 +23,68 @@ export default class PlayerCharacter extends Unit {
             frame
         );
         this.stats = this.gameScene.player.stats;
-        this.type = 'Warrior';
+        this.type = 'Soldier';
     }
 
     calculateAttack(target: Unit): Turn | void {
         // don't check if target is living here
         if (target.living) {
-            // formula for setting the attack amount based on str
-            const damage = Phaser.Math.Between(1, Math.floor(this.stats.strength / 3)) + Phaser.Math.Between(1, this.stats.weapon);
+            let critical = false;
+            let targetKilled = false;
+            // determine if the target evaded the attack
+            const evade = Phaser.Math.Between(1, 64) === 1;
+            let damage = 0;
 
-            target.takeDamage(damage);
-            return {actor: this, actionName: 'attack', target, targetHpChange: -damage};
+            if (!evade) {
+
+                if (Phaser.Math.Between(1, 64) === 1) {
+                    // logic for announcing critical hits
+                    critical = true;
+                    damage = Math.max(1, Math.floor((this.stats.attack) * (Phaser.Math.Between(54, 64) / 64)));
+                }
+                else {
+                    damage = Math.max(1, Math.floor((this.stats.attack - target.stats.defense / 2) * (Phaser.Math.FloatBetween(0.34, 0.52))));
+                }
+
+                target.takeDamage(damage);
+                if (!target.living) {
+                    targetKilled = true;
+                }
+            }
+
+            return {
+                actor: this,
+                actionName: 'attack',
+                target,
+                targetHpChange: -damage,
+                critical,
+                targetKilled,
+                evade
+            };
         }
     }
 
-
     public processTurn(turn: Turn): void {
-        // turn.target.takeDamage(-turn.targetHpChange);
-
-        eventsCenter.emit(
-            'Message',
-            `The ${this.type} attacks ${turn.target.type} for ${-turn.targetHpChange} damage.`
-        );
+        let critString = '';
+        let targetKilledString = '';
+        if (turn.critical) {
+            critString = ' A critical strike!';
+        }
+        if (turn.targetKilled) {
+            targetKilledString = ` ${turn.target.type} is killed.`;
+        }
+        if (turn.evade) {
+            eventsCenter.emit(
+                'Message',
+                `${this.type} attacks ${turn.target.type}; ${turn.target.type} dodges!`
+            );
+        }
+        else {
+            eventsCenter.emit(
+                'Message',
+                `${this.type} attacks ${turn.target.type} for ${-turn.targetHpChange} damage.${critString}${targetKilledString}`
+            );
+        }
     }
 
     updateSceneOnReceivingDamage(): void {
@@ -64,9 +104,8 @@ export default class PlayerCharacter extends Unit {
     }
 
     getInitiative(): number {
-        return this.stats.dexterity / 5 + Phaser.Math.Between(1, 20);
+        return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
     }
-
 
     takeDamage(damage: number): void {
         // handle the math of taking damage,

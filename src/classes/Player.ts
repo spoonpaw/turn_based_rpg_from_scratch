@@ -1,7 +1,7 @@
 import GameScene from '../scenes/GameScene';
 import {Direction} from '../types/Direction';
 import Stats from '../stats/Stats';
-import Warrior from '../jobs/Warrior';
+import Soldier from '../jobs/Soldier';
 
 export default class Player {
     public stats: Stats;
@@ -54,20 +54,22 @@ export default class Player {
     }
 
     createStatsForNewPlayer(job: string): Stats {
-        if (job === 'warrior') {
+        if (job === 'soldier') {
+
             return new Stats(
-                Warrior.advancement[0].constitution,
-                Warrior.advancement[0].dexterity,
-                Warrior.advancement[0].strength,
-                Warrior.advancement[0].maxHP,
-                0,
-                Warrior.advancement[0].agility,
-                Warrior.advancement[0].intellect,
-                1,
-                0,
-                0,
-                Warrior.advancement[0].maxHP
+                Soldier.advancement[0].strength,
+                Soldier.advancement[0].agility,
+                Soldier.advancement[0].vitality,
+                Soldier.advancement[0].intellect,
+                Soldier.advancement[0].luck,
+                Soldier.advancement[0].vitality * 2,
+                Soldier.advancement[0].vitality * 2,
+                Soldier.advancement[0].intellect * 2,
+                Soldier.advancement[0].intellect * 2,
+                Soldier.advancement[0].strength,
+                Soldier.advancement[0].agility / 2
             );
+
         }
         else {
             return new Stats(
