@@ -60,7 +60,7 @@ export default class GameScene extends Phaser.Scene {
                 ),
                 this.player?.gold ?? 0,
                 this.player?.experience ?? 0,
-                'warrior'
+                'soldier'
             );
 
             this.setupPlayerGridPhysics();
@@ -99,7 +99,7 @@ export default class GameScene extends Phaser.Scene {
                 ),
                 this.player.gold,
                 this.player.experience,
-                'warrior',
+                'soldier',
                 this.player.stats
             );
 

@@ -1,11 +1,6 @@
+// TODO: Add logic for armor decreasing damage taken.
 
-// Add logic for armor decreasing damage taken.
-
-// Remove static nature of exp, it should be a
-//  function of enemy level
-
-// Make enemies have hard coded stats and scale by
-//  level
+// TODO: Add logic for weapons increasing damage
 
 import GameScene from './GameScene';
 import PlayerCharacter from '../classes/PlayerCharacter';
@@ -14,7 +9,8 @@ import eventsCenter from '../utils/EventsCenter';
 import BattleUIScene from './BattleUIScene';
 import {levels} from '../levels/Levels';
 import {Turn} from '../types/Turn';
-import warrior from '../jobs/Warrior';
+import soldier, {IStatIncreases} from '../jobs/Soldier';
+import {enemies} from '../enemies/enemies';
 
 export default class BattleScene extends Phaser.Scene {
     public interactionState!: string;
@@ -69,7 +65,7 @@ export default class BattleScene extends Phaser.Scene {
             .setOrigin(0, 0);
 
         // instantiate the warrior player (player 1)
-        const warrior = new PlayerCharacter(
+        const soldier = new PlayerCharacter(
             this,
             270,
             675,
@@ -77,12 +73,12 @@ export default class BattleScene extends Phaser.Scene {
             0
         );
 
-        this.add.existing(warrior);
+        this.add.existing(soldier);
 
         this.add.text(
             250,
             610,
-            'Warrior',
+            'Soldier',
             {
                 fontSize: '45px',
                 color: '#fff',
@@ -116,7 +112,7 @@ export default class BattleScene extends Phaser.Scene {
 
         this.add.existing(enemy);
 
-        this.heroes = [warrior];
+        this.heroes = [soldier];
 
         this.enemies = [enemy];
 
@@ -225,8 +221,9 @@ export default class BattleScene extends Phaser.Scene {
             eventsCenter.emit('Message', 'Thine enemies are slain.');
             this.time.addEvent({
                 delay: 2000,
-                callback: BattleScene.showGoldAndExperience,
-                callbackScope: this
+                callback: this.showGoldAndExperience,
+                callbackScope: this,
+                args: [this.enemies]
             });
             this.time.addEvent({
                 delay: 4000,
@@ -293,45 +290,76 @@ export default class BattleScene extends Phaser.Scene {
         this.player1HPText.setText(`HP: ${this.heroes[0].stats.currentHP}`);
     }
 
-    private static showGoldAndExperience(): void {
-        eventsCenter.emit('Message', 'You receive 3 gold pieces.\nYou receive 10 experience points.');
+    private showGoldAndExperience(currentEnemies: Enemy[]): void {
+        // the gold pieces/experience points should vary depending on the enemy
+        let goldAmount = 0;
+        let experienceAmount = 0;
+
+        for (const enemy of currentEnemies) {
+            const enemyData = enemies.find(obj => {
+                return obj.name === enemy.texture.key;
+            });
+            goldAmount += enemyData?.gold ?? 0;
+            experienceAmount += enemyData?.experience ?? 0;
+        }
+
+        eventsCenter.emit('Message', `You receive ${goldAmount} gold pieces.\nYou receive ${experienceAmount} experience points.`);
     }
 
     private sendPlayerInfoToGameScene(): void {
 
         for (const unit of this.heroes) {
-            if (unit.type === 'Warrior') {
+            if (unit.type === 'Soldier') {
                 this.gameScene.player.stats.currentHP = unit.stats.currentHP;
                 eventsCenter.emit('updateHP', this.gameScene.player.stats.currentHP);
 
-                this.gameScene.player.gold += 3;
+                let goldAmount = 0;
+                let experienceAmount = 0;
+
+                for (const enemy of this.enemies) {
+                    const enemyData = enemies.find(obj => {
+                        return obj.name === enemy.texture.key;
+                    });
+                    goldAmount += enemyData?.gold ?? 0;
+                    experienceAmount += enemyData?.experience ?? 0;
+                }
+
+                this.gameScene.player.gold += goldAmount;
+
                 eventsCenter.emit('updateGold', this.gameScene.player.gold);
 
                 const currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)));
-                this.gameScene.player.experience += 10;
+
+                this.gameScene.player.experience += experienceAmount;
 
                 const newLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)));
 
                 if (currentLevel < newLevel) {
+
                     this.gameScene.player.stats = {
-                        constitution: warrior.advancement[newLevel - 1].constitution,
-
-                        dexterity: warrior.advancement[newLevel - 1].dexterity,
-                        strength: warrior.advancement[newLevel - 1].strength,
-                        maxHP: warrior.advancement[newLevel - 1].maxHP,
-                        armor: this.heroes[0].stats.armor,
-                        agility: warrior.advancement[newLevel - 1].agility,
-                        intellect: warrior.advancement[newLevel - 1].intellect,
-                        weapon: this.heroes[0].stats.weapon,
-                        currentMP: this.heroes[0].stats.currentMP,
-                        maxMP: warrior.advancement[newLevel - 1].maxHP,
+                        strength: this.gameScene.player.stats.strength + this.getStatIncrease('strength', newLevel),
+                        agility: this.gameScene.player.stats.agility + this.getStatIncrease('agility', newLevel),
+                        vitality: this.gameScene.player.stats.vitality + this.getStatIncrease('vitality', newLevel),
+                        intellect: this.gameScene.player.stats.intellect + this.getStatIncrease('intellect', newLevel),
+                        luck: this.gameScene.player.stats.luck + this.getStatIncrease('luck', newLevel),
                         currentHP: this.heroes[0].stats.currentHP,
-
+                        maxHP: this.gameScene.player.stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
+                        currentMP: this.heroes[0].stats.currentMP,
+                        maxMP: this.gameScene.player.stats.maxMP + this.getStatIncrease('intellect', newLevel) * 2,
+                        attack: this.gameScene.player.stats.attack + this.getStatIncrease('strength', newLevel),
+                        defense: this.gameScene.player.stats.defense + this.getStatIncrease('agility', newLevel) / 2
                     };
                 }
                 eventsCenter.emit('updateXP', this.gameScene.player.experience);
             }
         }
+    }
+
+    private getStatIncrease(stat: keyof IStatIncreases, level: number): number {
+        const statIncreaseRangeIncrementObject = soldier.statIncreases[stat].find(obj => {
+            return obj.range[0] <= level && level <= obj.range[1];
+        });
+        return statIncreaseRangeIncrementObject?.increment ?? 0;
     }
 
     private endBattle(): void {

@@ -24,8 +24,6 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         this.living = true;
     }
 
-    // abstract attack(target: Unit): void;
-
     abstract takeDamage(damage: number): void;
 
     abstract getInitiative(): number;

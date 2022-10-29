@@ -1,16 +1,16 @@
-
-export default class Stats{
+export default class Stats {
     constructor(
-        public constitution: number,
-        public dexterity: number,
         public strength: number,
-        public maxHP: number,
-        public armor: number,
         public agility: number,
+        public vitality: number,
         public intellect: number,
-        public weapon: number,
+        public luck: number,
+        public currentHP: number,
+        public maxHP: number,
         public currentMP: number,
         public maxMP: number,
-        public currentHP: number,
-    ) {}
+        public attack: number,
+        public defense: number
+    ) {
+    }
 }

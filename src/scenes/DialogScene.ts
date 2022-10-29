@@ -12,6 +12,17 @@ export default class DialogScene extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
 
         this.gameScene = <GameScene>this.scene.get('Game');
+
+        this.gameScene.cursors.up.reset();
+        this.gameScene.cursors.down.reset();
+        this.gameScene.cursors.left.reset();
+        this.gameScene.cursors.right.reset();
+
+        this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).reset();
+        this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).reset();
+        this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).reset();
+        this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).reset();
+
         this.add.image(0, 420, 'prefab4')
             .setOrigin(0, 0);
         this.add.text(30, 445, data.text, {

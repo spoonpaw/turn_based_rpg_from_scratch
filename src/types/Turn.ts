@@ -5,4 +5,7 @@ export interface Turn {
     target: Unit,
     actionName: string,
     targetHpChange: number,
+    critical: boolean,
+    targetKilled: boolean,
+    evade: boolean
 }
