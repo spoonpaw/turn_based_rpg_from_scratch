@@ -1,6 +1,7 @@
-import Stats from '../stats/Stats';
+import BattleScene from '../scenes/BattleScene';
+import BattleUIScene from '../scenes/BattleUIScene';
 import GameScene from '../scenes/GameScene';
-import {Turn} from '../types/Turn';
+import Stats from '../stats/Stats';
 
 export default abstract class Unit extends Phaser.GameObjects.Sprite {
     public living: boolean;
@@ -8,6 +9,8 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
     abstract damageTween: Phaser.Tweens.Tween;
     protected gameScene: GameScene;
     abstract type: string;
+    protected battleScene: BattleScene;
+    protected battleUIScene: BattleUIScene;
 
     protected constructor(
         public scene: Phaser.Scene,
@@ -20,17 +23,17 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
         // get reference to game scene
         this.gameScene = <GameScene>this.scene.scene.get('Game');
+        this.battleScene = <BattleScene>this.scene.scene.get('Battle');
+        this.battleUIScene = <BattleUIScene>this.scene.scene.get('BattleUI');
+
 
         this.living = true;
     }
 
-    abstract takeDamage(damage: number): void;
+    abstract applyHPChange(hpChangeAmount: number): number;
 
     abstract getInitiative(): number;
 
     abstract updateSceneOnReceivingDamage(): void;
 
-    abstract calculateAttack(target: Unit): Turn | void;
-
-    abstract processTurn(turn: Turn): void;
 }

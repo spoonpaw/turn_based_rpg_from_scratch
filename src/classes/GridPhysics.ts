@@ -1,6 +1,6 @@
+import GameScene from '../scenes/GameScene';
 import {Direction} from '../types/Direction';
 import Player from './Player';
-import GameScene from '../scenes/GameScene';
 
 const Vector2 = Phaser.Math.Vector2;
 type Vector2 = Phaser.Math.Vector2;

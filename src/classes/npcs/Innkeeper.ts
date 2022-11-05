@@ -1,6 +1,6 @@
-import NPC from './NPC';
 import GameScene from '../../scenes/GameScene';
 import eventsCenter from '../../utils/EventsCenter';
+import NPC from './NPC';
 
 export default class Innkeeper extends NPC {
     private gameScene: GameScene;

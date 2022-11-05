@@ -1,6 +1,6 @@
-import GameScene from './GameScene';
 import UiButton from '../classes/UiButton';
 import eventsCenter from '../utils/EventsCenter';
+import GameScene from './GameScene';
 
 export default class YesNoDialogScene extends Phaser.Scene {
     private gameScene!: GameScene;
@@ -69,5 +69,4 @@ export default class YesNoDialogScene extends Phaser.Scene {
             this.gameScene.spaceDown = false;
         }
     }
-
 }

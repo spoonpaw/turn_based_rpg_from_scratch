@@ -1,10 +1,12 @@
-import GameScene from '../scenes/GameScene';
-import {Direction} from '../types/Direction';
-import Stats from '../stats/Stats';
 import Soldier from '../jobs/Soldier';
+import GameScene from '../scenes/GameScene';
+import Stats from '../stats/Stats';
+import {Direction} from '../types/Direction';
+import Item from './Item';
 
 export default class Player {
     public stats: Stats;
+    // public inventory: Item[] = [];
 
     constructor(
         public sprite: Phaser.GameObjects.Sprite,
@@ -12,7 +14,9 @@ export default class Player {
         public gold: number,
         public experience: number,
         public type: string,
-        stats?: Stats
+        public inventory: Item[],
+        stats?: Stats,
+
     ) {
         const offsetX = GameScene.TILE_SIZE / 2;
         const offsetY = GameScene.TILE_SIZE;
@@ -73,7 +77,17 @@ export default class Player {
         }
         else {
             return new Stats(
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
             );
         }
     }
