@@ -1,18 +1,19 @@
-import Unit from './Unit';
-import eventsCenter from '../utils/EventsCenter';
+import _ from 'lodash';
+
+import {enemies} from '../enemies/enemies';
 import BattleScene from '../scenes/BattleScene';
 import Stats from '../stats/Stats';
-import {Turn} from '../types/Turn';
-import {enemies} from '../enemies/enemies';
-
-import _ from 'lodash';
+import eventsCenter from '../utils/EventsCenter';
+import Item from './Item';
+import PlayerCharacter from './PlayerCharacter';
+import Unit from './Unit';
 
 export class Enemy extends Unit {
     public type!: string;
 
     damageTween!: Phaser.Tweens.Tween;
     stats!: Stats;
-    private battleScene: BattleScene;
+    public inventory: Item[] = [];
 
     constructor(
         scene: BattleScene,
@@ -37,7 +38,19 @@ export class Enemy extends Unit {
             })
         );
 
-        this.stats = enemy?.stats ?? new Stats(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this.stats = enemy?.stats ?? new Stats(
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        );
 
         this.type = enemy?.type ?? '???';
 
@@ -58,63 +71,44 @@ export class Enemy extends Unit {
         });
     }
 
-    calculateAttack(target: Unit): Turn | void {
-        if (target.living) {
-            const critical = false;
-            let targetKilled = false;
-            // determine if the target evaded the attack
-            const evade = Phaser.Math.Between(1, 64) === 1;
-            let damage = 0;
-
-            if (!evade) {
-                damage = Math.max(
-                    1,
-                    Math.floor(
-                        (this.stats.attack - target.stats.defense / 2) *
-                        Phaser.Math.FloatBetween(
-                            0.39, 0.59
-                        )
-                    )
-                );
-                // attack the target, but don't give a visual indication of that yet
-                //  takeDamage method needs to return info: did the target take damage? did the target
-                //  die? store this info in the turn as this will be parsed later to display messages
-                //  or sprite effects
-                target.takeDamage(damage);
-                if (!target.living) {
-                    targetKilled = true;
-                }
-            }
-
-            return {
-                actor: this,
-                actionName: 'attack',
-                target,
-                targetHpChange: -damage,
-                critical,
-                targetKilled,
-                evade
-            };
-        }
+    evadeTest(): boolean {
+        return Phaser.Math.Between(1, 64) === 1;
     }
 
-    public processTurn(turn: Turn): void {
-        let targetKilledString = '';
-        if (turn.targetKilled) {
-            targetKilledString = ` ${turn.target.type} is killed.`;
+    public runTurn(): number {
+        // just attack player 1
+        const target = this.battleScene.heroes[0];
+        let runtimeInMS = 0;
+
+        let damage = 0;
+
+        if (!this.evadeTest()) {
+            damage = this.calculateAttackDamage(target);
+            target.applyHPChange(damage);
+            runtimeInMS += 2000;
+            eventsCenter.emit('Message', `${this.type} attacked ${target.type} for ${damage} HP!`);
+
         }
-        if (turn.evade) {
-            eventsCenter.emit(
-                'Message',
-                `${this.type} attacks ${turn.target.type}; ${turn.target.type} dodges!`
-            );
-        }
+
         else {
-            eventsCenter.emit(
-                'Message',
-                `${this.type} attacks ${turn.target.type} for ${-turn.targetHpChange} damage.${targetKilledString}`
-            );
+            eventsCenter.emit('Message', `${this.type} attacked ${target.type}. ${target.type} dodged the attack!`);
+            runtimeInMS += 2000;
+            return runtimeInMS;
         }
+
+        return runtimeInMS;
+    }
+
+    public calculateAttackDamage(target: (PlayerCharacter | Enemy)): number {
+        return Math.max(
+            1,
+            Math.floor(
+                (this.stats.attack - target.stats.defense / 2) *
+                Phaser.Math.FloatBetween(
+                    0.39, 0.59
+                )
+            )
+        );
     }
 
     updateSceneOnReceivingDamage(): void {
@@ -138,12 +132,28 @@ export class Enemy extends Unit {
 
     }
 
-    takeDamage(damage: number): void {
+    applyHPChange(hpChangeAmount:number): number {
         // handle the math of taking damage,
-        this.stats.currentHP -= damage;
+        this.stats.currentHP -= hpChangeAmount;
         if (this.stats.currentHP <= 0) {
             this.stats.currentHP = 0;
             this.living = false;
         }
+        this.updateSceneOnReceivingDamage();
+        return 0;
+    }
+
+
+    calculateCriticalStrikeDamage() {
+        return Math.max(
+            1,
+            Math.floor(
+                this.stats.attack * (Phaser.Math.Between(54, 64) / 64)
+            )
+        );
+    }
+
+    criticalStrikeTest(): boolean {
+        return Phaser.Math.Between(1, 64) === 1;
     }
 }

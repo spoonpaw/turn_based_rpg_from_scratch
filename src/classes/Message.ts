@@ -1,7 +1,7 @@
 import eventsCenter from '../utils/EventsCenter';
 
 export default class Message extends Phaser.GameObjects.Container {
-    private readonly text: Phaser.GameObjects.Text;
+    public text: Phaser.GameObjects.Text;
     private hideEvent: Phaser.Time.TimerEvent | undefined;
 
     constructor(scene: Phaser.Scene) {

@@ -1,9 +1,10 @@
-import Player from '../classes/Player';
 import GridControls from '../classes/GridControls';
 import GridPhysics from '../classes/GridPhysics';
-import {Direction} from '../types/Direction';
-import {ILevelData, levels} from '../levels/Levels';
+import Item from '../classes/Item';
 import Innkeeper from '../classes/npcs/Innkeeper';
+import Player from '../classes/Player';
+import {ILevelData, levels} from '../levels/Levels';
+import {Direction} from '../types/Direction';
 
 export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
@@ -15,10 +16,10 @@ export default class GameScene extends Phaser.Scene {
     public playerTileY!: number;
     public currentMap!: string;
     public activeDialogScene!: boolean;
+    public spaceDown!: boolean;
     private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private exitingCurrentLevel!: boolean;
     private nonHostileSpace!: boolean;
-    public spaceDown!: boolean;
     private innKeeper!: Innkeeper;
 
     constructor() {
@@ -52,6 +53,12 @@ export default class GameScene extends Phaser.Scene {
             this.cameras.main.startFollow(playerSprite);
             this.cameras.main.roundPixels = true;
 
+            const aBunchOfPotions = [];
+            for (let i = 0; i < 8; i++) {
+                const potion = new Item('healthpotion', 'healthpotionactive', 'Health Potion', 30);
+                aBunchOfPotions.push(potion);
+            }
+
             this.player = new Player(
                 playerSprite,
                 new Phaser.Math.Vector2(
@@ -60,7 +67,8 @@ export default class GameScene extends Phaser.Scene {
                 ),
                 this.player?.gold ?? 0,
                 this.player?.experience ?? 0,
-                'soldier'
+                'soldier',
+                aBunchOfPotions
             );
 
             this.setupPlayerGridPhysics();
@@ -100,7 +108,8 @@ export default class GameScene extends Phaser.Scene {
                 this.player.gold,
                 this.player.experience,
                 'soldier',
-                this.player.stats
+                this.player.inventory,
+                this.player.stats,
             );
 
             this.setupPlayerGridPhysics();

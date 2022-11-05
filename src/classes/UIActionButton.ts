@@ -18,6 +18,14 @@ export default class UIActionButton extends Phaser.GameObjects.Container {
         this.scene.add.existing(this);
     }
 
+    select() {
+        this.button.setTexture(this.hoverKey);
+    }
+
+    deselect() {
+        this.button.setTexture(this.key);
+    }
+
     private createButton() {
         this.button = this.scene.add.image(0, 0, this.key);
 
@@ -26,8 +34,21 @@ export default class UIActionButton extends Phaser.GameObjects.Container {
         this.button.setScale(2);
 
         if (this.text) {
-            this.buttonText = this.scene.add.text(this.x+20, this.y-25, this.text,{ fontSize: '50px', color: '#fff', fontFamily: 'CustomFont'} );
+            this.buttonText = this.scene.add.text(
+                this.x + 20,
+                this.y - 25,
+                this.text,
+                {
+                    fontSize: '50px',
+                    color: '#fff',
+                    fontFamily: 'CustomFont'
+                }
+            );
             this.buttonText.setResolution(10);
+            this.buttonText.setInteractive();
+            this.buttonText.on('pointerdown', () => {
+                this.targetCallback();
+            });
         }
 
         this.add(this.button);
@@ -35,13 +56,5 @@ export default class UIActionButton extends Phaser.GameObjects.Container {
         this.button.on('pointerdown', () => {
             this.targetCallback();
         });
-    }
-
-    select() {
-        this.button.setTexture(this.hoverKey);
-    }
-
-    deselect() {
-        this.button.setTexture(this.key);
     }
 }

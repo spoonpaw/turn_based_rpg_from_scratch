@@ -1,15 +1,19 @@
-import Unit from './Unit';
+import BattleScene from '../scenes/BattleScene';
+import BattleUIScene from '../scenes/BattleUIScene';
 import Stats from '../stats/Stats';
 import eventsCenter from '../utils/EventsCenter';
-import {Turn} from '../types/Turn';
+import {Enemy} from './Enemy';
+import Item from './Item';
+import Unit from './Unit';
 
 export default class PlayerCharacter extends Unit {
     type: string;
     damageTween!: Phaser.Tweens.Tween;
     stats!: Stats;
+    inventory!: Item[];
 
     constructor(
-        scene: Phaser.Scene,
+        scene: BattleScene,
         x: number,
         y: number,
         texture: string | Phaser.Textures.Texture,
@@ -22,69 +26,32 @@ export default class PlayerCharacter extends Unit {
             texture,
             frame
         );
+        this.battleScene = <BattleScene>this.scene.scene.get('Battle');
         this.stats = this.gameScene.player.stats;
+        this.inventory = this.gameScene.player.inventory;
         this.type = 'Soldier';
-    }
 
-    calculateAttack(target: Unit): Turn | void {
-        // don't check if target is living here
-        if (target.living) {
-            let critical = false;
-            let targetKilled = false;
-            // determine if the target evaded the attack
-            const evade = Phaser.Math.Between(1, 64) === 1;
-            let damage = 0;
+        this.setInteractive();
+        this.on('pointerdown', () => {
+            if (scene.interactionState.startsWith('inventoryaction')) {
+                const inventorySlotNumber = Number(scene.interactionState.split('inventoryaction')[1]);
 
-            if (!evade) {
+                const battleUIScene = <BattleUIScene>scene.scene.get('BattleUI');
 
-                if (Phaser.Math.Between(1, 64) === 1) {
-                    // logic for announcing critical hits
-                    critical = true;
-                    damage = Math.max(1, Math.floor((this.stats.attack) * (Phaser.Math.Between(54, 64) / 64)));
-                }
-                else {
-                    damage = Math.max(1, Math.floor((this.stats.attack - target.stats.defense / 2) * (Phaser.Math.FloatBetween(0.34, 0.52))));
+                battleUIScene.message.visible = false;
+
+                for (const item of battleUIScene.inventoryButtons) {
+                    item.deselect();
+                    item.visible = false;
+                    item.buttonText.visible = false;
                 }
 
-                target.takeDamage(damage);
-                if (!target.living) {
-                    targetKilled = true;
-                }
+                eventsCenter.emit('actionSelect', {
+                    action: this.inventory[inventorySlotNumber].key,
+                    target: this
+                });
             }
-
-            return {
-                actor: this,
-                actionName: 'attack',
-                target,
-                targetHpChange: -damage,
-                critical,
-                targetKilled,
-                evade
-            };
-        }
-    }
-
-    public processTurn(turn: Turn): void {
-        let critString = '';
-        let targetKilledString = '';
-        if (turn.critical) {
-            critString = ' A critical strike!';
-        }
-        if (turn.targetKilled) {
-            targetKilledString = ` ${turn.target.type} is killed.`;
-        }
-        if (turn.evade) {
-            eventsCenter.emit(
-                'Message',
-                `${this.type} attacks ${turn.target.type}; ${turn.target.type} dodges!`
-            );
-        }
-        else {
-            eventsCenter.emit(
-                'Message',
-                `${this.type} attacks ${turn.target.type} for ${-turn.targetHpChange} damage.${critString}${targetKilledString}`
-            );
-        }
+        });
     }
 
     updateSceneOnReceivingDamage(): void {
@@ -107,13 +74,111 @@ export default class PlayerCharacter extends Unit {
         return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
     }
 
-    takeDamage(damage: number): void {
-        // handle the math of taking damage,
-        this.stats.currentHP = this.stats.currentHP - damage;
+    applyHPChange(hpChangeAmount: number): number {
+        const initialCharacterHP = this.stats.currentHP;
+
+        // handle healing hp change (negative hp change signifies healing)
+        if (hpChangeAmount < 0) {
+            this.stats.currentHP = Math.min(this.stats.maxHP, this.stats.currentHP - hpChangeAmount);
+        }
+
+        // apply damage
+        else {
+            // handle the math of taking damage,
+            this.stats.currentHP -= hpChangeAmount;
+            this.updateSceneOnReceivingDamage();
+        }
 
         if (this.stats.currentHP <= 0) {
             this.stats.currentHP = 0;
             this.living = false;
         }
+
+        this.battleScene.player1HPText.setText(`HP: ${this.stats.currentHP}`);
+
+        // return actual hp change
+        return this.stats.currentHP - initialCharacterHP;
+    }
+
+    evadeTest(): boolean {
+        return Phaser.Math.Between(1, 64) === 1;
+    }
+
+    runTurn(data: { action: string; target: Enemy | PlayerCharacter; }) {
+        const target = data.target;
+        let runtimeInMS = 0;
+
+        if (data.action === 'attack') {
+
+            let damage = 0;
+
+            if (!this.evadeTest()) {
+                if (!this.criticalStrikeTest()) {
+                    damage += this.calculateAttackDamage(target);
+                    eventsCenter.emit('Message', `${this.type} attacked ${target.type} for ${damage} HP!`);
+                }
+                else {
+                    damage += this.calculateCriticalStrikeDamage();
+                    eventsCenter.emit('Message', `${this.type} attacked ${target.type} for ${damage} HP! A critical strike!`);
+                }
+                runtimeInMS += 2000;
+                target.applyHPChange(damage);
+            }
+            else {
+                eventsCenter.emit('Message', `${this.type} attacked ${target.type}. ${target.type} dodged the attack!`);
+                runtimeInMS += 2000;
+                return runtimeInMS;
+            }
+        }
+        else if (data.action === 'healthpotion') {
+            // get the selected inventory slot index from the battle ui scene delete it from the player's inventory
+            //  and regenerate the inventory list
+
+            const inventoryIndex = this.battleUIScene.inventoryIndex;
+            this.inventory.splice(inventoryIndex, 1);
+
+            for (const inventoryButton of this.battleUIScene.inventoryButtons) {
+                inventoryButton.destroy();
+                inventoryButton.buttonText.destroy();
+            }
+            this.battleUIScene.inventoryButtons = [];
+
+            this.battleUIScene.generateInventoryButtons();
+
+            if (data.target.living) {
+
+                // calculate the exact amount healed, announce it in a message
+                runtimeInMS += 2000;
+                const amountHealed = data.target.applyHPChange(-30);
+                eventsCenter.emit('Message', `${this.type} uses a health potion on ${target.type}, healing them for ${amountHealed} HP.`);
+            }
+        }
+
+        return runtimeInMS;
+    }
+
+    calculateAttackDamage(target: (PlayerCharacter | Enemy)): number {
+        return Math.max(
+            1,
+            Math.floor(
+                (this.stats.attack - target.stats.defense / 2) * Phaser.Math.FloatBetween(
+                    0.34,
+                    0.52
+                )
+            )
+        );
+    }
+
+    criticalStrikeTest(): boolean {
+        return Phaser.Math.Between(1, 64) === 1;
+    }
+
+    calculateCriticalStrikeDamage() {
+        return Math.max(
+            1,
+            Math.floor(
+                this.stats.attack * (Phaser.Math.Between(54, 64) / 64)
+            )
+        );
     }
 }

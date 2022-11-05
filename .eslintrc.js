@@ -4,6 +4,7 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     plugins: [
         '@typescript-eslint',
+        'simple-import-sort'
     ],
     extends: [
         'eslint:recommended',
@@ -20,5 +21,7 @@ module.exports = {
         'eol-last': ['error', 'never'],
         '@typescript-eslint/no-unused-vars': 2,
         '@typescript-eslint/no-extra-semi': 1,
+        'simple-import-sort/imports': 'error',
+        'simple-import-sort/exports': 'error'
     }
 };
