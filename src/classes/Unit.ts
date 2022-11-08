@@ -26,7 +26,6 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         this.battleScene = <BattleScene>this.scene.scene.get('Battle');
         this.battleUIScene = <BattleUIScene>this.scene.scene.get('BattleUI');
 
-
         this.living = true;
     }
 
