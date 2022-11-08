@@ -1,3 +1,5 @@
+// TODO: Add Ability button functionality
+
 // TODO: Add inventory button on game scene
 
 // TODO: Add logic for armor decreasing damage taken.
