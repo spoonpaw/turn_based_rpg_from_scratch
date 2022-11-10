@@ -12,6 +12,8 @@ export default class UIScene extends Phaser.Scene {
     private goldText!: Phaser.GameObjects.Text;
     private inventoryButton!: UIActionButton;
     private actionMenuFrame!: Phaser.GameObjects.Image;
+    private characterButton!: UIActionButton;
+    private abilityButton!: UIActionButton;
 
     constructor() {
         super('UI');
@@ -28,6 +30,12 @@ export default class UIScene extends Phaser.Scene {
     }
 
     setupUiElements() {
+        this.actionMenuFrame = this.add.image(
+            460,
+            650,
+            'gameActionMenuFrame'
+        );
+
         // set up gold text and icon
         this.coinIcon = this.add.image(18, 71, 'coin');
         this.goldText = this.add.text(
@@ -40,8 +48,8 @@ export default class UIScene extends Phaser.Scene {
 
         // set up soldier text and icon as well as level text
         this.soldierText = this.add.text(
-            35,
-            -5,
+            75,
+            625,
             `Soldier / Level ${Math.max(
                 1, Math.ceil(
                     0.3 * Math.sqrt(
@@ -52,30 +60,20 @@ export default class UIScene extends Phaser.Scene {
             { fontSize: '50px', color: '#ffffff', fontFamily: 'CustomFont' })
             .setStroke('#000000', 2)
             .setResolution(10);
-        this.swordIcon = this.add.image(18, 20, 'sword')
+        this.swordIcon = this.add.image(60, 650, 'sword')
             .setScale(1.5);
 
         // create the hp text game object
         this.hpText = this.add.text(
-            35,
-            30,
+            448,
+            620,
             `Hit Points: ${this.gameScene.player.stats.currentHP}`,
             { fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont' })
             .setStroke('#000000', 2)
             .setResolution(10);
         // create heart icon
-        this.heartIcon = this.add.image(18, 46, 'heart')
+        this.heartIcon = this.add.image(433, 635, 'heart')
             .setScale(1.25);
-
-            
-
-        console.log('setting up inventory button on game scene');
-        
-        this.actionMenuFrame = this.add.image(
-            460,
-            650,
-            'gameActionMenuFrame'
-        );
 
         this.inventoryButton = new UIActionButton(
             this,
@@ -88,8 +86,30 @@ export default class UIScene extends Phaser.Scene {
                 console.log('button pressed (game scene)');
             }
         );
-        // this.inventoryButton.visible = true;
-        // this.inventoryButton.setDepth(100);
+
+        this.characterButton = new UIActionButton(
+            this,
+            750,
+            650,
+            'gameActionMenuCharacterButton',
+            'gameActionMenuCharacterButtonActive',
+            '',
+            () => {
+                console.log('character button pressed (game scene)');
+            }
+        );
+
+        this.abilityButton = new UIActionButton(
+            this,
+            800,
+            650,
+            'pagebutton',
+            'pagebuttonactive',
+            '',
+            () => {
+                console.log('character button pressed (game scene)');
+            }
+        );
     }
 
     setupEvents() {
