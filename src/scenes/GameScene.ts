@@ -1,8 +1,13 @@
+// TODO: Add inventory button on game scene
+
+// TODO: Add character sheet button on game scene
+
 import GridControls from '../classes/GridControls';
 import GridPhysics from '../classes/GridPhysics';
 import Item from '../classes/Item';
 import Innkeeper from '../classes/npcs/Innkeeper';
 import Player from '../classes/Player';
+// import UIActionButton from '../classes/UIActionButton';
 import {ILevelData, levels} from '../levels/Levels';
 import {Direction} from '../types/Direction';
 
@@ -21,6 +26,7 @@ export default class GameScene extends Phaser.Scene {
     private exitingCurrentLevel!: boolean;
     private nonHostileSpace!: boolean;
     private innKeeper!: Innkeeper;
+    // private inventoryButton!: UIActionButton;
 
     constructor() {
         super('Game');
@@ -139,6 +145,7 @@ export default class GameScene extends Phaser.Scene {
             this.playerTileX = this.player.getTilePos().x;
             this.playerTileY = this.player.getTilePos().y;
         }
+
     }
 
     setupPlayerGridPhysics() {

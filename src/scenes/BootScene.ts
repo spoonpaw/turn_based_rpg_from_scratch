@@ -66,6 +66,8 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('prefab4', 'assets/images/ui/prefab4.png');
         this.load.image('prefab5', 'assets/images/ui/prefab5.png');
 
+        this.load.image('gameActionMenuFrame', 'assets/images/ui/gameActionMenuFrame.png');
+
         this.load.image('actionMenuFrame', 'assets/images/ui/actionMenuFrame.png');
         this.load.image('heroMenuFrame', 'assets/images/ui/heroMenuFrame.png');
         this.load.image('messageMenuFrame', 'assets/images/ui/messageMenuFrame.png');

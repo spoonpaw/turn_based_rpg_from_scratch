@@ -1,3 +1,4 @@
+import UIActionButton from '../classes/UIActionButton';
 import eventsCenter from '../utils/EventsCenter';
 import GameScene from './GameScene';
 
@@ -9,6 +10,8 @@ export default class UIScene extends Phaser.Scene {
     private swordIcon!: Phaser.GameObjects.Image;
     private coinIcon!: Phaser.GameObjects.Image;
     private goldText!: Phaser.GameObjects.Text;
+    private inventoryButton!: UIActionButton;
+    private actionMenuFrame!: Phaser.GameObjects.Image;
 
     constructor() {
         super('UI');
@@ -63,6 +66,30 @@ export default class UIScene extends Phaser.Scene {
         // create heart icon
         this.heartIcon = this.add.image(18, 46, 'heart')
             .setScale(1.25);
+
+            
+
+        console.log('setting up inventory button on game scene');
+        
+        this.actionMenuFrame = this.add.image(
+            460,
+            650,
+            'gameActionMenuFrame'
+        );
+
+        this.inventoryButton = new UIActionButton(
+            this,
+            850,
+            650,
+            'bagbutton',
+            'bagbuttonactive',
+            '',
+            () => {
+                console.log('button pressed (game scene)');
+            }
+        );
+        // this.inventoryButton.visible = true;
+        // this.inventoryButton.setDepth(100);
     }
 
     setupEvents() {
