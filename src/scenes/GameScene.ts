@@ -26,7 +26,7 @@ export default class GameScene extends Phaser.Scene {
     private exitingCurrentLevel!: boolean;
     private nonHostileSpace!: boolean;
     private innKeeper!: Innkeeper;
-    // private inventoryButton!: UIActionButton;
+    public interactionState!: string;
 
     constructor() {
         super('Game');
@@ -37,6 +37,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     create(data?: { levelData?: ILevelData }) {
+        this.interactionState = '';
         this.activeDialogScene = false;
 
         // if data is empty then the game just started so load the player in the spawn location

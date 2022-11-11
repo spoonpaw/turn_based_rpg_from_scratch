@@ -3,13 +3,13 @@ import Camera = Phaser.Cameras.Scene2D.Camera;
 
 export default class TitleScene extends Phaser.Scene {
     public titleText!: Phaser.GameObjects.Text;
+    song!: Phaser.Sound.BaseSound;
 
     constructor() {
         super('Title');
     }
 
     create() {
-
         const phaserImage = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pic');
         phaserImage.displayHeight = this.sys.canvas.height;
         phaserImage.displayWidth = this.sys.canvas.width;
@@ -57,9 +57,6 @@ export default class TitleScene extends Phaser.Scene {
                     this.handleInput(camera);
                 });
             });
-
-
-
         });
     }
 
@@ -68,6 +65,11 @@ export default class TitleScene extends Phaser.Scene {
     }
 
     handleInput(camera: Camera) {
+        // sets the title music - muted for now
+        this.song = this.sound.add('titlesong', {
+            loop: true
+        });
+        this.song.play();
         this.input.keyboard.enabled = false;
         this.input.enabled = false;
         camera.fadeOut(1500);

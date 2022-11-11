@@ -130,5 +130,6 @@ export default class BootScene extends Phaser.Scene {
     loadAudio() {
         // load mp3s
         this.load.audio('battlesong', 'assets/sounds/songs/embattledPredistortion.mp3');
+        this.load.audio('titlesong', 'assets/sounds/songs/ennui.mp3');
     }
 }
