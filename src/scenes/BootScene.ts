@@ -66,6 +66,11 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('prefab4', 'assets/images/ui/prefab4.png');
         this.load.image('prefab5', 'assets/images/ui/prefab5.png');
 
+        this.load.image('gameActionMenuFrame', 'assets/images/ui/gameActionMenuFrame.png');
+
+        this.load.image('gameActionMenuCharacterButton', 'assets/images/ui/characterButton.png');
+        this.load.image('gameActionMenuCharacterButtonActive', 'assets/images/ui/characterButtonActive.png');
+
         this.load.image('actionMenuFrame', 'assets/images/ui/actionMenuFrame.png');
         this.load.image('heroMenuFrame', 'assets/images/ui/heroMenuFrame.png');
         this.load.image('messageMenuFrame', 'assets/images/ui/messageMenuFrame.png');
@@ -125,5 +130,6 @@ export default class BootScene extends Phaser.Scene {
     loadAudio() {
         // load mp3s
         this.load.audio('battlesong', 'assets/sounds/songs/embattledPredistortion.mp3');
+        this.load.audio('titlesong', 'assets/sounds/songs/ennui.mp3');
     }
 }
