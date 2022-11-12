@@ -1,3 +1,5 @@
+// TODO: Add Item Detail panel
+
 // TODO: Add Ability button functionality
 
 // TODO: Add logic for armor decreasing damage taken.

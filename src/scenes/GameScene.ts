@@ -26,26 +26,19 @@ export default class GameScene extends Phaser.Scene {
     private exitingCurrentLevel!: boolean;
     private nonHostileSpace!: boolean;
     private innKeeper!: Innkeeper;
-    public interactionState!: string;
 
     constructor() {
         super('Game');
     }
 
-    init() {
-        console.log('launching ui scene from the game scene');
-        
-        this.scene.launch('UI');
-    }
-
     create(data?: { levelData?: ILevelData }) {
-        this.interactionState = '';
         this.activeDialogScene = false;
 
         // if data is empty then the game just started so load the player in the spawn location
         if (data && Object.keys(data).length === 0) {
             // create the game scene when the level 1 player initially spawns.
             // create the map
+            this.scene.launch('UI');
             this.currentMap = levels.overworld.name;
             this.exitingCurrentLevel = false;
             this.currentTilemap = this.make.tilemap({key: levels.overworld.tilemapKey});
