@@ -31,11 +31,13 @@ export default class UIScene extends Phaser.Scene {
     }
 
     create() {
-        this.setupUiElements();
+        this.setupUIElements();
         this.setupEvents();
     }
 
-    setupUiElements() {
+    setupUIElements() {
+        console.log('setting up the ui elements in the ui scene');
+        
         this.inventoryAndAbilityMenuFrame = this.add.image(532, 181, 'inventoryAndAbilityMenuFrame')
             .setOrigin(0, 0);
         this.inventoryAndAbilityMenuFrame.visible = false;
@@ -161,7 +163,9 @@ export default class UIScene extends Phaser.Scene {
         );
     }
 
-    generateInventoryButtons() {
+    private generateInventoryButtons() {
+        console.log('generating inventory buttons on the ui scene');
+        
        
         // iterate over all inventory entries
         for (const [index, item] of this.gameScene.player.inventory.entries()) {
@@ -174,7 +178,12 @@ export default class UIScene extends Phaser.Scene {
                 item.activeKey,
                 item.name,
                 () => {
+                    // TODO: fix this meesed up game scene inventory button
+                    //  it is saying that the scene is null when clicked after resetting
+                    //  the game scene
+                    console.log('potion button pressed from the game scene! so far so good)');
                     this.inventoryIndex = index;
+                    console.log({inventoryIndex: this.inventoryIndex});
                     this.inventoryButtons[index].select();
                     for (const [inventoryButtonIndex, inventoryButton] of this.inventoryButtons.entries()) {
                         if (inventoryButtonIndex !== index) {

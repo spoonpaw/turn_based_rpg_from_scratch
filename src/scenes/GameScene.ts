@@ -33,6 +33,8 @@ export default class GameScene extends Phaser.Scene {
     }
 
     init() {
+        console.log('launching ui scene from the game scene');
+        
         this.scene.launch('UI');
     }
 

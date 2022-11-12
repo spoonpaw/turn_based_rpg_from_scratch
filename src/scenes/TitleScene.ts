@@ -1,15 +1,24 @@
 import TweenHelper from '../utils/TweenHelper';
+import MusicScene from './MusicScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
 
 export default class TitleScene extends Phaser.Scene {
     public titleText!: Phaser.GameObjects.Text;
-    song!: Phaser.Sound.BaseSound;
+    // private song!: Phaser.Sound.BaseSound;
+    private musicScene!: MusicScene;
 
     constructor() {
         super('Title');
     }
 
+    init() {
+        this.scene.launch('Music');
+    }
+
     create() {
+
+        this.musicScene = <MusicScene>this.scene.get('Music');
+        
         const phaserImage = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pic');
         phaserImage.displayHeight = this.sys.canvas.height;
         phaserImage.displayWidth = this.sys.canvas.width;
@@ -66,10 +75,15 @@ export default class TitleScene extends Phaser.Scene {
 
     handleInput(camera: Camera) {
         // sets the title music - muted for now
-        this.song = this.sound.add('titlesong', {
-            loop: true
-        });
-        this.song.play();
+        console.log('emitting playMusic  with title song argument');
+        
+        // eventsCenter.emit('playMusic', 'titlesong');
+        // this.musicScene.titleSong = this.sound.add('titlesong', {
+        // //     loop: true
+        // });
+
+        this.musicScene.titleSong.play();
+
         this.input.keyboard.enabled = false;
         this.input.enabled = false;
         camera.fadeOut(1500);

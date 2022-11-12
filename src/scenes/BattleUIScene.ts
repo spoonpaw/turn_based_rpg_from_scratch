@@ -173,7 +173,7 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.subAbilityButtons.push(this.subAbilityButton);
 
-        // todo: generate ability buttons!
+        // TODO generate ability buttons!
 
         this.attackButton = new UIActionButton(
             this,

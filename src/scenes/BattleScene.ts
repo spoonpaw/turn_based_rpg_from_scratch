@@ -12,6 +12,7 @@ import {levels} from '../levels/Levels';
 import eventsCenter from '../utils/EventsCenter';
 import BattleUIScene from './BattleUIScene';
 import GameScene from './GameScene';
+import MusicScene from './MusicScene';
 
 export default class BattleScene extends Phaser.Scene {
     public interactionState!: string;
@@ -26,6 +27,7 @@ export default class BattleScene extends Phaser.Scene {
     private background!: Phaser.GameObjects.Image;
     private battleUIScene!: BattleUIScene;
     private turnIndex!: number;
+    private musicScene!: MusicScene;
 
     constructor() {
         super('Battle');
@@ -34,6 +36,7 @@ export default class BattleScene extends Phaser.Scene {
     create(): void {
 
         this.gameScene = <GameScene>this.scene.get('Game');
+        this.musicScene = <MusicScene>this.scene.get('Music');
 
         this.startBattle();
 
@@ -43,10 +46,9 @@ export default class BattleScene extends Phaser.Scene {
     private startBattle(): void {
         this.turnIndex = -1;
         // sets the battle music - muted for now
-        // const song = this.sound.add('battlesong', {
-        //     loop: true
-        // });
-        // song.play();
+
+        this.musicScene.titleSong.stop();
+        this.musicScene.battleSong.play();
 
         // set background to grey
         this.cameras.main.setBackgroundColor('rgb(235, 235, 235)');
@@ -338,6 +340,9 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private endBattle(): void {
+        this.musicScene.battleSong.stop();
+        this.musicScene.titleSong.play();
+
         this.battleUIScene.disableAllActionButtons();
         // send the player info to the game scene ui
 

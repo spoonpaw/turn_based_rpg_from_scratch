@@ -4,6 +4,7 @@ import BootScene from './scenes/BootScene';
 import DialogScene from './scenes/DialogScene';
 import GameOverScene from './scenes/GameOverScene';
 import GameScene from './scenes/GameScene';
+import MusicScene from './scenes/MusicScene';
 import TitleScene from './scenes/TitleScene';
 import UIScene from './scenes/UIScene';
 import YesNoDialogScene from './scenes/YesNoDialogScene';
@@ -24,6 +25,7 @@ const config: Phaser.Types.Core.GameConfig = {
     scene: [
         BootScene,
         TitleScene,
+        MusicScene,
         GameScene,
         UIScene,
         BattleScene,
