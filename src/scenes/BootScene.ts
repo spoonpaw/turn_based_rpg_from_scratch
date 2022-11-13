@@ -80,6 +80,7 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('cancelMenuFrame', 'assets/images/ui/cancelMenuFrame.png');
         this.load.image('inventoryAndAbilityMenuFrame', 'assets/images/ui/inventoryAndAbilityMenuFrame.png');
         this.load.image('subInventoryAndAbilityMenuFrame', 'assets/images/ui/subInventoryAndAbilityMenuFrame.png');
+        this.load.image('inventoryAndAbilityDetailFrame', 'assets/images/ui/inventoryAndAbilityDetailFrame.png');
 
         this.load.image('pic', 'assets/images/baal-loader.png');
         this.load.image('pic2', 'assets/images/atari-fujilogo.png');

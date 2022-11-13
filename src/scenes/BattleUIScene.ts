@@ -24,6 +24,7 @@ export default class BattleUIScene extends Phaser.Scene {
     private cancelText!: Phaser.GameObjects.Text;
     private cancelButton!: UIActionButton;
     private inventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
+    private inventoryAndAbilityDetailFrame!: Phaser.GameObjects.Image;
     private subInventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
     private subInventoryBagButton!: UIActionButton;
     private subAbilityButtons: UIActionButton[] = [];
@@ -59,6 +60,9 @@ export default class BattleUIScene extends Phaser.Scene {
         this.subInventoryAndAbilityMenuFrame = this.add.image(236, 430, 'subInventoryAndAbilityMenuFrame')
             .setOrigin(0, 0);
         this.subInventoryAndAbilityMenuFrame.visible = false;
+        this.inventoryAndAbilityDetailFrame = this.add.image(5, 212, 'inventoryAndAbilityDetailFrame')
+            .setOrigin(0, 0);
+        this.inventoryAndAbilityDetailFrame.setVisible(false);
 
         // create text second
         this.commandMenuText = this.add.text(244, 440, 'Command?', {
@@ -259,6 +263,7 @@ export default class BattleUIScene extends Phaser.Scene {
                 item.activeKey,
                 item.name,
                 () => {
+                    this.inventoryAndAbilityDetailFrame.setVisible(true);
                     this.inventoryIndex = index;
                     this.inventoryButtons[index].select();
                     for (const [inventoryButtonIndex, inventoryButton] of this.inventoryButtons.entries()) {
