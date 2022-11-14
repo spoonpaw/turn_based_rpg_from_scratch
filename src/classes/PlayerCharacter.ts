@@ -38,12 +38,14 @@ export default class PlayerCharacter extends Unit {
 
                 const battleUIScene = <BattleUIScene>scene.scene.get('BattleUI');
 
-                battleUIScene.message.visible = false;
+                battleUIScene.message.setVisible(false);
+                battleUIScene.selectedItemAndAbilityIcon.setVisible(false);
+                battleUIScene.selectedItemAndAbilityIcon.buttonText.setVisible(false);
 
                 for (const item of battleUIScene.inventoryButtons) {
                     item.deselect();
-                    item.visible = false;
-                    item.buttonText.visible = false;
+                    item.setVisible(false);
+                    item.buttonText.setVisible(false);
                 }
 
                 eventsCenter.emit('actionSelect', {
@@ -57,7 +59,7 @@ export default class PlayerCharacter extends Unit {
     updateSceneOnReceivingDamage(): void {
         // take care of flashing the enemy sprite if it gets damaged or hiding it if it dies.
         if (this.stats.currentHP <= 0) {
-            this.visible = false;
+            this.setVisible(false);
         }
         else {
             this.damageTween = this.scene.tweens.add({

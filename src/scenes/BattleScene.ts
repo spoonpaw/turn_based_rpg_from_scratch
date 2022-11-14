@@ -357,7 +357,7 @@ export default class BattleScene extends Phaser.Scene {
         this.enemies.length = 0;
         for (let i = 0; i < this.units.length; i++) {
             // unlink item
-            this.units[i].visible = false;
+            this.units[i].setVisible(false);
             this.units[i].destroy();
         }
         this.units.length = 0;

@@ -114,7 +114,7 @@ export class Enemy extends Unit {
     updateSceneOnReceivingDamage(): void {
         // take care of flashing the enemy sprite if it gets damaged or hiding it if it dies.
         if (this.stats.currentHP <= 0) {
-            this.visible = false;
+            this.setVisible(false);
         }
         else {
             this.damageTween = this.scene.tweens.add({

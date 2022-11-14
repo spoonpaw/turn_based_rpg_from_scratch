@@ -26,6 +26,7 @@ export default class GameScene extends Phaser.Scene {
     private exitingCurrentLevel!: boolean;
     private nonHostileSpace!: boolean;
     private innKeeper!: Innkeeper;
+    public interactionState!: string;
 
     constructor() {
         super('Game');

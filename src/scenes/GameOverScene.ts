@@ -1,3 +1,4 @@
+
 import TweenHelper from '../utils/TweenHelper';
 import GameScene from './GameScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
@@ -25,7 +26,7 @@ export default class GameOverScene extends Phaser.Scene {
             .setStroke('#000000', 2);
         this.gameOverText.setOrigin(0.5);
 
-        const pressAnyKeyText = this.add.text(this.scale.width / 2, this.scale.height * 0.65, 'Press Any Key', {
+        const pressAnyKeyText = this.add.text(this.scale.width / 2, this.scale.height * 0.65, 'Continue?', {
             fontSize: '40px',
             color: '#fff',
             fontFamily: 'CustomFont',

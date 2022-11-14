@@ -1,3 +1,5 @@
+// TODO: FIX THIS TO ONLY START THE GAME ON CLICK
+
 import TweenHelper from '../utils/TweenHelper';
 import MusicScene from './MusicScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
@@ -47,21 +49,21 @@ export default class TitleScene extends Phaser.Scene {
 
             this.titleText.setOrigin(0.5);
 
-            const pressAnyKeyText = this.add.text(this.scale.width / 2, this.scale.height * 0.65, 'Press Any Key', {
+            const clickToStartText = this.add.text(this.scale.width / 2, this.scale.height * 0.65, 'Click To Start', {
                 fontSize: '40px',
                 color: '#fff',
                 fontFamily: 'CustomFont',
             })
                 .setStroke('#000000', 2);
 
-            pressAnyKeyText.setOrigin(0.5);
-            TweenHelper.flashElement(this, pressAnyKeyText);
+            clickToStartText.setOrigin(0.5);
+            TweenHelper.flashElement(this, clickToStartText);
 
             this.cameras.main.once('camerafadeincomplete', (camera: Camera) => {
-                this.input.keyboard.once('keydown', () => {
-                    this.handleInput(camera);
+                // this.input.keyboard.once('keydown', () => {
+                //     this.handleInput(camera);
 
-                });
+                // });
                 this.input.once('pointerdown', () => {
                     this.handleInput(camera);
                 });
