@@ -31,19 +31,21 @@ export default class UIScene extends Phaser.Scene {
     }
 
     create() {
-        this.setupUiElements();
+        this.setupUIElements();
         this.setupEvents();
     }
 
-    setupUiElements() {
+    setupUIElements() {
+        console.log('setting up the ui elements in the ui scene');
+        
         this.inventoryAndAbilityMenuFrame = this.add.image(532, 181, 'inventoryAndAbilityMenuFrame')
             .setOrigin(0, 0);
-        this.inventoryAndAbilityMenuFrame.visible = false;
+        this.inventoryAndAbilityMenuFrame.setVisible(false);
 
 
         this.subInventoryAndAbilityMenuFrame = this.add.image(236, 430, 'subInventoryAndAbilityMenuFrame')
             .setOrigin(0, 0);
-        this.subInventoryAndAbilityMenuFrame.visible = false;
+        this.subInventoryAndAbilityMenuFrame.setVisible(false);
 
         this.subInventoryBagButton = new UIActionButton(
             this,
@@ -56,8 +58,8 @@ export default class UIScene extends Phaser.Scene {
                 return;
             }
         );
-        this.subInventoryBagButton.visible = false;
-        this.subInventoryBagButton.buttonText.visible = false;
+        this.subInventoryBagButton.setVisible(false);
+        this.subInventoryBagButton.buttonText.setVisible(false);
 
         this.subInventoryButtons.push(this.subInventoryBagButton);
 
@@ -118,17 +120,17 @@ export default class UIScene extends Phaser.Scene {
             () => {
                 console.log('button pressed (game scene)');
                 // todo: show the inventory interface!
-                this.inventoryAndAbilityMenuFrame.visible = true;
+                this.inventoryAndAbilityMenuFrame.setVisible(true);
                 for (const inventoryButton of this.inventoryButtons) {
-                    inventoryButton.visible = true;
-                    inventoryButton.buttonText.visible = true;
+                    inventoryButton.setVisible(true);
+                    inventoryButton.buttonText.setVisible(true);
                 }
                 
-                this.subInventoryAndAbilityMenuFrame.visible = true;
+                this.subInventoryAndAbilityMenuFrame.setVisible(true);
                 
                 for (const subInventoryButton of this.subInventoryButtons) {
-                    subInventoryButton.visible = true;
-                    subInventoryButton.buttonText.visible = true;
+                    subInventoryButton.setVisible(true);
+                    subInventoryButton.buttonText.setVisible(true);
                 }
 
                 this.inventoryButton.select();
@@ -161,7 +163,9 @@ export default class UIScene extends Phaser.Scene {
         );
     }
 
-    generateInventoryButtons() {
+    private generateInventoryButtons() {
+        console.log('generating inventory buttons on the ui scene');
+        
        
         // iterate over all inventory entries
         for (const [index, item] of this.gameScene.player.inventory.entries()) {
@@ -174,7 +178,12 @@ export default class UIScene extends Phaser.Scene {
                 item.activeKey,
                 item.name,
                 () => {
+                    // TODO: fix this meesed up game scene inventory button
+                    //  it is saying that the scene is null when clicked after resetting
+                    //  the game scene
+                    console.log('potion button pressed from the game scene! so far so good)');
                     this.inventoryIndex = index;
+                    console.log({inventoryIndex: this.inventoryIndex});
                     this.inventoryButtons[index].select();
                     for (const [inventoryButtonIndex, inventoryButton] of this.inventoryButtons.entries()) {
                         if (inventoryButtonIndex !== index) {
@@ -184,8 +193,8 @@ export default class UIScene extends Phaser.Scene {
                     this.gameScene.interactionState = `inventoryaction${index}`;
                 }
             );
-            inventoryButton.visible = false;
-            inventoryButton.buttonText.visible = false;
+            inventoryButton.setVisible(false);
+            inventoryButton.buttonText.setVisible(false);
 
             this.inventoryButtons.push(inventoryButton);
 

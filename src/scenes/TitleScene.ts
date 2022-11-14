@@ -1,15 +1,26 @@
+// TODO: FIX THIS TO ONLY START THE GAME ON CLICK
+
 import TweenHelper from '../utils/TweenHelper';
+import MusicScene from './MusicScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
 
 export default class TitleScene extends Phaser.Scene {
     public titleText!: Phaser.GameObjects.Text;
-    song!: Phaser.Sound.BaseSound;
+    // private song!: Phaser.Sound.BaseSound;
+    private musicScene!: MusicScene;
 
     constructor() {
         super('Title');
     }
 
+    init() {
+        this.scene.launch('Music');
+    }
+
     create() {
+
+        this.musicScene = <MusicScene>this.scene.get('Music');
+        
         const phaserImage = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pic');
         phaserImage.displayHeight = this.sys.canvas.height;
         phaserImage.displayWidth = this.sys.canvas.width;
@@ -38,21 +49,21 @@ export default class TitleScene extends Phaser.Scene {
 
             this.titleText.setOrigin(0.5);
 
-            const pressAnyKeyText = this.add.text(this.scale.width / 2, this.scale.height * 0.65, 'Press Any Key', {
+            const clickToStartText = this.add.text(this.scale.width / 2, this.scale.height * 0.65, 'Click To Start', {
                 fontSize: '40px',
                 color: '#fff',
                 fontFamily: 'CustomFont',
             })
                 .setStroke('#000000', 2);
 
-            pressAnyKeyText.setOrigin(0.5);
-            TweenHelper.flashElement(this, pressAnyKeyText);
+            clickToStartText.setOrigin(0.5);
+            TweenHelper.flashElement(this, clickToStartText);
 
             this.cameras.main.once('camerafadeincomplete', (camera: Camera) => {
-                this.input.keyboard.once('keydown', () => {
-                    this.handleInput(camera);
+                // this.input.keyboard.once('keydown', () => {
+                //     this.handleInput(camera);
 
-                });
+                // });
                 this.input.once('pointerdown', () => {
                     this.handleInput(camera);
                 });
@@ -66,10 +77,15 @@ export default class TitleScene extends Phaser.Scene {
 
     handleInput(camera: Camera) {
         // sets the title music - muted for now
-        this.song = this.sound.add('titlesong', {
-            loop: true
-        });
-        this.song.play();
+        console.log('emitting playMusic  with title song argument');
+        
+        // eventsCenter.emit('playMusic', 'titlesong');
+        // this.musicScene.titleSong = this.sound.add('titlesong', {
+        // //     loop: true
+        // });
+
+        this.musicScene.titleSong.play();
+
         this.input.keyboard.enabled = false;
         this.input.enabled = false;
         camera.fadeOut(1500);

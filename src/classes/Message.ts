@@ -27,12 +27,12 @@ export default class Message extends Phaser.GameObjects.Container {
         this.text.setPosition(image.x + 10, image.y + 5);
         eventsCenter.removeListener('Message');
         eventsCenter.on('Message', this.showMessage, this);
-        this.visible = false;
+        this.setVisible(false);
     }
 
     showMessage(text: string | string[]) {
         this.text.setText(text);
-        this.visible = true;
+        this.setVisible(true);
         if (this.hideEvent) {
             this.hideEvent.remove(false);
         }
@@ -45,7 +45,7 @@ export default class Message extends Phaser.GameObjects.Container {
 
     hideMessage() {
         this.hideEvent = undefined;
-        this.visible = false;
+        this.setVisible(false);
         eventsCenter.emit('MessageClose');
     }
 }
