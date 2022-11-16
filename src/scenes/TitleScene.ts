@@ -1,12 +1,9 @@
-// TODO: FIX THIS TO ONLY START THE GAME ON CLICK
-
 import TweenHelper from '../utils/TweenHelper';
 import MusicScene from './MusicScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
 
 export default class TitleScene extends Phaser.Scene {
     public titleText!: Phaser.GameObjects.Text;
-    // private song!: Phaser.Sound.BaseSound;
     private musicScene!: MusicScene;
 
     constructor() {
@@ -60,10 +57,6 @@ export default class TitleScene extends Phaser.Scene {
             TweenHelper.flashElement(this, clickToStartText);
 
             this.cameras.main.once('camerafadeincomplete', (camera: Camera) => {
-                // this.input.keyboard.once('keydown', () => {
-                //     this.handleInput(camera);
-
-                // });
                 this.input.once('pointerdown', () => {
                     this.handleInput(camera);
                 });
@@ -76,13 +69,7 @@ export default class TitleScene extends Phaser.Scene {
     }
 
     handleInput(camera: Camera) {
-        // sets the title music - muted for now
-        console.log('emitting playMusic  with title song argument');
-        
-        // eventsCenter.emit('playMusic', 'titlesong');
-        // this.musicScene.titleSong = this.sound.add('titlesong', {
-        // //     loop: true
-        // });
+        // sets the title music
 
         this.musicScene.titleSong.play();
 

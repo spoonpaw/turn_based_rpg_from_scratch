@@ -15,9 +15,9 @@ const Soldier: {
     weapons: 'any',
 
     // the soldier should level up gradually, advancing stats automatically following a stat priority
-    // stat priority (in order of importance): strength, stamina, agility, dexterity, intellect
+    // (in order of importance): strength, stamina, agility, dexterity, intellect
     // three levels of stat increase: 3 points per level, 2 points per level, 1 point per level
-    // level up... or something like that:
+    // up... or something like that:
     advancement: [
         {
             level: 1,

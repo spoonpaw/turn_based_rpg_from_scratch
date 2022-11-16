@@ -6,7 +6,6 @@ import Item from './Item';
 
 export default class Player {
     public stats: Stats;
-    // public inventory: Item[] = [];
 
     constructor(
         public sprite: Phaser.GameObjects.Sprite,

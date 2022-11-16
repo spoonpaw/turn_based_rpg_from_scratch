@@ -7,7 +7,7 @@ export default class UIScene extends Phaser.Scene {
     public hpText!: Phaser.GameObjects.Text;
     public heartIcon!: Phaser.GameObjects.Image;
     private soldierText!: Phaser.GameObjects.Text;
-    private swordIcon!: Phaser.GameObjects.Image;
+    // private swordIcon!: Phaser.GameObjects.Image;
     private coinIcon!: Phaser.GameObjects.Image;
     private goldText!: Phaser.GameObjects.Text;
     private inventoryButton!: UIActionButton;
@@ -15,11 +15,17 @@ export default class UIScene extends Phaser.Scene {
     private characterButton!: UIActionButton;
     private abilityButton!: UIActionButton;
     private inventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
+    private inventoryAndAbilityDetailFrame!: Phaser.GameObjects.Image;
+    private inventoryAndAbilityDetailText!: Phaser.GameObjects.Text;
+    private useButton!: UIActionButton;
+    public selectedItemAndAbilityIcon!: UIActionButton;
     private subInventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
     private subInventoryBagButton!: UIActionButton;
     private subInventoryButtons: UIActionButton[] = [];
     private inventoryButtons: UIActionButton[] = [];
     private inventoryIndex!: number;
+    private cancelMenuFrame!: Phaser.GameObjects.Image;
+    private cancelButton!: UIActionButton;
 
     constructor() {
         super('UI');
@@ -36,8 +42,10 @@ export default class UIScene extends Phaser.Scene {
     }
 
     setupUIElements() {
-        console.log('setting up the ui elements in the ui scene');
-        
+        this.cancelMenuFrame = this.add.image(315, 315, 'cancelMenuFrame')
+            .setOrigin(0, 0);
+        this.cancelMenuFrame.setVisible(false);
+
         this.inventoryAndAbilityMenuFrame = this.add.image(532, 181, 'inventoryAndAbilityMenuFrame')
             .setOrigin(0, 0);
         this.inventoryAndAbilityMenuFrame.setVisible(false);
@@ -46,6 +54,74 @@ export default class UIScene extends Phaser.Scene {
         this.subInventoryAndAbilityMenuFrame = this.add.image(236, 430, 'subInventoryAndAbilityMenuFrame')
             .setOrigin(0, 0);
         this.subInventoryAndAbilityMenuFrame.setVisible(false);
+
+        this.inventoryAndAbilityDetailFrame = this.add.image(3, 212, 'inventoryAndAbilityDetailFrame')
+            .setOrigin(0, 0);
+        this.inventoryAndAbilityDetailFrame.setVisible(false);
+
+        this.cancelButton = new UIActionButton(
+            this,
+            347,
+            350,
+            'crossbutton',
+            'crossbutton',
+            'Cancel',
+            () => {
+                this.cancelMenuFrame.setVisible(false);
+                this.cancelButton.setVisible(false);
+                this.cancelButton.buttonText.setVisible(false);
+                this.subInventoryAndAbilityMenuFrame.setVisible(false);
+                this.inventoryAndAbilityMenuFrame.setVisible(false);
+                this.inventoryAndAbilityDetailFrame.setVisible(false);
+                this.useButton.setVisible(false);
+                this.useButton.buttonText.setVisible(false);
+                this.inventoryAndAbilityDetailText.setVisible(false);
+
+                for (const subInventoryButton of this.subInventoryButtons) {
+                    subInventoryButton.setVisible(false);
+                    subInventoryButton.buttonText.setVisible(false);
+                }
+
+                for (const inventoryButton of this.inventoryButtons) {
+                    inventoryButton.setVisible(false);
+                    inventoryButton.buttonText.setVisible(false);
+                    inventoryButton.deselect();
+                }
+
+                this.inventoryButton.deselect();
+            }
+        );
+
+        this.cancelButton.setVisible(false);
+        this.cancelButton.buttonText.setVisible(false);
+
+        this.selectedItemAndAbilityIcon = new UIActionButton(
+            this,
+            265,
+            465,
+            'healthpotionactive',
+            'healthpotionactive',
+            'Health Potion',
+            () => {
+                return;
+            }
+        );
+        this.selectedItemAndAbilityIcon.setVisible(false);
+        this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+
+        this.useButton = new UIActionButton(
+            this,
+            35,
+            385,
+            'checkbutton',
+            'checkbutton',
+            'Use',
+            () => {
+                // TODO: implement use button functionality
+            }
+        );
+        this.useButton.setVisible(false);
+        this.useButton.buttonText.setVisible(false);
 
         this.subInventoryBagButton = new UIActionButton(
             this,
@@ -71,13 +147,29 @@ export default class UIScene extends Phaser.Scene {
             'gameActionMenuFrame'
         );
 
+        this.inventoryAndAbilityDetailText = this.add.text(
+            15,
+            215,
+            '',
+            {
+                fontSize: '50px',
+                color: '#fff',
+                fontFamily: 'CustomFont',
+                wordWrap: {
+                    width: 500,
+                    useAdvancedWrap: true
+                }
+            }
+        );
+        this.inventoryAndAbilityDetailText.setVisible(false);
+
         // set up gold text and icon
         this.coinIcon = this.add.image(433, 665, 'coin');
         this.goldText = this.add.text(
             448,
             647,
             `Gold: ${this.gameScene.player.gold}`,
-            { fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont' })
+            {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(10);
 
@@ -92,18 +184,18 @@ export default class UIScene extends Phaser.Scene {
                     )
                 )
             )}`,
-            { fontSize: '50px', color: '#ffffff', fontFamily: 'CustomFont' })
+            {fontSize: '50px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(10);
-        this.swordIcon = this.add.image(60, 650, 'sword')
-            .setScale(1.5);
+        // this.swordIcon = this.add.image(60, 650, 'sword')
+        //     .setScale(1.5);
 
         // create the hp text game object
         this.hpText = this.add.text(
             448,
             620,
             `Hit Points: ${this.gameScene.player.stats.currentHP}`,
-            { fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont' })
+            {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(10);
         // create heart icon
@@ -118,16 +210,15 @@ export default class UIScene extends Phaser.Scene {
             'bagbuttonactive',
             '',
             () => {
-                console.log('button pressed (game scene)');
-                // todo: show the inventory interface!
+                // show the inventory interface!
                 this.inventoryAndAbilityMenuFrame.setVisible(true);
                 for (const inventoryButton of this.inventoryButtons) {
                     inventoryButton.setVisible(true);
                     inventoryButton.buttonText.setVisible(true);
                 }
-                
+
                 this.subInventoryAndAbilityMenuFrame.setVisible(true);
-                
+
                 for (const subInventoryButton of this.subInventoryButtons) {
                     subInventoryButton.setVisible(true);
                     subInventoryButton.buttonText.setVisible(true);
@@ -135,18 +226,27 @@ export default class UIScene extends Phaser.Scene {
 
                 this.inventoryButton.select();
                 this.subInventoryBagButton.select();
+
+                this.cancelMenuFrame.setVisible(true);
+
+                this.cancelButton.setX(347);
+                this.cancelButton.setY(350);
+                this.cancelButton.buttonText.setX(367);
+                this.cancelButton.buttonText.setY(325);
+                this.cancelButton.setVisible(true);
+                this.cancelButton.buttonText.setVisible(true);
             }
         );
 
         this.characterButton = new UIActionButton(
             this,
-            750,
+            68,
             650,
             'gameActionMenuCharacterButton',
             'gameActionMenuCharacterButtonActive',
             '',
             () => {
-                console.log('character button pressed (game scene)');
+                // todo: set up character sheet when this button is pressed
             }
         );
 
@@ -158,15 +258,12 @@ export default class UIScene extends Phaser.Scene {
             'bookbuttonactive',
             '',
             () => {
-                console.log('ability button pressed (game scene)');
+                // todo: set up ability menu when this button is pressed
             }
         );
     }
 
     private generateInventoryButtons() {
-        console.log('generating inventory buttons on the ui scene');
-        
-       
         // iterate over all inventory entries
         for (const [index, item] of this.gameScene.player.inventory.entries()) {
 
@@ -178,18 +275,30 @@ export default class UIScene extends Phaser.Scene {
                 item.activeKey,
                 item.name,
                 () => {
-                    // TODO: fix this meesed up game scene inventory button
-                    //  it is saying that the scene is null when clicked after resetting
-                    //  the game scene
-                    console.log('potion button pressed from the game scene! so far so good)');
+
                     this.inventoryIndex = index;
-                    console.log({inventoryIndex: this.inventoryIndex});
                     this.inventoryButtons[index].select();
                     for (const [inventoryButtonIndex, inventoryButton] of this.inventoryButtons.entries()) {
                         if (inventoryButtonIndex !== index) {
                             inventoryButton.deselect();
                         }
                     }
+
+                    this.cancelMenuFrame.setVisible(false);
+
+                    this.inventoryAndAbilityDetailFrame.setVisible(true);
+                    this.inventoryAndAbilityDetailText.setText('Heals a friendly target for 30 HP.');
+                    this.inventoryAndAbilityDetailText.setVisible(true);
+
+                    this.useButton.setVisible(true);
+                    this.useButton.buttonText.setVisible(true);
+
+                    this.cancelButton.setX(165);
+                    this.cancelButton.setY(385);
+
+                    this.cancelButton.buttonText.setX(185);
+                    this.cancelButton.buttonText.setY(360);
+
                     this.gameScene.interactionState = `inventoryaction${index}`;
                 }
             );
@@ -198,7 +307,7 @@ export default class UIScene extends Phaser.Scene {
 
             this.inventoryButtons.push(inventoryButton);
 
-        } 
+        }
 
     }
 
@@ -220,7 +329,7 @@ export default class UIScene extends Phaser.Scene {
         this.hpText.text = `Hit Points: ${hp}`;
     }
 
-    updateGold(gold:  number) {
+    updateGold(gold: number) {
         this.goldText.text = `Gold: ${gold}`;
     }
 

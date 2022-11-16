@@ -7,7 +7,6 @@ import GridPhysics from '../classes/GridPhysics';
 import Item from '../classes/Item';
 import Innkeeper from '../classes/npcs/Innkeeper';
 import Player from '../classes/Player';
-// import UIActionButton from '../classes/UIActionButton';
 import {ILevelData, levels} from '../levels/Levels';
 import {Direction} from '../types/Direction';
 
