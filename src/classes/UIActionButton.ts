@@ -19,12 +19,6 @@ export default class UIActionButton extends Phaser.GameObjects.Container {
     }
 
     select() {
-        console.log('selecting the ui action button');
-        console.log({selectedHoverKey:this.hoverKey});
-        console.log({selectedButton:this.button});
-        console.log({selectedButtonTexture: this.button.texture});
-        console.log({selectedButtonScene: this.button.scene});
-
         this.button.setTexture(this.hoverKey);
     }
 
