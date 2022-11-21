@@ -45,6 +45,8 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('pagebuttonactive', 'assets/images/ui/pageButtonActive.png');
         this.load.image('checkbutton', 'assets/images/ui/checkButton.png');
         this.load.image('crossbutton', 'assets/images/ui/crossButton.png');
+        this.load.image('facebutton', 'assets/images/ui/faceButton.png');
+        this.load.image('facebuttonactive', 'assets/images/ui/faceButtonActive.png');
 
         this.load.image('healthpotion', 'assets/images/ui/healthPotion.png');
         this.load.image('healthpotionactive', 'assets/images/ui/healthPotionActive.png');
@@ -83,6 +85,8 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('inventoryAndAbilityMenuFrame', 'assets/images/ui/inventoryAndAbilityMenuFrame.png');
         this.load.image('subInventoryAndAbilityMenuFrame', 'assets/images/ui/subInventoryAndAbilityMenuFrame.png');
         this.load.image('inventoryAndAbilityDetailFrame', 'assets/images/ui/inventoryAndAbilityDetailFrame.png');
+        this.load.image('confirmSelectedAbilityOrItemFrame', 'assets/images/ui/confirmSelectedAbilityOrItemFrame.png');
+        this.load.image('confirmSelectedAbilityOrItemFrameB', 'assets/images/ui/confirmSelectedAbilityOrItemFrameB.png');
 
         this.load.image('pic', 'assets/images/baal-loader.png');
         this.load.image('pic2', 'assets/images/atari-fujilogo.png');

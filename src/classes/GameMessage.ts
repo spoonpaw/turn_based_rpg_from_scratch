@@ -1,17 +1,25 @@
 import eventsCenter from '../utils/EventsCenter';
 
-export default class Message extends Phaser.GameObjects.Container {
+export default class GameMessage extends Phaser.GameObjects.Container {
     public text: Phaser.GameObjects.Text;
     private hideEvent: Phaser.Time.TimerEvent | undefined;
 
     constructor(scene: Phaser.Scene) {
         super(scene, 0, 0);
-        const image = this.scene.add.image(236, 430, 'messageMenuFrame')
+        const image = this.scene.add.image(
+            120,
+            430,
+            'messageMenuFrame'
+        )
             .setOrigin(0, 0);
         this.add(image);
 
         this.text = new Phaser.GameObjects.Text(
-            this.scene, 475, 465, '', {
+            this.scene,
+            475,
+            465,
+            '',
+            {
                 color: '#ffffff',
                 fontFamily: 'CustomFont',
                 wordWrap: {
@@ -26,12 +34,12 @@ export default class Message extends Phaser.GameObjects.Container {
         this.add(this.text);
         this.text.setOrigin(0);
         this.text.setPosition(image.x + 10, image.y + 5);
-        eventsCenter.removeListener('Message');
-        eventsCenter.on('Message', this.showMessage, this);
+        eventsCenter.removeListener('GameMessage');
+        eventsCenter.on('GameMessage', this.showMessage, this);
         this.setVisible(false);
     }
 
-    showMessage(text: string | string[]) {
+    private showMessage(text: string | string[]) {
         this.text.setText(text);
         this.setVisible(true);
         if (this.hideEvent) {
@@ -44,9 +52,8 @@ export default class Message extends Phaser.GameObjects.Container {
         });
     }
 
-    hideMessage() {
+    private hideMessage() {
         this.hideEvent = undefined;
         this.setVisible(false);
-        eventsCenter.emit('MessageClose');
     }
 }

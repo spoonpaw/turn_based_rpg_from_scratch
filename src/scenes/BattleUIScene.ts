@@ -25,6 +25,8 @@ export default class BattleUIScene extends Phaser.Scene {
     private inventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
     private inventoryAndAbilityDetailFrame!: Phaser.GameObjects.Image;
     private subInventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
+    public confirmSelectedAbilityOrItemFrame!: Phaser.GameObjects.Image;
+    public confirmSelectedAbilityOrItemFrameB!: Phaser.GameObjects.Image;
     private subInventoryBagButton!: UIActionButton;
     private subAbilityButtons: UIActionButton[] = [];
     private subAbilityButton!: UIActionButton;
@@ -47,21 +49,35 @@ export default class BattleUIScene extends Phaser.Scene {
         this.commandMenuFrame = this.add.image(236, 430, 'commandMenuFrame')
             .setOrigin(0, 0);
         this.commandMenuFrame.setVisible(false);
+
         this.hotkeyMenuFrame = this.add.image(236, 546, 'hotkeyMenuFrame')
             .setOrigin(0, 0);
         this.hotkeyMenuFrame.setVisible(false);
+
         this.confirmMenuFrame = this.add.image(236, 430, 'confirmMenuFrame')
             .setOrigin(0, 0);
         this.confirmMenuFrame.setVisible(false);
+
         this.cancelMenuFrame = this.add.image(698, 430, 'cancelMenuFrame')
             .setOrigin(0, 0);
         this.cancelMenuFrame.setVisible(false);
+
         this.inventoryAndAbilityMenuFrame = this.add.image(532, 181, 'inventoryAndAbilityMenuFrame')
             .setOrigin(0, 0);
         this.inventoryAndAbilityMenuFrame.setVisible(false);
+
         this.subInventoryAndAbilityMenuFrame = this.add.image(236, 430, 'subInventoryAndAbilityMenuFrame')
             .setOrigin(0, 0);
         this.subInventoryAndAbilityMenuFrame.setVisible(false);
+
+        this.confirmSelectedAbilityOrItemFrame = this.add.image(236, 430, 'confirmSelectedAbilityOrItemFrame')
+            .setOrigin(0, 0);
+        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+
+        this.confirmSelectedAbilityOrItemFrameB = this.add.image(236, 505, 'confirmSelectedAbilityOrItemFrameB')
+            .setOrigin(0, 0);
+        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+
         this.inventoryAndAbilityDetailFrame = this.add.image(3, 212, 'inventoryAndAbilityDetailFrame')
             .setOrigin(0, 0);
         this.inventoryAndAbilityDetailFrame.setVisible(false);
@@ -264,6 +280,8 @@ export default class BattleUIScene extends Phaser.Scene {
             'checkbutton',
             'Use',
             () => {
+                console.log('setting the interaction state from the battle ui scene');
+                console.log({battleSceneInteractionState: this.battleScene.interactionState});
                 this.battleScene.interactionState = this.battleScene.interactionState.split('selecting')[1];
                 this.useButton.setVisible(false);
                 this.useButton.buttonText.setVisible(false);
@@ -272,7 +290,13 @@ export default class BattleUIScene extends Phaser.Scene {
                 this.subInventoryAndAbilityMenuFrame.setVisible(false);
                 this.subInventoryBagButton.setVisible(false);
                 this.subInventoryBagButton.buttonText.setVisible(false);
-                this.cancelMenuFrame.setVisible(false);
+
+                this.cancelMenuFrame.setX(698);
+                this.cancelMenuFrame.setY(430);
+                this.cancelMenuFrame.setVisible(true);
+
+                this.confirmSelectedAbilityOrItemFrame.setVisible(true);
+                this.confirmSelectedAbilityOrItemFrameB.setVisible(true);
 
                 this.cancelButton.setX(730);
                 this.cancelButton.setY(465);
@@ -286,7 +310,7 @@ export default class BattleUIScene extends Phaser.Scene {
                 }
 
                 this.message.text.setText('');
-                this.message.setVisible(true);
+                // this.message.setVisible(true);
 
                 this.selectedItemAndAbilityIcon.setVisible(true);
                 this.selectedItemAndAbilityIcon.buttonText.setVisible(true);
@@ -447,6 +471,9 @@ export default class BattleUIScene extends Phaser.Scene {
         this.useButton.setVisible(false);
         this.useButton.buttonText.setVisible(false);
 
+        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+
         this.closeInventory();
         this.closeAbility();
 
@@ -487,6 +514,9 @@ export default class BattleUIScene extends Phaser.Scene {
         this.selectedItemAndAbilityIcon.setVisible(false);
         this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
 
+        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+
         this.battleScene.interactionState = 'run';
 
         eventsCenter.emit('actionSelect', {
@@ -506,6 +536,9 @@ export default class BattleUIScene extends Phaser.Scene {
         this.cancelButton.buttonText.setVisible(false);
         this.cancelMenuFrame.setVisible(false);
         this.confirmMenuFrame.setVisible(false);
+
+        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
 
         this.message.setVisible(false);
         this.selectedItemAndAbilityIcon.setVisible(false);
@@ -548,6 +581,9 @@ export default class BattleUIScene extends Phaser.Scene {
         this.hotkeyButton1.setVisible(false);
         this.hotkeyMenuFrame.setVisible(false);
         this.hotkeyBadge1.setVisible(false);
+
+        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
 
         this.inventoryAndAbilityMenuFrame.setVisible(true);
         this.subInventoryAndAbilityMenuFrame.setVisible(true);

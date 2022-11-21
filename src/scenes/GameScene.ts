@@ -9,6 +9,7 @@ import Innkeeper from '../classes/npcs/Innkeeper';
 import Player from '../classes/Player';
 import {ILevelData, levels} from '../levels/Levels';
 import {Direction} from '../types/Direction';
+import UIScene from './UIScene';
 
 export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
@@ -25,7 +26,7 @@ export default class GameScene extends Phaser.Scene {
     private exitingCurrentLevel!: boolean;
     private nonHostileSpace!: boolean;
     private innKeeper!: Innkeeper;
-    public interactionState!: string;
+    private uiScene!: UIScene;
 
     constructor() {
         super('Game');
@@ -39,6 +40,7 @@ export default class GameScene extends Phaser.Scene {
             // create the game scene when the level 1 player initially spawns.
             // create the map
             this.scene.launch('UI');
+            this.uiScene = <UIScene>this.scene.get('UI');
             this.currentMap = levels.overworld.name;
             this.exitingCurrentLevel = false;
             this.currentTilemap = this.make.tilemap({key: levels.overworld.tilemapKey});
@@ -69,7 +71,7 @@ export default class GameScene extends Phaser.Scene {
                 ),
                 this.player?.gold ?? 0,
                 this.player?.experience ?? 0,
-                'soldier',
+                'Soldier',
                 aBunchOfPotions
             );
 
@@ -109,7 +111,7 @@ export default class GameScene extends Phaser.Scene {
                 ),
                 this.player.gold,
                 this.player.experience,
-                'soldier',
+                'Soldier',
                 this.player.inventory,
                 this.player.stats,
             );
@@ -235,6 +237,16 @@ export default class GameScene extends Phaser.Scene {
         if (this.innKeeper) {
             this.innKeeper.update();
         }
+
+        this.input.keyboard.on('keydown', (event: KeyboardEvent) => {
+            if (event.code === 'Space') {
+                this.uiScene.selectCancel();
+            }
+        });
+
+        // if (Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
+        //     this.uiScene.selectCancel();
+        // }
     }
 
     checkForRandomEncounter(): boolean {
