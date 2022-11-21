@@ -6,7 +6,7 @@ const Soldier: {
     statIncreases: IStatIncreases;
 } = {
     // this is a typed tag
-    kind: 'soldier',
+    kind: 'Soldier',
 
     // the soldier can equip any armor item
     armor: 'any',

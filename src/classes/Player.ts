@@ -1,11 +1,13 @@
 import Soldier from '../jobs/Soldier';
 import GameScene from '../scenes/GameScene';
+import UIScene from '../scenes/UIScene';
 import Stats from '../stats/Stats';
 import {Direction} from '../types/Direction';
 import Item from './Item';
 
 export default class Player {
     public stats: Stats;
+    private uiScene!: UIScene;
 
     constructor(
         public sprite: Phaser.GameObjects.Sprite,
@@ -14,9 +16,11 @@ export default class Player {
         public experience: number,
         public type: string,
         public inventory: Item[],
-        stats?: Stats,
+        stats?: Stats
 
     ) {
+        this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
+
         const offsetX = GameScene.TILE_SIZE / 2;
         const offsetY = GameScene.TILE_SIZE;
 
@@ -27,6 +31,15 @@ export default class Player {
         );
         this.sprite.setFrame(1);
         this.stats = stats ?? this.createStatsForNewPlayer(this.type);
+
+        this.sprite.setInteractive();
+
+        this.sprite.on(
+            'pointerdown',
+            () => {
+                console.log('sprite clicked');
+            }
+        );
     }
 
     getPosition(): Phaser.Math.Vector2 {
@@ -57,7 +70,7 @@ export default class Player {
     }
 
     createStatsForNewPlayer(job: string): Stats {
-        if (job === 'soldier') {
+        if (job === 'Soldier') {
 
             return new Stats(
                 Soldier.advancement[0].strength,

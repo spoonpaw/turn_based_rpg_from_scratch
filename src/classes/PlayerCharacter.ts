@@ -39,6 +39,8 @@ export default class PlayerCharacter extends Unit {
                 const battleUIScene = <BattleUIScene>scene.scene.get('BattleUI');
 
                 battleUIScene.message.setVisible(false);
+                battleUIScene.confirmSelectedAbilityOrItemFrame.setVisible(false);
+                battleUIScene.confirmSelectedAbilityOrItemFrameB.setVisible(false);
                 battleUIScene.selectedItemAndAbilityIcon.setVisible(false);
                 battleUIScene.selectedItemAndAbilityIcon.buttonText.setVisible(false);
 
