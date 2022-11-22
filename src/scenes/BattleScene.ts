@@ -1,7 +1,5 @@
 // TODO: Add Sound Effects to battle scene (attack, heal, run)
 
-// TODO: Add Item Detail panel
-
 // TODO: Add Ability button functionality
 
 // TODO: Add logic for armor decreasing damage taken.

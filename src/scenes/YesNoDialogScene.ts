@@ -1,11 +1,12 @@
-import UiButton from '../classes/UiButton';
+// import UiButton from '../classes/UiButton';
+import UIActionButton from '../classes/UIActionButton';
 import eventsCenter from '../utils/EventsCenter';
 import GameScene from './GameScene';
 
 export default class YesNoDialogScene extends Phaser.Scene {
     private gameScene!: GameScene;
-    private yesButton!: UiButton;
-    private noButton!: UiButton;
+    private yesButton!: UIActionButton;
+    private noButton!: UIActionButton;
     private justSpace!: Phaser.Input.Keyboard.Key;
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 
@@ -29,29 +30,44 @@ export default class YesNoDialogScene extends Phaser.Scene {
         this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).reset();
         this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).reset();
 
-        this.add.image(0, 420, 'prefab4')
+        // this.add.image(0, 310, 'prefab4')
+        //     .setOrigin(0, 0);
+        this.add.image(40, 380, 'leftsidedialogframe')
             .setOrigin(0, 0);
-        this.add.text(30, 445, data.text, {
+        this.add.text(50, 380, data.text, {
             color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
-                width: 625,
+                width: 610,
                 useAdvancedWrap: true
             }
         })
             .setResolution(10)
             .setFontSize(50)
-            .setLineSpacing(-15);
+            .setLineSpacing(-22);
 
-        this.add.image(670, 470, 'prefab5')
+        // this.add.image(670, 390, 'prefab5')
+        //     .setOrigin(0, 0);
+
+        this.add.image(670, 390, 'rightsidedialogoptionsframe')
             .setOrigin(0, 0);
 
-        this.yesButton = new UiButton(this, 770, 540, 'button', 'buttonhover', 'Yes', () => {
+        this.yesButton = new UIActionButton(this, 710, 425, 'checkbutton', 'checkbuttonactive', 'Yes', () => {
             eventsCenter.emit('confirm');
             this.closeScene();
         });
 
-        this.noButton = new UiButton(this, 770, 600, 'button2', 'button2hover', 'No', () => {
+        // TODO: fix issue where space needs to be double clicked to reopen the
+        this.noButton = new UIActionButton(this, 710, 475, 'crossbutton', 'crossbuttonactive', 'No', () => {
             this.closeScene();
         });
+
+        // this.yesButton = new UiButton(this, 770, 430, 'button', 'buttonhover', 'Yes', () => {
+        //     eventsCenter.emit('confirm');
+        //     this.closeScene();
+        // });
+        //
+        // this.noButton = new UiButton(this, 770, 490, 'button2', 'button2hover', 'No', () => {
+        //     this.closeScene();
+        // });
         this.gameScene.input.keyboard.enabled = false;
     }
 

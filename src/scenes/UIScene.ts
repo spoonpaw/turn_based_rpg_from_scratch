@@ -1,4 +1,6 @@
-// import Message from '../classes/Message';
+// TODO: fix the innkeeper dialogue! when speaking to the innkeeper, the dialogue frames should match the existing
+//  scheme. dialogue frame should be properties of the ui scene. shown or hidden from the player as needed
+
 import GameMessage from '../classes/GameMessage';
 import UIActionButton from '../classes/UIActionButton';
 import eventsCenter from '../utils/EventsCenter';
@@ -220,7 +222,6 @@ export default class UIScene extends Phaser.Scene {
             () => {
                 console.log('setting the interaction state from the use button');
                 this.interactionState = this.interactionState.split('selecting')[1];
-                // TODO: implement use button functionality
                 this.inventoryAndAbilityMenuFrame.setVisible(false);
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
                 this.subInventoryAndAbilityMenuFrame.setVisible(false);
@@ -373,7 +374,7 @@ export default class UIScene extends Phaser.Scene {
                     this.selectCancel();
                 }
 
-                // TODO: it would probably be a good idea to query and build the inventory
+                // query and build the inventory
                 //  buttons right when this button is pressed!
                 this.destroyInventoryButtons();
                 this.generateInventoryButtons();
@@ -439,27 +440,14 @@ export default class UIScene extends Phaser.Scene {
 
                     this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
 
-                    // TODO: FINISH USING THE POTION -> HEAL THE TARGET, DELETE FROM BAG
-                    //  DISPLAY NEW HEALTH ON SCREEN -> RE-ENABLE THE KEYBOARD ON GAME SCENE
+                    // finish using the item -> affect the target, delete item from bag
+                    //  display new health on screen if needed -> re-enable the keyboard on game scene
                     console.log('just used an item on the game scene!');
                     console.log({
                         gameScenePlayerInventoryAfterRemovingUsedItem: this.gameScene.player.inventory
                     });
                     this.destroyInventoryButtons();
-                    // for (const inventoryButton of this.inventoryButtons) {
-                    //     inventoryButton.destroy();
-                    //     inventoryButton.buttonText.destroy();
-                    // }
-                    // this.inventoryButtons = [];
 
-                    // TODO: get the actual amount that the item healed the player
-                    //  formula -> trying to heal 30. can't heal more than maxhp
-                    //  if ((30 + current hp) > max hp) {
-                    //      actual amount healed = max hp - current hp
-                    //  }
-                    //  for example current hp = 1, max hp = 30, potion strength 30
-                    //  amount healed = 29
-                    //  Math.min(30, maxHP - currentHP)
                     const actualAmountHealed = Math.min(
                         30,
                         this.gameScene.player.stats.maxHP - this.gameScene.player.stats.currentHP
@@ -468,8 +456,6 @@ export default class UIScene extends Phaser.Scene {
                     this.updateHP(this.gameScene.player.stats.currentHP);
 
                     eventsCenter.emit('GameMessage', `${this.gameScene.player.type} uses a health potion on ${this.gameScene.player.type}, healing them for ${actualAmountHealed} HP.`);
-
-                    // this.inventoryButtons = [];
 
                     this.generateInventoryButtons();
                     this.gameScene.input.keyboard.resetKeys();
@@ -506,7 +492,7 @@ export default class UIScene extends Phaser.Scene {
                     this.selectCancel();
                     return;
                 }
-                // todo: set up ability menu when this button is pressed
+                // set up ability menu when this button is pressed
                 this.interactionState = 'ability';
 
                 this.abilityButton.select();
@@ -555,7 +541,7 @@ export default class UIScene extends Phaser.Scene {
                     this.selectCancel();
                     return;
                 }
-                // TODO: set up the character sheet -> query and update
+                // set up the character sheet -> query and update
                 //  the stats before showing the character sheet
                 this.updateCharacterSheetStrings();
 

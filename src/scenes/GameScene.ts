@@ -1,7 +1,3 @@
-// TODO: Add inventory button on game scene
-
-// TODO: Add character sheet button on game scene
-
 import GridControls from '../classes/GridControls';
 import GridPhysics from '../classes/GridPhysics';
 import Item from '../classes/Item';
