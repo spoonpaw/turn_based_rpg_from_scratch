@@ -198,8 +198,6 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.subAbilityButtons.push(this.subAbilityButton);
 
-        // TODO generate ability buttons!
-
         this.attackButton = new UIActionButton(
             this,
             30,
@@ -373,8 +371,6 @@ export default class BattleUIScene extends Phaser.Scene {
                         }
                     }
                     this.battleScene.interactionState = `selectinginventoryaction${index}`;
-                    // TODO: when the player presses USE, then remove 'selecting' from the beginning of the interactionState string
-                    //  then hide everything except the command frame saying 'Choose A Target'
                 }
             );
             inventoryButton.setVisible(false);
