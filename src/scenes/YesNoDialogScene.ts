@@ -47,17 +47,18 @@ export default class YesNoDialogScene extends Phaser.Scene {
         // this.add.image(670, 390, 'prefab5')
         //     .setOrigin(0, 0);
 
-        this.add.image(670, 390, 'rightsidedialogoptionsframe')
+        this.add.image(670, 380, 'rightsidedialogoptionsframe')
             .setOrigin(0, 0);
 
-        this.yesButton = new UIActionButton(this, 710, 425, 'checkbutton', 'checkbuttonactive', 'Yes', () => {
+        this.yesButton = new UIActionButton(this, 710, 415, 'checkbutton', 'checkbuttonactive', 'Yes', () => {
             eventsCenter.emit('confirm');
             this.closeScene();
         });
 
         // TODO: fix issue where space needs to be double clicked to reopen the
-        this.noButton = new UIActionButton(this, 710, 475, 'crossbutton', 'crossbuttonactive', 'No', () => {
+        this.noButton = new UIActionButton(this, 710, 465, 'crossbutton', 'crossbuttonactive', 'No', () => {
             this.closeScene();
+            this.gameScene.input.keyboard.resetKeys();
         });
 
         // this.yesButton = new UiButton(this, 770, 430, 'button', 'buttonhover', 'Yes', () => {

@@ -47,6 +47,12 @@ export default class UIScene extends Phaser.Scene {
     private intellectString!: Phaser.GameObjects.Text;
     private luckString!: Phaser.GameObjects.Text;
     private tillNextLevelString!: Phaser.GameObjects.Text;
+    public leftSideDialogFrame!: Phaser.GameObjects.Image;
+    public leftSideDialogText!: Phaser.GameObjects.Text;
+    public rightSideDialogOptionsFrame!: Phaser.GameObjects.Image;
+    public yesButton!: UIActionButton;
+    public noButton!: UIActionButton;
+    public cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 
     constructor() {
         super('UI');
@@ -58,6 +64,7 @@ export default class UIScene extends Phaser.Scene {
     }
 
     create() {
+        this.cursors = this.input.keyboard.createCursorKeys();
         this.setupUIElements();
         this.setupEvents();
 
@@ -68,6 +75,15 @@ export default class UIScene extends Phaser.Scene {
     }
 
     setupUIElements() {
+
+        this.leftSideDialogFrame = this.add.image(40, 380, 'leftsidedialogframe')
+            .setOrigin(0, 0);
+        this.leftSideDialogFrame.setVisible(false);
+
+        this.rightSideDialogOptionsFrame = this.add.image(670, 380, 'rightsidedialogoptionsframe')
+            .setOrigin(0, 0);
+        this.rightSideDialogOptionsFrame.setVisible(false);
+
         this.cancelMenuFrame = this.add.image(315, 315, 'cancelMenuFrame')
             .setOrigin(0, 0);
         this.cancelMenuFrame.setVisible(false);
@@ -92,6 +108,16 @@ export default class UIScene extends Phaser.Scene {
         this.inventoryAndAbilityDetailFrame = this.add.image(3, 212, 'inventoryAndAbilityDetailFrame')
             .setOrigin(0, 0);
         this.inventoryAndAbilityDetailFrame.setVisible(false);
+
+        this.leftSideDialogText = this.add.text(50, 380, '', {
+            color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
+                width: 610,
+                useAdvancedWrap: true
+            }
+        })
+            .setResolution(10)
+            .setFontSize(50)
+            .setLineSpacing(-22);
 
         // create text second
         this.commandMenuText = this.add.text(244, 440, 'Command?', {
@@ -182,6 +208,34 @@ export default class UIScene extends Phaser.Scene {
         })
             .setResolution(10);
         this.tillNextLevelString.setVisible(false);
+
+        this.yesButton = new UIActionButton(
+            this,
+            710,
+            415,
+            'checkbutton',
+            'checkbuttonactive',
+            'Yes',
+            () => {
+                eventsCenter.emit('yes');
+            }
+        );
+        this.yesButton.setVisible(false);
+        this.yesButton.buttonText.setVisible(false);
+
+        this.noButton = new UIActionButton(
+            this,
+            710,
+            465,
+            'crossbutton',
+            'crossbuttonactive',
+            'No',
+            () => {
+                eventsCenter.emit('no');
+            }
+        );
+        this.noButton.setVisible(false);
+        this.noButton.buttonText.setVisible(false);
 
         this.cancelButton = new UIActionButton(
             this,
@@ -700,9 +754,7 @@ export default class UIScene extends Phaser.Scene {
             inventoryButton.buttonText.setVisible(false);
 
             this.inventoryButtons.push(inventoryButton);
-
         }
-
     }
 
     setupEvents() {
@@ -729,5 +781,12 @@ export default class UIScene extends Phaser.Scene {
 
     updateXP(xp: number) {
         this.soldierText.setText(`Soldier / Level ${Math.max(1, Math.ceil(0.3 * Math.sqrt(xp)))}`);
+    }
+
+    update() {
+        if (Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
+            console.log('space bar pressed on ui scene');
+            eventsCenter.emit('space');
+        }
     }
 }

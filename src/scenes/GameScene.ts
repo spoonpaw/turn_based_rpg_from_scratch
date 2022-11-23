@@ -230,9 +230,16 @@ export default class GameScene extends Phaser.Scene {
             }
         }
 
+        //TODO: fix the innkeeper. put the dialog frames, texts, and buttons on the uiscene instead of layering scenes
+        // comment this out for now
+
         if (this.innKeeper) {
-            this.innKeeper.update();
+            this.innKeeper.listenForInteractEvent();
         }
+
+        // if (this.innKeeper) {
+        //     this.innKeeper.update();
+        // }
 
         this.input.keyboard.on('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Space') {
