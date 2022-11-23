@@ -5,9 +5,9 @@ const { resolve } = require("path");
 
 const app = express();
 
-app.use(sslRedirect());
-
 app.use("/", express.static(resolve("_build")));
+
+app.use(sslRedirect());
 
 const server = new Server(app);
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
