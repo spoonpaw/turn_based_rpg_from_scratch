@@ -337,6 +337,14 @@ export default class BattleUIScene extends Phaser.Scene {
         this.sys.events.on('wake', this.initiateBattleUI, this);
     }
 
+    public destroyInventoryButtons() {
+        for (const inventoryButton of this.inventoryButtons) {
+            inventoryButton.destroy();
+            inventoryButton.buttonText.destroy();
+        }
+        this.inventoryButtons = [];
+    }
+
     public generateInventoryButtons() {
         // iterate over all inventory entries
         for (const [index, item] of this.battleScene.heroes[0].inventory.entries()) {
@@ -620,6 +628,9 @@ export default class BattleUIScene extends Phaser.Scene {
     }
 
     private selectInventory() {
+        this.destroyInventoryButtons();
+        this.generateInventoryButtons();
+
         this.disableAllActionButtons();
 
         this.closeAbility();
@@ -653,6 +664,8 @@ export default class BattleUIScene extends Phaser.Scene {
         
         this.battleScene.interactionState = 'inventory';
 
+        // query the items here!!!
+        //  delete and rebuild the buttons here!!!
         for (const item of this.inventoryButtons) {
             item.setVisible(true);
             item.buttonText.setVisible(true);
