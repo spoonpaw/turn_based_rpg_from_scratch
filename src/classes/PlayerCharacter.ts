@@ -147,6 +147,7 @@ export default class PlayerCharacter extends Unit {
             }
             this.battleUIScene.inventoryButtons = [];
 
+            this.battleUIScene.destroyInventoryButtons();
             this.battleUIScene.generateInventoryButtons();
 
             if (data.target.living) {

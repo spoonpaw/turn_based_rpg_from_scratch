@@ -15,6 +15,7 @@ import eventsCenter from '../utils/EventsCenter';
 import BattleUIScene from './BattleUIScene';
 import GameScene from './GameScene';
 import MusicScene from './MusicScene';
+import UIScene from './UIScene';
 
 export default class BattleScene extends Phaser.Scene {
     public interactionState!: string;
@@ -30,6 +31,7 @@ export default class BattleScene extends Phaser.Scene {
     private battleUIScene!: BattleUIScene;
     private turnIndex!: number;
     private musicScene!: MusicScene;
+    private uiScene!: UIScene;
 
     constructor() {
         super('Battle');
@@ -38,6 +40,7 @@ export default class BattleScene extends Phaser.Scene {
     create(): void {
 
         this.gameScene = <GameScene>this.scene.get('Game');
+        this.uiScene = <UIScene>this.scene.get('UI');
         this.musicScene = <MusicScene>this.scene.get('Music');
 
         this.startBattle();
@@ -46,6 +49,8 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private startBattle(): void {
+        this.uiScene.selectCancel();
+
         this.turnIndex = -1;
         // sets the battle music - muted for now
 
