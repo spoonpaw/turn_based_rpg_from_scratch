@@ -93,7 +93,7 @@ export default class BootScene extends Phaser.Scene {
 
         this.load.image('pic', 'assets/images/baal-loader.png');
         this.load.image('pic2', 'assets/images/atari-fujilogo.png');
-        this.load.image('title', 'assets/images/afterlife-title-screen.png');
+        this.load.image('title', 'assets/images/afterlife-title-screen4.png');
 
         this.load.image('tiles', 'assets/images/basictiles2.png');
         this.load.image('heart', 'assets/images/heart.png');
@@ -107,6 +107,7 @@ export default class BootScene extends Phaser.Scene {
 
         this.load.image('sword', 'assets/images/icons/sword.png');
         this.load.image('coin', 'assets/images/icons/coin.png');
+        this.load.image('mana', 'assets/images/icons/mana.png');
 
         this.load.image('overworldbackground', 'assets/images/overworldCombatBackground2.png');
     }
@@ -126,6 +127,11 @@ export default class BootScene extends Phaser.Scene {
             frameHeight: 48
         });
         this.load.spritesheet('npc1', 'assets/images/characters/npc1.png', {
+            frameWidth: 48,
+            frameHeight: 48
+        });
+
+        this.load.spritesheet('npc2', 'assets/images/characters/npc2.png', {
             frameWidth: 48,
             frameHeight: 48
         });

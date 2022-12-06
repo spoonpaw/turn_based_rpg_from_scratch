@@ -2,27 +2,29 @@ import GridControls from '../classes/GridControls';
 import GridPhysics from '../classes/GridPhysics';
 import Item from '../classes/Item';
 import Innkeeper from '../classes/npcs/Innkeeper';
+import Merchant from '../classes/npcs/Merchant';
 import Player from '../classes/Player';
 import {ILevelData, levels} from '../levels/Levels';
 import {Direction} from '../types/Direction';
 import UIScene from './UIScene';
 
 export default class GameScene extends Phaser.Scene {
-    static readonly TILE_SIZE = 48;
+    private currentTilemap!: Phaser.Tilemaps.Tilemap;
+    private exitingCurrentLevel!: boolean;
+    private innKeeper!: Innkeeper;
+    private nonHostileSpace!: boolean;
+    private uiScene!: UIScene;
+    public activeDialogScene!: boolean;
+    public currentMap!: string;
+    public cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     public gridControls!: GridControls;
     public gridPhysics!: GridPhysics;
     public player!: Player;
-    public cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     public playerTileX!: number;
     public playerTileY!: number;
-    public currentMap!: string;
-    public activeDialogScene!: boolean;
     public spaceDown!: boolean;
-    private currentTilemap!: Phaser.Tilemaps.Tilemap;
-    private exitingCurrentLevel!: boolean;
-    private nonHostileSpace!: boolean;
-    private innKeeper!: Innkeeper;
-    private uiScene!: UIScene;
+    public weaponMerchant!: Merchant;
+    static readonly TILE_SIZE = 48;
 
     constructor() {
         super('Game');
@@ -121,8 +123,21 @@ export default class GameScene extends Phaser.Scene {
             for (const npc of data.levelData.npcs) {
 
                 // place npc sprites
-                if (npc.name === 'innkeeper') {
+                if (npc.name === 'weaponmerchant') {
+                    const weaponMerchantSprite = this.add.sprite(0, 0, 'npc2');
+                    weaponMerchantSprite.setDepth(2);
 
+                    this.weaponMerchant = new Merchant(
+                        weaponMerchantSprite,
+                        new Phaser.Math.Vector2(
+                            npc.x,
+                            npc.y
+                        )
+                    );
+                }
+
+                else if (npc.name === 'innkeeper') {
+                    console.log('spawning an innkeeper!');
                     const innKeeperSprite = this.add.sprite(0, 0, 'npc1');
                     innKeeperSprite.setDepth(2);
 
@@ -230,15 +245,20 @@ export default class GameScene extends Phaser.Scene {
             }
         }
 
-        //TODO: fix the innkeeper. put the dialog frames, texts, and buttons on the uiscene instead of layering scenes
-        // comment this out for now
-
-        if (this.innKeeper) {
-            this.innKeeper.listenForInteractEvent();
+        // listen for the interact action (space bar)
+        if (this.weaponMerchant || this.innKeeper) {
+            if (Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
+                if (this.weaponMerchant) this.weaponMerchant.listenForInteractEvent();
+                if (this.innKeeper) this.innKeeper.listenForInteractEvent();
+            }
         }
 
+        // if (this.weaponMerchant) {
+        //     this.weaponMerchant.listenForInteractEvent();
+        // }
+        //
         // if (this.innKeeper) {
-        //     this.innKeeper.update();
+        //     this.innKeeper.listenForInteractEvent();
         // }
 
         this.input.keyboard.on('keydown', (event: KeyboardEvent) => {
@@ -246,10 +266,6 @@ export default class GameScene extends Phaser.Scene {
                 this.uiScene.selectCancel();
             }
         });
-
-        // if (Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
-        //     this.uiScene.selectCancel();
-        // }
     }
 
     checkForRandomEncounter(): boolean {

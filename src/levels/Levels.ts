@@ -32,6 +32,26 @@ export const levels: ILevelDataContainer = {
                 name: 'innkeeper',
                 x: 6,
                 y: 2
+            },
+            {
+                name: 'weaponmerchant',
+                x: 12,
+                y: 2,
+                inventory?: [
+                    {
+                        name: 'Cypress Stick',
+                        type: 'weapon',
+                        cost: 3,
+                        classes: ['all'],
+                        stats: {
+                            strength: 1,
+                            agility: 0,
+                            vitality: 0,
+                            intellect: 0,
+                            luck: 0
+                        }
+                    }
+                ]
             }
         ]
     }

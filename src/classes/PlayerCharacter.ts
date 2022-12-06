@@ -43,6 +43,7 @@ export default class PlayerCharacter extends Unit {
                 battleUIScene.confirmSelectedAbilityOrItemFrameB.setVisible(false);
                 battleUIScene.selectedItemAndAbilityIcon.setVisible(false);
                 battleUIScene.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+                battleUIScene.selectedItemAndAbilityCommandText.setVisible(false);
 
                 for (const item of battleUIScene.inventoryButtons) {
                     item.deselect();
@@ -98,7 +99,12 @@ export default class PlayerCharacter extends Unit {
             this.living = false;
         }
 
-        this.battleScene.player1HPText.setText(`HP: ${this.stats.currentHP}`);
+        console.log('setting the ui hp');
+        console.log({
+            currentHP: this.stats.currentHP,
+            maxHP: this.stats.maxHP
+        });
+        this.battleScene.player1HPText.setText(`HP: ${this.stats.currentHP}/${this.stats.maxHP}`);
 
         // return actual hp change
         return this.stats.currentHP - initialCharacterHP;

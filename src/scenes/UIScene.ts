@@ -10,15 +10,17 @@ export default class UIScene extends Phaser.Scene {
     public gameScene!: GameScene;
     public hpText!: Phaser.GameObjects.Text;
     public heartIcon!: Phaser.GameObjects.Image;
-    private soldierText!: Phaser.GameObjects.Text;
+    // private soldierText!: Phaser.GameObjects.Text;
     private coinIcon!: Phaser.GameObjects.Image;
+    private manaIcon!: Phaser.GameObjects.Image;
+    private manaText!: Phaser.GameObjects.Text;
     private goldText!: Phaser.GameObjects.Text;
     private inventoryButton!: UIActionButton;
     private actionMenuFrame!: Phaser.GameObjects.Image;
     private characterButton!: UIActionButton;
     private characterSheetButton!: UIActionButton;
     private abilityButton!: UIActionButton;
-    private inventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
+    public inventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
     private inventoryAndAbilityDetailFrame!: Phaser.GameObjects.Image;
     private inventoryAndAbilityDetailText!: Phaser.GameObjects.Text;
     private useButton!: UIActionButton;
@@ -36,6 +38,7 @@ export default class UIScene extends Phaser.Scene {
     public confirmSelectedAbilityOrItemFrame!: Phaser.GameObjects.Image;
     public confirmSelectedAbilityOrItemFrameB!: Phaser.GameObjects.Image;
     private commandMenuText!: Phaser.GameObjects.Text;
+    private selectedItemAndAbilityCommandText!: Phaser.GameObjects.Text;
     public interactionState!: string;
     private classString!: Phaser.GameObjects.Text;
     private levelString!: Phaser.GameObjects.Text;
@@ -53,6 +56,7 @@ export default class UIScene extends Phaser.Scene {
     public yesButton!: UIActionButton;
     public noButton!: UIActionButton;
     public cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    public merchantInventoryButtons: UIActionButton[] = [];
 
     constructor() {
         super('UI');
@@ -128,6 +132,18 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(10);
         this.commandMenuText.setVisible(false);
 
+        this.selectedItemAndAbilityCommandText = this.add.text(
+            244,
+            510,
+            'Choose A Target',
+            {
+                fontSize: '55px',
+                color: '#fff',
+                fontFamily: 'CustomFont'
+            }
+        )
+            .setResolution(10);
+        this.selectedItemAndAbilityCommandText.setVisible(false);
 
         this.classString = this.add.text(540, 180, 'Class: Soldier', {
             fontSize: '50px',
@@ -292,8 +308,12 @@ export default class UIScene extends Phaser.Scene {
                 this.cancelMenuFrame.setVisible(true);
                 this.confirmSelectedAbilityOrItemFrame.setVisible(true);
                 this.confirmSelectedAbilityOrItemFrameB.setVisible(true);
-                this.commandMenuText.setText('\nChoose A Target');
-                this.commandMenuText.setVisible(true);
+
+                this.selectedItemAndAbilityCommandText.setText('Choose A Target');
+                this.selectedItemAndAbilityCommandText.setVisible(true);
+
+                // this.commandMenuText.setText('\nChoose A Target');
+                // this.commandMenuText.setVisible(true);
 
                 for (const inventoryButton of this.inventoryButtons) {
                     inventoryButton.setVisible(false);
@@ -367,42 +387,55 @@ export default class UIScene extends Phaser.Scene {
         this.inventoryAndAbilityDetailText.setVisible(false);
 
         // set up gold text and icon
-        this.coinIcon = this.add.image(433, 665, 'coin');
-        this.goldText = this.add.text(
-            448,
+        this.manaIcon = this.add.image(100, 663, 'mana');
+
+        let currentMP;
+        let maxMP;
+
+        if (this.gameScene.player.type === 'Soldier') {
+            currentMP = 0;
+            maxMP = 0;
+        }
+        else {
+            currentMP = this.gameScene.player.stats.currentMP;
+            maxMP = this.gameScene.player.stats.maxMP;
+        }
+
+        this.manaText = this.add.text(
+            115,
             647,
-            `Gold: ${this.gameScene.player.gold}`,
+            `MP: ${currentMP} / ${maxMP}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(10);
 
         // set up soldier text and icon as well as level text
-        this.soldierText = this.add.text(
-            88,
-            620,
-            `Soldier / Level ${Math.max(
-                1, Math.ceil(
-                    0.3 * Math.sqrt(
-                        this.gameScene.player.experience
-                    )
-                )
-            )}`,
-            {fontSize: '50px', color: '#ffffff', fontFamily: 'CustomFont'})
-            .setStroke('#000000', 2)
-            .setResolution(10);
+        // this.soldierText = this.add.text(
+        //     88,
+        //     620,
+        //     `Soldier / Level ${Math.max(
+        //         1, Math.ceil(
+        //             0.3 * Math.sqrt(
+        //                 this.gameScene.player.experience
+        //             )
+        //         )
+        //     )}`,
+        //     {fontSize: '50px', color: '#ffffff', fontFamily: 'CustomFont'})
+        //     .setStroke('#000000', 2)
+        //     .setResolution(10);
         // this.swordIcon = this.add.image(60, 650, 'sword')
         //     .setScale(1.5);
 
         // create the hp text game object
         this.hpText = this.add.text(
-            448,
+            115,
             620,
-            `Hit Points: ${this.gameScene.player.stats.currentHP}`,
+            `HP: ${this.gameScene.player.stats.currentHP} / ${this.gameScene.player.stats.maxHP}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(10);
         // create heart icon
-        this.heartIcon = this.add.image(433, 638, 'heart')
+        this.heartIcon = this.add.image(100, 638, 'heart')
             .setScale(1.25);
 
         this.inventoryButton = new UIActionButton(
@@ -488,6 +521,7 @@ export default class UIScene extends Phaser.Scene {
                     this.selectedItemAndAbilityIcon.setVisible(false);
                     this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
                     this.commandMenuText.setVisible(false);
+                    this.selectedItemAndAbilityCommandText.setVisible(false);
 
                     this.inventoryButton.deselect();
                     this.interactionState = 'handlinghealthpotionselect';
@@ -507,7 +541,7 @@ export default class UIScene extends Phaser.Scene {
                         this.gameScene.player.stats.maxHP - this.gameScene.player.stats.currentHP
                     );
                     this.gameScene.player.stats.currentHP += actualAmountHealed;
-                    this.updateHP(this.gameScene.player.stats.currentHP);
+                    this.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
 
                     eventsCenter.emit('GameMessage', `${this.gameScene.player.type} uses a health potion on ${this.gameScene.player.type}, healing them for ${actualAmountHealed} HP.`);
 
@@ -630,6 +664,7 @@ export default class UIScene extends Phaser.Scene {
 
     public selectCancel() {
         this.commandMenuText.setVisible(false);
+        this.selectedItemAndAbilityCommandText.setVisible(false);
         this.cancelMenuFrame.setVisible(false);
         this.cancelButton.setVisible(false);
         this.cancelButton.buttonText.setVisible(false);
@@ -712,6 +747,14 @@ export default class UIScene extends Phaser.Scene {
         this.inventoryButtons = [];
     }
 
+    private generateWeaponMerchantInventoryButtons() {
+        // iterate over all weapon merchant inventory entries
+        if (this.gameScene.weaponMerchant) {
+            // TODO: fill out weapon merchant logic
+            return;
+        }
+    }
+
     private generateInventoryButtons() {
         // iterate over all inventory entries
         for (const [index, item] of this.gameScene.player.inventory.entries()) {
@@ -763,25 +806,33 @@ export default class UIScene extends Phaser.Scene {
         eventsCenter.on('updateHP', this.updateHP, this);
 
         // listen for the updateGold event from the events center
-        eventsCenter.removeListener('updateGold');
-        eventsCenter.on('updateGold', this.updateGold, this);
+        // eventsCenter.removeListener('updateGold');
+        // eventsCenter.on('updateGold', this.updateGold, this);
+        eventsCenter.removeListener('updateMP');
+        eventsCenter.on('updateMP', this.updateMP, this);
 
         // listen for the updateXP event from the events center
-        eventsCenter.removeListener('updateXP');
-        eventsCenter.on('updateXP', this.updateXP, this);
+        // eventsCenter.removeListener('updateXP');
+        // eventsCenter.on('updateXP', this.updateXP, this);
     }
 
-    updateHP(hp: number) {
-        this.hpText.text = `Hit Points: ${hp}`;
+    updateHP(hp: number, maxHp: number) {
+        this.hpText.text = `HP: ${hp} / ${maxHp}`;
     }
 
-    updateGold(gold: number) {
-        this.goldText.text = `Gold: ${gold}`;
+    updateMP(currentMP: number, maxMP: number) {
+        // this.goldText.text = `Gold: ${gold}`;
+        if (this.gameScene.player.type === 'Soldier') {
+            currentMP = 0;
+            maxMP = 0;
+        }
+
+        this.manaText.text = `MP: ${currentMP} / ${maxMP}`;
     }
 
-    updateXP(xp: number) {
-        this.soldierText.setText(`Soldier / Level ${Math.max(1, Math.ceil(0.3 * Math.sqrt(xp)))}`);
-    }
+    // updateXP(xp: number) {
+    //     this.soldierText.setText(`Soldier / Level ${Math.max(1, Math.ceil(0.3 * Math.sqrt(xp)))}`);
+    // }
 
     update() {
         if (Phaser.Input.Keyboard.JustDown(this.cursors.space)) {

@@ -99,15 +99,27 @@ export default class BattleScene extends Phaser.Scene {
             })
             .setResolution(10);
 
-        this.player1HPText = this.add.text(300, 640, `HP: ${this.gameScene.player.stats.currentHP}`, {
-            fontSize: '45px',
+        this.player1HPText = this.add.text(300, 645, `HP: ${this.gameScene.player.stats.currentHP}/${this.gameScene.player.stats.maxHP}`, {
+            fontSize: '35px',
             color: '#fff',
             fontFamily: 'CustomFont'
         })
             .setResolution(10);
 
-        this.player1MPText = this.add.text(300, 670, 'MP: 0', {
-            fontSize: '45px',
+
+        let currentMP;
+        let maxMP;
+
+        if (this.gameScene.player.type === 'Soldier') {
+            currentMP = 0;
+            maxMP = 0;
+        }
+        else {
+            currentMP = this.gameScene.player.stats.currentMP;
+            maxMP = this.gameScene.player.stats.maxMP;
+        }
+        this.player1MPText = this.add.text(300, 670, `MP: ${currentMP}/${maxMP}`, {
+            fontSize: '35px',
             color: '#fff',
             fontFamily: 'CustomFont'
         })
@@ -403,7 +415,8 @@ export default class BattleScene extends Phaser.Scene {
 
                 this.gameScene.player.gold += goldAmount;
 
-                eventsCenter.emit('updateGold', this.gameScene.player.gold);
+                // eventsCenter.emit('updateGold', this.gameScene.player.gold);
+                eventsCenter.emit('updateMP', this.gameScene.player.stats.currentMP, this.gameScene.player.stats.maxMP);
 
                 const currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)));
 
@@ -446,7 +459,8 @@ export default class BattleScene extends Phaser.Scene {
 
         eventsCenter.emit('Message', 'Thou art vanquished!');
         this.gameScene.player.gold = Math.floor(this.gameScene.player.gold / 2);
-        eventsCenter.emit('updateGold', this.gameScene.player.gold);
+        // eventsCenter.emit('updateGold', this.gameScene.player.gold);
+        eventsCenter.emit('updateMP', this.gameScene.player.stats.currentMP, this.gameScene.player.stats.maxMP);
         this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
         eventsCenter.emit('updateHP', this.gameScene.player.stats.currentHP);
 
