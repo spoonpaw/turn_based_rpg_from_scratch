@@ -22,6 +22,6 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': 2,
         '@typescript-eslint/no-extra-semi': 1,
         'simple-import-sort/imports': 'error',
-        'simple-import-sort/exports': 'error'
+        'simple-import-sort/exports': 'error',
     }
 };

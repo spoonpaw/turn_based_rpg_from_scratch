@@ -18,12 +18,12 @@ export default class UIActionButton extends Phaser.GameObjects.Container {
         this.scene.add.existing(this);
     }
 
-    select() {
-        this.button.setTexture(this.hoverKey);
-    }
-
     deselect() {
         this.button.setTexture(this.key);
+    }
+
+    select() {
+        this.button.setTexture(this.hoverKey);
     }
 
     private createButton() {

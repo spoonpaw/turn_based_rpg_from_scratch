@@ -27,7 +27,11 @@ export default class UiButton extends Phaser.GameObjects.Container {
         this.button.setScale(2);
 
         // create the button text
-        this.buttonText = this.scene.add.text(0, 0, this.text, { fontSize: '50px', color: '#fff', fontFamily: 'CustomFont'});
+        this.buttonText = this.scene.add.text(0, 0, this.text, {
+            fontSize: '50px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        });
         this.buttonText.setResolution(10);
         // center the button text inside the Ui button
         Phaser.Display.Align.In.Center(this.buttonText, this.button);

@@ -5,7 +5,8 @@ export default class GridControls {
     constructor(
         public input: Phaser.Input.InputPlugin,
         public gridPhysics: GridPhysics
-    ) {}
+    ) {
+    }
 
     update() {
         const cursors = this.input.keyboard.createCursorKeys();

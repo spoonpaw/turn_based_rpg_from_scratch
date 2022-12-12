@@ -4,14 +4,20 @@ import eventsCenter from '../utils/EventsCenter';
 import GameScene from './GameScene';
 
 export default class YesNoDialogScene extends Phaser.Scene {
-    private gameScene!: GameScene;
-    private yesButton!: UIActionButton;
-    private noButton!: UIActionButton;
-    private justSpace!: Phaser.Input.Keyboard.Key;
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    private gameScene!: GameScene;
+    private justSpace!: Phaser.Input.Keyboard.Key;
+    private noButton!: UIActionButton;
+    private yesButton!: UIActionButton;
 
     constructor() {
         super('YesNoDialog');
+    }
+
+    closeScene() {
+        this.gameScene.input.keyboard.enabled = true;
+        // this.gameScene.activeDialogScene = false;
+        this.scene.stop();
     }
 
     create(data: { text: string | string[]; }) {
@@ -70,12 +76,6 @@ export default class YesNoDialogScene extends Phaser.Scene {
         //     this.closeScene();
         // });
         this.gameScene.input.keyboard.enabled = false;
-    }
-
-    closeScene() {
-        this.gameScene.input.keyboard.enabled = true;
-        this.gameScene.activeDialogScene = false;
-        this.scene.stop();
     }
 
     update() {
