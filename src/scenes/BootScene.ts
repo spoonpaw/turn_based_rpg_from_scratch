@@ -6,23 +6,14 @@ export default class BootScene extends Phaser.Scene {
         super('Boot');
     }
 
-
-    preload() {
-        // load images
-        this.loadImages();
-
-        // load sprite sheets
-        this.loadSpriteSheets();
-
-        // load tile maps
-        this.loadTileMap();
-
-        // load audio files
-        this.loadAudio();
-    }
-
     create() {
         this.scene.start('Title');
+    }
+
+    loadAudio() {
+        // load mp3s
+        this.load.audio('battlesong', 'assets/sounds/songs/embattledPredistortion.mp3');
+        this.load.audio('titlesong', 'assets/sounds/songs/ennui.mp3');
     }
 
     loadImages() {
@@ -47,6 +38,8 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('crossbutton', 'assets/images/ui/crossButton.png');
         this.load.image('facebutton', 'assets/images/ui/faceButton.png');
         this.load.image('facebuttonactive', 'assets/images/ui/faceButtonActive.png');
+        this.load.image('staffbutton', 'assets/images/ui/staffButton.png');
+        this.load.image('staffbuttonactive', 'assets/images/ui/staffButtonActive.png');
 
         this.load.image('healthpotion', 'assets/images/ui/healthPotion.png');
         this.load.image('healthpotionactive', 'assets/images/ui/healthPotionActive.png');
@@ -93,7 +86,7 @@ export default class BootScene extends Phaser.Scene {
 
         this.load.image('pic', 'assets/images/baal-loader.png');
         this.load.image('pic2', 'assets/images/atari-fujilogo.png');
-        this.load.image('title', 'assets/images/afterlife-title-screen.png');
+        this.load.image('title', 'assets/images/afterlife-title-screen4.png');
 
         this.load.image('tiles', 'assets/images/basictiles2.png');
         this.load.image('heart', 'assets/images/heart.png');
@@ -107,6 +100,7 @@ export default class BootScene extends Phaser.Scene {
 
         this.load.image('sword', 'assets/images/icons/sword.png');
         this.load.image('coin', 'assets/images/icons/coin.png');
+        this.load.image('mana', 'assets/images/icons/mana.png');
 
         this.load.image('overworldbackground', 'assets/images/overworldCombatBackground2.png');
     }
@@ -129,17 +123,30 @@ export default class BootScene extends Phaser.Scene {
             frameWidth: 48,
             frameHeight: 48
         });
+
+        this.load.spritesheet('npc2', 'assets/images/characters/npc2.png', {
+            frameWidth: 48,
+            frameHeight: 48
+        });
     }
 
     loadTileMap() {
         // load tile maps
         this.load.tilemapTiledJSON('overworld-map', 'assets/tilemaps/afterlife.json');
-        this.load.tilemapTiledJSON('town-map', 'assets/tilemaps/town.json');
+        this.load.tilemapTiledJSON('town-map', 'assets/tilemaps/town3.json');
     }
 
-    loadAudio() {
-        // load mp3s
-        this.load.audio('battlesong', 'assets/sounds/songs/embattledPredistortion.mp3');
-        this.load.audio('titlesong', 'assets/sounds/songs/ennui.mp3');
+    preload() {
+        // load images
+        this.loadImages();
+
+        // load sprite sheets
+        this.loadSpriteSheets();
+
+        // load tile maps
+        this.loadTileMap();
+
+        // load audio files
+        this.loadAudio();
     }
 }

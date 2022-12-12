@@ -3,17 +3,23 @@ import _ from 'lodash';
 import {enemies} from '../enemies/enemies';
 import BattleScene from '../scenes/BattleScene';
 import Stats from '../stats/Stats';
+import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import Item from './Item';
 import PlayerCharacter from './PlayerCharacter';
 import Unit from './Unit';
 
 export class Enemy extends Unit {
-    public type!: string;
-
     damageTween!: Phaser.Tweens.Tween;
-    stats!: Stats;
+    equipment: Equipment = {
+        body: undefined,
+        head: undefined,
+        offhand: undefined,
+        weapon: undefined
+    };
     public inventory: Item[] = [];
+    stats!: Stats;
+    public type!: string;
 
     constructor(
         scene: BattleScene,
@@ -71,8 +77,74 @@ export class Enemy extends Unit {
         });
     }
 
+    applyHPChange(hpChangeAmount: number): number {
+        // handle the math of taking damage,
+        this.stats.currentHP -= hpChangeAmount;
+        if (this.stats.currentHP <= 0) {
+            this.stats.currentHP = 0;
+            this.living = false;
+        }
+        this.updateSceneOnReceivingDamage();
+        return 0;
+    }
+
+    public calculateAttackDamage(target: (PlayerCharacter | Enemy)): number {
+        return Math.max(
+            1,
+            Math.floor(
+                (this.stats.strength - target.stats.defense / 2) *
+                Phaser.Math.FloatBetween(
+                    0.39, 0.59
+                )
+            )
+        );
+    }
+
+    calculateCriticalStrikeDamage() {
+        return Math.max(
+            1,
+            Math.floor(
+                this.stats.strength * (Phaser.Math.Between(54, 64) / 64)
+            )
+        );
+    }
+
+    criticalStrikeTest(): boolean {
+        return Phaser.Math.Between(1, 64) === 1;
+    }
+
     evadeTest(): boolean {
         return Phaser.Math.Between(1, 64) === 1;
+    }
+
+    public getCombinedStat(stat: keyof typeof this.stats): number {
+        const baseStat = this.stats[stat];
+        let weaponBonus = 0;
+        if (this.equipment.weapon) {
+            weaponBonus += this.equipment.weapon.stats![stat as keyof typeof this.equipment.weapon.stats];
+        }
+
+        let headBonus = 0;
+        if (this.equipment.head) {
+            headBonus += this.equipment.head.stats![stat as keyof typeof this.equipment.head.stats];
+        }
+
+        let bodyBonus = 0;
+        if (this.equipment.body) {
+            bodyBonus += this.equipment.body.stats![stat as keyof typeof this.equipment.body.stats];
+        }
+
+        let offHandBonus = 0;
+        if (this.equipment.offhand) {
+            offHandBonus += this.equipment.offhand.stats![stat as keyof typeof this.equipment.offhand.stats];
+        }
+
+        return baseStat + weaponBonus + headBonus + bodyBonus + offHandBonus;
+    }
+
+    getInitiative(): number {
+        return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
+
     }
 
     public runTurn(): number {
@@ -99,18 +171,6 @@ export class Enemy extends Unit {
         return runtimeInMS;
     }
 
-    public calculateAttackDamage(target: (PlayerCharacter | Enemy)): number {
-        return Math.max(
-            1,
-            Math.floor(
-                (this.stats.attack - target.stats.defense / 2) *
-                Phaser.Math.FloatBetween(
-                    0.39, 0.59
-                )
-            )
-        );
-    }
-
     updateSceneOnReceivingDamage(): void {
         // take care of flashing the enemy sprite if it gets damaged or hiding it if it dies.
         if (this.stats.currentHP <= 0) {
@@ -127,33 +187,4 @@ export class Enemy extends Unit {
         }
     }
 
-    getInitiative(): number {
-        return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
-
-    }
-
-    applyHPChange(hpChangeAmount:number): number {
-        // handle the math of taking damage,
-        this.stats.currentHP -= hpChangeAmount;
-        if (this.stats.currentHP <= 0) {
-            this.stats.currentHP = 0;
-            this.living = false;
-        }
-        this.updateSceneOnReceivingDamage();
-        return 0;
-    }
-
-
-    calculateCriticalStrikeDamage() {
-        return Math.max(
-            1,
-            Math.floor(
-                this.stats.attack * (Phaser.Math.Between(54, 64) / 64)
-            )
-        );
-    }
-
-    criticalStrikeTest(): boolean {
-        return Phaser.Math.Between(1, 64) === 1;
-    }
 }

@@ -1,4 +1,3 @@
-
 import TweenHelper from '../utils/TweenHelper';
 import GameScene from './GameScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
@@ -49,6 +48,17 @@ export default class GameOverScene extends Phaser.Scene {
 
     }
 
+    handleInput(camera: Camera) {
+        this.input.keyboard.enabled = false;
+        this.input.enabled = false;
+        camera.fadeOut(3000);
+        this.cameras.main.once('camerafadeoutcomplete', () => {
+            this.scene.wake('Game');
+            this.scene.stop();
+            return;
+        });
+    }
+
     setupKeyListeners() {
         this.input.keyboard.enabled = true;
         this.input.enabled = true;
@@ -59,17 +69,6 @@ export default class GameOverScene extends Phaser.Scene {
             this.input.once('pointerdown', () => {
                 this.handleInput(camera);
             });
-        });
-    }
-
-    handleInput(camera: Camera) {
-        this.input.keyboard.enabled = false;
-        this.input.enabled = false;
-        camera.fadeOut(3000);
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-            this.scene.wake('Game');
-            this.scene.stop();
-            return;
         });
     }
 

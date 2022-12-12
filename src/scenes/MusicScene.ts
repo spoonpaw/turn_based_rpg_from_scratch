@@ -1,7 +1,7 @@
 export default class MusicScene extends Phaser.Scene {
 
-    public titleSong!: Phaser.Sound.BaseSound;
     public battleSong!: Phaser.Sound.BaseSound;
+    public titleSong!: Phaser.Sound.BaseSound;
 
     constructor() {
         super('Music');

@@ -1,11 +1,17 @@
 import GameScene from './GameScene';
 
 export default class DialogScene extends Phaser.Scene {
-    private gameScene!: GameScene;
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    private gameScene!: GameScene;
 
     constructor() {
         super('Dialog');
+    }
+
+    closeScene() {
+        this.gameScene.input.keyboard.enabled = true;
+        // this.gameScene.activeDialogScene = false;
+        this.scene.stop();
     }
 
     create(data: { text: string | string[]; }) {
@@ -46,11 +52,5 @@ export default class DialogScene extends Phaser.Scene {
         else if (Phaser.Input.Keyboard.JustUp(this.cursors.space) && this.gameScene.spaceDown) {
             this.gameScene.spaceDown = false;
         }
-    }
-
-    closeScene() {
-        this.gameScene.input.keyboard.enabled = true;
-        this.gameScene.activeDialogScene = false;
-        this.scene.stop();
     }
 }

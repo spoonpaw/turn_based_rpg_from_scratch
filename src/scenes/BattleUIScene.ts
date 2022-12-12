@@ -5,37 +5,66 @@ import BattleScene from './BattleScene';
 
 export default class BattleUIScene extends Phaser.Scene {
     public attackButton!: UIActionButton;
-    public message!: Message;
     public commandMenuText!: Phaser.GameObjects.Text;
-    public inventoryButtons: UIActionButton[] = [];
-    public inventoryIndex!: number;
-    private bagButton!: UIActionButton;
-    private abilityButton!: UIActionButton;
-    private runButton!: UIActionButton;
-    private battleScene!: BattleScene;
-    private commandMenuFrame!: Phaser.GameObjects.Image;
-    private hotkeyMenuFrame!: Phaser.GameObjects.Image;
-    private hotkeyButton1!: UIActionButton;
-    private hotkeyBadge1!: Phaser.GameObjects.Image;
-    private actionButtons: UIActionButton[] = [];
-    private subInventoryButtons: UIActionButton[] = [];
-    private confirmMenuFrame!: Phaser.GameObjects.Image;
-    private cancelMenuFrame!: Phaser.GameObjects.Image;
-    private cancelButton!: UIActionButton;
-    private inventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
-    private inventoryAndAbilityDetailFrame!: Phaser.GameObjects.Image;
-    private subInventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
     public confirmSelectedAbilityOrItemFrame!: Phaser.GameObjects.Image;
     public confirmSelectedAbilityOrItemFrameB!: Phaser.GameObjects.Image;
-    private subInventoryBagButton!: UIActionButton;
-    private subAbilityButtons: UIActionButton[] = [];
-    private subAbilityButton!: UIActionButton;
-    private inventoryAndAbilityDetailText!: Phaser.GameObjects.Text;
-    private useButton!: UIActionButton;
+    public inventoryButtons: UIActionButton[] = [];
+    public inventoryIndex!: number;
+    public message!: Message;
+    public selectedItemAndAbilityCommandText!: Phaser.GameObjects.Text;
     public selectedItemAndAbilityIcon!: UIActionButton;
+    private abilityButton!: UIActionButton;
+    private actionButtons: UIActionButton[] = [];
+    private bagButton!: UIActionButton;
+    private battleScene!: BattleScene;
+    private cancelButton!: UIActionButton;
+    private cancelMenuFrame!: Phaser.GameObjects.Image;
+    private commandMenuFrame!: Phaser.GameObjects.Image;
+    private confirmMenuFrame!: Phaser.GameObjects.Image;
+    private hotkeyBadge1!: Phaser.GameObjects.Image;
+    private hotkeyButton1!: UIActionButton;
+    private hotkeyMenuFrame!: Phaser.GameObjects.Image;
+    private inventoryAndAbilityDetailFrame!: Phaser.GameObjects.Image;
+    private inventoryAndAbilityDetailText!: Phaser.GameObjects.Text;
+    private inventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
+    private runButton!: UIActionButton;
+    private subAbilityButton!: UIActionButton;
+    private subAbilityButtons: UIActionButton[] = [];
+    private subInventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
+    private subInventoryBagButton!: UIActionButton;
+    private subInventoryButtons: UIActionButton[] = [];
+    private useButton!: UIActionButton;
 
     constructor() {
         super('BattleUI');
+    }
+
+    public closeAbility() {
+        for (const subAbilityButton of this.subAbilityButtons) {
+            subAbilityButton.deselect();
+            subAbilityButton.setVisible(false);
+            subAbilityButton.buttonText.setVisible(false);
+        }
+
+        this.inventoryAndAbilityMenuFrame.setVisible(false);
+        this.subInventoryAndAbilityMenuFrame.setVisible(false);
+    }
+
+    public closeInventory() {
+        for (const inventoryButton of this.inventoryButtons) {
+            inventoryButton.deselect();
+            inventoryButton.setVisible(false);
+            inventoryButton.buttonText.setVisible(false);
+        }
+
+        for (const subInventoryButton of this.subInventoryButtons) {
+            subInventoryButton.deselect();
+            subInventoryButton.setVisible(false);
+            subInventoryButton.buttonText.setVisible(false);
+        }
+
+        this.inventoryAndAbilityMenuFrame.setVisible(false);
+        this.subInventoryAndAbilityMenuFrame.setVisible(false);
     }
 
     create() {
@@ -91,6 +120,18 @@ export default class BattleUIScene extends Phaser.Scene {
             .setResolution(10);
         this.commandMenuText.setVisible(false);
 
+        this.selectedItemAndAbilityCommandText = this.add.text(
+            244,
+            510,
+            'Choose A Target',
+            {
+                fontSize: '55px',
+                color: '#fff',
+                fontFamily: 'CustomFont'
+            })
+            .setResolution(10);
+        this.selectedItemAndAbilityCommandText.setVisible(false);
+
         this.inventoryAndAbilityDetailText = this.add.text(
             15,
             215,
@@ -105,6 +146,7 @@ export default class BattleUIScene extends Phaser.Scene {
                 }
             }
         );
+        this.inventoryAndAbilityDetailText.setLineSpacing(-10);
         this.inventoryAndAbilityDetailText.setVisible(false);
 
         // create buttons and badges third
@@ -313,8 +355,11 @@ export default class BattleUIScene extends Phaser.Scene {
                 this.selectedItemAndAbilityIcon.setVisible(true);
                 this.selectedItemAndAbilityIcon.buttonText.setVisible(true);
 
-                this.commandMenuText.setText('\nChoose A Target.');
-                this.commandMenuText.setVisible(true);
+                this.selectedItemAndAbilityCommandText.setText('Choose A Target');
+                this.selectedItemAndAbilityCommandText.setVisible(true);
+
+                // this.commandMenuText.setText('\nChoose A Target.');
+                // this.commandMenuText.setVisible(true);
             }
         );
         this.useButton.setVisible(false);
@@ -345,6 +390,12 @@ export default class BattleUIScene extends Phaser.Scene {
         this.inventoryButtons = [];
     }
 
+    public disableAllActionButtons() {
+        this.actionButtons.forEach((button) => {
+            button.deselect();
+        });
+    }
+
     public generateInventoryButtons() {
         // iterate over all inventory entries
         for (const [index, item] of this.battleScene.heroes[0].inventory.entries()) {
@@ -365,10 +416,10 @@ export default class BattleUIScene extends Phaser.Scene {
                     this.useButton.setVisible(true);
                     this.useButton.buttonText.setVisible(true);
 
-                    this.cancelButton.setX(165);
+                    this.cancelButton.setX(185);
                     this.cancelButton.setY(385);
 
-                    this.cancelButton.buttonText.setX(185);
+                    this.cancelButton.buttonText.setX(205);
                     this.cancelButton.buttonText.setY(360);
 
                     this.inventoryIndex = index;
@@ -389,6 +440,20 @@ export default class BattleUIScene extends Phaser.Scene {
         }
     }
 
+    public hideUIFrames() {
+        this.cancelButton.setVisible(false);
+        this.cancelButton.buttonText.setVisible(false);
+        // this.cancelText.setVisible(false);
+        this.cancelMenuFrame.setVisible(false);
+        this.confirmMenuFrame.setVisible(false);
+        this.commandMenuFrame.setVisible(false);
+        this.commandMenuText.setVisible(false);
+        this.selectedItemAndAbilityCommandText.setVisible(false);
+        this.hotkeyMenuFrame.setVisible(false);
+        this.hotkeyButton1.setVisible(false);
+        this.hotkeyBadge1.setVisible(false);
+    }
+
     public showCommandAndHotkeyFrames() {
         this.commandMenuFrame.setVisible(true);
         this.commandMenuText.setVisible(true);
@@ -398,51 +463,9 @@ export default class BattleUIScene extends Phaser.Scene {
 
     }
 
-    public disableAllActionButtons() {
-        this.actionButtons.forEach((button) => {
-            button.deselect();
-        });
-    }
-
-    public hideUIFrames() {
-        this.cancelButton.setVisible(false);
-        this.cancelButton.buttonText.setVisible(false);
-        // this.cancelText.setVisible(false);
-        this.cancelMenuFrame.setVisible(false);
-        this.confirmMenuFrame.setVisible(false);
-        this.commandMenuFrame.setVisible(false);
-        this.commandMenuText.setVisible(false);
-        this.hotkeyMenuFrame.setVisible(false);
-        this.hotkeyButton1.setVisible(false);
-        this.hotkeyBadge1.setVisible(false);
-    }
-
-    public closeAbility() {
-        for (const subAbilityButton of this.subAbilityButtons) {
-            subAbilityButton.deselect();
-            subAbilityButton.setVisible(false);
-            subAbilityButton.buttonText.setVisible(false);
-        }
-
-        this.inventoryAndAbilityMenuFrame.setVisible(false);
-        this.subInventoryAndAbilityMenuFrame.setVisible(false);
-    }
-
-    public closeInventory() {
-        for (const inventoryButton of this.inventoryButtons) {
-            inventoryButton.deselect();
-            inventoryButton.setVisible(false);
-            inventoryButton.buttonText.setVisible(false);
-        }
-
-        for (const subInventoryButton of this.subInventoryButtons) {
-            subInventoryButton.deselect();
-            subInventoryButton.setVisible(false);
-            subInventoryButton.buttonText.setVisible(false);
-        }
-
-        this.inventoryAndAbilityMenuFrame.setVisible(false);
-        this.subInventoryAndAbilityMenuFrame.setVisible(false);
+    private initiateBattleUI() {
+        this.hideUIFrames();
+        eventsCenter.emit('Message', `A ${this.battleScene.enemies[0].type} approaches.`);
     }
 
     private messageCloseHandler() {
@@ -450,123 +473,6 @@ export default class BattleUIScene extends Phaser.Scene {
             this.showCommandAndHotkeyFrames();
             this.battleScene.interactionState = 'mainselect';
         }
-    }
-
-    private selectAttack() {
-
-        this.selectedItemAndAbilityIcon.setVisible(false);
-        this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
-
-        this.hotkeyMenuFrame.setVisible(true);
-        this.hotkeyButton1.setVisible(true);
-        this.hotkeyBadge1.setVisible(true);
-
-        this.cancelMenuFrame.setX(698);
-        this.cancelMenuFrame.setY(430);
-
-        this.cancelButton.setX(730);
-        this.cancelButton.setY(465);
-        
-        this.cancelButton.buttonText.setX(750);
-        this.cancelButton.buttonText.setY(440);
-
-        this.inventoryAndAbilityDetailFrame.setVisible(false);
-        this.inventoryAndAbilityDetailText.setVisible(false);
-        this.useButton.setVisible(false);
-        this.useButton.buttonText.setVisible(false);
-
-        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
-        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-
-        this.closeInventory();
-        this.closeAbility();
-
-        this.disableAllActionButtons();
-
-
-        this.message.setVisible(false);
-        this.hotkeyButton1.select();
-        this.attackButton.select();
-
-        this.commandMenuFrame.setVisible(false);
-
-        this.confirmMenuFrame.setVisible(true);
-        this.cancelMenuFrame.setVisible(true);
-        // this.cancelText.setVisible(true);
-        this.cancelButton.setVisible(true);
-        this.cancelButton.buttonText.setVisible(true);
-
-        this.commandMenuText.setText('Choose A Target');
-        this.commandMenuText.setVisible(true);
-
-        this.battleScene.interactionState = 'attack';
-    }
-
-    private selectRun() {
-        this.closeInventory();
-        this.closeAbility();
-        this.disableAllActionButtons();
-        this.runButton.select();
-
-        this.inventoryAndAbilityDetailFrame.setVisible(false);
-        this.inventoryAndAbilityDetailText.setVisible(false);
-        // this.inventoryAndAbilityCancelButton.setVisible(false);
-        // this.inventoryAndAbilityCancelButton.buttonText.setVisible(false);
-        this.useButton.setVisible(false);
-        this.useButton.buttonText.setVisible(false);
-
-        this.selectedItemAndAbilityIcon.setVisible(false);
-        this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
-
-        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
-        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-
-        this.battleScene.interactionState = 'run';
-
-        eventsCenter.emit('actionSelect', {
-            action: 'run',
-            target: this.battleScene.heroes[0]
-        });
-    }
-
-    private selectCancel() {
-        this.disableAllActionButtons();
-
-        this.closeInventory();
-        this.closeAbility();
-
-        // this.cancelText.setVisible(false);
-        this.cancelButton.setVisible(false);
-        this.cancelButton.buttonText.setVisible(false);
-        this.cancelMenuFrame.setVisible(false);
-        this.confirmMenuFrame.setVisible(false);
-
-        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
-        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-
-        this.message.setVisible(false);
-        this.selectedItemAndAbilityIcon.setVisible(false);
-        this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
-
-        this.commandMenuFrame.setVisible(true);
-        this.commandMenuText.setVisible(true);
-        this.commandMenuText.setText('Command?');
-
-        this.hotkeyMenuFrame.setVisible(true);
-        this.hotkeyButton1.setVisible(true);
-        this.hotkeyBadge1.setVisible(true);
-
-        this.battleScene.interactionState = 'mainselect';
-
-        this.inventoryAndAbilityDetailFrame.setVisible(false);
-        this.inventoryAndAbilityDetailText.setVisible(false);
-        this.useButton.setVisible(false);
-        this.useButton.buttonText.setVisible(false);
-    }
-
-    private initiateBattleUI() {
-        this.hideUIFrames();
-        eventsCenter.emit('Message', `A ${this.battleScene.enemies[0].type} approaches.`);
     }
 
     private selectAbility() {
@@ -581,6 +487,7 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.commandMenuFrame.setVisible(false);
         this.commandMenuText.setVisible(false);
+        this.selectedItemAndAbilityCommandText.setVisible(false);
 
         this.hotkeyButton1.setVisible(false);
         this.hotkeyMenuFrame.setVisible(false);
@@ -612,7 +519,7 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.cancelMenuFrame.setX(315);
         this.cancelMenuFrame.setY(315);
-        
+
         this.cancelButton.setVisible(true);
         this.cancelButton.buttonText.setVisible(true);
         this.cancelMenuFrame.setVisible(true);
@@ -625,6 +532,93 @@ export default class BattleUIScene extends Phaser.Scene {
         }
 
         this.subAbilityButton.select();
+    }
+
+    private selectAttack() {
+
+        this.selectedItemAndAbilityIcon.setVisible(false);
+        this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+
+        this.hotkeyMenuFrame.setVisible(true);
+        this.hotkeyButton1.setVisible(true);
+        this.hotkeyBadge1.setVisible(true);
+
+        this.cancelMenuFrame.setX(698);
+        this.cancelMenuFrame.setY(430);
+
+        this.cancelButton.setX(730);
+        this.cancelButton.setY(465);
+
+        this.cancelButton.buttonText.setX(750);
+        this.cancelButton.buttonText.setY(440);
+
+        this.inventoryAndAbilityDetailFrame.setVisible(false);
+        this.inventoryAndAbilityDetailText.setVisible(false);
+        this.useButton.setVisible(false);
+        this.useButton.buttonText.setVisible(false);
+
+        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+
+        this.closeInventory();
+        this.closeAbility();
+
+        this.disableAllActionButtons();
+
+        this.message.setVisible(false);
+        this.hotkeyButton1.select();
+        this.attackButton.select();
+
+        this.commandMenuFrame.setVisible(false);
+        this.selectedItemAndAbilityCommandText.setVisible(false);
+
+        this.confirmMenuFrame.setVisible(true);
+        this.cancelMenuFrame.setVisible(true);
+        // this.cancelText.setVisible(true);
+        this.cancelButton.setVisible(true);
+        this.cancelButton.buttonText.setVisible(true);
+
+        this.commandMenuText.setText('Choose A Target');
+        this.commandMenuText.setVisible(true);
+
+        this.battleScene.interactionState = 'attack';
+    }
+
+    private selectCancel() {
+        this.disableAllActionButtons();
+
+        this.closeInventory();
+        this.closeAbility();
+
+        // this.cancelText.setVisible(false);
+        this.cancelButton.setVisible(false);
+        this.cancelButton.buttonText.setVisible(false);
+        this.cancelMenuFrame.setVisible(false);
+        this.confirmMenuFrame.setVisible(false);
+
+        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+
+        this.message.setVisible(false);
+        this.selectedItemAndAbilityIcon.setVisible(false);
+        this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+
+        this.commandMenuFrame.setVisible(true);
+        this.commandMenuText.setVisible(true);
+        this.commandMenuText.setText('Command?');
+
+        this.selectedItemAndAbilityCommandText.setVisible(false);
+
+        this.hotkeyMenuFrame.setVisible(true);
+        this.hotkeyButton1.setVisible(true);
+        this.hotkeyBadge1.setVisible(true);
+
+        this.battleScene.interactionState = 'mainselect';
+
+        this.inventoryAndAbilityDetailFrame.setVisible(false);
+        this.inventoryAndAbilityDetailText.setVisible(false);
+        this.useButton.setVisible(false);
+        this.useButton.buttonText.setVisible(false);
     }
 
     private selectInventory() {
@@ -641,6 +635,7 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.commandMenuFrame.setVisible(false);
         this.commandMenuText.setVisible(false);
+        this.selectedItemAndAbilityCommandText.setVisible(false);
 
         this.hotkeyButton1.setVisible(false);
         this.hotkeyMenuFrame.setVisible(false);
@@ -657,11 +652,11 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.cancelMenuFrame.setX(315);
         this.cancelMenuFrame.setY(315);
-        
+
         this.cancelButton.setVisible(true);
         this.cancelButton.buttonText.setVisible(true);
         this.cancelMenuFrame.setVisible(true);
-        
+
         this.battleScene.interactionState = 'inventory';
 
         // query the items here!!!
@@ -677,5 +672,32 @@ export default class BattleUIScene extends Phaser.Scene {
         }
 
         this.subInventoryBagButton.select();
+    }
+
+    private selectRun() {
+        this.closeInventory();
+        this.closeAbility();
+        this.disableAllActionButtons();
+        this.runButton.select();
+
+        this.inventoryAndAbilityDetailFrame.setVisible(false);
+        this.inventoryAndAbilityDetailText.setVisible(false);
+        // this.inventoryAndAbilityCancelButton.setVisible(false);
+        // this.inventoryAndAbilityCancelButton.buttonText.setVisible(false);
+        this.useButton.setVisible(false);
+        this.useButton.buttonText.setVisible(false);
+
+        this.selectedItemAndAbilityIcon.setVisible(false);
+        this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+
+        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+
+        this.battleScene.interactionState = 'run';
+
+        eventsCenter.emit('actionSelect', {
+            action: 'run',
+            target: this.battleScene.heroes[0]
+        });
     }
 }

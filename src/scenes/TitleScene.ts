@@ -10,14 +10,10 @@ export default class TitleScene extends Phaser.Scene {
         super('Title');
     }
 
-    init() {
-        this.scene.launch('Music');
-    }
-
     create() {
 
         this.musicScene = <MusicScene>this.scene.get('Music');
-        
+
         const phaserImage = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pic');
         phaserImage.displayHeight = this.sys.canvas.height;
         phaserImage.displayWidth = this.sys.canvas.width;
@@ -64,10 +60,6 @@ export default class TitleScene extends Phaser.Scene {
         });
     }
 
-    startScene(targetScene: string) {
-        this.scene.start(targetScene);
-    }
-
     handleInput(camera: Camera) {
         // sets the title music
 
@@ -80,5 +72,13 @@ export default class TitleScene extends Phaser.Scene {
             this.startScene('Game');
         });
 
+    }
+
+    init() {
+        this.scene.launch('Music');
+    }
+
+    startScene(targetScene: string) {
+        this.scene.start(targetScene);
     }
 }

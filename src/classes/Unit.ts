@@ -2,15 +2,17 @@ import BattleScene from '../scenes/BattleScene';
 import BattleUIScene from '../scenes/BattleUIScene';
 import GameScene from '../scenes/GameScene';
 import Stats from '../stats/Stats';
+import {Equipment} from '../types/Equipment';
 
 export default abstract class Unit extends Phaser.GameObjects.Sprite {
+    abstract damageTween: Phaser.Tweens.Tween;
+    abstract equipment: Equipment;
     public living: boolean;
     abstract stats: Stats;
-    abstract damageTween: Phaser.Tweens.Tween;
-    protected gameScene: GameScene;
     abstract type: string;
     protected battleScene: BattleScene;
     protected battleUIScene: BattleUIScene;
+    protected gameScene: GameScene;
 
     protected constructor(
         public scene: Phaser.Scene,

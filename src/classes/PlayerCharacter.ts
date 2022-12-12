@@ -1,16 +1,18 @@
 import BattleScene from '../scenes/BattleScene';
 import BattleUIScene from '../scenes/BattleUIScene';
 import Stats from '../stats/Stats';
+import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import {Enemy} from './Enemy';
 import Item from './Item';
 import Unit from './Unit';
 
 export default class PlayerCharacter extends Unit {
-    type: string;
-    damageTween!: Phaser.Tweens.Tween;
-    stats!: Stats;
-    inventory!: Item[];
+    public damageTween!: Phaser.Tweens.Tween;
+    public equipment: Equipment;
+    public inventory!: Item[];
+    public stats!: Stats;
+    public type: string;
 
     constructor(
         scene: BattleScene,
@@ -28,6 +30,7 @@ export default class PlayerCharacter extends Unit {
         );
         this.battleScene = <BattleScene>this.scene.scene.get('Battle');
         this.stats = this.gameScene.player.stats;
+        this.equipment = this.gameScene.player.equipment;
         this.inventory = this.gameScene.player.inventory;
         this.type = 'Soldier';
 
@@ -43,6 +46,7 @@ export default class PlayerCharacter extends Unit {
                 battleUIScene.confirmSelectedAbilityOrItemFrameB.setVisible(false);
                 battleUIScene.selectedItemAndAbilityIcon.setVisible(false);
                 battleUIScene.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+                battleUIScene.selectedItemAndAbilityCommandText.setVisible(false);
 
                 for (const item of battleUIScene.inventoryButtons) {
                     item.deselect();
@@ -58,27 +62,7 @@ export default class PlayerCharacter extends Unit {
         });
     }
 
-    updateSceneOnReceivingDamage(): void {
-        // take care of flashing the enemy sprite if it gets damaged or hiding it if it dies.
-        if (this.stats.currentHP <= 0) {
-            this.setVisible(false);
-        }
-        else {
-            this.damageTween = this.scene.tweens.add({
-                targets: this,
-                duration: 100,
-                repeat: 3,
-                alpha: 0,
-                yoyo: true
-            });
-        }
-    }
-
-    getInitiative(): number {
-        return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
-    }
-
-    applyHPChange(hpChangeAmount: number): number {
+    public applyHPChange(hpChangeAmount: number): number {
         const initialCharacterHP = this.stats.currentHP;
 
         // handle healing hp change (negative hp change signifies healing)
@@ -98,17 +82,76 @@ export default class PlayerCharacter extends Unit {
             this.living = false;
         }
 
-        this.battleScene.player1HPText.setText(`HP: ${this.stats.currentHP}`);
+        console.log('setting the ui hp');
+        console.log({
+            currentHP: this.stats.currentHP,
+            maxHP: this.stats.maxHP
+        });
+        this.battleScene.player1HPText.setText(`HP: ${this.stats.currentHP}/${this.stats.maxHP}`);
 
         // return actual hp change
         return this.stats.currentHP - initialCharacterHP;
     }
 
-    evadeTest(): boolean {
+    public calculateAttackDamage(target: (PlayerCharacter | Enemy)): number {
+        return Math.max(
+            1,
+            Math.floor(
+                (this.getCombinedStat('strength') - target.stats.defense / 2) * Phaser.Math.FloatBetween(
+                    0.34,
+                    0.52
+                )
+            )
+        );
+    }
+
+    public calculateCriticalStrikeDamage() {
+        return Math.max(
+            1,
+            Math.floor(
+                this.stats.strength * (Phaser.Math.Between(54, 64) / 64)
+            )
+        );
+    }
+
+    public criticalStrikeTest(): boolean {
         return Phaser.Math.Between(1, 64) === 1;
     }
 
-    runTurn(data: { action: string; target: Enemy | PlayerCharacter; }) {
+    public evadeTest(): boolean {
+        return Phaser.Math.Between(1, 64) === 1;
+    }
+
+    public getCombinedStat(stat: keyof typeof this.stats): number {
+        const baseStat = this.stats[stat];
+        let weaponBonus = 0;
+        if (this.equipment.weapon) {
+            weaponBonus += this.equipment.weapon.stats![stat as keyof typeof this.equipment.weapon.stats];
+        }
+
+        let headBonus = 0;
+        if (this.equipment.head) {
+            headBonus += this.equipment.head.stats![stat as keyof typeof this.equipment.head.stats];
+        }
+
+        let bodyBonus = 0;
+        if (this.equipment.body) {
+            bodyBonus += this.equipment.body.stats![stat as keyof typeof this.equipment.body.stats];
+        }
+
+        let offHandBonus = 0;
+        if (this.equipment.offhand) {
+            offHandBonus += this.equipment.offhand.stats![stat as keyof typeof this.equipment.offhand.stats];
+        }
+
+        return baseStat + weaponBonus + headBonus + bodyBonus + offHandBonus;
+    }
+
+    public getInitiative(): number {
+        return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
+    }
+
+    public runTurn(data: { action: string; target: Enemy | PlayerCharacter; }) {
         const target = data.target;
         let runtimeInMS = 0;
 
@@ -162,28 +205,19 @@ export default class PlayerCharacter extends Unit {
         return runtimeInMS;
     }
 
-    calculateAttackDamage(target: (PlayerCharacter | Enemy)): number {
-        return Math.max(
-            1,
-            Math.floor(
-                (this.stats.attack - target.stats.defense / 2) * Phaser.Math.FloatBetween(
-                    0.34,
-                    0.52
-                )
-            )
-        );
-    }
-
-    criticalStrikeTest(): boolean {
-        return Phaser.Math.Between(1, 64) === 1;
-    }
-
-    calculateCriticalStrikeDamage() {
-        return Math.max(
-            1,
-            Math.floor(
-                this.stats.attack * (Phaser.Math.Between(54, 64) / 64)
-            )
-        );
+    public updateSceneOnReceivingDamage(): void {
+        // take care of flashing the enemy sprite if it gets damaged or hiding it if it dies.
+        if (this.stats.currentHP <= 0) {
+            this.setVisible(false);
+        }
+        else {
+            this.damageTween = this.scene.tweens.add({
+                targets: this,
+                duration: 100,
+                repeat: 3,
+                alpha: 0,
+                yoyo: true
+            });
+        }
     }
 }

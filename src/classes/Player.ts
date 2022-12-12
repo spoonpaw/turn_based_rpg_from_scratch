@@ -3,6 +3,7 @@ import GameScene from '../scenes/GameScene';
 import UIScene from '../scenes/UIScene';
 import Stats from '../stats/Stats';
 import {Direction} from '../types/Direction';
+import {Equipment} from '../types/Equipment';
 import Item from './Item';
 
 export default class Player {
@@ -16,8 +17,8 @@ export default class Player {
         public experience: number,
         public type: string,
         public inventory: Item[],
+        public equipment: Equipment,
         stats?: Stats
-
     ) {
         this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
 
@@ -42,34 +43,7 @@ export default class Player {
         );
     }
 
-    getPosition(): Phaser.Math.Vector2 {
-        return this.sprite.getBottomCenter();
-    }
-
-    setPosition(position: Phaser.Math.Vector2): void {
-        this.sprite.setPosition(position.x, position.y);
-    }
-
-    stopAnimation(direction: Direction) {
-        const animationManager = this.sprite.anims.animationManager;
-        const standingFrame = animationManager.get(direction).frames[1].frame.name;
-        this.sprite.anims.stop();
-        this.sprite.setFrame(standingFrame);
-    }
-
-    startAnimation(direction: Direction) {
-        this.sprite.anims.play(direction);
-    }
-
-    getTilePos(): Phaser.Math.Vector2 {
-        return this.tilePos.clone();
-    }
-
-    setTilePos(tilePosition: Phaser.Math.Vector2): void {
-        this.tilePos = tilePosition.clone();
-    }
-
-    createStatsForNewPlayer(job: string): Stats {
+    public createStatsForNewPlayer(job: string): Stats {
         if (job === 'Soldier') {
 
             return new Stats(
@@ -103,4 +77,57 @@ export default class Player {
             );
         }
     }
+
+    public getCombinedStat(stat: keyof typeof this.stats): number {
+        const baseStat = this.stats[stat];
+        let weaponBonus = 0;
+        if (this.equipment.weapon) {
+            weaponBonus += this.equipment.weapon.stats![stat as keyof typeof this.equipment.weapon.stats];
+        }
+
+        let headBonus = 0;
+        if (this.equipment.head) {
+            headBonus += this.equipment.head.stats![stat as keyof typeof this.equipment.head.stats];
+        }
+
+        let bodyBonus = 0;
+        if (this.equipment.body) {
+            bodyBonus += this.equipment.body.stats![stat as keyof typeof this.equipment.body.stats];
+        }
+
+        let offHandBonus = 0;
+        if (this.equipment.offhand) {
+            offHandBonus += this.equipment.offhand.stats![stat as keyof typeof this.equipment.offhand.stats];
+        }
+
+        return baseStat + weaponBonus + headBonus + bodyBonus + offHandBonus;
+    }
+
+    public getPosition(): Phaser.Math.Vector2 {
+        return this.sprite.getBottomCenter();
+    }
+
+    public getTilePos(): Phaser.Math.Vector2 {
+        return this.tilePos.clone();
+    }
+
+    public setPosition(position: Phaser.Math.Vector2): void {
+        this.sprite.setPosition(position.x, position.y);
+    }
+
+    public setTilePos(tilePosition: Phaser.Math.Vector2): void {
+        this.tilePos = tilePosition.clone();
+    }
+
+    public startAnimation(direction: Direction) {
+        this.sprite.anims.play(direction);
+    }
+
+    public stopAnimation(direction: Direction) {
+        const animationManager = this.sprite.anims.animationManager;
+        const standingFrame = animationManager.get(direction).frames[1].frame.name;
+        this.sprite.anims.stop();
+        this.sprite.setFrame(standingFrame);
+    }
+
 }

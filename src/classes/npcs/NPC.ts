@@ -22,8 +22,20 @@ export default class NPC {
         return this.sprite.getBottomCenter();
     }
 
+    getTilePos(): Phaser.Math.Vector2 {
+        return this.tilePos.clone();
+    }
+
     setPosition(position: Phaser.Math.Vector2): void {
         this.sprite.setPosition(position.x, position.y);
+    }
+
+    setTilePos(tilePosition: Phaser.Math.Vector2): void {
+        this.tilePos = tilePosition.clone();
+    }
+
+    startAnimation(direction: Direction) {
+        this.sprite.anims.play(direction);
     }
 
     stopAnimation(direction: Direction) {
@@ -31,17 +43,5 @@ export default class NPC {
         const standingFrame = animationManager.get(direction).frames[1].frame.name;
         this.sprite.anims.stop();
         this.sprite.setFrame(standingFrame);
-    }
-
-    startAnimation(direction: Direction) {
-        this.sprite.anims.play(direction);
-    }
-
-    getTilePos(): Phaser.Math.Vector2 {
-        return this.tilePos.clone();
-    }
-
-    setTilePos(tilePosition: Phaser.Math.Vector2): void {
-        this.tilePos = tilePosition.clone();
     }
 }

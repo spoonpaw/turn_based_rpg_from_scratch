@@ -69,22 +69,21 @@ const Soldier: {
 };
 
 export interface IStatIncreases {
-    strength: {range: [number, number], increment: number}[];
-    agility: {range: [number, number], increment: number}[];
-    vitality: {range: [number, number], increment: number}[];
-    intellect: {range: [number, number], increment: number}[];
-    luck: {range: [number, number], increment: number}[];
+    agility: { range: [number, number], increment: number }[];
+    intellect: { range: [number, number], increment: number }[];
+    luck: { range: [number, number], increment: number }[];
+    strength: { range: [number, number], increment: number }[];
+    vitality: { range: [number, number], increment: number }[];
 }
 
-
 interface IAdvancementBlock {
-    level: number;
-    xp: number;
-    strength: number;
     agility: number;
-    vitality: number;
     intellect: number;
+    level: number;
     luck: number;
+    strength: number;
+    vitality: number;
+    xp: number;
 }
 
 export default Soldier;
