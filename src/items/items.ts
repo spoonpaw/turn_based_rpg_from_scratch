@@ -17,7 +17,7 @@ export const items: itemArray = [
         cost: 3,
         classes: ['all'],
         stats: {
-            strength: 100,
+            strength: 1,
             agility: 0,
             vitality: 0,
             intellect: 0,
