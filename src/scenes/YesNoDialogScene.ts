@@ -10,17 +10,17 @@ export default class YesNoDialogScene extends Phaser.Scene {
     private noButton!: UIActionButton;
     private yesButton!: UIActionButton;
 
-    constructor() {
+    public constructor() {
         super('YesNoDialog');
     }
 
-    closeScene() {
+    public closeScene() {
         this.gameScene.input.keyboard.enabled = true;
         // this.gameScene.activeDialogScene = false;
         this.scene.stop();
     }
 
-    create(data: { text: string | string[]; }) {
+    public create(data: { text: string | string[]; }) {
         this.cursors = this.input.keyboard.createCursorKeys();
         this.justSpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE, true, false);
 
@@ -78,7 +78,7 @@ export default class YesNoDialogScene extends Phaser.Scene {
         this.gameScene.input.keyboard.enabled = false;
     }
 
-    update() {
+    public update() {
         if (Phaser.Input.Keyboard.JustDown(this.cursors.space) && !this.gameScene.spaceDown) {
             this.closeScene();
         }

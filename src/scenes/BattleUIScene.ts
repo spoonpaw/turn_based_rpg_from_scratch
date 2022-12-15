@@ -2,6 +2,7 @@ import Message from '../classes/Message';
 import UIActionButton from '../classes/UIActionButton';
 import eventsCenter from '../utils/EventsCenter';
 import BattleScene from './BattleScene';
+import MusicScene from './MusicScene';
 
 export default class BattleUIScene extends Phaser.Scene {
     public attackButton!: UIActionButton;
@@ -13,6 +14,8 @@ export default class BattleUIScene extends Phaser.Scene {
     public message!: Message;
     public selectedItemAndAbilityCommandText!: Phaser.GameObjects.Text;
     public selectedItemAndAbilityIcon!: UIActionButton;
+    public musicMuteButton!: UIActionButton;
+    private musicScene!: MusicScene;
     private abilityButton!: UIActionButton;
     private actionButtons: UIActionButton[] = [];
     private bagButton!: UIActionButton;
@@ -35,7 +38,7 @@ export default class BattleUIScene extends Phaser.Scene {
     private subInventoryButtons: UIActionButton[] = [];
     private useButton!: UIActionButton;
 
-    constructor() {
+    public constructor() {
         super('BattleUI');
     }
 
@@ -67,7 +70,10 @@ export default class BattleUIScene extends Phaser.Scene {
         this.subInventoryAndAbilityMenuFrame.setVisible(false);
     }
 
-    create() {
+    public create() {
+
+        this.musicScene = <MusicScene>this.scene.get('Music');
+
         // get a reference to the battle scene
         this.battleScene = <BattleScene>this.scene.get('Battle');
 
@@ -168,6 +174,38 @@ export default class BattleUIScene extends Phaser.Scene {
         this.actionButtons.push(this.hotkeyButton1);
         this.hotkeyBadge1 = this.add.image(278, 583, 'badge1').setScale(2);
         this.hotkeyBadge1.setVisible(false);
+
+        this.musicMuteButton = new UIActionButton(
+            this,
+            890,
+            21,
+            'musicbutton',
+            'musicinactivebutton',
+            '',
+            () => {
+                console.log('music button clicked!');
+                if (!this.musicScene.muted) {
+                    this.musicScene.muted = true;
+                    this.musicScene.musicMuteButton.select();
+                    this.musicMuteButton.select();
+                    this.musicScene.muteMusic();
+                }
+                else {
+                    this.musicScene.muted = false;
+                    this.musicScene.musicMuteButton.deselect();
+                    this.musicMuteButton.deselect();
+                    this.musicScene.unmuteMusic();
+                }
+
+            }
+        );
+        if (this.musicScene.muted) {
+            this.musicMuteButton.select();
+        }
+        else {
+            this.musicMuteButton.deselect();
+        }
+
 
         this.abilityButton = new UIActionButton(
             this,
@@ -352,6 +390,30 @@ export default class BattleUIScene extends Phaser.Scene {
                 this.message.text.setText('');
                 // this.message.setVisible(true);
 
+                // TODO: fix this part. this.selectedItemAndAbilityIcon needs to be destroyed and
+                //  regenerated here based on what the selected item is
+
+                this.selectedItemAndAbilityIcon.destroy();
+                this.selectedItemAndAbilityIcon.buttonText.destroy();
+
+                // get the selected item!!!
+                console.log(`this is the current interaction state ${this.battleScene.interactionState}`);
+                const selectedItemIndex = Number(this.battleScene.interactionState.split('inventoryaction')[1]);
+                const selectedItem = this.battleScene.heroes[0].inventory[selectedItemIndex];
+
+                this.selectedItemAndAbilityIcon = new UIActionButton(
+                    this,
+                    265,
+                    465,
+                    selectedItem.key,
+                    selectedItem.activeKey,
+                    selectedItem.name,
+                    () => {
+                        return;
+                    }
+                );
+
+
                 this.selectedItemAndAbilityIcon.setVisible(true);
                 this.selectedItemAndAbilityIcon.buttonText.setVisible(true);
 
@@ -409,9 +471,12 @@ export default class BattleUIScene extends Phaser.Scene {
                 item.name,
                 () => {
                     // display text here describing the selected item
+                    this.battleScene.interactionState = `selectinginventoryaction${index}`;
+                    const selectedItemIndex = Number(this.battleScene.interactionState.split('selectinginventoryaction')[1]);
+                    const selectedItem = this.battleScene.heroes[0].inventory[selectedItemIndex];
                     this.cancelMenuFrame.setVisible(false);
                     this.inventoryAndAbilityDetailFrame.setVisible(true);
-                    this.inventoryAndAbilityDetailText.setText('Heals a friendly target for 30 HP.');
+                    this.inventoryAndAbilityDetailText.setText(selectedItem.description);
                     this.inventoryAndAbilityDetailText.setVisible(true);
                     this.useButton.setVisible(true);
                     this.useButton.buttonText.setVisible(true);
@@ -429,7 +494,6 @@ export default class BattleUIScene extends Phaser.Scene {
                             inventoryButton.deselect();
                         }
                     }
-                    this.battleScene.interactionState = `selectinginventoryaction${index}`;
                 }
             );
             inventoryButton.setVisible(false);
@@ -464,6 +528,12 @@ export default class BattleUIScene extends Phaser.Scene {
     }
 
     private initiateBattleUI() {
+        if (this.musicScene.muted) {
+            this.musicMuteButton.select();
+        }
+        else {
+            this.musicMuteButton.deselect();
+        }
         this.hideUIFrames();
         eventsCenter.emit('Message', `A ${this.battleScene.enemies[0].type} approaches.`);
     }

@@ -18,7 +18,7 @@ export default class UiButton extends Phaser.GameObjects.Container {
         this.scene.add.existing(this);
     }
 
-    createButton() {
+    public createButton() {
         // create play game button
         this.button = this.scene.add.image(0, 0, this.key);
         // make button interactive

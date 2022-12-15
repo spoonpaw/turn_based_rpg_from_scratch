@@ -55,7 +55,7 @@ export default class PlayerCharacter extends Unit {
                 }
 
                 eventsCenter.emit('actionSelect', {
-                    action: this.inventory[inventorySlotNumber].key,
+                    action: this.inventory[inventorySlotNumber].name,
                     target: this
                 });
             }
@@ -177,7 +177,11 @@ export default class PlayerCharacter extends Unit {
                 return runtimeInMS;
             }
         }
-        else if (data.action === 'healthpotion') {
+        else if (data.action === 'Cypress Stick') {
+            runtimeInMS += 2000;
+            eventsCenter.emit('Message', `${this.type} uses a cypress stick on ${target.type}; it has no effect.`);
+        }
+        else if (data.action === 'Health Potion') {
             // get the selected inventory slot index from the battle ui scene delete it from the player's inventory
             //  and regenerate the inventory list
 

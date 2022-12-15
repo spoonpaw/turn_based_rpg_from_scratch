@@ -6,11 +6,11 @@ export default class TitleScene extends Phaser.Scene {
     public titleText!: Phaser.GameObjects.Text;
     private musicScene!: MusicScene;
 
-    constructor() {
+    public constructor() {
         super('Title');
     }
 
-    create() {
+    public create() {
 
         this.musicScene = <MusicScene>this.scene.get('Music');
 
@@ -60,10 +60,9 @@ export default class TitleScene extends Phaser.Scene {
         });
     }
 
-    handleInput(camera: Camera) {
+    public handleInput(camera: Camera) {
         // sets the title music
-
-        this.musicScene.titleSong.play();
+        this.musicScene.changeSong('title');
 
         this.input.keyboard.enabled = false;
         this.input.enabled = false;
@@ -74,11 +73,11 @@ export default class TitleScene extends Phaser.Scene {
 
     }
 
-    init() {
+    public init() {
         this.scene.launch('Music');
     }
 
-    startScene(targetScene: string) {
+    public startScene(targetScene: string) {
         this.scene.start(targetScene);
     }
 }

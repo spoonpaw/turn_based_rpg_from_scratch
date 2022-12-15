@@ -16,7 +16,7 @@ export default class Innkeeper extends NPC {
         this.uiScene = <UIScene>this.gameScene.scene.get('UI');
     }
 
-    listenForInteractEvent() {
+    public listenForInteractEvent() {
         console.log('innkeeper heard player press the space bar somewhere!');
         // check if player is facing innkeeper
         if (
@@ -47,6 +47,10 @@ export default class Innkeeper extends NPC {
             if (this.gameScene.gridPhysics.facingDirection === 'right') this.sprite.setFrame(1);
             if (this.gameScene.gridPhysics.facingDirection === 'up') this.sprite.setFrame(0);
 
+            this.uiScene.updateGold();
+            this.uiScene.goldFrame.setVisible(true);
+            this.uiScene.goldIcon.setVisible(true);
+            this.uiScene.goldText.setVisible(true);
             this.uiScene.leftSideDialogFrame.setVisible(true);
             this.uiScene.leftSideDialogText.setText('Innkeeper:\nGood day! It costs three gold to rest hither. Dost thou wish to stay?');
             this.uiScene.leftSideDialogText.setVisible(true);
@@ -63,6 +67,10 @@ export default class Innkeeper extends NPC {
                 eventsCenter.removeListener('no');
                 console.log('close the talk scene');
 
+
+                this.uiScene.goldFrame.setVisible(false);
+                this.uiScene.goldIcon.setVisible(false);
+                this.uiScene.goldText.setVisible(false);
                 this.uiScene.leftSideDialogFrame.setVisible(false);
                 this.uiScene.leftSideDialogText.setText('');
                 this.uiScene.leftSideDialogText.setVisible(false);

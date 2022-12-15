@@ -1,15 +1,20 @@
 import TweenHelper from '../utils/TweenHelper';
 import GameScene from './GameScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
+import UIActionButton from '../classes/UIActionButton';
+import MusicScene from './MusicScene';
 
 export default class GameOverScene extends Phaser.Scene {
     private gameOverText!: Phaser.GameObjects.Text;
+    private musicMuteButton!: UIActionButton;
+    private musicScene!: MusicScene;
 
-    constructor() {
+    public constructor() {
         super('GameOver');
     }
 
-    create() {
+    public create() {
+        this.musicScene = <MusicScene>this.scene.get('Music');
         const phaserImage = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'title');
         phaserImage.displayHeight = this.sys.canvas.height;
         phaserImage.displayWidth = this.sys.canvas.width;
@@ -34,6 +39,37 @@ export default class GameOverScene extends Phaser.Scene {
 
         pressAnyKeyText.setOrigin(0.5);
 
+        this.musicMuteButton = new UIActionButton(
+            this,
+            890,
+            21,
+            'musicbutton',
+            'musicinactivebutton',
+            '',
+            () => {
+                console.log('music button clicked!');
+                if (!this.musicScene.muted) {
+                    this.musicScene.muted = true;
+                    this.musicScene.musicMuteButton.select();
+                    this.musicMuteButton.select();
+                    this.musicScene.muteMusic();
+                }
+                else {
+                    this.musicScene.muted = false;
+                    this.musicScene.musicMuteButton.deselect();
+                    this.musicMuteButton.deselect();
+                    this.musicScene.unmuteMusic();
+                }
+
+            }
+        );
+        if (this.musicScene.muted) {
+            this.musicMuteButton.select();
+        }
+        else {
+            this.musicMuteButton.deselect();
+        }
+
         TweenHelper.flashElement(this, pressAnyKeyText);
 
         this.sys.events.removeListener('wake');
@@ -48,9 +84,9 @@ export default class GameOverScene extends Phaser.Scene {
 
     }
 
-    handleInput(camera: Camera) {
+    public handleInput(camera: Camera) {
         this.input.keyboard.enabled = false;
-        this.input.enabled = false;
+        // this.input.enabled = false;
         camera.fadeOut(3000);
         this.cameras.main.once('camerafadeoutcomplete', () => {
             this.scene.wake('Game');
@@ -59,7 +95,7 @@ export default class GameOverScene extends Phaser.Scene {
         });
     }
 
-    setupKeyListeners() {
+    public setupKeyListeners() {
         this.input.keyboard.enabled = true;
         this.input.enabled = true;
         this.cameras.main.once('camerafadeincomplete', (camera: Camera) => {
@@ -72,7 +108,7 @@ export default class GameOverScene extends Phaser.Scene {
         });
     }
 
-    wake() {
+    public wake() {
         this.cameras.main.fadeIn(3000);
         const gameScene = <GameScene>this.scene.get('Game');
         gameScene.player.stats.currentHP = gameScene.player.stats.maxHP;

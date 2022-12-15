@@ -4,17 +4,17 @@ export default class DialogScene extends Phaser.Scene {
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     private gameScene!: GameScene;
 
-    constructor() {
+    public constructor() {
         super('Dialog');
     }
 
-    closeScene() {
+    public closeScene() {
         this.gameScene.input.keyboard.enabled = true;
         // this.gameScene.activeDialogScene = false;
         this.scene.stop();
     }
 
-    create(data: { text: string | string[]; }) {
+    public create(data: { text: string | string[]; }) {
         this.cursors = this.input.keyboard.createCursorKeys();
 
         this.gameScene = <GameScene>this.scene.get('Game');
@@ -45,7 +45,7 @@ export default class DialogScene extends Phaser.Scene {
 
     }
 
-    update() {
+    public update() {
         if (Phaser.Input.Keyboard.JustDown(this.cursors.space) && !this.gameScene.spaceDown) {
             this.closeScene();
         }

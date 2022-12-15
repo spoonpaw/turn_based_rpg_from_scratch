@@ -35,7 +35,7 @@ export default class BattleScene extends Phaser.Scene {
     private uiScene!: UIScene;
     private units!: (PlayerCharacter | Enemy)[];
 
-    constructor() {
+    public constructor() {
         super('Battle');
     }
 
@@ -101,8 +101,8 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private endBattle(): void {
-        this.musicScene.battleSong.stop();
-        this.musicScene.titleSong.play();
+
+        this.musicScene.changeSong('title');
 
         this.battleUIScene.disableAllActionButtons();
         // send the player info to the game scene ui
@@ -353,8 +353,9 @@ export default class BattleScene extends Phaser.Scene {
         this.turnIndex = -1;
         // sets the battle music - muted for now
 
-        this.musicScene.titleSong.stop();
-        this.musicScene.battleSong.play();
+        this.musicScene.changeSong('battle');
+        // this.musicScene.titleSong.stop();
+        // this.musicScene.battleSong.play();
 
         // set background to grey
         this.cameras.main.setBackgroundColor('rgb(235, 235, 235)');
@@ -447,6 +448,15 @@ export default class BattleScene extends Phaser.Scene {
         this.index = -1;
 
         this.scene.run('BattleUI');
+        // this.battleUIScene = <BattleUIScene>this.scene.get('BattleUI');
+        //
+        // if (this.musicScene.muted) {
+        //     this.battleUIScene.musicMuteButton.select();
+        // }
+        // else {
+        //     this.battleUIScene.musicMuteButton.deselect();
+        // }
+
 
         eventsCenter.removeListener('actionSelect');
         eventsCenter.on('actionSelect', this.handleActionSelection, this);

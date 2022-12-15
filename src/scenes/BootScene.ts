@@ -2,21 +2,35 @@ import Phaser from 'phaser';
 
 export default class BootScene extends Phaser.Scene {
 
-    constructor() {
+    public constructor() {
         super('Boot');
     }
 
-    create() {
+    public create() {
         this.scene.start('Title');
     }
 
-    loadAudio() {
+    public preload() {
+        // load images
+        this.loadImages();
+
+        // load sprite sheets
+        this.loadSpriteSheets();
+
+        // load tile maps
+        this.loadTileMap();
+
+        // load audio files
+        this.loadAudio();
+    }
+
+    private loadAudio() {
         // load mp3s
         this.load.audio('battlesong', 'assets/sounds/songs/embattledPredistortion.mp3');
         this.load.audio('titlesong', 'assets/sounds/songs/ennui.mp3');
     }
 
-    loadImages() {
+    private loadImages() {
         // load images
         this.load.image('button', 'assets/images/ui/button.png');
         this.load.image('button2', 'assets/images/ui/button2.png');
@@ -40,6 +54,8 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('facebuttonactive', 'assets/images/ui/faceButtonActive.png');
         this.load.image('staffbutton', 'assets/images/ui/staffButton.png');
         this.load.image('staffbuttonactive', 'assets/images/ui/staffButtonActive.png');
+        this.load.image('musicbutton', 'assets/images/ui/musicButton.png');
+        this.load.image('musicinactivebutton', 'assets/images/ui/musicInactiveButton.png');
 
         this.load.image('healthpotion', 'assets/images/ui/healthPotion.png');
         this.load.image('healthpotionactive', 'assets/images/ui/healthPotionActive.png');
@@ -72,6 +88,7 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('gameActionMenuCharacterButtonActive', 'assets/images/ui/characterButtonActive.png');
 
         this.load.image('actionMenuFrame', 'assets/images/ui/actionMenuFrame.png');
+        this.load.image('goldFrame', 'assets/images/ui/goldFrame.png');
         this.load.image('heroMenuFrame', 'assets/images/ui/heroMenuFrame.png');
         this.load.image('messageMenuFrame', 'assets/images/ui/messageMenuFrame.png');
         this.load.image('commandMenuFrame', 'assets/images/ui/commandMenuFrame.png');
@@ -105,7 +122,7 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('overworldbackground', 'assets/images/overworldCombatBackground2.png');
     }
 
-    loadSpriteSheets() {
+    private loadSpriteSheets() {
         // load sprite sheets
         this.load.spritesheet('female_player', 'assets/images/characters/female_sprite.png', {
             frameWidth: 48,
@@ -130,23 +147,9 @@ export default class BootScene extends Phaser.Scene {
         });
     }
 
-    loadTileMap() {
+    private loadTileMap() {
         // load tile maps
         this.load.tilemapTiledJSON('overworld-map', 'assets/tilemaps/afterlife.json');
         this.load.tilemapTiledJSON('town-map', 'assets/tilemaps/town3.json');
-    }
-
-    preload() {
-        // load images
-        this.loadImages();
-
-        // load sprite sheets
-        this.loadSpriteSheets();
-
-        // load tile maps
-        this.loadTileMap();
-
-        // load audio files
-        this.loadAudio();
     }
 }

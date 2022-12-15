@@ -50,6 +50,10 @@ export default class Merchant extends NPC {
 
             // TODO: implement the item purchase functionality
             this.uiScene.inventoryAndAbilityMenuFrame.setVisible(true);
+            this.uiScene.updateGold();
+            this.uiScene.goldFrame.setVisible(true);
+            this.uiScene.goldIcon.setVisible(true);
+            this.uiScene.goldText.setVisible(true);
             this.uiScene.subInventoryAndAbilityMenuFrame.setVisible(true);
             this.uiScene.subInventoryBagButton.select();
             this.uiScene.subInventoryBagButton.setVisible(true);
@@ -83,6 +87,9 @@ export default class Merchant extends NPC {
                 this.uiScene.leftSideDialogText.setText('');
                 this.uiScene.leftSideDialogText.setVisible(false);
                 this.uiScene.inventoryAndAbilityMenuFrame.setVisible(false);
+                this.uiScene.goldFrame.setVisible(false);
+                this.uiScene.goldIcon.setVisible(false);
+                this.uiScene.goldText.setVisible(false);
                 this.uiScene.subInventoryAndAbilityMenuFrame.setVisible(false);
                 this.uiScene.subInventoryBagButton.setVisible(false);
                 this.uiScene.subInventoryBagButton.buttonText.setVisible(false);
