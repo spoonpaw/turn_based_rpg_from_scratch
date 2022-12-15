@@ -34,11 +34,11 @@ export default class NPC {
         this.tilePos = tilePosition.clone();
     }
 
-    startAnimation(direction: Direction) {
+    public startAnimation(direction: Direction) {
         this.sprite.anims.play(direction);
     }
 
-    stopAnimation(direction: Direction) {
+    public stopAnimation(direction: Direction) {
         const animationManager = this.sprite.anims.animationManager;
         const standingFrame = animationManager.get(direction).frames[1].frame.name;
         this.sprite.anims.stop();

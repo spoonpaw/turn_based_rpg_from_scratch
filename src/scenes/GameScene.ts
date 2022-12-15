@@ -28,7 +28,7 @@ export default class GameScene extends Phaser.Scene {
     private nonHostileSpace!: boolean;
     private uiScene!: UIScene;
 
-    constructor() {
+    public constructor() {
         super('Game');
     }
 
@@ -37,7 +37,7 @@ export default class GameScene extends Phaser.Scene {
         return randNum === 0;
     }
 
-    create(data?: { levelData?: ILevelData }) {
+    public create(data?: { levelData?: ILevelData }) {
         // this.activeDialogScene = false;
 
         // if data is empty then the game just started so load the player in the spawn location
@@ -187,7 +187,7 @@ export default class GameScene extends Phaser.Scene {
 
     }
 
-    setupPlayerGridPhysics() {
+    private setupPlayerGridPhysics() {
         this.gridPhysics = new GridPhysics(this.player, this.currentTilemap);
         this.gridControls = new GridControls(this.input, this.gridPhysics);
 
@@ -331,7 +331,13 @@ export default class GameScene extends Phaser.Scene {
 
     }
 
-    wake() {
+    public wake() {
+        if (this.uiScene.musicScene.muted) {
+            this.uiScene.musicMuteButton.select();
+        }
+        else {
+            this.uiScene.musicMuteButton.deselect();
+        }
         this.input.keyboard.enabled = true;
         this.cursors.left.reset();
         this.cursors.right.reset();

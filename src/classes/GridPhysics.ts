@@ -20,7 +20,7 @@ export default class GridPhysics {
     private readonly speedPixelsPerSecond: number = GameScene.TILE_SIZE * 4;
     private tileSizePixelsWalked = 0;
 
-    constructor(private player: Player, private tileMap: Phaser.Tilemaps.Tilemap) {
+    public constructor(private player: Player, private tileMap: Phaser.Tilemaps.Tilemap) {
     }
 
     movePlayer(direction: Direction): void {

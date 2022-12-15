@@ -6,6 +6,7 @@ import UIActionButton from '../classes/UIActionButton';
 import {ItemInterface} from '../items/items';
 import eventsCenter from '../utils/EventsCenter';
 import GameScene from './GameScene';
+import MusicScene from './MusicScene';
 
 export default class UIScene extends Phaser.Scene {
     public cancelButton!: UIActionButton;
@@ -15,6 +16,9 @@ export default class UIScene extends Phaser.Scene {
     public currentNPC!: Merchant | Innkeeper;
     public cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     public gameScene!: GameScene;
+    public goldFrame!: Phaser.GameObjects.Image;
+    public goldIcon!: Phaser.GameObjects.Image;
+    public goldText!: Phaser.GameObjects.Text;
     public heartIcon!: Phaser.GameObjects.Image;
     public hpText!: Phaser.GameObjects.Text;
     public interactionState!: string;
@@ -43,12 +47,11 @@ export default class UIScene extends Phaser.Scene {
     private characterButton!: UIActionButton;
     private characterSheetButton!: UIActionButton;
     private classString!: Phaser.GameObjects.Text;
-    private coinIcon!: Phaser.GameObjects.Image;
+    // private coinIcon!: Phaser.GameObjects.Image;
     private commandMenuText!: Phaser.GameObjects.Text;
     private equipButton!: UIActionButton;
     private equipmentButtons: UIActionButton[] = [];
     private equipmentStrings: Phaser.GameObjects.Text[] = [];
-    private goldText!: Phaser.GameObjects.Text;
     private headItemButton!: UIActionButton;
     private headString!: Phaser.GameObjects.Text;
     private hitPointString!: Phaser.GameObjects.Text;
@@ -64,6 +67,8 @@ export default class UIScene extends Phaser.Scene {
     private manaPointString!: Phaser.GameObjects.Text;
     private manaText!: Phaser.GameObjects.Text;
     private message!: GameMessage;
+    public musicMuteButton!: UIActionButton;
+    public musicScene!: MusicScene;
     private offHandItemButton!: UIActionButton;
     private offHandString!: Phaser.GameObjects.Text;
     private selectedItemAndAbilityCommandText!: Phaser.GameObjects.Text;
@@ -74,11 +79,12 @@ export default class UIScene extends Phaser.Scene {
     private tillNextLevelString!: Phaser.GameObjects.Text;
     private vitalityString!: Phaser.GameObjects.Text;
 
-    constructor() {
+    public constructor() {
         super('UI');
     }
 
-    create() {
+    public create() {
+        this.musicScene = <MusicScene>this.scene.get('Music');
         this.cursors = this.input.keyboard.createCursorKeys();
         this.setupUIElements();
         this.setupEvents();
@@ -289,7 +295,7 @@ export default class UIScene extends Phaser.Scene {
 
     }
 
-    init() {
+    public init() {
         // grab a reference to the game scene
         this.gameScene = <GameScene>this.scene.get('Game');
     }
@@ -307,6 +313,9 @@ export default class UIScene extends Phaser.Scene {
         this.cancelButton.buttonText.setVisible(false);
         this.subInventoryAndAbilityMenuFrame.setVisible(false);
         this.inventoryAndAbilityMenuFrame.setVisible(false);
+        this.goldFrame.setVisible(false);
+        this.goldIcon.setVisible(false);
+        this.goldText.setVisible(false);
         this.inventoryAndAbilityDetailFrame.setVisible(false);
         this.useButton.setVisible(false);
         this.useButton.buttonText.setVisible(false);
@@ -390,7 +399,7 @@ export default class UIScene extends Phaser.Scene {
         this.gameScene.input.keyboard.enabled = true;
     }
 
-    setupEvents() {
+    public setupEvents() {
         // listen for the updateHP event from the events center
         // eventsCenter.removeListener('updateHP');
         // eventsCenter.on('updateHP', this.updateHP, this);
@@ -406,7 +415,14 @@ export default class UIScene extends Phaser.Scene {
         // eventsCenter.on('updateXP', this.updateXP, this);
     }
 
-    setupUIElements() {
+    public setupUIElements() {
+
+        // START FRAME SECTION
+        this.actionMenuFrame = this.add.image(
+            460,
+            650,
+            'gameActionMenuFrame'
+        );
 
         this.leftSideDialogFrame = this.add.image(40, 380, 'leftsidedialogframe')
             .setOrigin(0, 0);
@@ -424,6 +440,10 @@ export default class UIScene extends Phaser.Scene {
             .setOrigin(0, 0);
         this.inventoryAndAbilityMenuFrame.setVisible(false);
 
+        this.goldFrame = this.add.image(532, 108, 'goldFrame')
+            .setOrigin(0, 0);
+        this.goldFrame.setVisible(false);
+
         this.subInventoryAndAbilityMenuFrame = this.add.image(236, 430, 'subInventoryAndAbilityMenuFrame')
             .setOrigin(0, 0);
         this.subInventoryAndAbilityMenuFrame.setVisible(false);
@@ -440,7 +460,20 @@ export default class UIScene extends Phaser.Scene {
             .setOrigin(0, 0);
         this.inventoryAndAbilityDetailFrame.setVisible(false);
 
-        // START ADDING TEXT FIELDS
+
+        // END FRAME SECTION
+
+        // START TEXT SECTION
+
+        this.goldText = this.add.text(584, 112, '0 gp', {
+            color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
+                width: 610,
+                useAdvancedWrap: true
+            }
+        })
+            .setResolution(10)
+            .setFontSize(50);
+        this.goldText.setVisible(false);
 
         this.leftSideDialogText = this.add.text(50, 380, '', {
             color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
@@ -452,7 +485,6 @@ export default class UIScene extends Phaser.Scene {
             .setFontSize(50)
             .setLineSpacing(-22);
 
-        // create text second
         this.commandMenuText = this.add.text(244, 440, 'Command?', {
             fontSize: '55px',
             color: '#fff',
@@ -590,6 +622,40 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(10);
         this.tillNextLevelString.setVisible(false);
 
+        // END TEXT SECTION
+
+        // START BUTTON SECTION
+        this.musicMuteButton = new UIActionButton(
+            this,
+            890,
+            21,
+            'musicbutton',
+            'musicinactivebutton',
+            '',
+            () => {
+                console.log('music button clicked!');
+                if (!this.musicScene.muted) {
+                    this.musicScene.muted = true;
+                    this.musicScene.musicMuteButton.select();
+                    this.musicMuteButton.select();
+                    this.musicScene.muteMusic();
+                }
+                else {
+                    this.musicScene.muted = false;
+                    this.musicScene.musicMuteButton.deselect();
+                    this.musicMuteButton.deselect();
+                    this.musicScene.unmuteMusic();
+                }
+
+            }
+        );
+        if (this.musicScene.muted) {
+            this.musicMuteButton.select();
+        }
+        else {
+            this.musicMuteButton.deselect();
+        }
+
         this.yesButton = new UIActionButton(
             this,
             710,
@@ -618,6 +684,10 @@ export default class UIScene extends Phaser.Scene {
                 // eventsCenter.removeListener('no');
                 console.log('close the talk scene');
 
+
+                this.goldFrame.setVisible(false);
+                this.goldIcon.setVisible(false);
+                this.goldText.setVisible(false);
                 this.leftSideDialogFrame.setVisible(false);
                 this.leftSideDialogText.setText('');
                 this.leftSideDialogText.setVisible(false);
@@ -766,7 +836,7 @@ export default class UIScene extends Phaser.Scene {
                             )
                         );
                         this.gameScene.player.gold -= selectedItem.cost;
-
+                        this.updateGold();
                     }
                 }
             }
@@ -784,6 +854,10 @@ export default class UIScene extends Phaser.Scene {
             () => {
                 console.log('setting the interaction state from the use button');
                 this.interactionState = this.interactionState.split('selecting')[1];
+
+                this.goldFrame.setVisible(false);
+                this.goldIcon.setVisible(false);
+                this.goldText.setVisible(false);
                 this.inventoryAndAbilityMenuFrame.setVisible(false);
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
                 this.subInventoryAndAbilityMenuFrame.setVisible(false);
@@ -1008,14 +1082,9 @@ export default class UIScene extends Phaser.Scene {
         this.subAbilityButtons.push(this.subAbilityButton);
 
         // END SUBABILITY BUTTONS SECTION
+        // END BUTTON SECTION
 
         this.generateInventoryButtons();
-
-        this.actionMenuFrame = this.add.image(
-            460,
-            650,
-            'gameActionMenuFrame'
-        );
 
         this.inventoryAndAbilityDetailText = this.add.text(
             15,
@@ -1086,6 +1155,10 @@ export default class UIScene extends Phaser.Scene {
         this.heartIcon = this.add.image(100, 638, 'heart')
             .setScale(1.25);
 
+        this.goldIcon = this.add.image(563, 142, 'coin')
+            .setScale(1.25);
+        this.goldIcon.setVisible(false);
+
         this.inventoryButton = new UIActionButton(
             this,
             850,
@@ -1119,6 +1192,11 @@ export default class UIScene extends Phaser.Scene {
 
                 // show the inventory interface!
                 this.interactionState = 'inventory';
+
+                this.updateGold();
+                this.goldFrame.setVisible(true);
+                this.goldIcon.setVisible(true);
+                this.goldText.setVisible(true);
 
                 this.inventoryAndAbilityMenuFrame.setVisible(true);
                 for (const inventoryButton of this.inventoryButtons) {
@@ -1324,7 +1402,7 @@ export default class UIScene extends Phaser.Scene {
         );
     }
 
-    update() {
+    public update() {
         if (Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
 
             console.log('space bar pressed on ui scene');
@@ -1368,6 +1446,10 @@ export default class UIScene extends Phaser.Scene {
             this.gameScene.spaceDown = false;
 
         }
+    }
+
+    public updateGold() {
+        this.goldText.setText(`${this.gameScene.player.gold} gp`);
     }
 
     public updateHP(hp: number, maxHp: number) {

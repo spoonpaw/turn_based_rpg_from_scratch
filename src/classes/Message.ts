@@ -4,7 +4,7 @@ export default class Message extends Phaser.GameObjects.Container {
     public text: Phaser.GameObjects.Text;
     private hideEvent: Phaser.Time.TimerEvent | undefined;
 
-    constructor(scene: Phaser.Scene) {
+    public constructor(scene: Phaser.Scene) {
         super(scene, 0, 0);
         const image = this.scene.add.image(236, 430, 'messageMenuFrame')
             .setOrigin(0, 0);
@@ -31,13 +31,13 @@ export default class Message extends Phaser.GameObjects.Container {
         this.setVisible(false);
     }
 
-    hideMessage() {
+    public hideMessage() {
         this.hideEvent = undefined;
         this.setVisible(false);
         eventsCenter.emit('MessageClose');
     }
 
-    showMessage(text: string | string[]) {
+    public showMessage(text: string | string[]) {
         this.text.setText(text);
         this.setVisible(true);
         if (this.hideEvent) {

@@ -4,7 +4,7 @@ export default class GameMessage extends Phaser.GameObjects.Container {
     public text: Phaser.GameObjects.Text;
     private hideEvent: Phaser.Time.TimerEvent | undefined;
 
-    constructor(scene: Phaser.Scene) {
+    public constructor(scene: Phaser.Scene) {
         super(scene, 0, 0);
         const image = this.scene.add.image(
             120,

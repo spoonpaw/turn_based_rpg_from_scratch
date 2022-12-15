@@ -8,7 +8,7 @@ export default class GridControls {
     ) {
     }
 
-    update() {
+    public update() {
         const cursors = this.input.keyboard.createCursorKeys();
         if (cursors.left.isDown || this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
             this.gridPhysics.movePlayer(Direction.LEFT);
