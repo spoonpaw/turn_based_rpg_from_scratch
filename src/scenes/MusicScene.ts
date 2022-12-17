@@ -26,7 +26,7 @@ export default class MusicScene extends Phaser.Scene {
         });
 
         this.gameOverSong = this.sound.add('gameoversong', {
-            volume: 0.5,
+            volume: 0.45,
             loop: true
         });
 

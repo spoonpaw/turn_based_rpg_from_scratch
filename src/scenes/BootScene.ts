@@ -27,9 +27,10 @@ export default class BootScene extends Phaser.Scene {
             style: {
                 font: '50px CustomFont',
                 color: '#ffffff'
-            }
+            },
         });
         loadingText.setOrigin(0.5, 0.5);
+        loadingText.setResolution(10);
 
         const percentText = this.make.text({
             x: width / 2,
@@ -41,6 +42,7 @@ export default class BootScene extends Phaser.Scene {
             }
         });
         percentText.setOrigin(0.5, 0.5);
+        percentText.setResolution(10);
 
         // const assetText = this.make.text({
         //     x: width / 2,
@@ -96,6 +98,9 @@ export default class BootScene extends Phaser.Scene {
         this.load.audio('attack', 'assets/sounds/fx/attack.mp3');
         this.load.audio('criticalattack', 'assets/sounds/fx/criticalAttack.mp3');
         this.load.audio('potion', 'assets/sounds/fx/potion.mp3');
+        this.load.audio(
+            'select', 'assets/sounds/fx/select.mp3');
+        this.load.audio('deselect', 'assets/sounds/fx/deselect.mp3');
     }
 
     private loadImages() {

@@ -1,0 +1,22 @@
+body {
+    font-family: CustomFont;
+    background: lightgrey;
+}
+
+h1 {
+    /*font-size: 3rem;*/
+    font-size: 10vh;
+    /*min-height: 4.2vh;*/
+}
+
+.nav-item {
+    font-size: 7vh;
+    margin-right: 30px;
+}
+
+.navbar-brand {
+    max-width: 30vw;
+    max-height: 30vh;
+    min-width: 10vw;
+    min-height: 10vh;
+}
