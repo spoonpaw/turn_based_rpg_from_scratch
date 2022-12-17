@@ -1,6 +1,9 @@
+import SFXScene from '../scenes/SFXScene';
+
 export default class UIActionButton extends Phaser.GameObjects.Container {
     public button!: Phaser.GameObjects.Image;
     public buttonText!: Phaser.GameObjects.Text;
+    private sfxScene: SFXScene;
 
     constructor(
         public scene: Phaser.Scene,
@@ -13,9 +16,12 @@ export default class UIActionButton extends Phaser.GameObjects.Container {
     ) {
         super(scene, x, y);
 
+        this.sfxScene = <SFXScene>this.scene.scene.get('SFX');
+
         this.createButton();
 
         this.scene.add.existing(this);
+
     }
 
     public deselect() {

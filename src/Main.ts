@@ -9,11 +9,15 @@ import MusicScene from './scenes/MusicScene';
 import SFXScene from './scenes/SFXScene';
 import TitleScene from './scenes/TitleScene';
 import UIScene from './scenes/UIScene';
+import ScaleModes = Phaser.Scale.ScaleModes;
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: 912,
     height: 720,
+    scale: {
+        mode: ScaleModes.FIT
+    },
     physics: {
         default: 'arcade',
         arcade: {

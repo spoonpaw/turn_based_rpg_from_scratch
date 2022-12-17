@@ -1188,6 +1188,7 @@ export default class UIScene extends Phaser.Scene {
                 ) {
                     this.selectCancel();
                 }
+                // this.sfxScene.playSound('select');
 
                 // query and build the inventory
                 //  buttons right when this button is pressed!
@@ -1322,6 +1323,7 @@ export default class UIScene extends Phaser.Scene {
                     this.selectCancel();
                     return;
                 }
+                // this.sfxScene.playSound('select');
                 // set up ability menu when this button is pressed
                 this.interactionState = 'ability';
 
