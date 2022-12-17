@@ -75,6 +75,7 @@ export default class TitleScene extends Phaser.Scene {
 
     public init() {
         this.scene.launch('Music');
+        this.scene.launch('SFX');
     }
 
     public startScene(targetScene: string) {

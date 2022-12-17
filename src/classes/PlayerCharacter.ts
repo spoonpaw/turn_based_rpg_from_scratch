@@ -161,10 +161,12 @@ export default class PlayerCharacter extends Unit {
 
             if (!this.evadeTest()) {
                 if (!this.criticalStrikeTest()) {
+                    this.battleScene.sfxScene.playSound('attack');
                     damage += this.calculateAttackDamage(target);
                     eventsCenter.emit('Message', `${this.type} attacked ${target.type} for ${damage} HP!`);
                 }
                 else {
+                    this.battleScene.sfxScene.playSound('criticalattack');
                     damage += this.calculateCriticalStrikeDamage();
                     eventsCenter.emit('Message', `${this.type} attacked ${target.type} for ${damage} HP! A critical strike!`);
                 }
@@ -202,6 +204,7 @@ export default class PlayerCharacter extends Unit {
                 // calculate the exact amount healed, announce it in a message
                 runtimeInMS += 2000;
                 const amountHealed = data.target.applyHPChange(-30);
+                this.battleScene.sfxScene.playSound('potion');
                 eventsCenter.emit('Message', `${this.type} uses a health potion on ${target.type}, healing them for ${amountHealed} HP.`);
             }
         }

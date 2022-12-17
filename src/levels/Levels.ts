@@ -14,8 +14,9 @@ export const levels: ILevelDataContainer = {
             }
         ],
         npcs: [],
-        enemies: ['seedspiker', 'sentientrock', 'deadlyflower']
-        // enemies: ['seedspiker']
+        enemies: ['seedspiker', 'sentientrock', 'deadlyflower'],
+        // enemies: ['seedspiker'],
+        music: 'title'
     },
     town: {
         name: 'town',
@@ -45,7 +46,8 @@ export const levels: ILevelDataContainer = {
                     }) as ItemInterface
                 ]
             }
-        ]
+        ],
+        music: 'town'
     }
 };
 
@@ -66,6 +68,7 @@ export interface ILevelData {
     tilemapKey: string;
     tilesetKey: string;
     tilesetName: string;
+    music: string;
 }
 
 export interface ILevelDataContainer {
