@@ -89,6 +89,7 @@ export default class GameOverScene extends Phaser.Scene {
         // this.input.enabled = false;
         camera.fadeOut(3000);
         this.cameras.main.once('camerafadeoutcomplete', () => {
+            this.musicScene.changeSong('title');
             this.scene.wake('Game');
             this.scene.stop();
             return;
@@ -96,6 +97,10 @@ export default class GameOverScene extends Phaser.Scene {
     }
 
     public setupKeyListeners() {
+        // TODO: don't put listeners on the input.
+        //  instead, put listeners on everything except the
+        //  mute button
+
         this.input.keyboard.enabled = true;
         this.input.enabled = true;
         this.cameras.main.once('camerafadeincomplete', (camera: Camera) => {

@@ -7,6 +7,7 @@ import {ItemInterface} from '../items/items';
 import eventsCenter from '../utils/EventsCenter';
 import GameScene from './GameScene';
 import MusicScene from './MusicScene';
+import SFXScene from './SFXScene';
 
 export default class UIScene extends Phaser.Scene {
     public cancelButton!: UIActionButton;
@@ -69,6 +70,7 @@ export default class UIScene extends Phaser.Scene {
     private message!: GameMessage;
     public musicMuteButton!: UIActionButton;
     public musicScene!: MusicScene;
+    public sfxScene!: SFXScene;
     private offHandItemButton!: UIActionButton;
     private offHandString!: Phaser.GameObjects.Text;
     private selectedItemAndAbilityCommandText!: Phaser.GameObjects.Text;
@@ -85,6 +87,8 @@ export default class UIScene extends Phaser.Scene {
 
     public create() {
         this.musicScene = <MusicScene>this.scene.get('Music');
+        this.sfxScene = <SFXScene>this.scene.get('SFX');
+
         this.cursors = this.input.keyboard.createCursorKeys();
         this.setupUIElements();
         this.setupEvents();
@@ -483,7 +487,7 @@ export default class UIScene extends Phaser.Scene {
         })
             .setResolution(10)
             .setFontSize(50)
-            .setLineSpacing(-22);
+            .setLineSpacing(-18);
 
         this.commandMenuText = this.add.text(244, 440, 'Command?', {
             fontSize: '55px',
@@ -1275,6 +1279,7 @@ export default class UIScene extends Phaser.Scene {
                     this.gameScene.player.stats.currentHP += actualAmountHealed;
                     this.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
 
+                    this.sfxScene.playSound('potion');
                     eventsCenter.emit('GameMessage', `${this.gameScene.player.type} uses a health potion on ${this.gameScene.player.type}, healing them for ${actualAmountHealed} HP.`);
 
                     this.generateInventoryButtons();

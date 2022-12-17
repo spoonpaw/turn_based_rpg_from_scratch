@@ -25,9 +25,16 @@ export default class BootScene extends Phaser.Scene {
     }
 
     private loadAudio() {
-        // load mp3s
+        // load music mp3s
         this.load.audio('battlesong', 'assets/sounds/songs/embattledPredistortion.mp3');
         this.load.audio('titlesong', 'assets/sounds/songs/ennui.mp3');
+        this.load.audio('gameoversong', 'assets/sounds/songs/theGreatGreen.mp3');
+        this.load.audio('townsong', 'assets/sounds/songs/loveAndSolitude.mp3');
+
+        // load sfx mp3s
+        this.load.audio('attack', 'assets/sounds/fx/attack.mp3');
+        this.load.audio('criticalattack', 'assets/sounds/fx/criticalAttack.mp3');
+        this.load.audio('potion', 'assets/sounds/fx/potion.mp3');
     }
 
     private loadImages() {
@@ -56,6 +63,8 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('staffbuttonactive', 'assets/images/ui/staffButtonActive.png');
         this.load.image('musicbutton', 'assets/images/ui/musicButton.png');
         this.load.image('musicinactivebutton', 'assets/images/ui/musicInactiveButton.png');
+        this.load.image('sfxbutton', 'assets/images/ui/sfxButton.png');
+        this.load.image('sfxinactivebutton', 'assets/images/ui/sfxInactiveButton.png');
 
         this.load.image('healthpotion', 'assets/images/ui/healthPotion.png');
         this.load.image('healthpotionactive', 'assets/images/ui/healthPotionActive.png');

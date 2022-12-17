@@ -109,6 +109,8 @@ export default class GameScene extends Phaser.Scene {
 
         }
         else if (data?.levelData) {
+            this.uiScene.musicScene.changeSong(data.levelData.music);
+
             // spawn the character in the correct position based on data passed to the restart method
             // create the map
             this.currentMap = data.levelData.name;

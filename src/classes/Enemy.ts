@@ -155,6 +155,7 @@ export class Enemy extends Unit {
         let damage = 0;
 
         if (!this.evadeTest()) {
+            this.battleScene.sfxScene.playSound('attack');
             damage = this.calculateAttackDamage(target);
             target.applyHPChange(damage);
             runtimeInMS += 2000;

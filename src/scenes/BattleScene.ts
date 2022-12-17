@@ -1,5 +1,3 @@
-// TODO: Character's max hp shows as undefined after fight ends!!
-
 // TODO: Add Sound Effects to battle scene (attack, heal, run)
 
 // TODO: Add Ability button functionality
@@ -17,6 +15,7 @@ import eventsCenter from '../utils/EventsCenter';
 import BattleUIScene from './BattleUIScene';
 import GameScene from './GameScene';
 import MusicScene from './MusicScene';
+import SFXScene from './SFXScene';
 import UIScene from './UIScene';
 
 export default class BattleScene extends Phaser.Scene {
@@ -24,6 +23,7 @@ export default class BattleScene extends Phaser.Scene {
     public heroes!: PlayerCharacter[];
     public interactionState!: string;
     public player1HPText!: Phaser.GameObjects.Text;
+    public sfxScene!: SFXScene;
     private background!: Phaser.GameObjects.Image;
     private battleUIScene!: BattleUIScene;
     private gameScene!: GameScene;
@@ -65,6 +65,7 @@ export default class BattleScene extends Phaser.Scene {
         this.gameScene = <GameScene>this.scene.get('Game');
         this.uiScene = <UIScene>this.scene.get('UI');
         this.musicScene = <MusicScene>this.scene.get('Music');
+        this.sfxScene = <SFXScene>this.scene.get('SFX');
 
         this.startBattle();
 
@@ -134,8 +135,10 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private endBattleGameOver(): void {
-        // cut gold in half, set hit points to full, cut to game over screen, respawn
+        // change to game over music
+        this.musicScene.changeSong('gameover');
 
+        // cut gold in half, set hit points to full, cut to game over screen, respawn
         eventsCenter.emit('Message', 'Thou art vanquished!');
         this.gameScene.player.gold = Math.floor(this.gameScene.player.gold / 2);
         // eventsCenter.emit('updateGold', this.gameScene.player.gold);
@@ -147,7 +150,10 @@ export default class BattleScene extends Phaser.Scene {
         this.time.addEvent({
             delay: 1000,
             callback: () => {
+                // TODO: fix this so the mute button doesn't get faded out
+                this.musicScene.scene.bringToTop();
                 this.battleUIScene.cameras.main.fadeOut(2000);
+
                 this.cameras.main.fadeOut(3000);
             },
             callbackScope: this

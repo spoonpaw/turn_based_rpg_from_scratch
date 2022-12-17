@@ -4,6 +4,8 @@ export default class MusicScene extends Phaser.Scene {
 
     public battleSong!: Phaser.Sound.BaseSound;
     public titleSong!: Phaser.Sound.BaseSound;
+    public gameOverSong!: Phaser.Sound.BaseSound;
+    public townSong!: Phaser.Sound.BaseSound;
     public muted = false;
     public musicMuteButton!: UIActionButton;
     public currentTrack!: string;
@@ -14,12 +16,25 @@ export default class MusicScene extends Phaser.Scene {
 
     public create() {
         this.titleSong = this.sound.add('titlesong', {
+            volume: 0.5,
             loop: true
         });
 
         this.battleSong = this.sound.add('battlesong', {
+            volume: 0.5,
             loop: true
         });
+
+        this.gameOverSong = this.sound.add('gameoversong', {
+            volume: 0.5,
+            loop: true
+        });
+
+        this.townSong = this.sound.add('townsong', {
+            volume: 0.80,
+            loop: true
+        });
+
         this.musicMuteButton = new UIActionButton(
             this,
             890,
@@ -60,6 +75,12 @@ export default class MusicScene extends Phaser.Scene {
         else if (this.currentTrack === 'battle') {
             this.battleSong.play();
         }
+        else if (this.currentTrack === 'gameover') {
+            this.gameOverSong.play();
+        }
+        else if (this.currentTrack === 'town') {
+            this.townSong.play();
+        }
     }
 
     public unmuteMusic() {
@@ -69,6 +90,12 @@ export default class MusicScene extends Phaser.Scene {
         }
         else if (this.currentTrack === 'battle') {
             this.battleSong.play();
+        }
+        else if (this.currentTrack === 'gameover') {
+            this.gameOverSong.play();
+        }
+        else if (this.currentTrack === 'town') {
+            this.townSong.play();
         }
     }
 
@@ -80,6 +107,12 @@ export default class MusicScene extends Phaser.Scene {
         }
         else if (this.currentTrack === 'battle') {
             this.battleSong.stop();
+        }
+        else if (this.currentTrack === 'gameover') {
+            this.gameOverSong.stop();
+        }
+        else if (this.currentTrack === 'town') {
+            this.townSong.stop();
         }
     }
 }
