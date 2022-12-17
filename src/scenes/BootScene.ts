@@ -42,16 +42,16 @@ export default class BootScene extends Phaser.Scene {
         });
         percentText.setOrigin(0.5, 0.5);
 
-        const assetText = this.make.text({
-            x: width / 2,
-            y: height / 2 + 50,
-            text: '',
-            style: {
-                font: '18px monospace',
-                color: '#ffffff'
-            }
-        });
-        assetText.setOrigin(0.5, 0.5);
+        // const assetText = this.make.text({
+        //     x: width / 2,
+        //     y: height / 2 + 50,
+        //     text: '',
+        //     style: {
+        //         font: '18px monospace',
+        //         color: '#ffffff'
+        //     }
+        // });
+        // assetText.setOrigin(0.5, 0.5);
 
         this.load.on('progress', function (value: number) {
             percentText.setText(parseInt(String(value * 100)) + '%');
@@ -60,15 +60,15 @@ export default class BootScene extends Phaser.Scene {
             progressBar.fillRect((width / 2) - 150, 280, 300 * value, 30);
         });
 
-        this.load.on('fileprogress', function (file: { key: string; }) {
-            assetText.setText('Loading asset: ' + file.key);
-        });
+        // this.load.on('fileprogress', function (file: { key: string; }) {
+        //     assetText.setText('Loading asset: ' + file.key);
+        // });
         this.load.on('complete', function () {
             progressBar.destroy();
             progressBox.destroy();
             loadingText.destroy();
             percentText.destroy();
-            assetText.destroy();
+            // assetText.destroy();
         }); 
 
 
