@@ -3,9 +3,14 @@ body {
     background: lightgrey;
 }
 
+main{
+    background-image: url("/../assets/images/website_background.png");
+    background-size: auto 100%;
+}
+
 h1 {
     /*font-size: 3rem;*/
-    font-size: 10vh;
+    font-size: 12vh;
     /*min-height: 4.2vh;*/
 }
 
