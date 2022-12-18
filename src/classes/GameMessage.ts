@@ -42,7 +42,7 @@ export default class GameMessage extends Phaser.GameObjects.Container {
     private hideMessage() {
         this.hideEvent = undefined;
         this.setVisible(false);
-        this.scene.scene.wake('GamePad');
+        this.scene.scene.launch('GamePad');
     }
 
     private showMessage(text: string | string[]) {
