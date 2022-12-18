@@ -23,7 +23,7 @@ export default class GridPhysics {
     public constructor(private player: Player, private tileMap: Phaser.Tilemaps.Tilemap) {
     }
 
-    movePlayer(direction: Direction): void {
+    public movePlayer(direction: Direction): void {
         this.lastMovementIntent = direction;
         if (this.isMoving()) return;
         if (this.isBlockingDirection(direction)) {

@@ -25,6 +25,17 @@
     .
 </div>
 <script type="module" src="dist/Main.js"></script>
+<script>
+    // Check touch input
+    var IS_TOUCH	= false;
+    window.addEventListener('touchstart', function touched()
+    {
+        console.log('just heard the touch event');
+        console.log({is_touch: true});
+        window.IS_TOUCH	= true;
+        window.removeEventListener('touchstart', touched);
+    });
+</script>
 
 </body>
 
