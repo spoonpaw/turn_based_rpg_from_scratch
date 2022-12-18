@@ -124,6 +124,8 @@ export default class Player {
     }
 
     public stopAnimation(direction: Direction) {
+        console.log({anims: this.sprite.anims});
+        if (!this.sprite.anims) return;
         const animationManager = this.sprite.anims.animationManager;
         const standingFrame = animationManager.get(direction).frames[1].frame.name;
         this.sprite.anims.stop();

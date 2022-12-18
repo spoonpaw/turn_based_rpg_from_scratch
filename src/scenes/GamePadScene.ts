@@ -1,4 +1,5 @@
 import {Direction} from '../types/Direction';
+import eventsCenter from '../utils/EventsCenter';
 import GameScene from './GameScene';
 
 export default class GamePadScene extends Phaser.Scene {
@@ -29,9 +30,25 @@ export default class GamePadScene extends Phaser.Scene {
         // .on('update', this.dumpJoyStickState, this);
 
         this.text = this.add.text(0, 0, '');
+        this.text.setVisible(false);
         this.dumpJoyStickState();
 
         this.input.on('pointerdown', (pointer: PointerEvent) => {
+            console.log('pointer down on the gamepad scene!');
+            eventsCenter.emit('space');
+            if (this.gameScene.weaponMerchant || this.gameScene.innKeeper) {
+                console.log('space bar pressed on game scene (npc[s] found)');
+                console.log({interactionState: this.gameScene.uiScene.interactionState});
+                if (
+                    this.gameScene.uiScene.interactionState === 'mainselect' // ||
+                    // this.uiScene.interactionState === 'cancelmouse' // ||
+                    // this.uiScene.interactionState === 'cancel'
+                ) {
+                    console.log('listening for interactivity on npcs');
+                    if (this.gameScene.weaponMerchant) this.gameScene.weaponMerchant.listenForInteractEvent();
+                    if (this.gameScene.innKeeper) this.gameScene.innKeeper.listenForInteractEvent();
+                }
+            }
             this.joyStick.setPosition(pointer.x, pointer.y);
         }, this);
     }
@@ -45,6 +62,9 @@ export default class GamePadScene extends Phaser.Scene {
 
                 // TODO: make the character move in the pressed direction
                 try {
+                    console.log({directionName: name});
+                    console.log({player: this.gameScene.player.sprite});
+                    console.log(this.gameScene.player.sprite ? 'truthy' : 'falsy');
                     if (name === 'up') {
                         this.gameScene.gridControls.gridPhysics.movePlayer(Direction.UP);
                     }
@@ -57,7 +77,6 @@ export default class GamePadScene extends Phaser.Scene {
                     else if (name === 'left') {
                         this.gameScene.gridControls.gridPhysics.movePlayer(Direction.LEFT);
                     }
-
                 }
                 catch (e) {
                     // TODO: FIX THIS WEIRD ERROR WHEN USING THE

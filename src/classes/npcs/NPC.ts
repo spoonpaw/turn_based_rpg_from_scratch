@@ -39,7 +39,8 @@ export default class NPC {
     }
 
     public stopAnimation(direction: Direction) {
-        const animationManager = this.sprite.anims.animationManager;
+        const animationManager = this.sprite.anims?.animationManager;
+        if (!animationManager) return;
         const standingFrame = animationManager.get(direction).frames[1].frame.name;
         this.sprite.anims.stop();
         this.sprite.setFrame(standingFrame);

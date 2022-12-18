@@ -8,6 +8,7 @@ import {items} from '../items/items';
 import {ILevelData, levels} from '../levels/Levels';
 import {Direction} from '../types/Direction';
 import {Equipment} from '../types/Equipment';
+import GamePadScene from './GamePadScene';
 import UIScene from './UIScene';
 
 export default class GameScene extends Phaser.Scene {
@@ -22,11 +23,12 @@ export default class GameScene extends Phaser.Scene {
     public playerTileX!: number;
     public playerTileY!: number;
     public spaceDown!: boolean;
+    public uiScene!: UIScene;
     public weaponMerchant!: Merchant;
     private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private exitingCurrentLevel!: boolean;
+    private gamePadScene?: GamePadScene;
     private nonHostileSpace!: boolean;
-    private uiScene!: UIScene;
 
     public constructor() {
         super('Game');
@@ -37,23 +39,18 @@ export default class GameScene extends Phaser.Scene {
         return randNum === 0;
     }
 
-    public preload() {
-        this.scene.scene.load.scenePlugin('rexgesturesplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexgesturesplugin.min.js', 'rexGestures', 'rexGestures');
-
-    }
-
     public create(data?: { levelData?: ILevelData }) {
+        this.gamePadScene?.scene.restart();
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         if (window['IS_TOUCH' as keyof typeof window] === true) {
             console.log('launching the game pad scene');
             this.scene.launch('GamePad');
-
+            this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
         }
 
         // this.swipe = this.scene.scene['rexGestures' as keyof typeof this.scene.scene].add.swipe(config);
         // var swipe = scene.rexGestures.add.swipe(gameObject, config);
-
 
         // this.activeDialogScene = false;
 
@@ -206,16 +203,8 @@ export default class GameScene extends Phaser.Scene {
 
     }
 
-    private setupPlayerGridPhysics() {
-        this.gridPhysics = new GridPhysics(this.player, this.currentTilemap);
-        this.gridControls = new GridControls(this.input, this.gridPhysics);
-
-        this.createPlayerAnimation(Direction.UP, 6, 7);
-        this.createPlayerAnimation(Direction.RIGHT, 4, 5);
-        this.createPlayerAnimation(Direction.DOWN, 0, 1);
-        this.createPlayerAnimation(Direction.LEFT, 2, 3);
-
-        this.cursors = this.input.keyboard.createCursorKeys();
+    public preload() {
+        this.scene.scene.load.scenePlugin('rexgesturesplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexgesturesplugin.min.js', 'rexGestures', 'rexGestures');
     }
 
     public update(_time: number, delta: number) {
@@ -252,6 +241,7 @@ export default class GameScene extends Phaser.Scene {
             this.time.delayedCall(240, () => {
                 // switch to town scene using scene restart method
                 this.nonHostileSpace = true;
+                this.gamePadScene?.scene.stop();
                 this.scene.restart({levelData: levels.town});
             });
         }
@@ -351,6 +341,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public wake() {
+        this.gamePadScene?.scene.restart();
         if (this.uiScene.musicScene.muted) {
             this.uiScene.musicMuteButton.select();
         }
@@ -375,5 +366,17 @@ export default class GameScene extends Phaser.Scene {
             repeat: -1,
             yoyo: true,
         });
+    }
+
+    private setupPlayerGridPhysics() {
+        this.gridPhysics = new GridPhysics(this.player, this.currentTilemap);
+        this.gridControls = new GridControls(this.input, this.gridPhysics);
+
+        this.createPlayerAnimation(Direction.UP, 6, 7);
+        this.createPlayerAnimation(Direction.RIGHT, 4, 5);
+        this.createPlayerAnimation(Direction.DOWN, 0, 1);
+        this.createPlayerAnimation(Direction.LEFT, 2, 3);
+
+        this.cursors = this.input.keyboard.createCursorKeys();
     }
 }

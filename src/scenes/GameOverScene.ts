@@ -90,6 +90,8 @@ export default class GameOverScene extends Phaser.Scene {
         camera.fadeOut(3000);
         this.cameras.main.removeListener('camerafadeoutcomplete');
         this.cameras.main.once('camerafadeoutcomplete', () => {
+            // TODO: FIX THIS SONG FROM GETTING TRIGGERED EARLY
+            this.cameras.main.removeListener('camerafadeoutcomplete');
             this.musicScene.changeSong('title');
             this.scene.wake('Game');
             this.scene.stop();
