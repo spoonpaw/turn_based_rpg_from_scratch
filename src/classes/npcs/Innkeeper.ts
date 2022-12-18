@@ -40,7 +40,7 @@ export default class Innkeeper extends NPC {
             console.log('innkeeper just got talked to');
             // set the ui scene interaction state as innkeeper select
             this.uiScene.interactionState = 'innkeeperselect';
-            this.gameScene.scene.sleep('GamePad');
+            this.gameScene.gamePadScene?.scene.stop();
 
             this.gameScene.input.keyboard.enabled = false;
             // get rid of active dialog scene, it isn't needed anymore

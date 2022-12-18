@@ -27,7 +27,7 @@ export default class GameScene extends Phaser.Scene {
     public weaponMerchant!: Merchant;
     private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private exitingCurrentLevel!: boolean;
-    private gamePadScene?: GamePadScene;
+    public gamePadScene?: GamePadScene;
     private nonHostileSpace!: boolean;
 
     public constructor() {

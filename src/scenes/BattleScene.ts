@@ -102,6 +102,7 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private endBattle(): void {
+        this.gameScene.gamePadScene?.scene.stop();
 
         this.musicScene.changeSong('title');
 

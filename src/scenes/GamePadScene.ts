@@ -1,5 +1,4 @@
 import {Direction} from '../types/Direction';
-import eventsCenter from '../utils/EventsCenter';
 import GameScene from './GameScene';
 
 export default class GamePadScene extends Phaser.Scene {
@@ -33,14 +32,19 @@ export default class GamePadScene extends Phaser.Scene {
         this.text.setVisible(false);
         this.dumpJoyStickState();
 
+        this.input.removeListener('pointerdown');
         this.input.on('pointerdown', (pointer: PointerEvent) => {
             console.log('pointer down on the gamepad scene!');
-            eventsCenter.emit('space');
+            // eventsCenter.emit('space');
             if (this.gameScene.weaponMerchant || this.gameScene.innKeeper) {
                 console.log('space bar pressed on game scene (npc[s] found)');
                 console.log({interactionState: this.gameScene.uiScene.interactionState});
+                if (this.gameScene.uiScene.interactionState === 'cancelmouse') {
+                    this.gameScene.uiScene.interactionState = 'mainselect';
+                    return;
+                }
                 if (
-                    this.gameScene.uiScene.interactionState === 'mainselect' // ||
+                    this.gameScene.uiScene.interactionState.startsWith('mainselect') // ||
                     // this.uiScene.interactionState === 'cancelmouse' // ||
                     // this.uiScene.interactionState === 'cancel'
                 ) {
@@ -51,6 +55,7 @@ export default class GamePadScene extends Phaser.Scene {
             }
             this.joyStick.setPosition(pointer.x, pointer.y);
         }, this);
+
     }
 
     dumpJoyStickState() {

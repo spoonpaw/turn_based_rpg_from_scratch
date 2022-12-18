@@ -305,7 +305,7 @@ export default class UIScene extends Phaser.Scene {
     }
 
     public selectCancel() {
-        this.scene.wake('GamePad');
+        this.scene.launch('GamePad');
         console.log('entering ui scene \'selectcancel\' method');
         eventsCenter.removeListener('space');
         if (!this.gameScene.input.keyboard.enabled) {
@@ -683,8 +683,14 @@ export default class UIScene extends Phaser.Scene {
             'crossbuttonactive',
             'No',
             () => {
+                // TODO: fix this gigantic issue, when the no button gets clicked
+                //  the entire bottom panel disappears and
+
                 // eventsCenter.emit('no');
                 this.interactionState = 'cancelmouse';
+
+                this.scene.launch('GamePad');
+
                 eventsCenter.removeListener('space');
                 // eventsCenter.removeListener('no');
                 console.log('close the talk scene');
@@ -1179,7 +1185,7 @@ export default class UIScene extends Phaser.Scene {
                     this.interactionState.startsWith('inventoryaction')
                 ) {
                     this.selectCancel();
-                    this.scene.wake('GamePad');
+                    this.scene.launch('GamePad');
                     return;
                 }
                 else if (
@@ -1191,7 +1197,7 @@ export default class UIScene extends Phaser.Scene {
                     this.selectCancel();
                 }
                 // this.sfxScene.playSound('select');
-                this.scene.sleep('GamePad');
+                this.gameScene.gamePadScene?.scene.stop();
 
                 // query and build the inventory
                 //  buttons right when this button is pressed!
@@ -1324,7 +1330,7 @@ export default class UIScene extends Phaser.Scene {
                     this.interactionState === 'ability'
                 ) {
                     this.selectCancel();
-                    this.scene.wake('GamePad');
+                    this.scene.launch('GamePad');
                     return;
                 }
                 // this.sfxScene.playSound('select');
@@ -1379,13 +1385,13 @@ export default class UIScene extends Phaser.Scene {
                 }
                 else if (this.interactionState === 'charactersheet') {
                     this.selectCancel();
-                    this.scene.wake('GamePad');
+                    this.scene.launch('GamePad');
                     return;
                 }
                 // set up the character sheet -> query and update
                 //  the stats before showing the character sheet
                 this.updateCharacterSheetStrings();
-                this.scene.sleep('GamePad');
+                this.gameScene.gamePadScene?.scene.stop();
 
                 this.interactionState = 'charactersheet';
                 this.characterSheetButton.select();
