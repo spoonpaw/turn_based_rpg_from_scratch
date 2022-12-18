@@ -25,3 +25,13 @@ h1 {
     min-width: 10vw;
     min-height: 10vh;
 }
+
+.text-responsive {
+    font-size: calc(100% + 1vw + 1vh);
+}
+
+img {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
