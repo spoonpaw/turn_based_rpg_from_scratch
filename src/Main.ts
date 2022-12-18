@@ -10,6 +10,9 @@ import SFXScene from './scenes/SFXScene';
 import TitleScene from './scenes/TitleScene';
 import UIScene from './scenes/UIScene';
 import ScaleModes = Phaser.Scale.ScaleModes;
+import VirtualJoyStickPlugin from 'phaser3-rex-plugins/plugins/virtualjoystick-plugin';
+
+import GamePadScene from './scenes/GamePadScene';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -38,9 +41,17 @@ const config: Phaser.Types.Core.GameConfig = {
         GameOverScene,
         // DialogScene,
         // YesNoDialogScene,
-        SFXScene
+        SFXScene,
+        GamePadScene
     ],
-    backgroundColor: '#000000'
+    backgroundColor: '#000000',
+    plugins: {
+        global: [{
+            key: 'rexVirtualJoyStick',
+            plugin: VirtualJoyStickPlugin,
+            start: true
+        }]
+    }
 };
 
 new Phaser.Game(config);

@@ -30,6 +30,14 @@ h1 {
     font-size: calc(100% + 1vw + 1vh);
 }
 
+.text-responsive-header-1 {
+    font-size: calc(200% + 2vw + 2vh);
+}
+
+.text-responsive-header-2 {
+    font-size: calc(150% + 1.5vw + 1.5vh);
+}
+
 img {
     image-rendering: pixelated;
     image-rendering: -moz-crisp-edges;

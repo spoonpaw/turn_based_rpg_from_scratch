@@ -26,6 +26,8 @@
     "express": "4.18.1",
     "lodash": "^4.17.21",
     "phaser": "3.55.2",
+    "phaser-swipe": "^1.0.4",
+    "phaser3-rex-plugins": "^1.1.78",
     "snowpack": "3.8.8",
     "typescript": "4.6.3"
   },

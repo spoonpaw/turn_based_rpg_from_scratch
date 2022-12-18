@@ -305,6 +305,7 @@ export default class UIScene extends Phaser.Scene {
     }
 
     public selectCancel() {
+        this.scene.wake('GamePad');
         console.log('entering ui scene \'selectcancel\' method');
         eventsCenter.removeListener('space');
         if (!this.gameScene.input.keyboard.enabled) {
@@ -1178,6 +1179,7 @@ export default class UIScene extends Phaser.Scene {
                     this.interactionState.startsWith('inventoryaction')
                 ) {
                     this.selectCancel();
+                    this.scene.wake('GamePad');
                     return;
                 }
                 else if (
@@ -1189,6 +1191,7 @@ export default class UIScene extends Phaser.Scene {
                     this.selectCancel();
                 }
                 // this.sfxScene.playSound('select');
+                this.scene.sleep('GamePad');
 
                 // query and build the inventory
                 //  buttons right when this button is pressed!
@@ -1321,11 +1324,13 @@ export default class UIScene extends Phaser.Scene {
                     this.interactionState === 'ability'
                 ) {
                     this.selectCancel();
+                    this.scene.wake('GamePad');
                     return;
                 }
                 // this.sfxScene.playSound('select');
                 // set up ability menu when this button is pressed
                 this.interactionState = 'ability';
+                this.scene.sleep('GamePad');
 
                 this.abilityButton.select();
 
@@ -1374,11 +1379,13 @@ export default class UIScene extends Phaser.Scene {
                 }
                 else if (this.interactionState === 'charactersheet') {
                     this.selectCancel();
+                    this.scene.wake('GamePad');
                     return;
                 }
                 // set up the character sheet -> query and update
                 //  the stats before showing the character sheet
                 this.updateCharacterSheetStrings();
+                this.scene.sleep('GamePad');
 
                 this.interactionState = 'charactersheet';
                 this.characterSheetButton.select();

@@ -37,7 +37,24 @@ export default class GameScene extends Phaser.Scene {
         return randNum === 0;
     }
 
+    public preload() {
+        this.scene.scene.load.scenePlugin('rexgesturesplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexgesturesplugin.min.js', 'rexGestures', 'rexGestures');
+
+    }
+
     public create(data?: { levelData?: ILevelData }) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (window['IS_TOUCH' as keyof typeof window] === true) {
+            console.log('launching the game pad scene');
+            this.scene.launch('GamePad');
+
+        }
+
+        // this.swipe = this.scene.scene['rexGestures' as keyof typeof this.scene.scene].add.swipe(config);
+        // var swipe = scene.rexGestures.add.swipe(gameObject, config);
+
+
         // this.activeDialogScene = false;
 
         // if data is empty then the game just started so load the player in the spawn location
