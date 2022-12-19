@@ -34,11 +34,11 @@ export default class GamePadScene extends Phaser.Scene {
 
         this.input.removeListener('pointerdown');
         this.input.on('pointerdown', (pointer: PointerEvent) => {
-            console.log('pointer down on the gamepad scene!');
+            // pointer down on the gamepad scene!
+            // ??
             // eventsCenter.emit('space');
             if (this.gameScene.weaponMerchant || this.gameScene.innKeeper) {
-                console.log('space bar pressed on game scene (npc[s] found)');
-                console.log({interactionState: this.gameScene.uiScene.interactionState});
+                // pointer down on the gamepad scene (npc[s] found)
                 if (this.gameScene.uiScene.interactionState === 'cancelmouse') {
                     this.gameScene.uiScene.interactionState = 'mainselect';
                     return;
@@ -48,7 +48,7 @@ export default class GamePadScene extends Phaser.Scene {
                     // this.uiScene.interactionState === 'cancelmouse' // ||
                     // this.uiScene.interactionState === 'cancel'
                 ) {
-                    console.log('listening for interactivity on npcs');
+                    // listening for interactivity on npcs
                     if (this.gameScene.weaponMerchant) this.gameScene.weaponMerchant.listenForInteractEvent();
                     if (this.gameScene.innKeeper) this.gameScene.innKeeper.listenForInteractEvent();
                 }
@@ -60,43 +60,33 @@ export default class GamePadScene extends Phaser.Scene {
 
     dumpJoyStickState() {
         const cursorKeys = this.joyStick.createCursorKeys();
-        let s = 'Key down: ';
+        // let s = 'Key down: ';
         for (const name in cursorKeys) {
             if (cursorKeys[name].isDown) {
-                s += name + ' ';
+                // s += name + ' ';
 
-                // TODO: make the character move in the pressed direction
-                try {
-                    console.log({directionName: name});
-                    console.log({player: this.gameScene.player.sprite});
-                    console.log(this.gameScene.player.sprite ? 'truthy' : 'falsy');
-                    if (name === 'up') {
-                        this.gameScene.gridControls.gridPhysics.movePlayer(Direction.UP);
-                    }
-                    else if (name === 'right') {
-                        this.gameScene.gridControls.gridPhysics.movePlayer(Direction.RIGHT);
-                    }
-                    else if (name === 'down') {
-                        this.gameScene.gridControls.gridPhysics.movePlayer(Direction.DOWN);
-                    }
-                    else if (name === 'left') {
-                        this.gameScene.gridControls.gridPhysics.movePlayer(Direction.LEFT);
-                    }
+                // make the character move in the pressed direction
+                if (name === 'up') {
+                    this.gameScene.gridControls.gridPhysics.movePlayer(Direction.UP);
                 }
-                catch (e) {
-                    // TODO: FIX THIS WEIRD ERROR WHEN USING THE
-                    //  ONSCREEN CONTROLLER AND TRYING TO LEAVE THE TOWN
-                    console.log(e);
-
+                else if (name === 'right') {
+                    this.gameScene.gridControls.gridPhysics.movePlayer(Direction.RIGHT);
+                }
+                else if (name === 'down') {
+                    this.gameScene.gridControls.gridPhysics.movePlayer(Direction.DOWN);
+                }
+                else if (name === 'left') {
+                    this.gameScene.gridControls.gridPhysics.movePlayer(Direction.LEFT);
                 }
 
             }
         }
-        s += '\n';
-        s += ('Force: ' + Math.floor(this.joyStick.force * 100) / 100 + '\n');
-        s += ('Angle: ' + Math.floor(this.joyStick.angle * 100) / 100 + '\n');
-        this.text.setText(s);
+        // s += '\n';
+        // s += ('Force: ' + Math.floor(this.joyStick.force * 100) / 100 + '\n');
+        // s += ('Angle: ' + Math.floor(this.joyStick.angle * 100) / 100 + '\n');
+        // this.text.setText(s);
     }
+
     public update() {
         this.dumpJoyStickState();
 

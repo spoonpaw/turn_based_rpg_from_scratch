@@ -82,11 +82,7 @@ export default class PlayerCharacter extends Unit {
             this.living = false;
         }
 
-        console.log('setting the ui hp');
-        console.log({
-            currentHP: this.stats.currentHP,
-            maxHP: this.stats.maxHP
-        });
+        // setting up the ui hp
         this.battleScene.player1HPText.setText(`HP: ${this.stats.currentHP}/${this.stats.maxHP}`);
 
         // return actual hp change

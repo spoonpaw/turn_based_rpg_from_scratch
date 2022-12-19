@@ -17,7 +17,7 @@ export default class Innkeeper extends NPC {
     }
 
     public listenForInteractEvent() {
-        console.log('innkeeper heard player press the space bar somewhere!');
+        // innkeeper heard player press the space bar somewhere!
         // check if player is facing innkeeper
         if (
             (
@@ -37,7 +37,7 @@ export default class Innkeeper extends NPC {
             )
 
         ) {
-            console.log('innkeeper just got talked to');
+            //innkeeper just got talked to
             // set the ui scene interaction state as innkeeper select
             this.uiScene.interactionState = 'innkeeperselect';
             this.gameScene.gamePadScene?.scene.stop();
@@ -66,8 +66,6 @@ export default class Innkeeper extends NPC {
                 this.uiScene.interactionState = 'mainselect';
                 eventsCenter.removeListener('space');
                 eventsCenter.removeListener('no');
-                console.log('close the talk scene');
-
 
                 this.uiScene.goldFrame.setVisible(false);
                 this.uiScene.goldIcon.setVisible(false);
@@ -134,7 +132,6 @@ export default class Innkeeper extends NPC {
                     this.uiScene.leftSideDialogText.setText('Innkeeper:\nYou haven\'t enough coin!');
                 }
                 else {
-                    console.log('heal the player, take his gold, show the final dialog');
                     this.uiScene.leftSideDialogText.setText('Innkeeper:\nThank thee! Thou appeareth well rested.');
                     this.gameScene.player.gold -= 3;
                     this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;

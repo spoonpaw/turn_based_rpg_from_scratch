@@ -43,7 +43,7 @@ export default class MusicScene extends Phaser.Scene {
             'musicinactivebutton',
             '',
             () => {
-                console.log('music button clicked!');
+                // music button clicked!
                 if (!this.muted) {
                     this.muted = true;
                     this.musicMuteButton.select();
@@ -60,16 +60,12 @@ export default class MusicScene extends Phaser.Scene {
 
     public changeSong(songName: string) {
         this.muteMusic();
-        console.log('changing the song!');
-        console.log({muted: this.muted});
         this.currentTrack = songName;
-        console.log({currentTrack: this.currentTrack});
         if (this.muted) {
             return;
         }
         else if (this.currentTrack === 'title') {
-            console.log('playing the title track!');
-            console.log({titleSong: this.titleSong});
+            // playing the title track!
             this.titleSong.play();
         }
         else if (this.currentTrack === 'battle') {
@@ -84,7 +80,7 @@ export default class MusicScene extends Phaser.Scene {
     }
 
     public unmuteMusic() {
-        console.log('unmuting the music!!');
+        // unmuting the music!!
         if (this.currentTrack === 'title') {
             this.titleSong.play();
         }
@@ -100,8 +96,7 @@ export default class MusicScene extends Phaser.Scene {
     }
 
     public muteMusic() {
-        console.log('muting music!');
-        console.log({currentTrack: this.currentTrack});
+        // muting music!
         if (this.currentTrack === 'title') {
             this.titleSong.stop();
         }

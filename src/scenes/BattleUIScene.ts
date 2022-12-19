@@ -183,7 +183,6 @@ export default class BattleUIScene extends Phaser.Scene {
             'musicinactivebutton',
             '',
             () => {
-                console.log('music button clicked!');
                 if (!this.musicScene.muted) {
                     this.musicScene.muted = true;
                     this.musicScene.musicMuteButton.select();
@@ -358,8 +357,6 @@ export default class BattleUIScene extends Phaser.Scene {
             'checkbutton',
             'Use',
             () => {
-                console.log('setting the interaction state from the battle ui scene');
-                console.log({battleSceneInteractionState: this.battleScene.interactionState});
                 this.battleScene.interactionState = this.battleScene.interactionState.split('selecting')[1];
                 this.useButton.setVisible(false);
                 this.useButton.buttonText.setVisible(false);
@@ -397,7 +394,6 @@ export default class BattleUIScene extends Phaser.Scene {
                 this.selectedItemAndAbilityIcon.buttonText.destroy();
 
                 // get the selected item!!!
-                console.log(`this is the current interaction state ${this.battleScene.interactionState}`);
                 const selectedItemIndex = Number(this.battleScene.interactionState.split('inventoryaction')[1]);
                 const selectedItem = this.battleScene.heroes[0].inventory[selectedItemIndex];
 

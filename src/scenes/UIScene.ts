@@ -39,7 +39,6 @@ export default class UIScene extends Phaser.Scene {
     public subInventoryQuestButton!: UIActionButton;
     public useButton!: UIActionButton;
     public yesButton!: UIActionButton;
-    // private soldierText!: Phaser.GameObjects.Text;
     private abilityButton!: UIActionButton;
     private actionMenuFrame!: Phaser.GameObjects.Image;
     private agilityString!: Phaser.GameObjects.Text;
@@ -48,7 +47,6 @@ export default class UIScene extends Phaser.Scene {
     private characterButton!: UIActionButton;
     private characterSheetButton!: UIActionButton;
     private classString!: Phaser.GameObjects.Text;
-    // private coinIcon!: Phaser.GameObjects.Image;
     private commandMenuText!: Phaser.GameObjects.Text;
     private equipButton!: UIActionButton;
     private equipmentButtons: UIActionButton[] = [];
@@ -255,7 +253,6 @@ export default class UIScene extends Phaser.Scene {
         // iterate over all weapon merchant inventory entries
 
         for (const [index, item] of inventory.entries()) {
-            console.log({index: item});
             const itemButton = new UIActionButton(
                 this,
                 564,
@@ -264,9 +261,7 @@ export default class UIScene extends Phaser.Scene {
                 item.activekey,
                 item.name,
                 () => {
-                    console.log(`${item.name} clicked`);
                     this.interactionState = `merchantbuyitem${index}`;
-                    console.log({selectedItem: inventory[0]});
                     // select the clicked item button
                     for (const [buttonIndex, uiButton] of this.merchantInventoryButtons.entries()) {
                         if (index === buttonIndex) {
@@ -306,7 +301,7 @@ export default class UIScene extends Phaser.Scene {
 
     public selectCancel() {
         this.scene.launch('GamePad');
-        console.log('entering ui scene \'selectcancel\' method');
+        // entering ui scene 'selectcancel' method
         eventsCenter.removeListener('space');
         if (!this.gameScene.input.keyboard.enabled) {
             this.gameScene.input.keyboard.resetKeys();
@@ -638,7 +633,7 @@ export default class UIScene extends Phaser.Scene {
             'musicinactivebutton',
             '',
             () => {
-                console.log('music button clicked!');
+                // music button clicked!
                 if (!this.musicScene.muted) {
                     this.musicScene.muted = true;
                     this.musicScene.musicMuteButton.select();
@@ -686,15 +681,11 @@ export default class UIScene extends Phaser.Scene {
                 // TODO: fix this gigantic issue, when the no button gets clicked
                 //  the entire bottom panel disappears and
 
-                // eventsCenter.emit('no');
                 this.interactionState = 'cancelmouse';
 
                 this.scene.launch('GamePad');
 
                 eventsCenter.removeListener('space');
-                // eventsCenter.removeListener('no');
-                console.log('close the talk scene');
-
 
                 this.goldFrame.setVisible(false);
                 this.goldIcon.setVisible(false);
@@ -755,7 +746,7 @@ export default class UIScene extends Phaser.Scene {
             'checkbutton',
             'Purchase',
             () => {
-                console.log('purchase button clicked');
+                // purchase button clicked
 
                 if (
                     this.currentNPC instanceof Merchant &&
@@ -765,9 +756,8 @@ export default class UIScene extends Phaser.Scene {
                     // get the item index from the interaction state
                     const itemIndex = this.interactionState.split('merchantbuyitem')[1];
                     const selectedItem = this.currentNPC.inventory[Number(itemIndex)];
-                    console.log(`purchasing ${selectedItem.name}`);
-                    // todo: get the player's gold, if it's too low then he gets nothing
-                    console.log({currentGold: this.gameScene.player.gold});
+                    // purchasing ${selectedItem.name}
+                    // get the player's gold, if it's too low then he gets nothing
 
                     if (this.gameScene.player.inventory.length === 8) {
                         // hide all the merchant related frames
@@ -790,7 +780,6 @@ export default class UIScene extends Phaser.Scene {
                     }
                     else if (this.gameScene.player.gold < selectedItem.cost) {
                         // process the rejection
-                        console.log('Ye can\'t afford that.');
 
                         // hide all the merchant related frames
                         this.inventoryAndAbilityMenuFrame.setVisible(false);
@@ -863,7 +852,7 @@ export default class UIScene extends Phaser.Scene {
             'checkbutton',
             'Use',
             () => {
-                console.log('setting the interaction state from the use button');
+                // setting the interaction state from the use button
                 this.interactionState = this.interactionState.split('selecting')[1];
 
                 this.goldFrame.setVisible(false);
@@ -919,11 +908,11 @@ export default class UIScene extends Phaser.Scene {
             'checkbutton',
             'Equip',
             () => {
-                console.log('equip button clicked!!!');
+                // equip button clicked!!!
 
                 const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
 
-                // TODO: remove the selected item from the main inventory,
+                // remove the selected item from the main inventory,
                 //  add it to the corresponding equipment slot!
                 //  refer to
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
@@ -939,7 +928,6 @@ export default class UIScene extends Phaser.Scene {
                 this.cancelMenuFrame.setVisible(true);
 
                 const itemToEquip = this.gameScene.player.inventory[inventorySlotNumber];
-                console.log({itemToEquip});
                 if (itemToEquip.type === 'weapon') {
                     this.gameScene.player.equipment.weapon = itemToEquip;
                 }
@@ -1008,7 +996,7 @@ export default class UIScene extends Phaser.Scene {
             'Equipment',
             () => {
                 this.interactionState = 'equipment';
-                console.log('subinventory equipment button clicked');
+                // subinventory equipment button clicked
                 // destroy all the inventory buttons!!
                 this.destroyInventoryButtons();
                 this.subInventoryBagButton.deselect();
@@ -1252,12 +1240,10 @@ export default class UIScene extends Phaser.Scene {
             'gameActionMenuCharacterButtonActive',
             '',
             () => {
-                console.log('clicked the character button!');
-                console.log({interactionState: this.interactionState});
                 if (this.interactionState.startsWith('inventoryaction')) {
                     const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
 
-                    console.log(`using inventory slot number ${inventorySlotNumber} on hero`);
+                    // using inventory slot number ${inventorySlotNumber} on hero
                     this.gameScene.input.keyboard.enabled = false;
                     this.cancelMenuFrame.setVisible(false);
                     this.cancelButton.setVisible(false);
@@ -1276,10 +1262,7 @@ export default class UIScene extends Phaser.Scene {
 
                     // finish using the item -> affect the target, delete item from bag
                     //  display new health on screen if needed -> re-enable the keyboard on game scene
-                    console.log('just used an item on the game scene!');
-                    console.log({
-                        gameScenePlayerInventoryAfterRemovingUsedItem: this.gameScene.player.inventory
-                    });
+                    // just used an item on the game scene!
                     this.destroyInventoryButtons();
 
                     const actualAmountHealed = Math.min(
@@ -1424,12 +1407,6 @@ export default class UIScene extends Phaser.Scene {
 
     public update() {
         if (Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
-
-            console.log('space bar pressed on ui scene');
-            console.log({
-                interactionState: this.interactionState,
-                spaceDown: this.gameScene.spaceDown
-            });
             eventsCenter.emit('space');
             // this.gameScene.spaceDown = true;
             if (
@@ -1439,10 +1416,9 @@ export default class UIScene extends Phaser.Scene {
                 this.interactionState = 'mainselect';
 
                 if (this.gameScene.weaponMerchant || this.gameScene.innKeeper) {
-                    console.log('space bar pressed on game scene (npc[s] found)');
-                    console.log({interactionState: this.interactionState});
+                    // space bar pressed on game scene (npc[s] found)
 
-                    console.log('listening for interactivity on npcs');
+                    // listening for interactivity on npcs
                     if (this.gameScene.weaponMerchant) this.gameScene.weaponMerchant.listenForInteractEvent();
                     if (this.gameScene.innKeeper) this.gameScene.innKeeper.listenForInteractEvent();
                 }
@@ -1462,7 +1438,6 @@ export default class UIScene extends Phaser.Scene {
             // }
         }
         if (Phaser.Input.Keyboard.JustUp(this.cursors.space)) {
-            console.log('space bar lifted! (ui scene)');
             this.gameScene.spaceDown = false;
 
         }
@@ -1501,10 +1476,7 @@ export default class UIScene extends Phaser.Scene {
 
     private generateInventoryButtons() {
         // iterate over all inventory entries
-        console.log('generating inventory buttons');
-        console.log({
-            inventory: this.gameScene.player.inventory
-        });
+        // generate inventory buttons
         for (const [index, item] of this.gameScene.player.inventory.entries()) {
 
             const inventoryButton = new UIActionButton(

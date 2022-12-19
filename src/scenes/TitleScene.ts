@@ -63,13 +63,11 @@ export default class TitleScene extends Phaser.Scene {
     public handleInput(camera: Camera) {
         // sets the title music
         this.musicScene.changeSong('title');
-        // console.log({isTouch: this.isTouch});
 
         this.input.keyboard.enabled = false;
         this.input.enabled = false;
         camera.fadeOut(1500);
         this.cameras.main.once('camerafadeoutcomplete', () => {
-            // this.startScene('Game');
             this.scene.start('Game');
         });
 
@@ -79,8 +77,4 @@ export default class TitleScene extends Phaser.Scene {
         this.scene.launch('Music');
         this.scene.launch('SFX');
     }
-    //
-    // public startScene(targetScene: string) {
-    //     this.scene.start(targetScene);
-    // }
 }

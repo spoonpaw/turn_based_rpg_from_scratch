@@ -28,7 +28,7 @@ export default class SFXScene extends Phaser.Scene {
             'sfxinactivebutton',
             '',
             () => {
-                console.log('sfx button clicked');
+                // sfx button clicked
                 if (!this.muted) {
                     this.muted = true;
                     this.sfxMuteButton.select();

@@ -1,10 +1,8 @@
-// TODO: Add Sound Effects to battle scene (attack, heal, run)
+// TODO: Add Sound Effects to battle scene (run, dodge)
 
 // TODO: Add Ability button functionality
 
 // TODO: Add logic for armor decreasing damage taken.
-
-// TODO: Add logic for weapons increasing damage
 
 import {Enemy} from '../classes/Enemy';
 import PlayerCharacter from '../classes/PlayerCharacter';
