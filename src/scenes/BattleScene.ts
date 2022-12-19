@@ -353,6 +353,9 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private startBattle(): void {
+        this.gameScene.gamePadScene?.scene.sendToBack();
+
+
         this.uiScene.selectCancel();
 
         this.turnIndex = -1;
