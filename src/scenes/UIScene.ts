@@ -1240,6 +1240,7 @@ export default class UIScene extends Phaser.Scene {
             'gameActionMenuCharacterButtonActive',
             '',
             () => {
+                console.log({interactionState: this.interactionState});
                 if (this.interactionState.startsWith('inventoryaction')) {
                     const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
 

@@ -40,6 +40,7 @@ export default class Merchant extends NPC {
         ) {
             // merchant is getting talked to
             this.uiScene.interactionState = 'merchantbuy';
+            this.gameScene.gamePadScene?.scene.stop();
             this.uiScene.currentNPC = this;
             // this.gameScene.input.keyboard.resetKeys();
             this.gameScene.input.keyboard.enabled = false;
