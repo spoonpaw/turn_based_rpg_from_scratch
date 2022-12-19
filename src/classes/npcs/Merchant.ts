@@ -20,7 +20,7 @@ export default class Merchant extends NPC {
 
     public listenForInteractEvent() {
         // if (Phaser.Input.Keyboard.JustDown(this.gameScene.cursors.space)) {
-        console.log('merchant just heard the space bar somewhere!');
+        // merchant just heard the space bar somewhere!
         if (
             (
                 this.gameScene.player.getTilePos().x === this.tilePos.x - 1 &&
@@ -38,7 +38,7 @@ export default class Merchant extends NPC {
                 this.gameScene.gridPhysics.facingDirection === 'left'
             )
         ) {
-            console.log('merchant is getting talked to');
+            // merchant is getting talked to
             this.uiScene.interactionState = 'merchantbuy';
             this.uiScene.currentNPC = this;
             // this.gameScene.input.keyboard.resetKeys();
@@ -81,7 +81,7 @@ export default class Merchant extends NPC {
                 this.uiScene.interactionState = 'mainselect';
                 eventsCenter.removeListener('space');
                 eventsCenter.removeListener('no');
-                console.log('close the merchant select scene');
+                // close the merchant select scene
 
                 this.uiScene.leftSideDialogFrame.setVisible(false);
                 this.uiScene.leftSideDialogText.setText('');
@@ -123,7 +123,7 @@ export default class Merchant extends NPC {
 
         }
         else {
-            // console.log('merchant is not getting talked to');
+            // merchant is not getting talked to
             return;
         }
         // }

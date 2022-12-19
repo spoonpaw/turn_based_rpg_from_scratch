@@ -47,7 +47,7 @@ export default class GameOverScene extends Phaser.Scene {
             'musicinactivebutton',
             '',
             () => {
-                console.log('music button clicked!');
+                // music button clicked!
                 if (!this.musicScene.muted) {
                     this.musicScene.muted = true;
                     this.musicScene.musicMuteButton.select();

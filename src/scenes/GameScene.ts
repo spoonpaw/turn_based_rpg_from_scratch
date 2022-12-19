@@ -13,7 +13,6 @@ import UIScene from './UIScene';
 
 export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
-    // public activeDialogScene!: boolean;
     public currentMap!: string;
     public cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     public gridControls!: GridControls;
@@ -44,13 +43,10 @@ export default class GameScene extends Phaser.Scene {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         if (window['IS_TOUCH' as keyof typeof window] === true) {
-            console.log('launching the game pad scene');
+            // launching the game pad scene
             this.scene.launch('GamePad');
             this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
         }
-
-        // this.swipe = this.scene.scene['rexGestures' as keyof typeof this.scene.scene].add.swipe(config);
-        // var swipe = scene.rexGestures.add.swipe(gameObject, config);
 
         // this.activeDialogScene = false;
 
@@ -183,7 +179,7 @@ export default class GameScene extends Phaser.Scene {
                 }
 
                 else if (npc.name === 'innkeeper') {
-                    console.log('spawning an innkeeper!');
+                    // spawning an innkeeper
                     const innKeeperSprite = this.add.sprite(0, 0, 'npc1');
                     innKeeperSprite.setDepth(2);
 
@@ -287,14 +283,13 @@ export default class GameScene extends Phaser.Scene {
             // }
 
             if (this.weaponMerchant || this.innKeeper) {
-                console.log('space bar pressed on game scene (npc[s] found)');
-                console.log({interactionState: this.uiScene.interactionState});
+                // space bar pressed on game scene (npc[s] found)
                 if (
                     this.uiScene.interactionState === 'mainselect' // ||
                     // this.uiScene.interactionState === 'cancelmouse' // ||
                     // this.uiScene.interactionState === 'cancel'
                 ) {
-                    console.log('listening for interactivity on npcs');
+                    // listening for interactivity on npcs
                     if (this.weaponMerchant) this.weaponMerchant.listenForInteractEvent();
                     if (this.innKeeper) this.innKeeper.listenForInteractEvent();
                 }
@@ -305,7 +300,7 @@ export default class GameScene extends Phaser.Scene {
             Phaser.Input.Keyboard.JustUp(this.cursors.space) // &&
             //     this.uiScene.interactionState === 'cancel'
         ) {
-            console.log('space bar lifted! (game scene)');
+            // space bar lifted! (game scene)
             this.spaceDown = false;
         }
 
