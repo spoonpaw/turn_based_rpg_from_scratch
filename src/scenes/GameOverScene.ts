@@ -1,22 +1,20 @@
-// TODO: GAME OVER MUSIC GET
-
-
 import TweenHelper from '../utils/TweenHelper';
 import GameScene from './GameScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
-import UIActionButton from '../classes/UIActionButton';
 import MusicScene from './MusicScene';
 
 export default class GameOverScene extends Phaser.Scene {
     private gameOverText!: Phaser.GameObjects.Text;
-    private musicMuteButton!: UIActionButton;
+    // private musicMuteButton!: UIActionButton;
     private musicScene!: MusicScene;
+    private gameScene!: GameScene;
 
     public constructor() {
         super('GameOver');
     }
 
     public create() {
+        this.gameScene = <GameScene>this.scene.get('Game');
         this.musicScene = <MusicScene>this.scene.get('Music');
         const phaserImage = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'title');
         phaserImage.displayHeight = this.sys.canvas.height;
@@ -42,37 +40,6 @@ export default class GameOverScene extends Phaser.Scene {
 
         pressAnyKeyText.setOrigin(0.5);
 
-        this.musicMuteButton = new UIActionButton(
-            this,
-            890,
-            21,
-            'musicbutton',
-            'musicinactivebutton',
-            '',
-            () => {
-                // music button clicked!
-                if (!this.musicScene.muted) {
-                    this.musicScene.muted = true;
-                    this.musicScene.musicMuteButton.select();
-                    this.musicMuteButton.select();
-                    this.musicScene.muteMusic();
-                }
-                else {
-                    this.musicScene.muted = false;
-                    this.musicScene.musicMuteButton.deselect();
-                    this.musicMuteButton.deselect();
-                    this.musicScene.unmuteMusic();
-                }
-
-            }
-        );
-        if (this.musicScene.muted) {
-            this.musicMuteButton.select();
-        }
-        else {
-            this.musicMuteButton.deselect();
-        }
-
         TweenHelper.flashElement(this, pressAnyKeyText);
 
         this.sys.events.removeListener('wake');
@@ -81,7 +48,7 @@ export default class GameOverScene extends Phaser.Scene {
         const gameScene = <GameScene>this.scene.get('Game');
 
         gameScene.player.stats.currentHP = gameScene.player.stats.maxHP;
-        gameScene.scene.restart();
+        // gameScene.scene.restart();
 
         this.setupKeyListeners();
 
@@ -91,21 +58,18 @@ export default class GameOverScene extends Phaser.Scene {
         this.input.keyboard.enabled = false;
         this.input.enabled = false;
         camera.fadeOut(3000);
-        this.cameras.main.removeListener('camerafadeoutcomplete');
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-            // TODO: FIX THIS SONG FROM GETTING TRIGGERED EARLY
-            this.cameras.main.removeListener('camerafadeoutcomplete');
-            this.musicScene.changeSong('title');
-            this.scene.wake('Game');
-            this.scene.stop();
-            return;
+        this.time.addEvent({
+            delay: 3000,
+            callback: () => {
+                // this.scene.wake('Game');
+                this.gameScene.scene.restart();
+                this.scene.stop();
+                return;
+            }
         });
     }
 
     public setupKeyListeners() {
-        // TODO: don't put listeners on the input.
-        //  instead, put listeners on everything except the
-        //  mute button
 
         this.input.keyboard.enabled = true;
         this.input.enabled = true;

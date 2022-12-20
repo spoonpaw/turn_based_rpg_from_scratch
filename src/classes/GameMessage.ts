@@ -1,11 +1,16 @@
+import GameScene from '../scenes/GameScene';
 import eventsCenter from '../utils/EventsCenter';
 
 export default class GameMessage extends Phaser.GameObjects.Container {
     public text: Phaser.GameObjects.Text;
     private hideEvent: Phaser.Time.TimerEvent | undefined;
+    private gameScene: GameScene;
 
     public constructor(scene: Phaser.Scene) {
         super(scene, 0, 0);
+
+        this.gameScene = <GameScene>this.scene.scene.get('Game');
+
         const image = this.scene.add.image(
             120,
             430,
@@ -42,7 +47,9 @@ export default class GameMessage extends Phaser.GameObjects.Container {
     private hideMessage() {
         this.hideEvent = undefined;
         this.setVisible(false);
-        this.scene.scene.launch('GamePad');
+        if (this.gameScene.operatingSystem === 'mobile') {
+            this.scene.scene.launch('GamePad');
+        }
     }
 
     private showMessage(text: string | string[]) {

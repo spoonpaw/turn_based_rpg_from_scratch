@@ -20,7 +20,7 @@ export default class GamePadScene extends Phaser.Scene {
         this.musicScene = <MusicScene>this.scene.get('Music');
         this.sfxScene = <SFXScene>this.scene.get('SFX');
         this.scene.bringToTop();
-        this.gameScene.uiScene.scene.bringToTop();
+        // this.gameScene.uiScene.scene.bringToTop();
         this.musicScene.scene.bringToTop();
         this.sfxScene.scene.bringToTop();
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -29,8 +29,8 @@ export default class GamePadScene extends Phaser.Scene {
             x: 110,
             y: 510,
             radius: 100,
-            base: this.add.circle(0, 0, 60, 0x888888),
-            thumb: this.add.circle(0, 0, 25, 0xcccccc),
+            base: this.add.circle(0, 0, 60, 0x888888, 0.8),
+            thumb: this.add.circle(0, 0, 25, 0xcccccc, 0.9),
             dir: '4dir',   // 'up&down'|0|'left&right'|1|'4dir'|2|'8dir'|3
             forceMin: 16,
             enable: true
@@ -40,33 +40,6 @@ export default class GamePadScene extends Phaser.Scene {
         this.text = this.add.text(0, 0, '');
         this.text.setVisible(false);
         this.dumpJoyStickState();
-
-        this.input.removeListener('pointerdown');
-        this.input.on('pointerdown', (pointer: PointerEvent) => {
-            // TODO: HIGH PRIORITY TODO: MOVE ALL THIS LOGIC TO AN INTERACT BUTTON ON THE
-            //  UISCENE THE ONLY APPEARS WHEN THE PLAYER IS STANDING IN FRONT OF AND FACING
-            //  AN NPC
-            // pointer down on the gamepad scene!
-            // ??
-            // eventsCenter.emit('space');
-            if (this.gameScene.weaponMerchant || this.gameScene.innKeeper) {
-                // pointer down on the gamepad scene (npc[s] found)
-                if (this.gameScene.uiScene.interactionState === 'cancelmouse') {
-                    this.gameScene.uiScene.interactionState = 'mainselect';
-                    return;
-                }
-                if (
-                    this.gameScene.uiScene.interactionState.startsWith('mainselect') // ||
-                    // this.uiScene.interactionState === 'cancelmouse' // ||
-                    // this.uiScene.interactionState === 'cancel'
-                ) {
-                    // listening for interactivity on npcs
-                    if (this.gameScene.weaponMerchant) this.gameScene.weaponMerchant.listenForInteractEvent();
-                    if (this.gameScene.innKeeper) this.gameScene.innKeeper.listenForInteractEvent();
-                }
-            }
-            this.joyStick.setPosition(pointer.x, pointer.y);
-        }, this);
 
     }
 

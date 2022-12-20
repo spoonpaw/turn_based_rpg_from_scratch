@@ -14,7 +14,7 @@ export default class BattleUIScene extends Phaser.Scene {
     public message!: Message;
     public selectedItemAndAbilityCommandText!: Phaser.GameObjects.Text;
     public selectedItemAndAbilityIcon!: UIActionButton;
-    public musicMuteButton!: UIActionButton;
+    // public musicMuteButton!: UIActionButton;
     private musicScene!: MusicScene;
     private abilityButton!: UIActionButton;
     private actionButtons: UIActionButton[] = [];
@@ -174,37 +174,6 @@ export default class BattleUIScene extends Phaser.Scene {
         this.actionButtons.push(this.hotkeyButton1);
         this.hotkeyBadge1 = this.add.image(278, 583, 'badge1').setScale(2);
         this.hotkeyBadge1.setVisible(false);
-
-        this.musicMuteButton = new UIActionButton(
-            this,
-            890,
-            21,
-            'musicbutton',
-            'musicinactivebutton',
-            '',
-            () => {
-                if (!this.musicScene.muted) {
-                    this.musicScene.muted = true;
-                    this.musicScene.musicMuteButton.select();
-                    this.musicMuteButton.select();
-                    this.musicScene.muteMusic();
-                }
-                else {
-                    this.musicScene.muted = false;
-                    this.musicScene.musicMuteButton.deselect();
-                    this.musicMuteButton.deselect();
-                    this.musicScene.unmuteMusic();
-                }
-
-            }
-        );
-        if (this.musicScene.muted) {
-            this.musicMuteButton.select();
-        }
-        else {
-            this.musicMuteButton.deselect();
-        }
-
 
         this.abilityButton = new UIActionButton(
             this,
@@ -387,7 +356,7 @@ export default class BattleUIScene extends Phaser.Scene {
                 this.message.text.setText('');
                 // this.message.setVisible(true);
 
-                // TODO: fix this part. this.selectedItemAndAbilityIcon needs to be destroyed and
+                // this.selectedItemAndAbilityIcon gets destroyed and
                 //  regenerated here based on what the selected item is
 
                 this.selectedItemAndAbilityIcon.destroy();
@@ -524,12 +493,7 @@ export default class BattleUIScene extends Phaser.Scene {
     }
 
     private initiateBattleUI() {
-        if (this.musicScene.muted) {
-            this.musicMuteButton.select();
-        }
-        else {
-            this.musicMuteButton.deselect();
-        }
+
         this.hideUIFrames();
         eventsCenter.emit('Message', `A ${this.battleScene.enemies[0].type} approaches.`);
     }
@@ -587,6 +551,7 @@ export default class BattleUIScene extends Phaser.Scene {
         this.cancelMenuFrame.setY(315);
 
         this.cancelButton.setVisible(true);
+        this.cancelButton.buttonText.setText('Cancel');
         this.cancelButton.buttonText.setVisible(true);
         this.cancelMenuFrame.setVisible(true);
 
@@ -642,6 +607,7 @@ export default class BattleUIScene extends Phaser.Scene {
         this.cancelMenuFrame.setVisible(true);
         // this.cancelText.setVisible(true);
         this.cancelButton.setVisible(true);
+        this.cancelButton.buttonText.setText('Cancel');
         this.cancelButton.buttonText.setVisible(true);
 
         this.commandMenuText.setText('Choose A Target');
@@ -720,6 +686,7 @@ export default class BattleUIScene extends Phaser.Scene {
         this.cancelMenuFrame.setY(315);
 
         this.cancelButton.setVisible(true);
+        this.cancelButton.buttonText.setText('Cancel');
         this.cancelButton.buttonText.setVisible(true);
         this.cancelMenuFrame.setVisible(true);
 

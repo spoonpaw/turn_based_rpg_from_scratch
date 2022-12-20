@@ -66,7 +66,7 @@ export default class UIScene extends Phaser.Scene {
     private manaPointString!: Phaser.GameObjects.Text;
     private manaText!: Phaser.GameObjects.Text;
     private message!: GameMessage;
-    public musicMuteButton!: UIActionButton;
+    // public musicMuteButton!: UIActionButton;
     public musicScene!: MusicScene;
     public sfxScene!: SFXScene;
     private offHandItemButton!: UIActionButton;
@@ -78,6 +78,8 @@ export default class UIScene extends Phaser.Scene {
     private subInventoryButtons: UIActionButton[] = [];
     private tillNextLevelString!: Phaser.GameObjects.Text;
     private vitalityString!: Phaser.GameObjects.Text;
+    public interactFrame!: Phaser.GameObjects.Image;
+    public interactButton!: UIActionButton;
 
     public constructor() {
         super('UI');
@@ -300,7 +302,10 @@ export default class UIScene extends Phaser.Scene {
     }
 
     public selectCancel() {
-        this.scene.launch('GamePad');
+
+        if (this.gameScene.operatingSystem !== 'desktop') {
+            this.scene.launch('GamePad');
+        }
         // entering ui scene 'selectcancel' method
         eventsCenter.removeListener('space');
         if (!this.gameScene.input.keyboard.enabled) {
@@ -460,6 +465,12 @@ export default class UIScene extends Phaser.Scene {
             .setOrigin(0, 0);
         this.inventoryAndAbilityDetailFrame.setVisible(false);
 
+        this.interactFrame = this.add.image(
+            Number(this.game.config.width) / 2,
+            550,
+            'cancelMenuFrame'
+        );
+        this.interactFrame.setVisible(false);
 
         // END FRAME SECTION
 
@@ -625,36 +636,21 @@ export default class UIScene extends Phaser.Scene {
         // END TEXT SECTION
 
         // START BUTTON SECTION
-        this.musicMuteButton = new UIActionButton(
+        this.interactButton = new UIActionButton(
             this,
-            890,
-            21,
-            'musicbutton',
-            'musicinactivebutton',
-            '',
+            385,
+            550,
+            'checkbutton',
+            'checkbuttonactive',
+            'Interact',
             () => {
-                // music button clicked!
-                if (!this.musicScene.muted) {
-                    this.musicScene.muted = true;
-                    this.musicScene.musicMuteButton.select();
-                    this.musicMuteButton.select();
-                    this.musicScene.muteMusic();
-                }
-                else {
-                    this.musicScene.muted = false;
-                    this.musicScene.musicMuteButton.deselect();
-                    this.musicMuteButton.deselect();
-                    this.musicScene.unmuteMusic();
-                }
-
+                this.gameScene.readyToInteractObject?.runDialog();
+                return;
             }
         );
-        if (this.musicScene.muted) {
-            this.musicMuteButton.select();
-        }
-        else {
-            this.musicMuteButton.deselect();
-        }
+        this.interactButton.setVisible(false);
+        this.interactButton.buttonText.setVisible(false);
+
 
         this.yesButton = new UIActionButton(
             this,
@@ -678,13 +674,11 @@ export default class UIScene extends Phaser.Scene {
             'crossbuttonactive',
             'No',
             () => {
-                // TODO: fix this gigantic issue, when the no button gets clicked
-                //  the entire bottom panel disappears and
-
                 this.interactionState = 'cancelmouse';
 
-                this.scene.launch('GamePad');
-
+                if (this.gameScene.operatingSystem !== 'desktop') {
+                    this.scene.launch('GamePad');
+                }
                 eventsCenter.removeListener('space');
 
                 this.goldFrame.setVisible(false);
@@ -706,9 +700,6 @@ export default class UIScene extends Phaser.Scene {
         this.noButton.setVisible(false);
         this.noButton.buttonText.setVisible(false);
 
-        // TODO: fix this cancel button.
-        //  when clicked from the merchant, the game eats the next
-        //  space bar input
         this.cancelButton = new UIActionButton(
             this,
             347,
@@ -777,6 +768,17 @@ export default class UIScene extends Phaser.Scene {
                         this.leftSideDialogFrame.setVisible(true);
                         this.leftSideDialogText.setText('Merchant:\nThou art ov\'r encumb\'r\'d!');
                         this.leftSideDialogText.setVisible(true);
+
+                        this.cancelMenuFrame.setX(670);
+                        this.cancelMenuFrame.setY(380);
+                        this.cancelMenuFrame.setVisible(true);
+                        this.cancelButton.setX(702);
+                        this.cancelButton.setY(415);
+                        this.cancelButton.setVisible(true);
+                        this.cancelButton.buttonText.setX(722);
+                        this.cancelButton.buttonText.setY(390);
+                        this.cancelButton.buttonText.setText('Farewell');
+                        this.cancelButton.buttonText.setVisible(true);
                     }
                     else if (this.gameScene.player.gold < selectedItem.cost) {
                         // process the rejection
@@ -798,11 +800,22 @@ export default class UIScene extends Phaser.Scene {
                         this.leftSideDialogFrame.setVisible(true);
                         this.leftSideDialogText.setText('Merchant:\nYou haven\'t enough coin!');
                         this.leftSideDialogText.setVisible(true);
+
+                        this.cancelMenuFrame.setX(670);
+                        this.cancelMenuFrame.setY(380);
+                        this.cancelMenuFrame.setVisible(true);
+                        this.cancelButton.setX(702);
+                        this.cancelButton.setY(415);
+                        this.cancelButton.setVisible(true);
+                        this.cancelButton.buttonText.setX(722);
+                        this.cancelButton.buttonText.setY(390);
+                        this.cancelButton.buttonText.setText('Farewell');
+                        this.cancelButton.buttonText.setVisible(true);
                     }
                     else {
-                        // TODO: handle buying the item, take the gold from the player
+                        // handle buying the item, take the gold from the player
                         //  and put the item in their inventory
-                        // process the purchase
+                        //  process the purchase
 
                         // hide all the merchant related frames
                         this.inventoryAndAbilityMenuFrame.setVisible(false);
@@ -821,6 +834,17 @@ export default class UIScene extends Phaser.Scene {
                         this.leftSideDialogFrame.setVisible(true);
                         this.leftSideDialogText.setText('Merchant:\nThanketh thee f\'r thy patronage!');
                         this.leftSideDialogText.setVisible(true);
+
+                        this.cancelMenuFrame.setX(670);
+                        this.cancelMenuFrame.setY(380);
+                        this.cancelMenuFrame.setVisible(true);
+                        this.cancelButton.setX(702);
+                        this.cancelButton.setY(415);
+                        this.cancelButton.setVisible(true);
+                        this.cancelButton.buttonText.setX(722);
+                        this.cancelButton.buttonText.setY(390);
+                        this.cancelButton.buttonText.setText('Farewell');
+                        this.cancelButton.buttonText.setVisible(true);
 
                         this.gameScene.player.inventory.push(
                             new Item(
@@ -1014,7 +1038,7 @@ export default class UIScene extends Phaser.Scene {
                     equipmentString.setVisible(true);
                 }
 
-                // TODO: REFRESH THE EQUIPMENT LIST
+                // REFRESH THE EQUIPMENT LIST
                 this.destroyEquipmentButtons();
                 this.generateEquipmentButtons();
 
@@ -1034,6 +1058,7 @@ export default class UIScene extends Phaser.Scene {
 
                 this.cancelMenuFrame.setVisible(true);
                 this.cancelButton.setVisible(true);
+                this.cancelButton.buttonText.setText('Cancel');
                 this.cancelButton.buttonText.setVisible(true);
             }
         );
@@ -1125,23 +1150,6 @@ export default class UIScene extends Phaser.Scene {
             .setStroke('#000000', 2)
             .setResolution(10);
 
-        // set up soldier text and icon as well as level text
-        // this.soldierText = this.add.text(
-        //     88,
-        //     620,
-        //     `Soldier / Level ${Math.max(
-        //         1, Math.ceil(
-        //             0.3 * Math.sqrt(
-        //                 this.gameScene.player.experience
-        //             )
-        //         )
-        //     )}`,
-        //     {fontSize: '50px', color: '#ffffff', fontFamily: 'CustomFont'})
-        //     .setStroke('#000000', 2)
-        //     .setResolution(10);
-        // this.swordIcon = this.add.image(60, 650, 'sword')
-        //     .setScale(1.5);
-
         // create the hp text game object
         this.hpText = this.add.text(
             115,
@@ -1173,7 +1181,9 @@ export default class UIScene extends Phaser.Scene {
                     this.interactionState.startsWith('inventoryaction')
                 ) {
                     this.selectCancel();
-                    this.scene.launch('GamePad');
+                    if (this.gameScene.operatingSystem !== 'desktop') {
+                        this.scene.launch('GamePad');
+                    }
                     return;
                 }
                 else if (
@@ -1228,6 +1238,7 @@ export default class UIScene extends Phaser.Scene {
                 this.cancelButton.buttonText.setX(367);
                 this.cancelButton.buttonText.setY(325);
                 this.cancelButton.setVisible(true);
+                this.cancelButton.buttonText.setText('Cancel');
                 this.cancelButton.buttonText.setVisible(true);
             }
         );
@@ -1240,7 +1251,8 @@ export default class UIScene extends Phaser.Scene {
             'gameActionMenuCharacterButtonActive',
             '',
             () => {
-                console.log({interactionState: this.interactionState});
+                // uncomment to log interaction state by clicking player portrait
+                // console.log({interactionState: this.interactionState});
                 if (this.interactionState.startsWith('inventoryaction')) {
                     const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
 
@@ -1314,13 +1326,17 @@ export default class UIScene extends Phaser.Scene {
                     this.interactionState === 'ability'
                 ) {
                     this.selectCancel();
-                    this.scene.launch('GamePad');
+                    if (this.gameScene.operatingSystem !== 'desktop') {
+                        this.scene.launch('GamePad');
+                    }
                     return;
                 }
                 // this.sfxScene.playSound('select');
                 // set up ability menu when this button is pressed
                 this.interactionState = 'ability';
-                this.scene.sleep('GamePad');
+                if (this.gameScene.operatingSystem !== 'desktop') {
+                    this.scene.sleep('GamePad');
+                }
 
                 this.abilityButton.select();
 
@@ -1343,6 +1359,7 @@ export default class UIScene extends Phaser.Scene {
                 this.cancelButton.buttonText.setX(367);
                 this.cancelButton.buttonText.setY(325);
                 this.cancelButton.setVisible(true);
+                this.cancelButton.buttonText.setText('Cancel');
                 this.cancelButton.buttonText.setVisible(true);
 
             }
@@ -1369,7 +1386,9 @@ export default class UIScene extends Phaser.Scene {
                 }
                 else if (this.interactionState === 'charactersheet') {
                     this.selectCancel();
-                    this.scene.launch('GamePad');
+                    if (this.gameScene.operatingSystem !== 'desktop') {
+                        this.scene.launch('GamePad');
+                    }
                     return;
                 }
                 // set up the character sheet -> query and update
@@ -1390,6 +1409,7 @@ export default class UIScene extends Phaser.Scene {
                 this.cancelButton.buttonText.setX(367);
                 this.cancelButton.buttonText.setY(498);
                 this.cancelButton.setVisible(true);
+                this.cancelButton.buttonText.setText('Cancel');
                 this.cancelButton.buttonText.setVisible(true);
 
                 this.classString.setVisible(true);
@@ -1434,9 +1454,6 @@ export default class UIScene extends Phaser.Scene {
             ) {
                 this.selectCancel();
             }
-            // else if (this.interactionState === 'mainselectnodialog') {
-            //     this.interactionState = 'mainselect';
-            // }
         }
         if (Phaser.Input.Keyboard.JustUp(this.cursors.space)) {
             this.gameScene.spaceDown = false;
@@ -1537,10 +1554,6 @@ export default class UIScene extends Phaser.Scene {
             this.inventoryButtons.push(inventoryButton);
         }
     }
-
-    // updateXP(xp: number) {
-    //     this.soldierText.setText(`Soldier / Level ${Math.max(1, Math.ceil(0.3 * Math.sqrt(xp)))}`);
-    // }
 
     private updateCharacterSheetStrings() {
         this.levelString.setText(`Level: ${Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)))}`);
