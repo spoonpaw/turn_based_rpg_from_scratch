@@ -59,6 +59,7 @@ export default class GameScene extends Phaser.Scene {
             // create the map
             this.scene.launch('UI');
             this.uiScene = <UIScene>this.scene.get('UI');
+            this.uiScene.scene.bringToTop();
 
             this.currentMap = levels.overworld.name;
             this.exitingCurrentLevel = false;
