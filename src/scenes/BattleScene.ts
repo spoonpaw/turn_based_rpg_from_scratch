@@ -349,8 +349,7 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private startBattle(): void {
-        // this.gameScene.gamePadScene?.scene.stop();
-
+        this.musicScene.scene.bringToTop();
 
         this.uiScene.selectCancel();
         this.gameScene.gamePadScene?.scene.stop();

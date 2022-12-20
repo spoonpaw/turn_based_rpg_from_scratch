@@ -9,28 +9,30 @@ import {ILevelData, levels} from '../levels/Levels';
 import {Direction} from '../types/Direction';
 import {Equipment} from '../types/Equipment';
 import GamePadScene from './GamePadScene';
+import MusicScene from './MusicScene';
 import UIScene from './UIScene';
 
 export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
     public currentMap!: string;
     public cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    public gamePadScene?: GamePadScene;
     public gridControls!: GridControls;
     public gridPhysics!: GridPhysics;
     public innKeeper!: Innkeeper;
+    public npcs: (Innkeeper | Merchant)[] = [];
+    public operatingSystem!: string;
     public player!: Player;
     public playerTileX!: number;
     public playerTileY!: number;
+    public readyToInteractObject: Innkeeper | Merchant | undefined;
     public spaceDown!: boolean;
     public uiScene!: UIScene;
     public weaponMerchant!: Merchant;
     private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private exitingCurrentLevel!: boolean;
-    public gamePadScene?: GamePadScene;
     private nonHostileSpace!: boolean;
-    public operatingSystem!: string;
-    public readyToInteractObject: Innkeeper | Merchant | undefined;
-    public npcs: (Innkeeper | Merchant)[] = [];
+    public musicScene!: MusicScene;
 
     public constructor() {
         super('Game');
@@ -42,6 +44,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public create(data?: { levelData?: ILevelData }) {
+
         this.gamePadScene?.scene.restart();
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
@@ -55,11 +58,18 @@ export default class GameScene extends Phaser.Scene {
 
         // if data is empty then the game just started so load the player in the spawn location
         if (data && Object.keys(data).length === 0) {
+
             // create the game scene when the level 1 player initially spawns.
             // create the map
             this.scene.launch('UI');
             this.uiScene = <UIScene>this.scene.get('UI');
             this.uiScene.scene.bringToTop();
+            this.musicScene = <MusicScene>this.scene.get('Music');
+            this.musicScene.scene.bringToTop();
+
+            if (this.musicScene.gameOverSong.isPlaying) {
+                this.musicScene.changeSong('title');
+            }
 
             this.currentMap = levels.overworld.name;
             this.exitingCurrentLevel = false;
