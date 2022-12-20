@@ -100,9 +100,6 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private endBattle(): void {
-        this.gameScene.gamePadScene?.scene.stop();
-
-        this.musicScene.changeSong('title');
 
         this.battleUIScene.disableAllActionButtons();
         // send the player info to the game scene ui
@@ -149,7 +146,6 @@ export default class BattleScene extends Phaser.Scene {
         this.time.addEvent({
             delay: 1000,
             callback: () => {
-                // TODO: fix this so the mute button doesn't get faded out
                 this.musicScene.scene.bringToTop();
                 this.battleUIScene.cameras.main.fadeOut(2000);
 
@@ -353,10 +349,12 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private startBattle(): void {
-        this.gameScene.gamePadScene?.scene.sendToBack();
+        // this.gameScene.gamePadScene?.scene.stop();
 
 
         this.uiScene.selectCancel();
+        this.gameScene.gamePadScene?.scene.stop();
+        this.uiScene.scene.sendToBack();
 
         this.turnIndex = -1;
         // sets the battle music - muted for now

@@ -2,11 +2,13 @@ import GameScene from '../../scenes/GameScene';
 import {Direction} from '../../types/Direction';
 
 export default class NPC {
+    protected gameScene: GameScene;
 
     constructor(
         public sprite: Phaser.GameObjects.Sprite,
         protected tilePos: Phaser.Math.Vector2
     ) {
+        this.gameScene = <GameScene>this.sprite.scene.scene.get('Game');
         const offsetX = GameScene.TILE_SIZE / 2;
         const offsetY = GameScene.TILE_SIZE;
 
@@ -45,4 +47,31 @@ export default class NPC {
         this.sprite.anims.stop();
         this.sprite.setFrame(standingFrame);
     }
+
+
+
+    public testForInteractionReadyState() {
+
+        if (
+            (
+                this.gameScene.player.getTilePos().x === this.tilePos.x - 1 &&
+                this.gameScene.player.getTilePos().y === this.tilePos.y &&
+                this.gameScene.gridPhysics.facingDirection === 'right'
+            ) ||
+            (
+                this.gameScene.player.getTilePos().x === this.tilePos.x &&
+                this.gameScene.player.getTilePos().y === this.tilePos.y + 1 &&
+                this.gameScene.gridPhysics.facingDirection === 'up'
+            ) ||
+            (
+                this.gameScene.player.getTilePos().x === this.tilePos.x + 1 &&
+                this.gameScene.player.getTilePos().y === this.tilePos.y &&
+                this.gameScene.gridPhysics.facingDirection === 'left'
+            )
+        ) {
+            return true;
+        }
+        return false;
+    }
+
 }

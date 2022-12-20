@@ -28,6 +28,9 @@ export default class GameScene extends Phaser.Scene {
     private exitingCurrentLevel!: boolean;
     public gamePadScene?: GamePadScene;
     private nonHostileSpace!: boolean;
+    public operatingSystem!: string;
+    public readyToInteractObject: Innkeeper | Merchant | undefined;
+    public npcs: (Innkeeper | Merchant)[] = [];
 
     public constructor() {
         super('Game');
@@ -42,7 +45,7 @@ export default class GameScene extends Phaser.Scene {
         this.gamePadScene?.scene.restart();
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        if (window['IS_TOUCH' as keyof typeof window] === true) {
+        if (this.operatingSystem === 'mobile') {
             // launching the game pad scene
             this.scene.launch('GamePad');
             this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
@@ -56,6 +59,7 @@ export default class GameScene extends Phaser.Scene {
             // create the map
             this.scene.launch('UI');
             this.uiScene = <UIScene>this.scene.get('UI');
+
             this.currentMap = levels.overworld.name;
             this.exitingCurrentLevel = false;
             this.currentTilemap = this.make.tilemap({key: levels.overworld.tilemapKey});
@@ -76,7 +80,7 @@ export default class GameScene extends Phaser.Scene {
             const potionItem = items.find(obj => {
                 return obj.name === 'Health Potion';
             });
-            for (let i = 0; i < 7; i++) {
+            for (let i = 0; i < 8; i++) {
                 const potion = new Item(
                     potionItem!.key,
                     potionItem!.activekey,
@@ -119,6 +123,11 @@ export default class GameScene extends Phaser.Scene {
 
         }
         else if (data?.levelData) {
+
+            this.uiScene.scene.bringToTop();
+
+            this.npcs = [];
+
             this.uiScene.musicScene.changeSong(data.levelData.music);
 
             // spawn the character in the correct position based on data passed to the restart method
@@ -175,6 +184,7 @@ export default class GameScene extends Phaser.Scene {
                             ),
                             npc.inventory
                         );
+                        this.npcs.push(this.weaponMerchant);
                     }
                 }
 
@@ -190,6 +200,7 @@ export default class GameScene extends Phaser.Scene {
                             npc.y
                         )
                     );
+                    this.npcs.push(this.innKeeper);
                 }
             }
 
@@ -201,6 +212,15 @@ export default class GameScene extends Phaser.Scene {
 
     public preload() {
         this.scene.scene.load.scenePlugin('rexgesturesplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexgesturesplugin.min.js', 'rexGestures', 'rexGestures');
+        if (this.sys.game.device.os.desktop) {
+            this.operatingSystem = 'desktop';
+        }
+        if (this.sys.game.device.os.android) {
+            this.operatingSystem = 'mobile';
+        }
+        if (this.sys.game.device.os.iOS) {
+            this.operatingSystem = 'mobile';
+        }
     }
 
     public update(_time: number, delta: number) {
@@ -272,6 +292,37 @@ export default class GameScene extends Phaser.Scene {
             }
         }
 
+        // check if the player is facing an npc. if so, show the interact button.
+        //  otherwise, hide the interact button
+        let readyNPCFound = false;
+        for (const npc of this.npcs) {
+            if (
+                (
+                    this.uiScene.interactionState.startsWith('mainselect') ||
+                    this.uiScene.interactionState.startsWith('cancel')
+                ) && npc.testForInteractionReadyState()) {
+                // yes, the player is facing the current npc
+                readyNPCFound = true;
+                this.readyToInteractObject = npc;
+                if (!this.uiScene.interactFrame.visible) {
+                    this.uiScene.interactFrame.setVisible(true);
+                    this.uiScene.interactButton.setVisible(true);
+                    this.uiScene.interactButton.buttonText.setVisible(true);
+                    // break out of the loop because we found the guy
+                    break;
+                }
+            }
+        }
+        if (!readyNPCFound) {
+            this.readyToInteractObject = undefined;
+            // if i'm not facing the guy, hide the interact button
+            if (this.uiScene.interactFrame.visible) {
+                this.uiScene.interactFrame.setVisible(false);
+                this.uiScene.interactButton.setVisible(false);
+                this.uiScene.interactButton.buttonText.setVisible(false);
+            }
+        }
+
         // listen for the interact action (space bar)
         if (
             !this.spaceDown &&
@@ -303,46 +354,13 @@ export default class GameScene extends Phaser.Scene {
             // space bar lifted! (game scene)
             this.spaceDown = false;
         }
-
-        // this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-        //     if (pointer.leftButtonReleased()) {
-        //         console.log('heard pointer up event on game scene');
-        //         if (this.uiScene.interactionState === 'cancelmouse') {
-        //             this.uiScene.interactionState = 'mainselect';
-        //         }
-        //
-        //     }
-        // });
-
-        // if (this.weaponMerchant) {
-        //     this.weaponMerchant.listenForInteractEvent();
-        // }
-        //
-        // if (this.innKeeper) {
-        //     this.innKeeper.listenForInteractEvent();
-        // }
-
-        // this.input.keyboard.on('keydown', (event: KeyboardEvent) => {
-        //     if (event.code === 'Space') {
-        //         this.uiScene.selectCancel();
-        //     }
-        // });
-
-        // if (Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
-        //     console.log('space bar heard from game scene (select cancel block)');
-        //     this.uiScene.selectCancel();
-        // }
-
     }
 
     public wake() {
+        this.uiScene.musicScene.changeSong('title');
+        this.uiScene.scene.bringToTop();
         this.gamePadScene?.scene.restart();
-        if (this.uiScene.musicScene.muted) {
-            this.uiScene.musicMuteButton.select();
-        }
-        else {
-            this.uiScene.musicMuteButton.deselect();
-        }
+
         this.input.keyboard.enabled = true;
         this.cursors.left.reset();
         this.cursors.right.reset();
