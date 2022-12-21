@@ -113,7 +113,7 @@ export default class BattleUIScene extends Phaser.Scene {
             .setOrigin(0, 0);
         this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
 
-        this.inventoryAndAbilityDetailFrame = this.add.image(3, 212, 'inventoryAndAbilityDetailFrame')
+        this.inventoryAndAbilityDetailFrame = this.add.image(3, 105, 'inventoryAndAbilityDetailFrame')
             .setOrigin(0, 0);
         this.inventoryAndAbilityDetailFrame.setVisible(false);
 
@@ -140,10 +140,10 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.inventoryAndAbilityDetailText = this.add.text(
             15,
-            215,
+            110,
             '',
             {
-                fontSize: '50px',
+                fontSize: '45px',
                 color: '#fff',
                 fontFamily: 'CustomFont',
                 wordWrap: {
@@ -152,8 +152,9 @@ export default class BattleUIScene extends Phaser.Scene {
                 }
             }
         );
-        this.inventoryAndAbilityDetailText.setLineSpacing(-10);
+        this.inventoryAndAbilityDetailText.setLineSpacing(-16);
         this.inventoryAndAbilityDetailText.setVisible(false);
+        this.inventoryAndAbilityDetailText.setResolution(10);
 
         // create buttons and badges third
         this.hotkeyButton1 = new UIActionButton(
@@ -321,7 +322,7 @@ export default class BattleUIScene extends Phaser.Scene {
         this.useButton = new UIActionButton(
             this,
             35,
-            385,
+            392,
             'checkbutton',
             'checkbutton',
             'Use',
@@ -395,7 +396,7 @@ export default class BattleUIScene extends Phaser.Scene {
         eventsCenter.removeListener('MessageClose');
         eventsCenter.on('MessageClose', this.messageCloseHandler, this);
 
-        this.input.keyboard.on('keydown', (event: KeyboardEvent) => {
+        this.input.keyboard!.on('keydown', (event: KeyboardEvent) => {
             if (event.code === 'Digit1') {
                 if (this.battleScene.interactionState !== 'mainselect') {
                     return;
@@ -447,10 +448,10 @@ export default class BattleUIScene extends Phaser.Scene {
                     this.useButton.buttonText.setVisible(true);
 
                     this.cancelButton.setX(185);
-                    this.cancelButton.setY(385);
+                    this.cancelButton.setY(392);
 
                     this.cancelButton.buttonText.setX(205);
-                    this.cancelButton.buttonText.setY(360);
+                    this.cancelButton.buttonText.setY(367);
 
                     this.inventoryIndex = index;
                     this.inventoryButtons[index].select();

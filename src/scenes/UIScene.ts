@@ -16,12 +16,15 @@ export default class UIScene extends Phaser.Scene {
     public confirmSelectedAbilityOrItemFrameB!: Phaser.GameObjects.Image;
     public currentNPC!: Merchant | Innkeeper;
     public cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    public defenseString!: Phaser.GameObjects.Text;
     public gameScene!: GameScene;
     public goldFrame!: Phaser.GameObjects.Image;
     public goldIcon!: Phaser.GameObjects.Image;
     public goldText!: Phaser.GameObjects.Text;
     public heartIcon!: Phaser.GameObjects.Image;
     public hpText!: Phaser.GameObjects.Text;
+    public interactButton!: UIActionButton;
+    public interactFrame!: Phaser.GameObjects.Image;
     public interactionState!: string;
     public inventoryAndAbilityDetailFrame!: Phaser.GameObjects.Image;
     public inventoryAndAbilityDetailText!: Phaser.GameObjects.Text;
@@ -29,10 +32,13 @@ export default class UIScene extends Phaser.Scene {
     public leftSideDialogFrame!: Phaser.GameObjects.Image;
     public leftSideDialogText!: Phaser.GameObjects.Text;
     public merchantInventoryButtons: UIActionButton[] = [];
+    // public musicMuteButton!: UIActionButton;
+    public musicScene!: MusicScene;
     public noButton!: UIActionButton;
     public purchaseButton!: UIActionButton;
     public rightSideDialogOptionsFrame!: Phaser.GameObjects.Image;
     public selectedItemAndAbilityIcon!: UIActionButton;
+    public sfxScene!: SFXScene;
     public subInventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
     public subInventoryBagButton!: UIActionButton;
     public subInventoryEquipmentButton!: UIActionButton;
@@ -66,9 +72,6 @@ export default class UIScene extends Phaser.Scene {
     private manaPointString!: Phaser.GameObjects.Text;
     private manaText!: Phaser.GameObjects.Text;
     private message!: GameMessage;
-    // public musicMuteButton!: UIActionButton;
-    public musicScene!: MusicScene;
-    public sfxScene!: SFXScene;
     private offHandItemButton!: UIActionButton;
     private offHandString!: Phaser.GameObjects.Text;
     private selectedItemAndAbilityCommandText!: Phaser.GameObjects.Text;
@@ -78,8 +81,6 @@ export default class UIScene extends Phaser.Scene {
     private subInventoryButtons: UIActionButton[] = [];
     private tillNextLevelString!: Phaser.GameObjects.Text;
     private vitalityString!: Phaser.GameObjects.Text;
-    public interactFrame!: Phaser.GameObjects.Image;
-    public interactButton!: UIActionButton;
 
     public constructor() {
         super('UI');
@@ -89,7 +90,7 @@ export default class UIScene extends Phaser.Scene {
         this.musicScene = <MusicScene>this.scene.get('Music');
         this.sfxScene = <SFXScene>this.scene.get('SFX');
 
-        this.cursors = this.input.keyboard.createCursorKeys();
+        this.cursors = this.input.keyboard!.createCursorKeys();
         this.setupUIElements();
         this.setupEvents();
 
@@ -281,11 +282,14 @@ export default class UIScene extends Phaser.Scene {
                     this.purchaseButton.buttonText.setText(`Purchase for ${item.cost} gold`);
                     this.purchaseButton.buttonText.setVisible(true);
 
-                    if (item.type === 'weapon') {
+                    if (item.type === 'weapon' || item.type === 'bodyarmor') {
                         this.inventoryAndAbilityDetailText.setText(
-                            `Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility}, \
-                                Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect}, \
-                                Luck: ${item.stats!.luck}`
+                            `${item.description}\n\n
+                            Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
+                                Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
+                                Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
+                                Classes: All,
+                                Min. Level: 1`
                         );
                     }
                     this.inventoryAndAbilityDetailText.setVisible(true);
@@ -304,12 +308,13 @@ export default class UIScene extends Phaser.Scene {
     public selectCancel() {
 
         if (this.gameScene.operatingSystem !== 'desktop') {
-            this.scene.launch('GamePad');
+            // this.scene.launch('GamePad');
+            this.gameScene.gamePadScene?.scene.restart();
         }
         // entering ui scene 'selectcancel' method
         eventsCenter.removeListener('space');
-        if (!this.gameScene.input.keyboard.enabled) {
-            this.gameScene.input.keyboard.resetKeys();
+        if (!this.gameScene.input.keyboard!.enabled) {
+            this.gameScene.input.keyboard!.resetKeys();
         }
         this.commandMenuText.setVisible(false);
         this.selectedItemAndAbilityCommandText.setVisible(false);
@@ -395,13 +400,14 @@ export default class UIScene extends Phaser.Scene {
         this.vitalityString.setVisible(false);
         this.intellectString.setVisible(false);
         this.luckString.setVisible(false);
+        this.defenseString.setVisible(false);
         this.tillNextLevelString.setVisible(false);
 
         this.inventoryButton.deselect();
         this.abilityButton.deselect();
         this.characterSheetButton.deselect();
         this.interactionState = 'mainselectnodialog';
-        this.gameScene.input.keyboard.enabled = true;
+        this.gameScene.input.keyboard!.enabled = true;
     }
 
     public setupEvents() {
@@ -461,7 +467,7 @@ export default class UIScene extends Phaser.Scene {
             .setOrigin(0, 0);
         this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
 
-        this.inventoryAndAbilityDetailFrame = this.add.image(3, 212, 'inventoryAndAbilityDetailFrame')
+        this.inventoryAndAbilityDetailFrame = this.add.image(3, 105, 'inventoryAndAbilityDetailFrame')
             .setOrigin(0, 0);
         this.inventoryAndAbilityDetailFrame.setVisible(false);
 
@@ -517,6 +523,9 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(10);
         this.selectedItemAndAbilityCommandText.setVisible(false);
 
+
+        // START EQUIPMENT STRING SECTION
+
         this.headString = this.add.text(540, 180, 'Head:', {
             fontSize: '50px',
             color: '#fff',
@@ -553,8 +562,12 @@ export default class UIScene extends Phaser.Scene {
         this.offHandString.setVisible(false);
         this.equipmentStrings.push(this.offHandString);
 
-        this.classString = this.add.text(540, 180, 'Class: Soldier', {
-            fontSize: '50px',
+        // END EQUIPMENT STRING SECTION
+
+        // START CHARACTER SHEET STRING SECTION
+
+        this.classString = this.add.text(540, 185, 'Class: Soldier', {
+            fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
         })
@@ -562,76 +575,86 @@ export default class UIScene extends Phaser.Scene {
         this.classString.setVisible(false);
 
         this.levelString = this.add.text(540, 221, `Level: ${Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)))}`, {
-            fontSize: '50px',
+            fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
         })
             .setResolution(10);
         this.levelString.setVisible(false);
 
-        this.hitPointString = this.add.text(540, 262, `Hit Points: ${this.gameScene.player.stats.currentHP}/${this.gameScene.player.stats.maxHP}`, {
-            fontSize: '50px',
+        this.hitPointString = this.add.text(540, 257, `Hit Points: ${this.gameScene.player.stats.currentHP}/${this.gameScene.player.stats.maxHP}`, {
+            fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
         })
             .setResolution(10);
         this.hitPointString.setVisible(false);
 
-        this.manaPointString = this.add.text(540, 303, 'Mana Points: 0/0', {
-            fontSize: '50px',
+        this.manaPointString = this.add.text(540, 293, 'Mana Points: 0/0', {
+            fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
         })
             .setResolution(10);
         this.manaPointString.setVisible(false);
 
-        this.strengthString = this.add.text(540, 344, `Strength: ${Math.floor(this.gameScene.player.getCombinedStat('strength'))}`, {
-            fontSize: '50px',
+        this.strengthString = this.add.text(540, 329, `Strength: ${Math.floor(this.gameScene.player.getCombinedStat('strength'))}`, {
+            fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
         })
             .setResolution(10);
         this.strengthString.setVisible(false);
 
-        this.agilityString = this.add.text(540, 385, `Agility: ${Math.floor(this.gameScene.player.stats.agility)}`, {
-            fontSize: '50px',
+        this.agilityString = this.add.text(540, 365, `Agility: ${Math.floor(this.gameScene.player.stats.agility)}`, {
+            fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
         })
             .setResolution(10);
         this.agilityString.setVisible(false);
 
-        this.vitalityString = this.add.text(540, 426, `Vitality: ${Math.floor(this.gameScene.player.stats.vitality)}`, {
-            fontSize: '50px',
+        this.vitalityString = this.add.text(540, 401, `Vitality: ${Math.floor(this.gameScene.player.stats.vitality)}`, {
+            fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
         })
             .setResolution(10);
         this.vitalityString.setVisible(false);
 
-        this.intellectString = this.add.text(540, 467, `Intellect: ${Math.floor(this.gameScene.player.stats.intellect)}`, {
-            fontSize: '50px',
+        this.intellectString = this.add.text(540, 437, `Intellect: ${Math.floor(this.gameScene.player.stats.intellect)}`, {
+            fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
         })
             .setResolution(10);
         this.intellectString.setVisible(false);
 
-        this.luckString = this.add.text(540, 508, `Luck: ${Math.floor(this.gameScene.player.stats.luck)}`, {
-            fontSize: '50px',
+        this.luckString = this.add.text(540, 473, `Luck: ${Math.floor(this.gameScene.player.stats.luck)}`, {
+            fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
         })
             .setResolution(10);
         this.luckString.setVisible(false);
 
-        this.tillNextLevelString = this.add.text(540, 549, `Till Next Level: ${this.calculateTilNextLevel()}`, {
-            fontSize: '50px',
+        this.defenseString = this.add.text(540, 509, `Defense: ${this.gameScene.player.getCombinedStat('defense')}`, {
+            fontSize: '48px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(10);
+        this.defenseString.setVisible(false);
+
+        this.tillNextLevelString = this.add.text(540, 545, `Till Next Level: ${this.calculateTilNextLevel()}`, {
+            fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
         })
             .setResolution(10);
         this.tillNextLevelString.setVisible(false);
+
+        // END CHARACTER SHEET STRING SECTION
 
         // END TEXT SECTION
 
@@ -677,7 +700,8 @@ export default class UIScene extends Phaser.Scene {
                 this.interactionState = 'cancelmouse';
 
                 if (this.gameScene.operatingSystem !== 'desktop') {
-                    this.scene.launch('GamePad');
+                    // this.scene.launch('GamePad');
+                    this.gameScene.gamePadScene?.scene.restart();
                 }
                 eventsCenter.removeListener('space');
 
@@ -693,8 +717,8 @@ export default class UIScene extends Phaser.Scene {
                 this.noButton.setVisible(false);
                 this.noButton.buttonText.setVisible(false);
 
-                this.gameScene.input.keyboard.enabled = true;
-                this.gameScene.input.keyboard.resetKeys();
+                this.gameScene.input.keyboard!.enabled = true;
+                this.gameScene.input.keyboard!.resetKeys();
             }
         );
         this.noButton.setVisible(false);
@@ -732,7 +756,7 @@ export default class UIScene extends Phaser.Scene {
         this.purchaseButton = new UIActionButton(
             this,
             35,
-            385,
+            392,
             'checkbutton',
             'checkbutton',
             'Purchase',
@@ -853,7 +877,7 @@ export default class UIScene extends Phaser.Scene {
                                 selectedItem.name,
                                 selectedItem.type,
                                 selectedItem.cost,
-                                'A sturdy walking staff.',
+                                selectedItem.description,
                                 undefined,
                                 selectedItem.classes,
                                 selectedItem.stats
@@ -871,7 +895,7 @@ export default class UIScene extends Phaser.Scene {
         this.useButton = new UIActionButton(
             this,
             35,
-            385,
+            392,
             'checkbutton',
             'checkbutton',
             'Use',
@@ -927,7 +951,7 @@ export default class UIScene extends Phaser.Scene {
         this.equipButton = new UIActionButton(
             this,
             35,
-            385,
+            392,
             'checkbutton',
             'checkbutton',
             'Equip',
@@ -954,6 +978,9 @@ export default class UIScene extends Phaser.Scene {
                 const itemToEquip = this.gameScene.player.inventory[inventorySlotNumber];
                 if (itemToEquip.type === 'weapon') {
                     this.gameScene.player.equipment.weapon = itemToEquip;
+                }
+                else if (itemToEquip.type === 'bodyarmor') {
+                    this.gameScene.player.equipment.body = itemToEquip;
                 }
 
                 this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
@@ -1112,10 +1139,10 @@ export default class UIScene extends Phaser.Scene {
 
         this.inventoryAndAbilityDetailText = this.add.text(
             15,
-            215,
+            110,
             '',
             {
-                fontSize: '50px',
+                fontSize: '45px',
                 color: '#fff',
                 fontFamily: 'CustomFont',
                 wordWrap: {
@@ -1124,8 +1151,9 @@ export default class UIScene extends Phaser.Scene {
                 }
             }
         );
-        this.inventoryAndAbilityDetailText.setLineSpacing(-10);
+        this.inventoryAndAbilityDetailText.setLineSpacing(-16);
         this.inventoryAndAbilityDetailText.setVisible(false);
+        this.inventoryAndAbilityDetailText.setResolution(10);
 
         // set up gold text and icon
         this.manaIcon = this.add.image(100, 663, 'mana');
@@ -1182,7 +1210,8 @@ export default class UIScene extends Phaser.Scene {
                 ) {
                     this.selectCancel();
                     if (this.gameScene.operatingSystem !== 'desktop') {
-                        this.scene.launch('GamePad');
+                        // this.scene.launch('GamePad');
+                        this.gameScene.gamePadScene?.scene.restart();
                     }
                     return;
                 }
@@ -1257,7 +1286,7 @@ export default class UIScene extends Phaser.Scene {
                     const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
 
                     // using inventory slot number ${inventorySlotNumber} on hero
-                    this.gameScene.input.keyboard.enabled = false;
+                    this.gameScene.input.keyboard!.enabled = false;
                     this.cancelMenuFrame.setVisible(false);
                     this.cancelButton.setVisible(false);
                     this.cancelButton.buttonText.setVisible(false);
@@ -1289,13 +1318,13 @@ export default class UIScene extends Phaser.Scene {
                     eventsCenter.emit('GameMessage', `${this.gameScene.player.type} uses a health potion on ${this.gameScene.player.type}, healing them for ${actualAmountHealed} HP.`);
 
                     this.generateInventoryButtons();
-                    this.gameScene.input.keyboard.resetKeys();
+                    this.gameScene.input.keyboard!.resetKeys();
 
                     this.time.addEvent({
                         delay: 2000,
                         callbackScope: this,
                         callback: () => {
-                            this.gameScene.input.keyboard.enabled = true;
+                            this.gameScene.input.keyboard!.enabled = true;
                             this.interactionState = 'mainselect';
                         }
                     });
@@ -1327,7 +1356,8 @@ export default class UIScene extends Phaser.Scene {
                 ) {
                     this.selectCancel();
                     if (this.gameScene.operatingSystem !== 'desktop') {
-                        this.scene.launch('GamePad');
+                        // this.scene.launch('GamePad');
+                        this.gameScene.gamePadScene?.scene.restart();
                     }
                     return;
                 }
@@ -1387,7 +1417,8 @@ export default class UIScene extends Phaser.Scene {
                 else if (this.interactionState === 'charactersheet') {
                     this.selectCancel();
                     if (this.gameScene.operatingSystem !== 'desktop') {
-                        this.scene.launch('GamePad');
+                        // this.scene.launch('GamePad');
+                        this.gameScene.gamePadScene?.scene.restart();
                     }
                     return;
                 }
@@ -1421,6 +1452,7 @@ export default class UIScene extends Phaser.Scene {
                 this.vitalityString.setVisible(true);
                 this.intellectString.setVisible(true);
                 this.luckString.setVisible(true);
+                this.defenseString.setVisible(true);
                 this.tillNextLevelString.setVisible(true);
             }
         );
@@ -1436,11 +1468,12 @@ export default class UIScene extends Phaser.Scene {
             ) {
                 this.interactionState = 'mainselect';
 
-                if (this.gameScene.weaponMerchant || this.gameScene.innKeeper) {
+                if (this.gameScene.weaponMerchant || this.gameScene.innKeeper || this.gameScene.armorMerchant) {
                     // space bar pressed on game scene (npc[s] found)
 
                     // listening for interactivity on npcs
                     if (this.gameScene.weaponMerchant) this.gameScene.weaponMerchant.listenForInteractEvent();
+                    if (this.gameScene.armorMerchant) this.gameScene.armorMerchant.listenForInteractEvent();
                     if (this.gameScene.innKeeper) this.gameScene.innKeeper.listenForInteractEvent();
                 }
             }
@@ -1530,10 +1563,18 @@ export default class UIScene extends Phaser.Scene {
                         this.useButton.buttonText.setVisible(true);
 
                     }
-                    else if (item.type === 'weapon') {
-                        this.inventoryAndAbilityDetailText.setText(`Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility}, \
-                                Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect}, \
-                                Luck: ${item.stats!.luck}`);
+                    else if (
+                        item.type === 'weapon' ||
+                        item.type === 'bodyarmor'
+                    ) {
+                        this.inventoryAndAbilityDetailText.setText(
+                            `${item.description}\n\n
+                            Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
+                                Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
+                                Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
+                                Classes: All,
+                                Min. Level: 1`
+                        );
                         this.useButton.setVisible(false);
                         this.useButton.buttonText.setVisible(false);
                         this.equipButton.setVisible(true);
@@ -1542,10 +1583,10 @@ export default class UIScene extends Phaser.Scene {
                     this.inventoryAndAbilityDetailText.setVisible(true);
 
                     this.cancelButton.setX(185);
-                    this.cancelButton.setY(385);
+                    this.cancelButton.setY(392);
 
                     this.cancelButton.buttonText.setX(205);
-                    this.cancelButton.buttonText.setY(360);
+                    this.cancelButton.buttonText.setY(367);
                 }
             );
             inventoryButton.setVisible(false);
@@ -1564,6 +1605,7 @@ export default class UIScene extends Phaser.Scene {
         this.vitalityString.setText(`Vitality: ${Math.floor(this.gameScene.player.stats.vitality)}`);
         this.intellectString.setText(`Intellect: ${Math.floor(this.gameScene.player.stats.intellect)}`);
         this.luckString.setText(`Luck: ${Math.floor(this.gameScene.player.stats.luck)}`);
+        this.defenseString.setText(`Defense: ${Math.floor(this.gameScene.player.getCombinedStat('defense'))}`);
         this.tillNextLevelString.setText(`Till Next Level: ${this.calculateTilNextLevel()}`);
     }
 }

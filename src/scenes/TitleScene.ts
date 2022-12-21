@@ -1,4 +1,4 @@
-import TweenHelper from '../utils/TweenHelper';
+// import TweenHelper from '../utils/TweenHelper';
 import MusicScene from './MusicScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
 
@@ -50,7 +50,15 @@ export default class TitleScene extends Phaser.Scene {
                 .setStroke('#000000', 2);
 
             clickToStartText.setOrigin(0.5);
-            TweenHelper.flashElement(this, clickToStartText);
+            // TweenHelper.flashElement(this, clickToStartText);
+            this.scene.scene.tweens.add({
+                targets: clickToStartText,
+                duration: 1500,
+                repeat: true,
+                loop: true,
+                alpha: 0,
+                yoyo: true
+            });
 
             this.cameras.main.once('camerafadeincomplete', (camera: Camera) => {
                 this.input.once('pointerdown', () => {
@@ -64,7 +72,7 @@ export default class TitleScene extends Phaser.Scene {
         // sets the title music
         this.musicScene.changeSong('title');
 
-        this.input.keyboard.enabled = false;
+        this.input.keyboard!.enabled = false;
         this.input.enabled = false;
         camera.fadeOut(1500);
         this.cameras.main.once('camerafadeoutcomplete', () => {

@@ -124,7 +124,7 @@ export default class BattleScene extends Phaser.Scene {
         // sleep the ui
         this.scene.sleep('BattleUI');
 
-        this.gameScene.input.keyboard.enabled = true;
+        this.gameScene.input.keyboard!.enabled = true;
 
         // return to game scene and sleep current battle scene
         this.scene.switch('Game');
@@ -372,7 +372,7 @@ export default class BattleScene extends Phaser.Scene {
         this.background.displayHeight = this.sys.canvas.height - 291;
         this.battleUIScene = <BattleUIScene>this.scene.get('BattleUI');
 
-        this.gameScene.input.keyboard.enabled = false;
+        this.gameScene.input.keyboard!.enabled = false;
 
         this.interactionState = 'init';
 

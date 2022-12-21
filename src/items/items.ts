@@ -9,8 +9,8 @@ export const items: itemArray = [
         cost: 3,
     },
     {
-        name: 'Cypress Stick',
-        description: 'A sturdy walking staff.',
+        name: 'Cypressium Staff',
+        description: 'A well-worn cypressium staff, able to extend to fit any situation.',
         key: 'staffbutton',
         activekey: 'staffbuttonactive',
         type: 'weapon',
@@ -21,7 +21,25 @@ export const items: itemArray = [
             agility: 0,
             vitality: 0,
             intellect: 0,
-            luck: 0
+            luck: 0,
+            defense: 0
+        }
+    },
+    {
+        name: 'Synthetic Weave Tunic',
+        description: 'A tunic made from a flimsy recycled material that provides minimal protection.',
+        key: 'bagbutton',
+        activekey: 'bagbuttonactive',
+        type: 'bodyarmor',
+        cost: 10,
+        classes: ['all'],
+        stats: {
+            strength: 0,
+            agility: 0,
+            vitality: 0,
+            intellect: 0,
+            luck: 0,
+            defense: 4
         }
     }
 ];
@@ -42,6 +60,7 @@ export interface ItemInterface {
         vitality: number;
         intellect: number;
         luck: number;
+        defense: number;
     };
     type: string;
 

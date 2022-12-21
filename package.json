@@ -25,7 +25,7 @@
     "eslint": "8.12.0",
     "express": "4.18.1",
     "lodash": "^4.17.21",
-    "phaser": "3.55.2",
+    "phaser": "^3.60.0-beta.10",
     "phaser-swipe": "^1.0.4",
     "phaser3-rex-plugins": "^1.1.78",
     "snowpack": "3.8.8",

@@ -1,4 +1,4 @@
-import TweenHelper from '../utils/TweenHelper';
+// import TweenHelper from '../utils/TweenHelper';
 import GameScene from './GameScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
 import MusicScene from './MusicScene';
@@ -40,7 +40,15 @@ export default class GameOverScene extends Phaser.Scene {
 
         pressAnyKeyText.setOrigin(0.5);
 
-        TweenHelper.flashElement(this, pressAnyKeyText);
+        // TweenHelper.flashElement(this, pressAnyKeyText);
+        this.scene.scene.tweens.add({
+            targets: pressAnyKeyText,
+            duration: 1500,
+            repeat: true,
+            loop: true,
+            alpha: 0,
+            yoyo: true
+        });
 
         this.sys.events.removeListener('wake');
         this.sys.events.on('wake', this.wake, this);
@@ -55,7 +63,7 @@ export default class GameOverScene extends Phaser.Scene {
     }
 
     public handleInput(camera: Camera) {
-        this.input.keyboard.enabled = false;
+        this.input.keyboard!.enabled = false;
         this.input.enabled = false;
         camera.fadeOut(3000);
         this.time.addEvent({
@@ -71,15 +79,15 @@ export default class GameOverScene extends Phaser.Scene {
 
     public setupKeyListeners() {
 
-        this.input.keyboard.enabled = true;
+        this.input.keyboard!.enabled = true;
         this.input.enabled = true;
         this.cameras.main.removeListener('camerafadeincomplete');
         this.cameras.main.once('camerafadeincomplete', (camera: Camera) => {
-            this.input.keyboard.removeListener('keydown');
-            this.input.keyboard.once('keydown', () => {
+            this.input.keyboard!.removeListener('keydown');
+            this.input.keyboard!.once('keydown', () => {
                 this.handleInput(camera);
             });
-            this.input.keyboard.removeListener('pointerdown');
+            this.input.keyboard!.removeListener('pointerdown');
             this.input.once('pointerdown', () => {
                 this.handleInput(camera);
             });

@@ -8,7 +8,7 @@ import Item from './Item';
 import Unit from './Unit';
 
 export default class PlayerCharacter extends Unit {
-    public damageTween!: Phaser.Tweens.Tween;
+    public damageTween!: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
     public equipment: Equipment;
     public inventory!: Item[];
     public stats!: Stats;
@@ -93,7 +93,7 @@ export default class PlayerCharacter extends Unit {
         return Math.max(
             1,
             Math.floor(
-                (this.getCombinedStat('strength') - target.stats.defense / 2) * Phaser.Math.FloatBetween(
+                (this.getCombinedStat('strength') - (target.stats.defense / 2)) * Phaser.Math.FloatBetween(
                     0.34,
                     0.52
                 )
@@ -140,7 +140,13 @@ export default class PlayerCharacter extends Unit {
             offHandBonus += this.equipment.offhand.stats![stat as keyof typeof this.equipment.offhand.stats];
         }
 
-        return baseStat + weaponBonus + headBonus + bodyBonus + offHandBonus;
+        const totalEquipmentBonus = weaponBonus + headBonus + bodyBonus + offHandBonus;
+
+        if (stat === 'defense') {
+            return (this.stats.agility / 2) + totalEquipmentBonus;
+        }
+
+        return baseStat + totalEquipmentBonus;
     }
 
     public getInitiative(): number {
@@ -175,9 +181,9 @@ export default class PlayerCharacter extends Unit {
                 return runtimeInMS;
             }
         }
-        else if (data.action === 'Cypress Stick') {
+        else if (data.action === 'Cypressium Staff') {
             runtimeInMS += 2000;
-            eventsCenter.emit('Message', `${this.type} uses a cypress stick on ${target.type}; it has no effect.`);
+            eventsCenter.emit('Message', `${this.type} uses an extendable cypressiom staff on ${target.type}; it has no effect.`);
         }
         else if (data.action === 'Health Potion') {
             // get the selected inventory slot index from the battle ui scene delete it from the player's inventory

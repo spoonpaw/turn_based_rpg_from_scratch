@@ -42,14 +42,19 @@ export const levels: ILevelDataContainer = {
                 y: 2,
                 inventory: [
                     items.find(obj => {
-                        return obj.name === 'Cypress Stick';
+                        return obj.name === 'Cypressium Staff';
                     }) as ItemInterface
                 ]
             },
             {
-                name: 'innkeeper',
+                name: 'armormerchant',
                 x: 5,
                 y: 8,
+                inventory: [
+                    items.find(obj => {
+                        return obj.name === 'Synthetic Weave Tunic';
+                    }) as ItemInterface
+                ]
             }
         ],
         music: 'town'

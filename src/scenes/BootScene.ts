@@ -205,6 +205,11 @@ export default class BootScene extends Phaser.Scene {
             frameWidth: 48,
             frameHeight: 48
         });
+
+        this.load.spritesheet('npc3', 'assets/images/characters/npc3.png', {
+            frameWidth: 48,
+            frameHeight: 48
+        });
     }
 
     private loadTileMap() {

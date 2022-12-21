@@ -23,7 +23,7 @@ export default class Innkeeper extends NPC {
             this.uiScene.interactionState = 'innkeeperselect';
             this.gameScene.gamePadScene?.scene.stop();
 
-            this.gameScene.input.keyboard.enabled = false;
+            this.gameScene.input.keyboard!.enabled = false;
             // get rid of active dialog scene, it isn't needed anymore
             // this.gameScene.activeDialogScene = true;
             if (this.gameScene.gridPhysics.facingDirection === 'right') this.sprite.setFrame(1);
@@ -70,16 +70,16 @@ export default class Innkeeper extends NPC {
                 this.uiScene.cancelButton.setVisible(false);
                 this.uiScene.cancelButton.buttonText.setVisible(false);
 
-                this.gameScene.input.keyboard.enabled = true;
+                this.gameScene.input.keyboard!.enabled = true;
 
                 this.gameScene.cursors.up.reset();
                 this.gameScene.cursors.left.reset();
                 this.gameScene.cursors.down.reset();
                 this.gameScene.cursors.right.reset();
-                this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).reset();
-                this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).reset();
-                this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).reset();
-                this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D).reset();
 
             });
 
@@ -114,6 +114,7 @@ export default class Innkeeper extends NPC {
                 else {
                     this.uiScene.leftSideDialogText.setText('Innkeeper:\nThank thee! Thou appeareth well rested.');
                     this.gameScene.player.gold -= 3;
+                    this.uiScene.goldText.setText(`${this.gameScene.player.gold} gp`);
                     this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
                     this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
                     this.uiScene.updateMP(this.gameScene.player.stats.currentMP, this.gameScene.player.stats.maxMP);
