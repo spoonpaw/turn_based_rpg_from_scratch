@@ -316,9 +316,10 @@ export default class GameScene extends Phaser.Scene {
             // randomly determine if fight will occur
             if (this.checkForRandomEncounter()) {
                 // start combat
-                this.time.delayedCall(210, () => {
-                    this.scene.switch('Battle');
-                });
+                this.scene.switch('Battle');
+                // this.time.delayedCall(210, () => {
+                //     this.scene.switch('Battle');
+                // });
             }
         }
 
