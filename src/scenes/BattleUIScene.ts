@@ -149,6 +149,11 @@ export default class BattleUIScene extends Phaser.Scene {
                 wordWrap: {
                     width: 500,
                     useAdvancedWrap: true
+                },
+                metrics: {
+                    ascent: 38,
+                    descent: 10,
+                    fontSize: 48
                 }
             }
         );

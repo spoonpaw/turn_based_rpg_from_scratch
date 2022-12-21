@@ -1148,12 +1148,16 @@ export default class UIScene extends Phaser.Scene {
                 wordWrap: {
                     width: 500,
                     useAdvancedWrap: true
+                },
+                metrics: {
+                    ascent: 38,
+                    descent: 10,
+                    fontSize: 48
                 }
             }
         );
         this.inventoryAndAbilityDetailText.setLineSpacing(-16);
         this.inventoryAndAbilityDetailText.setVisible(false);
-        this.inventoryAndAbilityDetailText.setResolution(10);
 
         // set up gold text and icon
         this.manaIcon = this.add.image(100, 663, 'mana');
