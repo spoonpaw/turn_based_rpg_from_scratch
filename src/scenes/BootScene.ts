@@ -205,11 +205,16 @@ export default class BootScene extends Phaser.Scene {
             frameWidth: 48,
             frameHeight: 48
         });
+
+        this.load.spritesheet('npc3', 'assets/images/characters/npc3.png', {
+            frameWidth: 48,
+            frameHeight: 48
+        });
     }
 
     private loadTileMap() {
         // load tile maps
         this.load.tilemapTiledJSON('overworld-map', 'assets/tilemaps/afterlife.json');
-        this.load.tilemapTiledJSON('town-map', 'assets/tilemaps/town3.json');
+        this.load.tilemapTiledJSON('town-map', 'assets/tilemaps/town4.json');
     }
 }

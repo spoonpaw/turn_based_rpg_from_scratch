@@ -101,7 +101,13 @@ export default class Player {
             offHandBonus += this.equipment.offhand.stats![stat as keyof typeof this.equipment.offhand.stats];
         }
 
-        return baseStat + weaponBonus + headBonus + bodyBonus + offHandBonus;
+        const totalEquipmentBonus = weaponBonus + headBonus + bodyBonus + offHandBonus;
+
+        if (stat === 'defense') {
+            return (this.stats.agility / 2) + totalEquipmentBonus;
+        }
+
+        return baseStat + totalEquipmentBonus;
     }
 
     public getPosition(): Phaser.Math.Vector2 {

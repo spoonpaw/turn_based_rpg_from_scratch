@@ -5,7 +5,7 @@ import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 
 export default abstract class Unit extends Phaser.GameObjects.Sprite {
-    abstract damageTween: Phaser.Tweens.Tween;
+    abstract damageTween: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
     abstract equipment: Equipment;
     public living: boolean;
     abstract stats: Stats;

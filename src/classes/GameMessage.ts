@@ -48,11 +48,18 @@ export default class GameMessage extends Phaser.GameObjects.Container {
         this.hideEvent = undefined;
         this.setVisible(false);
         if (this.gameScene.operatingSystem === 'mobile') {
-            this.scene.scene.launch('GamePad');
+            // this.scene.scene.launch('GamePad');
+            this.gameScene.gamePadScene?.scene.restart();
+
         }
     }
 
     private showMessage(text: string | string[]) {
+        if (this.gameScene.operatingSystem === 'mobile') {
+            // this.scene.scene.launch('GamePad');
+            this.gameScene.gamePadScene?.scene.stop();
+
+        }
         this.text.setText(text);
         this.setVisible(true);
         if (this.hideEvent) {

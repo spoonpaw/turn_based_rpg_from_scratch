@@ -20,6 +20,7 @@ export default class GameScene extends Phaser.Scene {
     public gridControls!: GridControls;
     public gridPhysics!: GridPhysics;
     public innKeeper!: Innkeeper;
+    public musicScene!: MusicScene;
     public npcs: (Innkeeper | Merchant)[] = [];
     public operatingSystem!: string;
     public player!: Player;
@@ -29,10 +30,10 @@ export default class GameScene extends Phaser.Scene {
     public spaceDown!: boolean;
     public uiScene!: UIScene;
     public weaponMerchant!: Merchant;
+    public armorMerchant!: Merchant;
     private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private exitingCurrentLevel!: boolean;
     private nonHostileSpace!: boolean;
-    public musicScene!: MusicScene;
 
     public constructor() {
         super('Game');
@@ -44,6 +45,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public create(data?: { levelData?: ILevelData }) {
+        this.input.keyboard!.enabled = true;
 
         this.gamePadScene?.scene.restart();
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -78,7 +80,7 @@ export default class GameScene extends Phaser.Scene {
             for (let i = 0; i < this.currentTilemap.layers.length; i++) {
                 const layer = this.currentTilemap
                     .createLayer(i, levels.overworld.tilesetName, 0, 0);
-                layer.setDepth(i);
+                layer?.setDepth(i);
             }
 
             // load the player sprite
@@ -152,7 +154,7 @@ export default class GameScene extends Phaser.Scene {
             for (let i = 0; i < this.currentTilemap.layers.length; i++) {
                 const layer = this.currentTilemap
                     .createLayer(i, data.levelData.tilesetName, 0, 0);
-                layer.setDepth(i);
+                layer?.setDepth(i);
             }
 
             const playerSprite = this.add.sprite(0, 0, 'hero');
@@ -182,7 +184,24 @@ export default class GameScene extends Phaser.Scene {
             for (const npc of data.levelData.npcs) {
 
                 // place npc sprites
-                if (npc.name === 'weaponmerchant') {
+                if (npc.name === 'armormerchant') {
+                    const armorMerchantSprite = this.add.sprite(0, 0, 'npc3');
+                    armorMerchantSprite.setDepth(2);
+
+                    if (npc.inventory) {
+                        this.armorMerchant = new Merchant(
+                            armorMerchantSprite,
+                            new Phaser.Math.Vector2(
+                                npc.x,
+                                npc.y
+                            ),
+                            npc.inventory
+                        );
+                        this.npcs.push(this.armorMerchant);
+                    }
+                }
+
+                else if (npc.name === 'weaponmerchant') {
                     const weaponMerchantSprite = this.add.sprite(0, 0, 'npc2');
                     weaponMerchantSprite.setDepth(2);
 
@@ -326,7 +345,7 @@ export default class GameScene extends Phaser.Scene {
         }
         if (!readyNPCFound) {
             this.readyToInteractObject = undefined;
-            // if i'm not facing the guy, hide the interact button
+            // if I'm not facing the guy, hide the interact button
             if (this.uiScene.interactFrame.visible) {
                 this.uiScene.interactFrame.setVisible(false);
                 this.uiScene.interactButton.setVisible(false);
@@ -344,7 +363,7 @@ export default class GameScene extends Phaser.Scene {
             //     this.uiScene.selectCancel();
             // }
 
-            if (this.weaponMerchant || this.innKeeper) {
+            if (this.weaponMerchant || this.innKeeper || this.armorMerchant) {
                 // space bar pressed on game scene (npc[s] found)
                 if (
                     this.uiScene.interactionState === 'mainselect' // ||
@@ -353,6 +372,7 @@ export default class GameScene extends Phaser.Scene {
                 ) {
                     // listening for interactivity on npcs
                     if (this.weaponMerchant) this.weaponMerchant.listenForInteractEvent();
+                    if (this.armorMerchant) this.armorMerchant.listenForInteractEvent();
                     if (this.innKeeper) this.innKeeper.listenForInteractEvent();
                 }
             }
@@ -372,7 +392,7 @@ export default class GameScene extends Phaser.Scene {
         this.uiScene.scene.bringToTop();
         this.gamePadScene?.scene.restart();
 
-        this.input.keyboard.enabled = true;
+        this.input.keyboard!.enabled = true;
         this.cursors.left.reset();
         this.cursors.right.reset();
         this.cursors.up.reset();
@@ -401,6 +421,6 @@ export default class GameScene extends Phaser.Scene {
         this.createPlayerAnimation(Direction.DOWN, 0, 1);
         this.createPlayerAnimation(Direction.LEFT, 2, 3);
 
-        this.cursors = this.input.keyboard.createCursorKeys();
+        this.cursors = this.input.keyboard!.createCursorKeys();
     }
 }

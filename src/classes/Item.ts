@@ -8,7 +8,14 @@ export default class Item {
         public description: string,
         public hpChange?: number,
         public classes?: string[],
-        public stats?: { strength: number, agility: number, vitality: number, intellect: number, luck: number }
+        public stats?: {
+            strength: number,
+            agility: number,
+            vitality: number,
+            intellect: number,
+            luck: number,
+            defense: number
+        }
     ) {
     }
 }

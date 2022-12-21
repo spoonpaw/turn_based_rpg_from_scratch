@@ -24,7 +24,7 @@ export default class Merchant extends NPC {
         this.gameScene.gamePadScene?.scene.stop();
         this.uiScene.currentNPC = this;
         // this.gameScene.input.keyboard.resetKeys();
-        this.gameScene.input.keyboard.enabled = false;
+        this.gameScene.input.keyboard!.enabled = false;
         // this.gameScene.activeDialogScene = true;
         if (this.gameScene.gridPhysics.facingDirection === 'right') this.sprite.setFrame(1);
         if (this.gameScene.gridPhysics.facingDirection === 'up') this.sprite.setFrame(0);
@@ -95,16 +95,16 @@ export default class Merchant extends NPC {
                 merchantButton.buttonText.setVisible(false);
             }
 
-            this.gameScene.input.keyboard.enabled = true;
+            this.gameScene.input.keyboard!.enabled = true;
 
             this.gameScene.cursors.up.reset();
             this.gameScene.cursors.left.reset();
             this.gameScene.cursors.down.reset();
             this.gameScene.cursors.right.reset();
-            this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).reset();
-            this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).reset();
-            this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).reset();
-            this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).reset();
+            this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W).reset();
+            this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A).reset();
+            this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S).reset();
+            this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D).reset();
 
             // this.gameScene.input.keyboard.resetKeys();
 
@@ -115,23 +115,7 @@ export default class Merchant extends NPC {
     public listenForInteractEvent() {
         // if (Phaser.Input.Keyboard.JustDown(this.gameScene.cursors.space)) {
         // merchant just heard the space bar somewhere!
-        if (
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x - 1 &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y &&
-                this.gameScene.gridPhysics.facingDirection === 'right'
-            ) ||
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y + 1 &&
-                this.gameScene.gridPhysics.facingDirection === 'up'
-            ) ||
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x + 1 &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y &&
-                this.gameScene.gridPhysics.facingDirection === 'left'
-            )
-        ) {
+        if (this.testForInteractionReadyState()) {
             this.runDialog();
         }
         else {

@@ -16,30 +16,6 @@ export default class Innkeeper extends NPC {
         this.uiScene = <UIScene>this.gameScene.scene.get('UI');
     }
 
-    public testForInteractionReadyState() {
-        if (
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x - 1 &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y &&
-                this.gameScene.gridPhysics.facingDirection === 'right'
-            ) ||
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y + 1 &&
-                this.gameScene.gridPhysics.facingDirection === 'up'
-            ) ||
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x + 1 &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y &&
-                this.gameScene.gridPhysics.facingDirection === 'left'
-            )
-
-        ) {
-            return true;
-        }
-        return false;
-    }
-
     public runDialog() {
         {
             //innkeeper just got talked to
@@ -47,11 +23,12 @@ export default class Innkeeper extends NPC {
             this.uiScene.interactionState = 'innkeeperselect';
             this.gameScene.gamePadScene?.scene.stop();
 
-            this.gameScene.input.keyboard.enabled = false;
+            this.gameScene.input.keyboard!.enabled = false;
             // get rid of active dialog scene, it isn't needed anymore
             // this.gameScene.activeDialogScene = true;
             if (this.gameScene.gridPhysics.facingDirection === 'right') this.sprite.setFrame(1);
             if (this.gameScene.gridPhysics.facingDirection === 'up') this.sprite.setFrame(0);
+            if (this.gameScene.gridPhysics.facingDirection === 'left') this.sprite.setFrame(2);
 
             this.uiScene.updateGold();
             this.uiScene.goldFrame.setVisible(true);
@@ -93,16 +70,16 @@ export default class Innkeeper extends NPC {
                 this.uiScene.cancelButton.setVisible(false);
                 this.uiScene.cancelButton.buttonText.setVisible(false);
 
-                this.gameScene.input.keyboard.enabled = true;
+                this.gameScene.input.keyboard!.enabled = true;
 
                 this.gameScene.cursors.up.reset();
                 this.gameScene.cursors.left.reset();
                 this.gameScene.cursors.down.reset();
                 this.gameScene.cursors.right.reset();
-                this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).reset();
-                this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).reset();
-                this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).reset();
-                this.gameScene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D).reset();
 
             });
 
@@ -137,6 +114,7 @@ export default class Innkeeper extends NPC {
                 else {
                     this.uiScene.leftSideDialogText.setText('Innkeeper:\nThank thee! Thou appeareth well rested.');
                     this.gameScene.player.gold -= 3;
+                    this.uiScene.goldText.setText(`${this.gameScene.player.gold} gp`);
                     this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
                     this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
                     this.uiScene.updateMP(this.gameScene.player.stats.currentMP, this.gameScene.player.stats.maxMP);
@@ -149,24 +127,7 @@ export default class Innkeeper extends NPC {
     public listenForInteractEvent() {
         // innkeeper heard player press the space bar somewhere!
         // check if player is facing innkeeper
-        if (
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x - 1 &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y &&
-                this.gameScene.gridPhysics.facingDirection === 'right'
-            ) ||
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y + 1 &&
-                this.gameScene.gridPhysics.facingDirection === 'up'
-            ) ||
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x + 1 &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y &&
-                this.gameScene.gridPhysics.facingDirection === 'left'
-            )
-
-        ) {
+        if (this.testForInteractionReadyState()) {
             this.runDialog();
         }
     }

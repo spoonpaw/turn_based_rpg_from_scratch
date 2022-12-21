@@ -10,15 +10,15 @@ import PlayerCharacter from './PlayerCharacter';
 import Unit from './Unit';
 
 export class Enemy extends Unit {
-    damageTween!: Phaser.Tweens.Tween;
-    equipment: Equipment = {
+    public damageTween!: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
+    public equipment: Equipment = {
         body: undefined,
         head: undefined,
         offhand: undefined,
         weapon: undefined
     };
     public inventory: Item[] = [];
-    stats!: Stats;
+    public stats!: Stats;
     public type!: string;
 
     constructor(
@@ -92,7 +92,7 @@ export class Enemy extends Unit {
         return Math.max(
             1,
             Math.floor(
-                (this.stats.strength - target.stats.defense / 2) *
+                (this.stats.strength - (target.getCombinedStat('defense') / 2)) *
                 Phaser.Math.FloatBetween(
                     0.39, 0.59
                 )
@@ -139,7 +139,14 @@ export class Enemy extends Unit {
             offHandBonus += this.equipment.offhand.stats![stat as keyof typeof this.equipment.offhand.stats];
         }
 
-        return baseStat + weaponBonus + headBonus + bodyBonus + offHandBonus;
+        const totalEquipmentBonus = weaponBonus + headBonus + bodyBonus + offHandBonus;
+
+        if (stat === 'defense') {
+            return (this.stats.agility / 2) + totalEquipmentBonus;
+        }
+
+        return baseStat + totalEquipmentBonus;
+
     }
 
     getInitiative(): number {
