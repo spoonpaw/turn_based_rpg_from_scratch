@@ -1195,7 +1195,7 @@ export default class UIScene extends Phaser.Scene {
                     this.selectCancel();
                 }
                 // this.sfxScene.playSound('select');
-                this.gameScene.gamePadScene?.scene.stop();
+                // this.gameScene.gamePadScene?.scene.stop();
 
                 // query and build the inventory
                 //  buttons right when this button is pressed!
@@ -1334,9 +1334,9 @@ export default class UIScene extends Phaser.Scene {
                 // this.sfxScene.playSound('select');
                 // set up ability menu when this button is pressed
                 this.interactionState = 'ability';
-                if (this.gameScene.operatingSystem !== 'desktop') {
-                    this.scene.sleep('GamePad');
-                }
+                // if (this.gameScene.operatingSystem !== 'desktop') {
+                //     this.scene.sleep('GamePad');
+                // }
 
                 this.abilityButton.select();
 
@@ -1394,7 +1394,7 @@ export default class UIScene extends Phaser.Scene {
                 // set up the character sheet -> query and update
                 //  the stats before showing the character sheet
                 this.updateCharacterSheetStrings();
-                this.gameScene.gamePadScene?.scene.stop();
+                // this.gameScene.gamePadScene?.scene.stop();
 
                 this.interactionState = 'charactersheet';
                 this.characterSheetButton.select();

@@ -16,30 +16,6 @@ export default class Innkeeper extends NPC {
         this.uiScene = <UIScene>this.gameScene.scene.get('UI');
     }
 
-    public testForInteractionReadyState() {
-        if (
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x - 1 &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y &&
-                this.gameScene.gridPhysics.facingDirection === 'right'
-            ) ||
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y + 1 &&
-                this.gameScene.gridPhysics.facingDirection === 'up'
-            ) ||
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x + 1 &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y &&
-                this.gameScene.gridPhysics.facingDirection === 'left'
-            )
-
-        ) {
-            return true;
-        }
-        return false;
-    }
-
     public runDialog() {
         {
             //innkeeper just got talked to
@@ -52,6 +28,7 @@ export default class Innkeeper extends NPC {
             // this.gameScene.activeDialogScene = true;
             if (this.gameScene.gridPhysics.facingDirection === 'right') this.sprite.setFrame(1);
             if (this.gameScene.gridPhysics.facingDirection === 'up') this.sprite.setFrame(0);
+            if (this.gameScene.gridPhysics.facingDirection === 'left') this.sprite.setFrame(2);
 
             this.uiScene.updateGold();
             this.uiScene.goldFrame.setVisible(true);
@@ -149,24 +126,7 @@ export default class Innkeeper extends NPC {
     public listenForInteractEvent() {
         // innkeeper heard player press the space bar somewhere!
         // check if player is facing innkeeper
-        if (
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x - 1 &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y &&
-                this.gameScene.gridPhysics.facingDirection === 'right'
-            ) ||
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y + 1 &&
-                this.gameScene.gridPhysics.facingDirection === 'up'
-            ) ||
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x + 1 &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y &&
-                this.gameScene.gridPhysics.facingDirection === 'left'
-            )
-
-        ) {
+        if (this.testForInteractionReadyState()) {
             this.runDialog();
         }
     }

@@ -115,23 +115,7 @@ export default class Merchant extends NPC {
     public listenForInteractEvent() {
         // if (Phaser.Input.Keyboard.JustDown(this.gameScene.cursors.space)) {
         // merchant just heard the space bar somewhere!
-        if (
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x - 1 &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y &&
-                this.gameScene.gridPhysics.facingDirection === 'right'
-            ) ||
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y + 1 &&
-                this.gameScene.gridPhysics.facingDirection === 'up'
-            ) ||
-            (
-                this.gameScene.player.getTilePos().x === this.tilePos.x + 1 &&
-                this.gameScene.player.getTilePos().y === this.tilePos.y &&
-                this.gameScene.gridPhysics.facingDirection === 'left'
-            )
-        ) {
+        if (this.testForInteractionReadyState()) {
             this.runDialog();
         }
         else {

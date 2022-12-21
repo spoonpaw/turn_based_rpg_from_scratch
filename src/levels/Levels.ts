@@ -45,6 +45,11 @@ export const levels: ILevelDataContainer = {
                         return obj.name === 'Cypress Stick';
                     }) as ItemInterface
                 ]
+            },
+            {
+                name: 'innkeeper',
+                x: 5,
+                y: 8,
             }
         ],
         music: 'town'
