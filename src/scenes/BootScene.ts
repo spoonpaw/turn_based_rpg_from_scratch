@@ -116,6 +116,8 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('musicinactivebutton', 'assets/images/ui/musicInactiveButton.png');
         this.load.image('sfxbutton', 'assets/images/ui/sfxButton.png');
         this.load.image('sfxinactivebutton', 'assets/images/ui/sfxInactiveButton.png');
+        this.load.image('coinbutton', 'assets/images/ui/coinButton.png');
+        this.load.image('coinbuttonactive', 'assets/images/ui/coinButtonActive.png');
 
         this.load.image('healthpotion', 'assets/images/ui/healthPotion.png');
         this.load.image('healthpotionactive', 'assets/images/ui/healthPotionActive.png');

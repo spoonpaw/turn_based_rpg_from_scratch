@@ -75,6 +75,7 @@ export default class UIScene extends Phaser.Scene {
     private offHandItemButton!: UIActionButton;
     private offHandString!: Phaser.GameObjects.Text;
     private selectedItemAndAbilityCommandText!: Phaser.GameObjects.Text;
+    public sellButton!: UIActionButton;
     private strengthString!: Phaser.GameObjects.Text;
     private subAbilityButton!: UIActionButton;
     private subAbilityButtons: UIActionButton[] = [];
@@ -411,19 +412,10 @@ export default class UIScene extends Phaser.Scene {
     }
 
     public setupEvents() {
-        // listen for the updateHP event from the events center
-        // eventsCenter.removeListener('updateHP');
-        // eventsCenter.on('updateHP', this.updateHP, this);
 
-        // listen for the updateGold event from the events center
-        // eventsCenter.removeListener('updateGold');
-        // eventsCenter.on('updateGold', this.updateGold, this);
         eventsCenter.removeListener('updateMP');
         eventsCenter.on('updateMP', this.updateMP, this);
 
-        // listen for the updateXP event from the events center
-        // eventsCenter.removeListener('updateXP');
-        // eventsCenter.on('updateXP', this.updateXP, this);
     }
 
     public setupUIElements() {
@@ -784,6 +776,8 @@ export default class UIScene extends Phaser.Scene {
                         this.purchaseButton.buttonText.setVisible(false);
                         this.subInventoryBagButton.setVisible(false);
                         this.subInventoryBagButton.buttonText.setVisible(false);
+                        this.sellButton.setVisible(false);
+                        this.sellButton.buttonText.setVisible(false);
 
                         for (const merchantInventoryButton of this.merchantInventoryButtons) {
                             merchantInventoryButton.setVisible(false);
@@ -816,6 +810,8 @@ export default class UIScene extends Phaser.Scene {
                         this.purchaseButton.buttonText.setVisible(false);
                         this.subInventoryBagButton.setVisible(false);
                         this.subInventoryBagButton.buttonText.setVisible(false);
+                        this.sellButton.setVisible(false);
+                        this.sellButton.buttonText.setVisible(false);
 
                         for (const merchantInventoryButton of this.merchantInventoryButtons) {
                             merchantInventoryButton.setVisible(false);
@@ -850,6 +846,8 @@ export default class UIScene extends Phaser.Scene {
                         this.purchaseButton.buttonText.setVisible(false);
                         this.subInventoryBagButton.setVisible(false);
                         this.subInventoryBagButton.buttonText.setVisible(false);
+                        this.sellButton.setVisible(false);
+                        this.sellButton.buttonText.setVisible(false);
 
                         for (const merchantInventoryButton of this.merchantInventoryButtons) {
                             merchantInventoryButton.setVisible(false);
@@ -996,6 +994,20 @@ export default class UIScene extends Phaser.Scene {
         );
         this.equipButton.setVisible(false);
         this.equipButton.buttonText.setVisible(false);
+
+        this.sellButton = new UIActionButton(
+            this,
+            265,
+            515,
+            'coinbutton',
+            'coinbuttonactive',
+            'Sell',
+            () => {
+                console.log('sell button clicked');
+            }
+        );
+        this.sellButton.setVisible(false);
+        this.sellButton.buttonText.setVisible(false);
 
         // START SUBINVENTORY BAG BUTTONS SECTION
 
@@ -1158,6 +1170,7 @@ export default class UIScene extends Phaser.Scene {
         );
         this.inventoryAndAbilityDetailText.setLineSpacing(-16);
         this.inventoryAndAbilityDetailText.setVisible(false);
+        this.inventoryAndAbilityDetailText.setResolution(10);
 
         // set up gold text and icon
         this.manaIcon = this.add.image(100, 663, 'mana');
