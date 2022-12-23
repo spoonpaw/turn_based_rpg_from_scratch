@@ -42,6 +42,9 @@ export default class Merchant extends NPC {
         this.uiScene.subInventoryBagButton.buttonText.setText('Buy');
         this.uiScene.subInventoryBagButton.buttonText.setVisible(true);
 
+        this.uiScene.sellButton.setVisible(true);
+        this.uiScene.sellButton.buttonText.setVisible(true);
+
         this.uiScene.cancelButton.setX(347);
         this.uiScene.cancelButton.setY(350);
 
@@ -78,6 +81,8 @@ export default class Merchant extends NPC {
             this.uiScene.subInventoryAndAbilityMenuFrame.setVisible(false);
             this.uiScene.subInventoryBagButton.setVisible(false);
             this.uiScene.subInventoryBagButton.buttonText.setVisible(false);
+            this.uiScene.sellButton.setVisible(false);
+            this.uiScene.sellButton.buttonText.setVisible(false);
             this.uiScene.cancelMenuFrame.setVisible(false);
             this.uiScene.cancelButton.setVisible(false);
             this.uiScene.cancelButton.buttonText.setVisible(false);

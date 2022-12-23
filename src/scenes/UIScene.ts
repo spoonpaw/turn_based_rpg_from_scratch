@@ -75,6 +75,7 @@ export default class UIScene extends Phaser.Scene {
     private offHandItemButton!: UIActionButton;
     private offHandString!: Phaser.GameObjects.Text;
     private selectedItemAndAbilityCommandText!: Phaser.GameObjects.Text;
+    public sellButton!: UIActionButton;
     private strengthString!: Phaser.GameObjects.Text;
     private subAbilityButton!: UIActionButton;
     private subAbilityButtons: UIActionButton[] = [];
@@ -281,6 +282,15 @@ export default class UIScene extends Phaser.Scene {
                     this.purchaseButton.setVisible(true);
                     this.purchaseButton.buttonText.setText(`Purchase for ${item.cost} gold`);
                     this.purchaseButton.buttonText.setVisible(true);
+                    this.cancelMenuFrame.setX(10);
+                    this.cancelMenuFrame.setY(460);
+                    this.cancelMenuFrame.setVisible(true);
+                    this.cancelButton.setX(42);
+                    this.cancelButton.setY(495);
+                    this.cancelButton.setVisible(true);
+                    this.cancelButton.buttonText.setX(62);
+                    this.cancelButton.buttonText.setY(470);
+                    this.cancelButton.buttonText.setVisible(true);
 
                     if (item.type === 'weapon' || item.type === 'bodyarmor') {
                         this.inventoryAndAbilityDetailText.setText(
@@ -288,7 +298,7 @@ export default class UIScene extends Phaser.Scene {
                             Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
                                 Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
                                 Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
-                                Classes: All,
+                                Classes: ${item.classes},
                                 Min. Level: 1`
                         );
                     }
@@ -347,6 +357,8 @@ export default class UIScene extends Phaser.Scene {
         this.noButton.buttonText.setVisible(false);
         this.purchaseButton.setVisible(false);
         this.purchaseButton.buttonText.setVisible(false);
+        this.sellButton.setVisible(false);
+        this.sellButton.buttonText.setVisible(false);
 
         for (const subInventoryButton of this.subInventoryButtons) {
             if (subInventoryButton.visible) {
@@ -411,19 +423,10 @@ export default class UIScene extends Phaser.Scene {
     }
 
     public setupEvents() {
-        // listen for the updateHP event from the events center
-        // eventsCenter.removeListener('updateHP');
-        // eventsCenter.on('updateHP', this.updateHP, this);
 
-        // listen for the updateGold event from the events center
-        // eventsCenter.removeListener('updateGold');
-        // eventsCenter.on('updateGold', this.updateGold, this);
         eventsCenter.removeListener('updateMP');
         eventsCenter.on('updateMP', this.updateMP, this);
 
-        // listen for the updateXP event from the events center
-        // eventsCenter.removeListener('updateXP');
-        // eventsCenter.on('updateXP', this.updateXP, this);
     }
 
     public setupUIElements() {
@@ -784,6 +787,8 @@ export default class UIScene extends Phaser.Scene {
                         this.purchaseButton.buttonText.setVisible(false);
                         this.subInventoryBagButton.setVisible(false);
                         this.subInventoryBagButton.buttonText.setVisible(false);
+                        this.sellButton.setVisible(false);
+                        this.sellButton.buttonText.setVisible(false);
 
                         for (const merchantInventoryButton of this.merchantInventoryButtons) {
                             merchantInventoryButton.setVisible(false);
@@ -816,6 +821,8 @@ export default class UIScene extends Phaser.Scene {
                         this.purchaseButton.buttonText.setVisible(false);
                         this.subInventoryBagButton.setVisible(false);
                         this.subInventoryBagButton.buttonText.setVisible(false);
+                        this.sellButton.setVisible(false);
+                        this.sellButton.buttonText.setVisible(false);
 
                         for (const merchantInventoryButton of this.merchantInventoryButtons) {
                             merchantInventoryButton.setVisible(false);
@@ -850,6 +857,8 @@ export default class UIScene extends Phaser.Scene {
                         this.purchaseButton.buttonText.setVisible(false);
                         this.subInventoryBagButton.setVisible(false);
                         this.subInventoryBagButton.buttonText.setVisible(false);
+                        this.sellButton.setVisible(false);
+                        this.sellButton.buttonText.setVisible(false);
 
                         for (const merchantInventoryButton of this.merchantInventoryButtons) {
                             merchantInventoryButton.setVisible(false);
@@ -996,6 +1005,20 @@ export default class UIScene extends Phaser.Scene {
         );
         this.equipButton.setVisible(false);
         this.equipButton.buttonText.setVisible(false);
+
+        this.sellButton = new UIActionButton(
+            this,
+            265,
+            515,
+            'coinbutton',
+            'coinbuttonactive',
+            'Sell',
+            () => {
+                console.log('sell button clicked');
+            }
+        );
+        this.sellButton.setVisible(false);
+        this.sellButton.buttonText.setVisible(false);
 
         // START SUBINVENTORY BAG BUTTONS SECTION
 
@@ -1158,6 +1181,7 @@ export default class UIScene extends Phaser.Scene {
         );
         this.inventoryAndAbilityDetailText.setLineSpacing(-16);
         this.inventoryAndAbilityDetailText.setVisible(false);
+        this.inventoryAndAbilityDetailText.setResolution(10);
 
         // set up gold text and icon
         this.manaIcon = this.add.image(100, 663, 'mana');
@@ -1576,7 +1600,7 @@ export default class UIScene extends Phaser.Scene {
                             Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
                                 Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
                                 Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
-                                Classes: All,
+                                Classes: ${item.classes},
                                 Min. Level: 1`
                         );
                         this.useButton.setVisible(false);

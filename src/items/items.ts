@@ -14,10 +14,10 @@ export const items: itemArray = [
         key: 'staffbutton',
         activekey: 'staffbuttonactive',
         type: 'weapon',
-        cost: 3,
-        classes: ['all'],
+        cost: 12,
+        classes: 'All',
         stats: {
-            strength: 1,
+            strength: 2,
             agility: 0,
             vitality: 0,
             intellect: 0,
@@ -26,20 +26,54 @@ export const items: itemArray = [
         }
     },
     {
-        name: 'Synthetic Weave Tunic',
-        description: 'A tunic made from a flimsy recycled material that provides minimal protection.',
+        name: 'Synthjute Tunic',
+        description: 'A tunic woven from a flimsy synthetic material that provides minimal protection.',
         key: 'bagbutton',
         activekey: 'bagbuttonactive',
         type: 'bodyarmor',
-        cost: 10,
-        classes: ['all'],
+        cost: 6,
+        classes: 'All',
         stats: {
             strength: 0,
             agility: 0,
             vitality: 0,
             intellect: 0,
             luck: 0,
-            defense: 4
+            defense: 1
+        }
+    },
+    {
+        name: 'Scrap Cloak',
+        description: 'A cloak made from various scraps and recycled fibers for enhanced durability.',
+        key: 'bagbutton',
+        activekey: 'bagbuttonactive',
+        type: 'bodyarmor',
+        cost: 90,
+        classes: 'All',
+        stats: {
+            strength: 0,
+            agility: 0,
+            vitality: 0,
+            intellect: 0,
+            luck: 0,
+            defense: 8
+        }
+    },
+    {
+        name: 'Chitinous Vest',
+        description: 'A lightweight, durable vest made from an oversized insect\'s exoskeleton.',
+        key: 'bagbutton',
+        activekey: 'bagbuttonactive',
+        type: 'bodyarmor',
+        cost: 150,
+        classes: 'Soldier/Healer',
+        stats: {
+            strength: 0,
+            agility: 0,
+            vitality: 0,
+            intellect: 0,
+            luck: 0,
+            defense: 12
         }
     }
 ];
@@ -48,7 +82,7 @@ type itemArray = ItemInterface[];
 
 export interface ItemInterface {
     activekey: string;
-    classes?: string[];
+    classes?: string;
     cost: number;
     description: string;
     hpchange?: number;
