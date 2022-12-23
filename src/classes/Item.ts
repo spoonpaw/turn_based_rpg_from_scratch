@@ -7,7 +7,7 @@ export default class Item {
         public cost: number,
         public description: string,
         public hpChange?: number,
-        public classes?: string[],
+        public classes?: string,
         public stats?: {
             strength: number,
             agility: number,

@@ -52,8 +52,15 @@ export const levels: ILevelDataContainer = {
                 y: 8,
                 inventory: [
                     items.find(obj => {
-                        return obj.name === 'Synthetic Weave Tunic';
-                    }) as ItemInterface
+                        return obj.name === 'Synthjute Tunic';
+                    }) as ItemInterface,
+                    items.find(obj => {
+                        return obj.name === 'Scrap Cloak';
+                    }) as ItemInterface,
+                    items.find(obj => {
+                        return obj.name === 'Chitinous Vest';
+                    }) as ItemInterface,
+
                 ]
             }
         ],

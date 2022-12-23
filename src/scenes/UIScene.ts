@@ -282,6 +282,15 @@ export default class UIScene extends Phaser.Scene {
                     this.purchaseButton.setVisible(true);
                     this.purchaseButton.buttonText.setText(`Purchase for ${item.cost} gold`);
                     this.purchaseButton.buttonText.setVisible(true);
+                    this.cancelMenuFrame.setX(10);
+                    this.cancelMenuFrame.setY(460);
+                    this.cancelMenuFrame.setVisible(true);
+                    this.cancelButton.setX(42);
+                    this.cancelButton.setY(495);
+                    this.cancelButton.setVisible(true);
+                    this.cancelButton.buttonText.setX(62);
+                    this.cancelButton.buttonText.setY(470);
+                    this.cancelButton.buttonText.setVisible(true);
 
                     if (item.type === 'weapon' || item.type === 'bodyarmor') {
                         this.inventoryAndAbilityDetailText.setText(
@@ -289,7 +298,7 @@ export default class UIScene extends Phaser.Scene {
                             Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
                                 Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
                                 Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
-                                Classes: All,
+                                Classes: ${item.classes},
                                 Min. Level: 1`
                         );
                     }
@@ -348,6 +357,8 @@ export default class UIScene extends Phaser.Scene {
         this.noButton.buttonText.setVisible(false);
         this.purchaseButton.setVisible(false);
         this.purchaseButton.buttonText.setVisible(false);
+        this.sellButton.setVisible(false);
+        this.sellButton.buttonText.setVisible(false);
 
         for (const subInventoryButton of this.subInventoryButtons) {
             if (subInventoryButton.visible) {
@@ -1589,7 +1600,7 @@ export default class UIScene extends Phaser.Scene {
                             Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
                                 Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
                                 Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
-                                Classes: All,
+                                Classes: ${item.classes},
                                 Min. Level: 1`
                         );
                         this.useButton.setVisible(false);
