@@ -10,6 +10,7 @@ import MusicScene from './MusicScene';
 import SFXScene from './SFXScene';
 
 export default class UIScene extends Phaser.Scene {
+    public buyButton!: UIActionButton;
     public cancelButton!: UIActionButton;
     public cancelMenuFrame!: Phaser.GameObjects.Image;
     public confirmSelectedAbilityOrItemFrame!: Phaser.GameObjects.Image;
@@ -29,15 +30,18 @@ export default class UIScene extends Phaser.Scene {
     public inventoryAndAbilityDetailFrame!: Phaser.GameObjects.Image;
     public inventoryAndAbilityDetailText!: Phaser.GameObjects.Text;
     public inventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
+    public inventoryToSellButtons: UIActionButton[] = [];
     public leftSideDialogFrame!: Phaser.GameObjects.Image;
     public leftSideDialogText!: Phaser.GameObjects.Text;
     public merchantInventoryButtons: UIActionButton[] = [];
     // public musicMuteButton!: UIActionButton;
     public musicScene!: MusicScene;
     public noButton!: UIActionButton;
-    public purchaseButton!: UIActionButton;
+    public purchaseItemButton!: UIActionButton;
     public rightSideDialogOptionsFrame!: Phaser.GameObjects.Image;
     public selectedItemAndAbilityIcon!: UIActionButton;
+    public sellButton!: UIActionButton;
+    public sellItemButton!: UIActionButton;
     public sfxScene!: SFXScene;
     public subInventoryAndAbilityMenuFrame!: Phaser.GameObjects.Image;
     public subInventoryBagButton!: UIActionButton;
@@ -75,7 +79,6 @@ export default class UIScene extends Phaser.Scene {
     private offHandItemButton!: UIActionButton;
     private offHandString!: Phaser.GameObjects.Text;
     private selectedItemAndAbilityCommandText!: Phaser.GameObjects.Text;
-    public sellButton!: UIActionButton;
     private strengthString!: Phaser.GameObjects.Text;
     private subAbilityButton!: UIActionButton;
     private subAbilityButtons: UIActionButton[] = [];
@@ -279,9 +282,9 @@ export default class UIScene extends Phaser.Scene {
                     this.cancelButton.setVisible(false);
                     this.cancelButton.buttonText.setVisible(false);
                     this.inventoryAndAbilityDetailFrame.setVisible(true);
-                    this.purchaseButton.setVisible(true);
-                    this.purchaseButton.buttonText.setText(`Purchase for ${item.cost} gold`);
-                    this.purchaseButton.buttonText.setVisible(true);
+                    this.purchaseItemButton.setVisible(true);
+                    this.purchaseItemButton.buttonText.setText(`Purchase for ${item.cost} gold`);
+                    this.purchaseItemButton.buttonText.setVisible(true);
                     this.cancelMenuFrame.setX(10);
                     this.cancelMenuFrame.setY(460);
                     this.cancelMenuFrame.setVisible(true);
@@ -299,7 +302,7 @@ export default class UIScene extends Phaser.Scene {
                                 Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
                                 Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
                                 Classes: ${item.classes},
-                                Min. Level: 1`
+                                Minimum Level: ${item.minimumLevel}`
                         );
                     }
                     this.inventoryAndAbilityDetailText.setVisible(true);
@@ -355,10 +358,14 @@ export default class UIScene extends Phaser.Scene {
         this.yesButton.buttonText.setVisible(false);
         this.noButton.setVisible(false);
         this.noButton.buttonText.setVisible(false);
-        this.purchaseButton.setVisible(false);
-        this.purchaseButton.buttonText.setVisible(false);
+        this.purchaseItemButton.setVisible(false);
+        this.purchaseItemButton.buttonText.setVisible(false);
+        this.buyButton.setVisible(false);
+        this.buyButton.buttonText.setVisible(false);
         this.sellButton.setVisible(false);
         this.sellButton.buttonText.setVisible(false);
+        this.sellItemButton.setVisible(false);
+        this.sellItemButton.buttonText.setVisible(false);
 
         for (const subInventoryButton of this.subInventoryButtons) {
             if (subInventoryButton.visible) {
@@ -367,21 +374,23 @@ export default class UIScene extends Phaser.Scene {
             }
         }
 
-        for (const inventoryButton of this.inventoryButtons) {
-            if (inventoryButton.visible) {
-                inventoryButton.setVisible(false);
-                inventoryButton.buttonText.setVisible(false);
-                inventoryButton.deselect();
-            }
-        }
+        this.destroyInventoryButtons();
+        // for (const inventoryButton of this.inventoryButtons) {
+        //     if (inventoryButton.visible) {
+        //         inventoryButton.setVisible(false);
+        //         inventoryButton.buttonText.setVisible(false);
+        //         inventoryButton.deselect();
+        //     }
+        // }
 
-        for (const merchantInventoryButton of this.merchantInventoryButtons) {
-            if (merchantInventoryButton.visible) {
-                merchantInventoryButton.setVisible(false);
-                merchantInventoryButton.buttonText.setVisible(false);
-                merchantInventoryButton.deselect();
-            }
-        }
+        this.destroyMerchantInventoryButtons();
+        // for (const merchantInventoryButton of this.merchantInventoryButtons) {
+        //     if (merchantInventoryButton.visible) {
+        //         merchantInventoryButton.setVisible(false);
+        //         merchantInventoryButton.buttonText.setVisible(false);
+        //         merchantInventoryButton.deselect();
+        //     }
+        // }
 
         for (const subAbilityButton of this.subAbilityButtons) {
             if (subAbilityButton.visible) {
@@ -402,6 +411,15 @@ export default class UIScene extends Phaser.Scene {
                 equipmentButton.buttonText.setVisible(false);
             }
         }
+
+        this.destroyInventoryToSellButtons();
+        // for (const inventoryToSellButton of this.inventoryToSellButtons) {
+        //     if (inventoryToSellButton.visible) {
+        //         inventoryToSellButton.setVisible(false);
+        //         inventoryToSellButton.buttonText.setVisible(false);
+        //         inventoryToSellButton.deselect();
+        //     }
+        // }
 
         this.classString.setVisible(false);
         this.levelString.setVisible(false);
@@ -756,7 +774,74 @@ export default class UIScene extends Phaser.Scene {
         this.selectedItemAndAbilityIcon.setVisible(false);
         this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
 
-        this.purchaseButton = new UIActionButton(
+        this.sellItemButton = new UIActionButton(
+            this,
+            35,
+            392,
+            'checkbutton',
+            'checkbutton',
+            'Sell',
+            () => {
+
+                if (
+                    this.currentNPC instanceof Merchant &&
+                    this.currentNPC.inventory &&
+                    this.interactionState.startsWith('merchantsellitem')
+                ) {
+                    // handle selling the item, take the item from the player
+                    //  and put the gold in their inventory
+                    //  process the sale
+
+                    const itemIndex = this.interactionState.split('merchantsellitem')[1];
+                    console.log({index: itemIndex});
+                    const itemToSell = this.gameScene.player.inventory[Number(itemIndex)];
+                    console.log({itemToSell});
+                    console.log({itemIndex, playerInventory: this.gameScene.player.inventory});
+                    const sellPrice = itemToSell.sellPrice;
+                    console.log(`selling ${itemToSell.name}`);
+                    this.gameScene.player.inventory.splice(Number(itemIndex), 1);
+                    this.gameScene.player.gold += sellPrice;
+
+                    // hide all merchant related frames
+                    this.inventoryAndAbilityMenuFrame.setVisible(false);
+                    this.subInventoryAndAbilityMenuFrame.setVisible(false);
+                    this.inventoryAndAbilityDetailFrame.setVisible(false);
+                    this.inventoryAndAbilityDetailText.setVisible(false);
+                    this.sellItemButton.setVisible(false);
+                    this.sellItemButton.buttonText.setVisible(false);
+                    this.buyButton.setVisible(false);
+                    this.buyButton.buttonText.setVisible(false);
+                    this.sellButton.setVisible(false);
+                    this.sellButton.buttonText.setVisible(false);
+
+                    for (const inventoryToSellButton of this.inventoryToSellButtons) {
+                        inventoryToSellButton.setVisible(false);
+                        inventoryToSellButton.buttonText.setVisible(false);
+                    }
+
+                    this.leftSideDialogFrame.setVisible(true);
+                    this.leftSideDialogText.setText('Merchant:\nThanketh thee f\'r thy patronage!');
+                    this.leftSideDialogText.setVisible(true);
+
+                    this.cancelMenuFrame.setX(670);
+                    this.cancelMenuFrame.setY(380);
+                    this.cancelMenuFrame.setVisible(true);
+                    this.cancelButton.setX(702);
+                    this.cancelButton.setY(415);
+                    this.cancelButton.setVisible(true);
+                    this.cancelButton.buttonText.setX(722);
+                    this.cancelButton.buttonText.setY(390);
+                    this.cancelButton.buttonText.setText('Farewell');
+                    this.cancelButton.buttonText.setVisible(true);
+
+                    this.updateGold();
+                }
+            }
+        );
+        this.sellItemButton.setVisible(false);
+        this.sellItemButton.buttonText.setVisible(false);
+
+        this.purchaseItemButton = new UIActionButton(
             this,
             35,
             392,
@@ -783,10 +868,10 @@ export default class UIScene extends Phaser.Scene {
                         this.subInventoryAndAbilityMenuFrame.setVisible(false);
                         this.inventoryAndAbilityDetailFrame.setVisible(false);
                         this.inventoryAndAbilityDetailText.setVisible(false);
-                        this.purchaseButton.setVisible(false);
-                        this.purchaseButton.buttonText.setVisible(false);
-                        this.subInventoryBagButton.setVisible(false);
-                        this.subInventoryBagButton.buttonText.setVisible(false);
+                        this.purchaseItemButton.setVisible(false);
+                        this.purchaseItemButton.buttonText.setVisible(false);
+                        this.buyButton.setVisible(false);
+                        this.buyButton.buttonText.setVisible(false);
                         this.sellButton.setVisible(false);
                         this.sellButton.buttonText.setVisible(false);
 
@@ -817,10 +902,10 @@ export default class UIScene extends Phaser.Scene {
                         this.subInventoryAndAbilityMenuFrame.setVisible(false);
                         this.inventoryAndAbilityDetailFrame.setVisible(false);
                         this.inventoryAndAbilityDetailText.setVisible(false);
-                        this.purchaseButton.setVisible(false);
-                        this.purchaseButton.buttonText.setVisible(false);
-                        this.subInventoryBagButton.setVisible(false);
-                        this.subInventoryBagButton.buttonText.setVisible(false);
+                        this.purchaseItemButton.setVisible(false);
+                        this.purchaseItemButton.buttonText.setVisible(false);
+                        this.buyButton.setVisible(false);
+                        this.buyButton.buttonText.setVisible(false);
                         this.sellButton.setVisible(false);
                         this.sellButton.buttonText.setVisible(false);
 
@@ -847,16 +932,17 @@ export default class UIScene extends Phaser.Scene {
                         // handle buying the item, take the gold from the player
                         //  and put the item in their inventory
                         //  process the purchase
+                        this.interactionState = 'merchantresponse';
 
                         // hide all the merchant related frames
                         this.inventoryAndAbilityMenuFrame.setVisible(false);
                         this.subInventoryAndAbilityMenuFrame.setVisible(false);
                         this.inventoryAndAbilityDetailFrame.setVisible(false);
                         this.inventoryAndAbilityDetailText.setVisible(false);
-                        this.purchaseButton.setVisible(false);
-                        this.purchaseButton.buttonText.setVisible(false);
-                        this.subInventoryBagButton.setVisible(false);
-                        this.subInventoryBagButton.buttonText.setVisible(false);
+                        this.purchaseItemButton.setVisible(false);
+                        this.purchaseItemButton.buttonText.setVisible(false);
+                        this.buyButton.setVisible(false);
+                        this.buyButton.buttonText.setVisible(false);
                         this.sellButton.setVisible(false);
                         this.sellButton.buttonText.setVisible(false);
 
@@ -886,9 +972,11 @@ export default class UIScene extends Phaser.Scene {
                                 selectedItem.name,
                                 selectedItem.type,
                                 selectedItem.cost,
+                                selectedItem.sellPrice,
                                 selectedItem.description,
                                 undefined,
                                 selectedItem.classes,
+                                selectedItem.minimumLevel,
                                 selectedItem.stats
                             )
                         );
@@ -898,8 +986,8 @@ export default class UIScene extends Phaser.Scene {
                 }
             }
         );
-        this.purchaseButton.setVisible(false);
-        this.purchaseButton.buttonText.setVisible(false);
+        this.purchaseItemButton.setVisible(false);
+        this.purchaseItemButton.buttonText.setVisible(false);
 
         this.useButton = new UIActionButton(
             this,
@@ -995,7 +1083,6 @@ export default class UIScene extends Phaser.Scene {
                 this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
 
                 this.destroyInventoryButtons();
-
                 this.generateInventoryButtons();
                 for (const inventoryButton of this.inventoryButtons) {
                     inventoryButton.setVisible(true);
@@ -1006,6 +1093,50 @@ export default class UIScene extends Phaser.Scene {
         this.equipButton.setVisible(false);
         this.equipButton.buttonText.setVisible(false);
 
+        this.buyButton = new UIActionButton(
+            this,
+            265,
+            465,
+            'bagbutton',
+            'bagbuttonactive',
+            'Buy',
+            () => {
+                console.log('buy button clicked');
+                // compare to the 'merchant talked to section of code
+                if (this.interactionState === 'merchantbuy') {
+                    return;
+                }
+
+                this.inventoryAndAbilityDetailText.setVisible(false);
+                this.inventoryAndAbilityDetailFrame.setVisible(false);
+                this.purchaseItemButton.setVisible(false);
+                this.purchaseItemButton.buttonText.setVisible(false);
+                this.sellItemButton.setVisible(false);
+                this.sellItemButton.buttonText.setVisible(false);
+
+                this.cancelButton.setX(347);
+                this.cancelButton.setY(350);
+
+                this.cancelButton.buttonText.setY(325);
+                this.cancelButton.buttonText.setX(367);
+
+                this.cancelMenuFrame.setX(315);
+                this.cancelMenuFrame.setY(315);
+
+                this.destroyInventoryToSellButtons();
+
+                this.destroyMerchantInventoryButtons();
+                if (this.currentNPC instanceof Merchant) {
+                    this.generateMerchantInventoryButtons(this.currentNPC.inventory);
+                }
+                this.sellButton.deselect();
+                this.buyButton.select();
+                this.interactionState = 'merchantbuy';
+            }
+        );
+        this.buyButton.setVisible(false);
+        this.buyButton.buttonText.setVisible(false);
+
         this.sellButton = new UIActionButton(
             this,
             265,
@@ -1014,7 +1145,39 @@ export default class UIScene extends Phaser.Scene {
             'coinbuttonactive',
             'Sell',
             () => {
+                if (this.interactionState === 'merchantsell') {
+                    return;
+                }
                 console.log('sell button clicked');
+                // compare to the 'merchant talked to section of code
+                this.interactionState = 'merchantsell';
+
+                this.buyButton.deselect();
+                this.sellButton.select();
+
+                this.cancelButton.setX(347);
+                this.cancelButton.setY(350);
+
+                this.cancelButton.buttonText.setY(325);
+                this.cancelButton.buttonText.setX(367);
+
+                this.cancelMenuFrame.setX(315);
+                this.cancelMenuFrame.setY(315);
+
+                this.inventoryAndAbilityDetailFrame.setVisible(false);
+                this.inventoryAndAbilityDetailText.setVisible(false);
+                this.purchaseItemButton.setVisible(false);
+                this.purchaseItemButton.buttonText.setVisible(false);
+                this.sellItemButton.setVisible(false);
+                this.sellItemButton.buttonText.setVisible(false);
+
+                this.destroyMerchantInventoryButtons();
+                this.destroyInventoryToSellButtons();
+                this.generateInventoryToSellButtons();
+                for (const inventoryToSellButton of this.inventoryToSellButtons) {
+                    inventoryToSellButton.setVisible(true);
+                    inventoryToSellButton.buttonText.setVisible(true);
+                }
             }
         );
         this.sellButton.setVisible(false);
@@ -1031,8 +1194,7 @@ export default class UIScene extends Phaser.Scene {
             'Inventory',
             () => {
                 if (
-                    this.interactionState === 'inventory' ||
-                    this.interactionState.startsWith('merchant')
+                    this.interactionState === 'inventory'
                 ) {
                     return;
                 }
@@ -1040,6 +1202,22 @@ export default class UIScene extends Phaser.Scene {
                 this.subInventoryBagButton.select();
                 this.subInventoryEquipmentButton.deselect();
                 this.subInventoryQuestButton.deselect();
+
+                this.inventoryAndAbilityDetailText.setVisible(false);
+                this.inventoryAndAbilityDetailFrame.setVisible(false);
+                this.useButton.setVisible(false);
+                this.useButton.buttonText.setVisible(false);
+
+                this.cancelButton.setX(347);
+                this.cancelButton.setY(350);
+
+                this.cancelButton.buttonText.setY(325);
+                this.cancelButton.buttonText.setX(367);
+
+                this.cancelMenuFrame.setX(315);
+                this.cancelMenuFrame.setY(315);
+                this.cancelMenuFrame.setVisible(true);
+
                 for (const equipmentString of this.equipmentStrings) {
                     equipmentString.setVisible(false);
                 }
@@ -1065,8 +1243,8 @@ export default class UIScene extends Phaser.Scene {
             this,
             265,
             515,
-            'bagbutton',
-            'bagbuttonactive',
+            'armorbutton',
+            'armorbuttonactive',
             'Equipment',
             () => {
                 this.interactionState = 'equipment';
@@ -1309,7 +1487,7 @@ export default class UIScene extends Phaser.Scene {
             '',
             () => {
                 // uncomment to log interaction state by clicking player portrait
-                // console.log({interactionState: this.interactionState});
+                console.log({interactionState: this.interactionState});
                 if (this.interactionState.startsWith('inventoryaction')) {
                     const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
 
@@ -1553,6 +1731,15 @@ export default class UIScene extends Phaser.Scene {
 
     }
 
+    private destroyInventoryToSellButtons() {
+        for (const inventoryToSellButton of this.inventoryToSellButtons) {
+            inventoryToSellButton.destroy();
+            inventoryToSellButton.buttonText.destroy();
+        }
+        this.inventoryToSellButtons = [];
+
+    }
+
     private generateInventoryButtons() {
         // iterate over all inventory entries
         // generate inventory buttons
@@ -1601,7 +1788,7 @@ export default class UIScene extends Phaser.Scene {
                                 Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
                                 Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
                                 Classes: ${item.classes},
-                                Min. Level: 1`
+                                Minimum Level: ${item.minimumLevel}`
                         );
                         this.useButton.setVisible(false);
                         this.useButton.buttonText.setVisible(false);
@@ -1622,6 +1809,71 @@ export default class UIScene extends Phaser.Scene {
 
             this.inventoryButtons.push(inventoryButton);
         }
+    }
+
+    private generateInventoryToSellButtons() {
+        for (const [index, item] of this.gameScene.player.inventory.entries()) {
+
+            const inventoryToSellButton = new UIActionButton(
+                this,
+                564,
+                216 + (index * 50),
+                item.key,
+                item.activeKey,
+                item.name,
+                () => {
+                    console.log('clicked an inventory button (selecting to sell)');
+                    console.log({clickedItem: this.gameScene.player.inventory[index]});
+                    console.log({inventoryToSellButtons: this.inventoryToSellButtons});
+                    this.interactionState = `merchantsellitem${index}`;
+                    this.inventoryIndex = index;
+                    this.inventoryToSellButtons[index].select();
+
+                    for (const [inventoryButtonIndex, inventoryToSellButton] of this.inventoryToSellButtons.entries()) {
+                        if (inventoryButtonIndex !== index) {
+                            inventoryToSellButton.deselect();
+                        }
+                    }
+
+                    this.inventoryAndAbilityDetailFrame.setVisible(true);
+                    this.sellItemButton.setVisible(true);
+                    this.sellItemButton.buttonText.setText(`Sell for ${item.sellPrice} gold`);
+                    this.sellItemButton.buttonText.setVisible(true);
+
+                    this.cancelMenuFrame.setX(10);
+                    this.cancelMenuFrame.setY(460);
+                    this.cancelMenuFrame.setVisible(true);
+                    this.cancelButton.setX(42);
+                    this.cancelButton.setY(495);
+                    this.cancelButton.setVisible(true);
+                    this.cancelButton.buttonText.setX(62);
+                    this.cancelButton.buttonText.setY(470);
+                    this.cancelButton.buttonText.setVisible(true);
+
+                    if (item.type === 'weapon' || item.type === 'bodyarmor') {
+                        this.inventoryAndAbilityDetailText.setText(
+                            `${item.description}\n\n
+                            Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
+                                Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
+                                Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
+                                Classes: ${item.classes},
+                                Minimum Level: ${item.minimumLevel}`
+                        );
+                    }
+                    else if (item.type === 'consumable') {
+                        this.inventoryAndAbilityDetailText.setText(item.description);
+                    }
+
+                    this.inventoryAndAbilityDetailText.setVisible(true);
+
+                }
+            );
+            inventoryToSellButton.setVisible(false);
+            inventoryToSellButton.buttonText.setVisible(false);
+
+            this.inventoryToSellButtons.push(inventoryToSellButton);
+        }
+
     }
 
     private updateCharacterSheetStrings() {

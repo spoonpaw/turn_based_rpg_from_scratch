@@ -100,6 +100,7 @@ export default class GameScene extends Phaser.Scene {
                     potionItem!.name,
                     potionItem!.type,
                     potionItem!.cost,
+                    potionItem!.sellPrice,
                     potionItem!.description,
                     potionItem!.hpchange
                 );
