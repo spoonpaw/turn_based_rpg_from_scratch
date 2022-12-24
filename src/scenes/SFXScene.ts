@@ -3,11 +3,12 @@ import UIActionButton from '../classes/UIActionButton';
 export default class SFXScene extends Phaser.Scene {
     public attackSound!: Phaser.Sound.BaseSound;
     public criticalAttackSound!: Phaser.Sound.BaseSound;
-    public potionSound!: Phaser.Sound.BaseSound;
     public muted = false;
-    private sfxMuteButton!: UIActionButton;
-    private selectSound!: Phaser.Sound.BaseSound;
+    public potionSound!: Phaser.Sound.BaseSound;
     private deselectSound!: Phaser.Sound.BaseSound;
+    private runAwaySound!: Phaser.Sound.BaseSound;
+    private selectSound!: Phaser.Sound.BaseSound;
+    private sfxMuteButton!: UIActionButton;
 
     public constructor() {
         super('SFX');
@@ -19,6 +20,7 @@ export default class SFXScene extends Phaser.Scene {
         this.potionSound = this.sound.add('potion');
         this.selectSound = this.sound.add('select');
         this.deselectSound = this.sound.add('deselect');
+        this.runAwaySound = this.sound.add('runaway');
 
         this.sfxMuteButton = new UIActionButton(
             this,
@@ -48,6 +50,7 @@ export default class SFXScene extends Phaser.Scene {
         if (this.potionSound.isPlaying) this.potionSound.stop();
         if (this.selectSound.isPlaying) this.selectSound.stop();
         if (this.deselectSound.isPlaying) this.deselectSound.stop();
+        if (this.runAwaySound.isPlaying) this.runAwaySound.stop();
     }
 
     public playSound(sound: string) {
@@ -67,6 +70,9 @@ export default class SFXScene extends Phaser.Scene {
                 break;
             case 'deselect':
                 this.deselectSound.play();
+                break;
+            case 'runaway':
+                this.runAwaySound.play();
                 break;
             }
         }
