@@ -52,7 +52,6 @@ export default class Merchant extends NPC {
         this.uiScene.subInventoryAndAbilityMenuFrame.setVisible(true);
 
 
-        // TODO: fix this section. use a special 'buy button' completely separate from the sub inventory bag button
         this.uiScene.buyButton.select();
         this.uiScene.buyButton.setVisible(true);
         this.uiScene.buyButton.buttonText.setText('Buy');

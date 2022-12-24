@@ -1,8 +1,8 @@
-// TODO: Add Sound Effects to battle scene (run, dodge)
+// TODO: add the ability to unequip and view the stats of equipped items
+
+// TODO: Add Sound Effects to battle scene (dodge)
 
 // TODO: Add Ability button functionality
-
-// TODO: Add logic for armor decreasing damage taken.
 
 import {Enemy} from '../classes/Enemy';
 import PlayerCharacter from '../classes/PlayerCharacter';
@@ -203,6 +203,7 @@ export default class BattleScene extends Phaser.Scene {
                 // run was successful, exit combat
                 // deliver the successful retreat message and exit the battle
                 eventsCenter.emit('Message', 'You have successfully retreated.');
+                this.sfxScene.playSound('runaway');
                 this.time.addEvent({
                     delay: 2000,
                     callback: this.endBattle,
