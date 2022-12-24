@@ -43,7 +43,10 @@ export const levels: ILevelDataContainer = {
                 inventory: [
                     items.find(obj => {
                         return obj.name === 'Cypressium Staff';
-                    }) as ItemInterface
+                    }) as ItemInterface,
+                    items.find(obj => {
+                        return obj.name === 'Galenite Blade';
+                    }) as ItemInterface,
                 ]
             },
             {

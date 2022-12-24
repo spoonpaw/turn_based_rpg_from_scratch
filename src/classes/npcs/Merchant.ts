@@ -18,6 +18,19 @@ export default class Merchant extends NPC {
         this.uiScene = <UIScene>this.gameScene.scene.get('UI');
     }
 
+    public listenForInteractEvent() {
+        // if (Phaser.Input.Keyboard.JustDown(this.gameScene.cursors.space)) {
+        // merchant just heard the space bar somewhere!
+        if (this.testForInteractionReadyState()) {
+            this.runDialog();
+        }
+        else {
+            // merchant is not getting talked to
+            return;
+        }
+        // }
+    }
+
     public runDialog() {
         // merchant is getting talked to
         this.uiScene.interactionState = 'merchantbuy';
@@ -37,11 +50,15 @@ export default class Merchant extends NPC {
         this.uiScene.goldIcon.setVisible(true);
         this.uiScene.goldText.setVisible(true);
         this.uiScene.subInventoryAndAbilityMenuFrame.setVisible(true);
-        this.uiScene.subInventoryBagButton.select();
-        this.uiScene.subInventoryBagButton.setVisible(true);
-        this.uiScene.subInventoryBagButton.buttonText.setText('Buy');
-        this.uiScene.subInventoryBagButton.buttonText.setVisible(true);
 
+
+        // TODO: fix this section. use a special 'buy button' completely separate from the sub inventory bag button
+        this.uiScene.buyButton.select();
+        this.uiScene.buyButton.setVisible(true);
+        this.uiScene.buyButton.buttonText.setText('Buy');
+        this.uiScene.buyButton.buttonText.setVisible(true);
+
+        this.uiScene.sellButton.deselect();
         this.uiScene.sellButton.setVisible(true);
         this.uiScene.sellButton.buttonText.setVisible(true);
 
@@ -79,8 +96,8 @@ export default class Merchant extends NPC {
             this.uiScene.goldIcon.setVisible(false);
             this.uiScene.goldText.setVisible(false);
             this.uiScene.subInventoryAndAbilityMenuFrame.setVisible(false);
-            this.uiScene.subInventoryBagButton.setVisible(false);
-            this.uiScene.subInventoryBagButton.buttonText.setVisible(false);
+            this.uiScene.buyButton.setVisible(false);
+            this.uiScene.buyButton.buttonText.setVisible(false);
             this.uiScene.sellButton.setVisible(false);
             this.uiScene.sellButton.buttonText.setVisible(false);
             this.uiScene.cancelMenuFrame.setVisible(false);
@@ -88,8 +105,10 @@ export default class Merchant extends NPC {
             this.uiScene.cancelButton.buttonText.setVisible(false);
             this.uiScene.inventoryAndAbilityDetailFrame.setVisible(false);
             this.uiScene.inventoryAndAbilityDetailText.setVisible(false);
-            this.uiScene.purchaseButton.setVisible(false);
-            this.uiScene.purchaseButton.buttonText.setVisible(false);
+            this.uiScene.purchaseItemButton.setVisible(false);
+            this.uiScene.purchaseItemButton.buttonText.setVisible(false);
+            this.uiScene.sellButton.setVisible(false);
+            this.uiScene.sellButton.buttonText.setVisible(false);
 
             this.uiScene.cancelMenuFrame.setVisible(false);
             this.uiScene.cancelButton.setVisible(false);
@@ -98,6 +117,15 @@ export default class Merchant extends NPC {
             for (const merchantButton of this.uiScene.merchantInventoryButtons) {
                 merchantButton.setVisible(false);
                 merchantButton.buttonText.setVisible(false);
+            }
+
+
+            for (const inventoryToSellButton of this.uiScene.inventoryToSellButtons) {
+                if (inventoryToSellButton.visible) {
+                    inventoryToSellButton.setVisible(false);
+                    inventoryToSellButton.buttonText.setVisible(false);
+                    inventoryToSellButton.deselect();
+                }
             }
 
             this.gameScene.input.keyboard!.enabled = true;
@@ -115,18 +143,5 @@ export default class Merchant extends NPC {
 
         });
 
-    }
-
-    public listenForInteractEvent() {
-        // if (Phaser.Input.Keyboard.JustDown(this.gameScene.cursors.space)) {
-        // merchant just heard the space bar somewhere!
-        if (this.testForInteractionReadyState()) {
-            this.runDialog();
-        }
-        else {
-            // merchant is not getting talked to
-            return;
-        }
-        // }
     }
 }

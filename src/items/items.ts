@@ -6,7 +6,8 @@ export const items: itemArray = [
         activekey: 'healthpotionactive',
         type: 'consumable',
         hpchange: 30,
-        cost: 3,
+        cost: 8,
+        sellPrice: 6
     },
     {
         name: 'Cypressium Staff',
@@ -15,7 +16,9 @@ export const items: itemArray = [
         activekey: 'staffbuttonactive',
         type: 'weapon',
         cost: 12,
+        sellPrice: 7,
         classes: 'All',
+        minimumLevel: 1,
         stats: {
             strength: 2,
             agility: 0,
@@ -26,13 +29,34 @@ export const items: itemArray = [
         }
     },
     {
+        name: 'Galenite Blade',
+        description: 'An unassuming sword made from a durable, pseudochromatic mineral.',
+        key: 'chromaticsword',
+        activekey: 'chromaticswordactive',
+        type: 'weapon',
+        cost: 250,
+        sellPrice: 130,
+        classes: 'All',
+        minimumLevel: 1,
+        stats: {
+            strength: 5,
+            agility: 0,
+            vitality: 0,
+            intellect: 0,
+            luck: 0,
+            defense: 0
+        }
+    },
+    {
         name: 'Synthjute Tunic',
         description: 'A tunic woven from a flimsy synthetic material that provides minimal protection.',
-        key: 'bagbutton',
-        activekey: 'bagbuttonactive',
+        key: 'synthjutetunic',
+        activekey: 'synthjutetunicactive',
         type: 'bodyarmor',
         cost: 6,
+        sellPrice: 4,
         classes: 'All',
+        minimumLevel: 1,
         stats: {
             strength: 0,
             agility: 0,
@@ -45,11 +69,13 @@ export const items: itemArray = [
     {
         name: 'Scrap Cloak',
         description: 'A cloak made from various scraps and recycled fibers for enhanced durability.',
-        key: 'bagbutton',
-        activekey: 'bagbuttonactive',
+        key: 'scrapcloak',
+        activekey: 'scrapcloakactive',
         type: 'bodyarmor',
         cost: 90,
+        sellPrice: 50,
         classes: 'All',
+        minimumLevel: 1,
         stats: {
             strength: 0,
             agility: 0,
@@ -62,11 +88,13 @@ export const items: itemArray = [
     {
         name: 'Chitinous Vest',
         description: 'A lightweight, durable vest made from an oversized insect\'s exoskeleton.',
-        key: 'bagbutton',
-        activekey: 'bagbuttonactive',
+        key: 'armorbutton',
+        activekey: 'armorbuttonactive',
         type: 'bodyarmor',
         cost: 150,
+        sellPrice: 80,
         classes: 'Soldier/Healer',
+        minimumLevel: 1,
         stats: {
             strength: 0,
             agility: 0,
@@ -81,9 +109,11 @@ export const items: itemArray = [
 type itemArray = ItemInterface[];
 
 export interface ItemInterface {
+    minimumLevel?: number;
     activekey: string;
     classes?: string;
     cost: number;
+    sellPrice: number;
     description: string;
     hpchange?: number;
     key: string;

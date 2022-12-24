@@ -5,9 +5,11 @@ export default class Item {
         public name: string,
         public type: string,
         public cost: number,
+        public sellPrice: number,
         public description: string,
         public hpChange?: number,
         public classes?: string,
+        public minimumLevel?: number,
         public stats?: {
             strength: number,
             agility: number,
