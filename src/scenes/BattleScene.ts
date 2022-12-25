@@ -1,8 +1,16 @@
-// TODO: add the ability to unequip and view the stats of equipped items
-
-// TODO: Add Sound Effects to battle scene (dodge)
+// TODO: Add an npc that
 
 // TODO: Add Ability button functionality
+
+// TODO: add an npc questgiver
+
+// TODO: add items in the dressers
+
+// TODO: add a sign that can be read
+
+// TODO: add an npc who walks in a predescribed pattern and will stop and speak when interacted with
+
+
 
 import {Enemy} from '../classes/Enemy';
 import PlayerCharacter from '../classes/PlayerCharacter';

@@ -82,7 +82,7 @@ export default class Merchant extends NPC {
         eventsCenter.on('space', () => {
             this.uiScene.interactionState = 'mainselect';
             eventsCenter.removeListener('space');
-            eventsCenter.removeListener('no');
+            // eventsCenter.removeListener('no');
             // close the merchant select scene
 
             this.gameScene.gamePadScene?.scene.restart();
@@ -106,8 +106,8 @@ export default class Merchant extends NPC {
             this.uiScene.inventoryAndAbilityDetailText.setVisible(false);
             this.uiScene.purchaseItemButton.setVisible(false);
             this.uiScene.purchaseItemButton.buttonText.setVisible(false);
-            this.uiScene.sellButton.setVisible(false);
-            this.uiScene.sellButton.buttonText.setVisible(false);
+            this.uiScene.sellItemButton.setVisible(false);
+            this.uiScene.sellItemButton.buttonText.setVisible(false);
 
             this.uiScene.cancelMenuFrame.setVisible(false);
             this.uiScene.cancelButton.setVisible(false);

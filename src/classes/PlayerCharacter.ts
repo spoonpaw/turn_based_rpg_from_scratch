@@ -176,6 +176,7 @@ export default class PlayerCharacter extends Unit {
                 target.applyHPChange(damage);
             }
             else {
+                this.battleScene.sfxScene.playSound('dodge');
                 eventsCenter.emit('Message', `${this.type} attacked ${target.type}. ${target.type} dodged the attack!`);
                 runtimeInMS += 2000;
                 return runtimeInMS;

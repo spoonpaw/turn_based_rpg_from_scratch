@@ -86,6 +86,7 @@ export default class BootScene extends Phaser.Scene {
         this.load.audio('select', 'assets/sounds/fx/select.mp3');
         this.load.audio('deselect', 'assets/sounds/fx/deselect.mp3');
         this.load.audio('runaway', 'assets/sounds/fx/runAway.mp3');
+        this.load.audio('dodge', 'assets/sounds/fx/dodge.mp3');
     }
 
     private loadImages() {
@@ -150,7 +151,7 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('prefab4', 'assets/images/ui/prefab4.png');
         this.load.image('prefab5', 'assets/images/ui/prefab5.png');
 
-        this.load.image('leftsidedialogframe', 'assets/images/ui/leftSideDialogFrame.png');
+        this.load.image('sidedialogframe', 'assets/images/ui/leftSideDialogFrame.png');
         this.load.image('rightsidedialogoptionsframe', 'assets/images/ui/rightSideDialogOptionsFrame.png');
 
         this.load.image('gameActionMenuFrame', 'assets/images/ui/gameActionMenuFrame.png');
@@ -171,12 +172,13 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('inventoryAndAbilityDetailFrame', 'assets/images/ui/inventoryAndAbilityDetailFrame.png');
         this.load.image('confirmSelectedAbilityOrItemFrame', 'assets/images/ui/confirmSelectedAbilityOrItemFrame.png');
         this.load.image('confirmSelectedAbilityOrItemFrameB', 'assets/images/ui/confirmSelectedAbilityOrItemFrameB.png');
+        this.load.image('characterDetailDisplayFrame', 'assets/images/ui/characterDetailDisplayFrame.png');
 
         this.load.image('pic', 'assets/images/baal-loader.png');
         this.load.image('pic2', 'assets/images/atari-fujilogo.png');
         this.load.image('title', 'assets/images/afterlife-title-screen4.png');
 
-        this.load.image('tiles', 'assets/images/basictiles2.png');
+        this.load.image('tiles', 'assets/images/basictiles3.png');
         this.load.image('heart', 'assets/images/heart.png');
 
         this.load.image('dragonblue', 'assets/images/dragonblue.png');
@@ -207,6 +209,10 @@ export default class BootScene extends Phaser.Scene {
             frameWidth: 48,
             frameHeight: 48
         });
+        this.load.spritesheet('redbot', 'assets/images/characters/redBot.png', {
+            frameWidth: 48,
+            frameHeight: 48
+        });
         this.load.spritesheet('npc1', 'assets/images/characters/npc1.png', {
             frameWidth: 48,
             frameHeight: 48
@@ -218,6 +224,16 @@ export default class BootScene extends Phaser.Scene {
         });
 
         this.load.spritesheet('npc3', 'assets/images/characters/npc3.png', {
+            frameWidth: 48,
+            frameHeight: 48
+        });
+
+        this.load.spritesheet('npc4', 'assets/images/characters/npc4.png', {
+            frameWidth: 48,
+            frameHeight: 48
+        });
+
+        this.load.spritesheet('npc5', 'assets/images/characters/npc5.png', {
             frameWidth: 48,
             frameHeight: 48
         });

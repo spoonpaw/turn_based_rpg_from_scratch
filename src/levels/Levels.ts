@@ -9,7 +9,7 @@ export const levels: ILevelDataContainer = {
         spawnCoords: [
             {
                 name: 'town',
-                x: 4,
+                x: 3,
                 y: 16
             }
         ],
@@ -65,6 +65,21 @@ export const levels: ILevelDataContainer = {
                     }) as ItemInterface,
 
                 ]
+            },
+            {
+                name: 'itemmerchant',
+                x: 12,
+                y: 8,
+                inventory: [
+                    items.find(obj => {
+                        return obj.name === 'Health Potion';
+                    }) as ItemInterface
+                ]
+            },
+            {
+                name: 'botscientist',
+                x: 5,
+                y: 14,
             }
         ],
         music: 'town'
