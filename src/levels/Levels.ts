@@ -9,14 +9,14 @@ export const levels: ILevelDataContainer = {
         spawnCoords: [
             {
                 name: 'town',
-                x: 4,
+                x: 3,
                 y: 16
             }
         ],
         npcs: [],
         enemies: ['seedspiker', 'sentientrock', 'deadlyflower'],
         // enemies: ['seedspiker'],
-        music: 'title'
+        music: 'overworld'
     },
     town: {
         name: 'town',
@@ -65,9 +65,25 @@ export const levels: ILevelDataContainer = {
                     }) as ItemInterface,
 
                 ]
+            },
+            {
+                name: 'itemmerchant',
+                x: 12,
+                y: 8,
+                inventory: [
+                    items.find(obj => {
+                        return obj.name === 'Health Potion';
+                    }) as ItemInterface
+                ]
+            },
+            {
+                name: 'botscientist',
+                x: 5,
+                y: 14,
             }
         ],
-        music: 'town'
+        music: 'town',
+        containers: [],
     }
 };
 
@@ -80,6 +96,11 @@ export interface ILevelData {
         y: number;
         inventory?: ItemInterface[];
     }[];
+    containers?: {
+        x: number;
+        y: number;
+        inventory: ItemInterface[];
+    }[]
     spawnCoords: {
         name: string;
         x: number;

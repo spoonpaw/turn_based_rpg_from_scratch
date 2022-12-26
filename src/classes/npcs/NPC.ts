@@ -6,7 +6,8 @@ export default class NPC {
 
     constructor(
         public sprite: Phaser.GameObjects.Sprite,
-        protected tilePos: Phaser.Math.Vector2
+        protected tilePos: Phaser.Math.Vector2,
+        // public dialogCallback?: () => void
     ) {
         this.gameScene = <GameScene>this.sprite.scene.scene.get('Game');
         const offsetX = GameScene.TILE_SIZE / 2;

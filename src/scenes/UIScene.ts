@@ -1,3 +1,5 @@
+import {cloneDeep} from 'lodash';
+
 import GameMessage from '../classes/GameMessage';
 import Item from '../classes/Item';
 import Innkeeper from '../classes/npcs/Innkeeper';
@@ -38,6 +40,7 @@ export default class UIScene extends Phaser.Scene {
     public musicScene!: MusicScene;
     public noButton!: UIActionButton;
     public purchaseItemButton!: UIActionButton;
+    public rightSideDialogFrame!: Phaser.GameObjects.Image;
     public rightSideDialogOptionsFrame!: Phaser.GameObjects.Image;
     public selectedItemAndAbilityIcon!: UIActionButton;
     public sellButton!: UIActionButton;
@@ -84,7 +87,11 @@ export default class UIScene extends Phaser.Scene {
     private subAbilityButtons: UIActionButton[] = [];
     private subInventoryButtons: UIActionButton[] = [];
     private tillNextLevelString!: Phaser.GameObjects.Text;
+    private unequipButton!: UIActionButton;
     private vitalityString!: Phaser.GameObjects.Text;
+    public rightSideDialogText!: Phaser.GameObjects.Text;
+    public characterDetailDisplay!: Phaser.GameObjects.Image;
+    public characterDetailDisplayFrame!: Phaser.GameObjects.Image;
 
     public constructor() {
         super('UI');
@@ -185,7 +192,28 @@ export default class UIScene extends Phaser.Scene {
                 this.gameScene.player.equipment.body.name,
 
                 () => {
-                    return;
+                    this.interactionState = 'equipmentbody';
+                    console.log({bodyArmor: this.gameScene.player.equipment.body});
+                    this.headItemButton.deselect();
+                    this.offHandItemButton.deselect();
+                    this.mainHandItemButton.deselect();
+                    this.bodyItemButton.select();
+                    const bodyArmor = this.gameScene.player.equipment.body;
+                    this.cancelMenuFrame.setVisible(false);
+                    this.cancelButton.setY(392);
+                    this.cancelButton.buttonText.setY(367);
+                    this.inventoryAndAbilityDetailFrame.setVisible(true);
+                    this.inventoryAndAbilityDetailText.setText(
+                        `${bodyArmor?.description}\n\n
+                            Strength: ${bodyArmor?.stats?.strength}, Agility: ${bodyArmor?.stats?.agility},
+                                Vitality: ${bodyArmor?.stats?.vitality}, Intellect: ${bodyArmor?.stats?.intellect},
+                                Luck: ${bodyArmor?.stats?.luck}, Defense: ${bodyArmor?.stats?.defense},
+                                Classes: ${bodyArmor?.classes},
+                                Minimum Level: ${bodyArmor?.minimumLevel}`);
+
+                    this.inventoryAndAbilityDetailText.setVisible(true);
+                    this.unequipButton.setVisible(true);
+                    this.unequipButton.buttonText.setVisible(true);
                 }
             );
         }
@@ -295,7 +323,13 @@ export default class UIScene extends Phaser.Scene {
                     this.cancelButton.buttonText.setY(470);
                     this.cancelButton.buttonText.setVisible(true);
 
-                    if (item.type === 'weapon' || item.type === 'bodyarmor') {
+                    if (item.type === 'consumable') {
+                        this.inventoryAndAbilityDetailText.setText(
+                            item.description
+                        );
+                    }
+
+                    else if (item.type === 'weapon' || item.type === 'bodyarmor') {
                         this.inventoryAndAbilityDetailText.setText(
                             `${item.description}\n\n
                             Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
@@ -353,6 +387,8 @@ export default class UIScene extends Phaser.Scene {
         this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
         this.leftSideDialogFrame.setVisible(false);
         this.leftSideDialogText.setVisible(false);
+        this.rightSideDialogFrame.setVisible(false);
+        this.rightSideDialogText.setVisible(false);
         this.rightSideDialogOptionsFrame.setVisible(false);
         this.yesButton.setVisible(false);
         this.yesButton.buttonText.setVisible(false);
@@ -366,6 +402,10 @@ export default class UIScene extends Phaser.Scene {
         this.sellButton.buttonText.setVisible(false);
         this.sellItemButton.setVisible(false);
         this.sellItemButton.buttonText.setVisible(false);
+        this.unequipButton.setVisible(false);
+        this.unequipButton.buttonText.setVisible(false);
+        this.characterDetailDisplay.setVisible(false);
+        this.characterDetailDisplayFrame.setVisible(false);
 
         for (const subInventoryButton of this.subInventoryButtons) {
             if (subInventoryButton.visible) {
@@ -375,22 +415,8 @@ export default class UIScene extends Phaser.Scene {
         }
 
         this.destroyInventoryButtons();
-        // for (const inventoryButton of this.inventoryButtons) {
-        //     if (inventoryButton.visible) {
-        //         inventoryButton.setVisible(false);
-        //         inventoryButton.buttonText.setVisible(false);
-        //         inventoryButton.deselect();
-        //     }
-        // }
 
         this.destroyMerchantInventoryButtons();
-        // for (const merchantInventoryButton of this.merchantInventoryButtons) {
-        //     if (merchantInventoryButton.visible) {
-        //         merchantInventoryButton.setVisible(false);
-        //         merchantInventoryButton.buttonText.setVisible(false);
-        //         merchantInventoryButton.deselect();
-        //     }
-        // }
 
         for (const subAbilityButton of this.subAbilityButtons) {
             if (subAbilityButton.visible) {
@@ -413,13 +439,6 @@ export default class UIScene extends Phaser.Scene {
         }
 
         this.destroyInventoryToSellButtons();
-        // for (const inventoryToSellButton of this.inventoryToSellButtons) {
-        //     if (inventoryToSellButton.visible) {
-        //         inventoryToSellButton.setVisible(false);
-        //         inventoryToSellButton.buttonText.setVisible(false);
-        //         inventoryToSellButton.deselect();
-        //     }
-        // }
 
         this.classString.setVisible(false);
         this.levelString.setVisible(false);
@@ -450,17 +469,28 @@ export default class UIScene extends Phaser.Scene {
     public setupUIElements() {
 
         // START FRAME SECTION
+        this.characterDetailDisplayFrame = this.add.image(
+            335,
+            275,
+            'characterDetailDisplayFrame'
+        );
+        this.characterDetailDisplayFrame.setVisible(false);
+
         this.actionMenuFrame = this.add.image(
             460,
             650,
             'gameActionMenuFrame'
         );
 
-        this.leftSideDialogFrame = this.add.image(40, 380, 'leftsidedialogframe')
+        this.rightSideDialogFrame = this.add.image(215, 380, 'sidedialogframe')
+            .setOrigin(0, 0);
+        this.rightSideDialogFrame.setVisible(false);
+
+        this.leftSideDialogFrame = this.add.image(40, 380, 'sidedialogframe')
             .setOrigin(0, 0);
         this.leftSideDialogFrame.setVisible(false);
 
-        this.rightSideDialogOptionsFrame = this.add.image(670, 380, 'rightsidedialogoptionsframe')
+        this.rightSideDialogOptionsFrame = this.add.image(670, 380, 'sideoptionsframe')
             .setOrigin(0, 0);
         this.rightSideDialogOptionsFrame.setVisible(false);
 
@@ -512,6 +542,16 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(10)
             .setFontSize(50);
         this.goldText.setVisible(false);
+
+        this.rightSideDialogText = this.add.text(225, 380, '', {
+            color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
+                width: 610,
+                useAdvancedWrap: true
+            }
+        })
+            .setResolution(10)
+            .setFontSize(50)
+            .setLineSpacing(-18);
 
         this.leftSideDialogText = this.add.text(50, 380, '', {
             color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
@@ -725,6 +765,7 @@ export default class UIScene extends Phaser.Scene {
                     this.gameScene.gamePadScene?.scene.restart();
                 }
                 eventsCenter.removeListener('space');
+                eventsCenter.emit('no');
 
                 this.goldFrame.setVisible(false);
                 this.goldIcon.setVisible(false);
@@ -737,6 +778,8 @@ export default class UIScene extends Phaser.Scene {
                 this.yesButton.buttonText.setVisible(false);
                 this.noButton.setVisible(false);
                 this.noButton.buttonText.setVisible(false);
+                this.characterDetailDisplay.setVisible(false);
+                this.characterDetailDisplayFrame.setVisible(false);
 
                 this.gameScene.input.keyboard!.enabled = true;
                 this.gameScene.input.keyboard!.resetKeys();
@@ -1045,6 +1088,58 @@ export default class UIScene extends Phaser.Scene {
         this.useButton.setVisible(false);
         this.useButton.buttonText.setVisible(false);
 
+        this.unequipButton = new UIActionButton(
+            this,
+            35,
+            392,
+            'checkbutton',
+            'checkbutton',
+            'Unequip',
+            () => {
+                // handle the unequip button selection
+
+                // first check if the inventory is full. if so, the item can't
+                //  be unequipped
+                if (this.gameScene.player.inventory.length === 8) {
+                    this.selectCancel();
+                    this.interactionState = 'equipmentequipfail';
+                    this.rightSideDialogFrame.setVisible(true);
+                    this.rightSideDialogText.setText('Not enough inventory space to remove the item.');
+                    this.rightSideDialogText.setVisible(true);
+
+                    this.cancelButton.setX(247);
+                    this.cancelButton.setY(572);
+                    this.cancelButton.buttonText.setX(267);
+                    this.cancelButton.buttonText.setY(547);
+
+
+                    this.cancelButton.setVisible(true);
+                    this.cancelButton.buttonText.setVisible(true);
+                }
+                else {
+                    // take the item out of the player's equipment, put
+                    //  it back in the inventory
+                    //  refresh the equipment view!
+
+                    const slotToUnequip = this.interactionState.split('equipment')[1];
+                    const itemToUnequip = cloneDeep(this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment]) as Item;
+
+                    console.log({slotToUnequip, itemToUnequip});
+                    this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment] = undefined;
+                    this.gameScene.player.inventory.push(itemToUnequip);
+                    this.destroyEquipmentButtons();
+                    this.generateEquipmentButtons();
+
+                    for (const equipmentButton of this.equipmentButtons) {
+                        equipmentButton.setVisible(true);
+                        equipmentButton.buttonText.setVisible(true);
+                    }
+                }
+            }
+        );
+        this.unequipButton.setVisible(false);
+        this.unequipButton.buttonText.setVisible(false);
+
         this.equipButton = new UIActionButton(
             this,
             35,
@@ -1054,7 +1149,6 @@ export default class UIScene extends Phaser.Scene {
             'Equip',
             () => {
                 // equip button clicked!!!
-
                 const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
 
                 // remove the selected item from the main inventory,
@@ -1207,6 +1301,10 @@ export default class UIScene extends Phaser.Scene {
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
                 this.useButton.setVisible(false);
                 this.useButton.buttonText.setVisible(false);
+                this.equipButton.setVisible(false);
+                this.equipButton.buttonText.setVisible(false);
+                this.unequipButton.setVisible(false);
+                this.unequipButton.buttonText.setVisible(false);
 
                 this.cancelButton.setX(347);
                 this.cancelButton.setY(350);
@@ -1336,6 +1434,17 @@ export default class UIScene extends Phaser.Scene {
         // END SUBABILITY BUTTONS SECTION
         // END BUTTON SECTION
 
+        // START IMAGE SECTION
+        this.characterDetailDisplay = this.add.image(
+            335,
+            275,
+            '',
+            0,
+        )
+            .setScale(3);
+        this.characterDetailDisplay.setVisible(false);
+        // END IMAGE SECTION
+
         this.generateInventoryButtons();
 
         this.inventoryAndAbilityDetailText = this.add.text(
@@ -1408,9 +1517,10 @@ export default class UIScene extends Phaser.Scene {
             'bagbuttonactive',
             '',
             () => {
+                eventsCenter.emit('inventory');
                 if (
                     this.interactionState === 'inventory' ||
-                    this.interactionState === 'equipment' ||
+                    this.interactionState.startsWith('equipment') ||
                     this.interactionState.startsWith('selecting') ||
                     this.interactionState.startsWith('inventoryaction')
                 ) {
@@ -1425,7 +1535,8 @@ export default class UIScene extends Phaser.Scene {
                     this.interactionState === 'ability' ||
                     this.interactionState === 'charactersheet' ||
                     this.interactionState.startsWith('merchant') ||
-                    this.interactionState.startsWith('innkeeper')
+                    this.interactionState.startsWith('innkeeper') ||
+                    this.interactionState.startsWith('botscientist')
                 ) {
                     this.selectCancel();
                 }
@@ -1488,6 +1599,7 @@ export default class UIScene extends Phaser.Scene {
             () => {
                 // uncomment to log interaction state by clicking player portrait
                 console.log({interactionState: this.interactionState});
+                console.log({currentMap: this.gameScene.currentMap});
                 if (this.interactionState.startsWith('inventoryaction')) {
                     const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
 
@@ -1546,6 +1658,7 @@ export default class UIScene extends Phaser.Scene {
             'bookbuttonactive',
             '',
             () => {
+                eventsCenter.emit('ability');
                 if (
                     this.interactionState === 'inventory' ||
                     this.interactionState === 'equipment' ||
@@ -1553,7 +1666,8 @@ export default class UIScene extends Phaser.Scene {
                     this.interactionState.startsWith('selecting') ||
                     this.interactionState.startsWith('inventoryaction') ||
                     this.interactionState.startsWith('merchant') ||
-                    this.interactionState.startsWith('innkeeper')
+                    this.interactionState.startsWith('innkeeper') ||
+                    this.interactionState.startsWith('botscientist')
                 ) {
                     this.selectCancel();
                 }
@@ -1609,6 +1723,7 @@ export default class UIScene extends Phaser.Scene {
             'pagebuttonactive',
             '',
             () => {
+                eventsCenter.emit('charactersheet');
                 if (
                     this.interactionState === 'inventory' ||
                     this.interactionState === 'equipment' ||
@@ -1616,7 +1731,8 @@ export default class UIScene extends Phaser.Scene {
                     this.interactionState.startsWith('selecting') ||
                     this.interactionState.startsWith('inventoryaction') ||
                     this.interactionState.startsWith('merchant') ||
-                    this.interactionState.startsWith('innkeeper')
+                    this.interactionState.startsWith('innkeeper') ||
+                    this.interactionState.startsWith('botscientist')
                 ) {
                     this.selectCancel();
                 }
@@ -1662,6 +1778,11 @@ export default class UIScene extends Phaser.Scene {
                 this.tillNextLevelString.setVisible(true);
             }
         );
+
+        // START HTML SECTION
+
+
+        // END HTML SECTION
     }
 
     public update() {
@@ -1674,13 +1795,20 @@ export default class UIScene extends Phaser.Scene {
             ) {
                 this.interactionState = 'mainselect';
 
-                if (this.gameScene.weaponMerchant || this.gameScene.innKeeper || this.gameScene.armorMerchant) {
+                if (
+                    this.gameScene.weaponMerchant ||
+                    this.gameScene.innKeeper ||
+                    this.gameScene.armorMerchant ||
+                    this.gameScene.itemMerchant ||
+                    this.gameScene.botScientist
+                ) {
                     // space bar pressed on game scene (npc[s] found)
 
                     // listening for interactivity on npcs
                     if (this.gameScene.weaponMerchant) this.gameScene.weaponMerchant.listenForInteractEvent();
                     if (this.gameScene.armorMerchant) this.gameScene.armorMerchant.listenForInteractEvent();
                     if (this.gameScene.innKeeper) this.gameScene.innKeeper.listenForInteractEvent();
+                    if (this.gameScene.itemMerchant) this.gameScene.itemMerchant.listenForInteractEvent();
                 }
             }
             else if (

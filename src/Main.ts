@@ -1,11 +1,9 @@
 import BattleScene from './scenes/BattleScene';
 import BattleUIScene from './scenes/BattleUIScene';
 import BootScene from './scenes/BootScene';
-// import DialogScene from './scenes/DialogScene';
 import GameOverScene from './scenes/GameOverScene';
 import GameScene from './scenes/GameScene';
 import MusicScene from './scenes/MusicScene';
-// import YesNoDialogScene from './scenes/YesNoDialogScene';
 import SFXScene from './scenes/SFXScene';
 import TitleScene from './scenes/TitleScene';
 import UIScene from './scenes/UIScene';
@@ -13,6 +11,7 @@ import ScaleModes = Phaser.Scale.ScaleModes;
 import VirtualJoyStickPlugin from 'phaser3-rex-plugins/plugins/virtualjoystick-plugin';
 
 import GamePadScene from './scenes/GamePadScene';
+import KeyboardScene from './scenes/KeyboardScene';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -42,10 +41,22 @@ const config: Phaser.Types.Core.GameConfig = {
         // DialogScene,
         // YesNoDialogScene,
         SFXScene,
-        GamePadScene
+        GamePadScene,
+        KeyboardScene
     ],
     backgroundColor: '#000000',
+    // parent: 'phaser-container',
+    // dom: {
+    //     createContainer: true
+    // },
     plugins: {
+        // scene: [
+        //     {
+        //         key: 'rexUI',
+        //         plugin: RexUIPlugin,
+        //         mapping: 'rexUI'
+        //     }
+        // ],
         global: [{
             key: 'rexVirtualJoyStick',
             plugin: VirtualJoyStickPlugin,

@@ -1,6 +1,8 @@
+import Bot from '../classes/Bot';
 import GridControls from '../classes/GridControls';
 import GridPhysics from '../classes/GridPhysics';
 import Item from '../classes/Item';
+import BotScientist from '../classes/npcs/BotScientist';
 import Innkeeper from '../classes/npcs/Innkeeper';
 import Merchant from '../classes/npcs/Merchant';
 import Player from '../classes/Player';
@@ -14,25 +16,29 @@ import UIScene from './UIScene';
 
 export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
+    public armorMerchant!: Merchant;
+    public botScientist!: BotScientist;
+    public bots: Bot[] = [];
     public currentMap!: string;
     public cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     public gamePadScene?: GamePadScene;
     public gridControls!: GridControls;
     public gridPhysics!: GridPhysics;
     public innKeeper!: Innkeeper;
+    public itemMerchant!: Merchant;
     public musicScene!: MusicScene;
-    public npcs: (Innkeeper | Merchant)[] = [];
+    public npcs: (Innkeeper | Merchant | BotScientist)[] = [];
     public operatingSystem!: string;
     public player!: Player;
     public playerTileX!: number;
     public playerTileY!: number;
-    public readyToInteractObject: Innkeeper | Merchant | undefined;
+    public readyToInteractObject: Innkeeper | Merchant | BotScientist | undefined;
     public spaceDown!: boolean;
     public uiScene!: UIScene;
     public weaponMerchant!: Merchant;
-    public armorMerchant!: Merchant;
     private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private exitingCurrentLevel!: boolean;
+    private movedFromSpawn!: boolean;
     private nonHostileSpace!: boolean;
 
     public constructor() {
@@ -70,16 +76,19 @@ export default class GameScene extends Phaser.Scene {
             this.musicScene.scene.bringToTop();
 
             if (this.musicScene.gameOverSong.isPlaying) {
-                this.musicScene.changeSong('title');
+                this.musicScene.changeSong('overworld');
             }
 
-            this.currentMap = levels.overworld.name;
+            this.nonHostileSpace = true;
+            this.currentMap = levels.town.name;
             this.exitingCurrentLevel = false;
-            this.currentTilemap = this.make.tilemap({key: levels.overworld.tilemapKey});
-            this.currentTilemap.addTilesetImage(levels.overworld.tilesetName, levels.overworld.tilesetKey);
+            this.currentTilemap = this.make.tilemap(
+                {key: levels.town.tilemapKey}
+            );
+            this.currentTilemap.addTilesetImage(levels.town.tilesetName, levels.town.tilesetKey);
             for (let i = 0; i < this.currentTilemap.layers.length; i++) {
                 const layer = this.currentTilemap
-                    .createLayer(i, levels.overworld.tilesetName, 0, 0);
+                    .createLayer(i, levels.town.tilesetName, 0, 0);
                 layer?.setDepth(i);
             }
 
@@ -117,10 +126,12 @@ export default class GameScene extends Phaser.Scene {
             this.player = new Player(
                 playerSprite,
                 new Phaser.Math.Vector2(
-                    levels.overworld.spawnCoords[0].x,
-                    levels.overworld.spawnCoords[0].y
+                    // levels.town.spawnCoords[0].x,
+                    // levels.town.spawnCoords[0].y
+                    12,
+                    14
                 ),
-                this.player?.gold ?? 0,
+                this.player?.gold ?? 500,
                 this.player?.experience ?? 0,
                 'Soldier',
                 aBunchOfPotions,
@@ -132,60 +143,40 @@ export default class GameScene extends Phaser.Scene {
             this.sys.events.removeListener('wake');
             this.sys.events.on('wake', this.wake, this);
 
-            this.playerTileX = this.player.getTilePos().x;
-            this.playerTileY = this.player.getTilePos().y;
-
-        }
-        else if (data?.levelData) {
-
-            this.uiScene.scene.bringToTop();
-
             this.npcs = [];
 
-            this.uiScene.musicScene.changeSong(data.levelData.music);
-
-            // spawn the character in the correct position based on data passed to the restart method
-            // create the map
-            this.currentMap = data.levelData.name;
-
-            this.exitingCurrentLevel = false;
-
-            this.currentTilemap = this.make.tilemap({key: data.levelData.tilemapKey});
-            this.currentTilemap.addTilesetImage(data.levelData.tilesetName, data.levelData.tilesetKey);
-            for (let i = 0; i < this.currentTilemap.layers.length; i++) {
-                const layer = this.currentTilemap
-                    .createLayer(i, data.levelData.tilesetName, 0, 0);
-                layer?.setDepth(i);
-            }
-
-            const playerSprite = this.add.sprite(0, 0, 'hero');
-            playerSprite.setDepth(2);
-            this.cameras.main.startFollow(playerSprite);
-            this.cameras.main.roundPixels = true;
-            this.player = new Player(
-                playerSprite,
-                new Phaser.Math.Vector2(
-                    data.levelData.spawnCoords[0].x,
-                    data.levelData.spawnCoords[0].y
-                ),
-                this.player.gold,
-                this.player.experience,
-                'Soldier',
-                this.player.inventory,
-                this.player.equipment,
-                this.player.stats
-            );
-
-            this.setupPlayerGridPhysics();
-
-            this.sys.events.removeListener('wake');
-            this.sys.events.on('wake', this.wake, this);
-
-            // iterate over the levels npcs and implement their functions
-            for (const npc of data.levelData.npcs) {
-
+            for (const npc of levels.town.npcs) {
                 // place npc sprites
-                if (npc.name === 'armormerchant') {
+                if (npc.name === 'botscientist') {
+                    const botScientistSprite = this.add.sprite(0, 0, 'npc5');
+                    botScientistSprite.setDepth(2);
+                    this.botScientist = new BotScientist(
+                        botScientistSprite,
+                        new Phaser.Math.Vector2(
+                            npc.x,
+                            npc.y
+                        )
+                    );
+                    this.npcs.push(this.botScientist);
+                }
+                else if (npc.name === 'itemmerchant') {
+                    const itemMerchantSprite = this.add.sprite(0, 0, 'npc4');
+                    itemMerchantSprite.setDepth(2);
+
+                    if (npc.inventory) {
+                        this.itemMerchant = new Merchant(
+                            itemMerchantSprite,
+                            new Phaser.Math.Vector2(
+                                npc.x,
+                                npc.y
+                            ),
+                            npc.inventory
+                        );
+                        this.npcs.push(this.itemMerchant);
+                    }
+                }
+
+                else if (npc.name === 'armormerchant') {
                     const armorMerchantSprite = this.add.sprite(0, 0, 'npc3');
                     armorMerchantSprite.setDepth(2);
 
@@ -237,6 +228,136 @@ export default class GameScene extends Phaser.Scene {
 
             this.playerTileX = this.player.getTilePos().x;
             this.playerTileY = this.player.getTilePos().y;
+
+        }
+        else if (data?.levelData) {
+
+            this.uiScene.scene.bringToTop();
+
+            this.npcs = [];
+
+            this.uiScene.musicScene.changeSong(data.levelData.music);
+
+            // spawn the character in the correct position based on data passed to the restart method
+            // create the map
+            this.currentMap = data.levelData.name;
+            this.exitingCurrentLevel = false;
+            this.currentTilemap = this.make.tilemap({key: data.levelData.tilemapKey});
+            this.currentTilemap.addTilesetImage(data.levelData.tilesetName, data.levelData.tilesetKey);
+            for (let i = 0; i < this.currentTilemap.layers.length; i++) {
+                const layer = this.currentTilemap
+                    .createLayer(i, data.levelData.tilesetName, 0, 0);
+                layer?.setDepth(i);
+            }
+
+            const playerSprite = this.add.sprite(0, 0, 'hero');
+            playerSprite.setDepth(2);
+            this.cameras.main.startFollow(playerSprite);
+            this.cameras.main.roundPixels = true;
+            this.player = new Player(
+                playerSprite,
+                new Phaser.Math.Vector2(
+                    data.levelData.spawnCoords[0].x,
+                    data.levelData.spawnCoords[0].y
+                ),
+                this.player.gold,
+                this.player.experience,
+                'Soldier',
+                this.player.inventory,
+                this.player.equipment,
+                this.player.stats
+            );
+
+            this.setupPlayerGridPhysics();
+
+            this.sys.events.removeListener('wake');
+            this.sys.events.on('wake', this.wake, this);
+
+            // iterate over the levels npcs and implement their functions
+            for (const npc of data.levelData.npcs) {
+                // place npc sprites
+                if (npc.name === 'botscientist') {
+                    const botScientistSprite = this.add.sprite(0, 0, 'npc5');
+                    botScientistSprite.setDepth(2);
+                    this.botScientist = new BotScientist(
+                        botScientistSprite,
+                        new Phaser.Math.Vector2(
+                            npc.x,
+                            npc.y
+                        )
+                    );
+                    this.npcs.push(this.botScientist);
+                }
+                else if (npc.name === 'itemmerchant') {
+                    const itemMerchantSprite = this.add.sprite(0, 0, 'npc4');
+                    itemMerchantSprite.setDepth(2);
+
+                    if (npc.inventory) {
+                        this.itemMerchant = new Merchant(
+                            itemMerchantSprite,
+                            new Phaser.Math.Vector2(
+                                npc.x,
+                                npc.y
+                            ),
+                            npc.inventory
+                        );
+                        this.npcs.push(this.itemMerchant);
+                    }
+                }
+
+                else if (npc.name === 'armormerchant') {
+                    const armorMerchantSprite = this.add.sprite(0, 0, 'npc3');
+                    armorMerchantSprite.setDepth(2);
+
+                    if (npc.inventory) {
+                        this.armorMerchant = new Merchant(
+                            armorMerchantSprite,
+                            new Phaser.Math.Vector2(
+                                npc.x,
+                                npc.y
+                            ),
+                            npc.inventory
+                        );
+                        this.npcs.push(this.armorMerchant);
+                    }
+                }
+
+                else if (npc.name === 'weaponmerchant') {
+                    const weaponMerchantSprite = this.add.sprite(0, 0, 'npc2');
+                    weaponMerchantSprite.setDepth(2);
+
+                    if (npc.inventory) {
+                        this.weaponMerchant = new Merchant(
+                            weaponMerchantSprite,
+                            new Phaser.Math.Vector2(
+                                npc.x,
+                                npc.y
+                            ),
+                            npc.inventory
+                        );
+                        this.npcs.push(this.weaponMerchant);
+                    }
+                }
+
+                else if (npc.name === 'innkeeper') {
+                    // spawning an innkeeper
+                    const innKeeperSprite = this.add.sprite(0, 0, 'npc1');
+                    innKeeperSprite.setDepth(2);
+
+                    this.innKeeper = new Innkeeper(
+                        innKeeperSprite,
+                        new Phaser.Math.Vector2(
+                            npc.x,
+                            npc.y
+                        )
+                    );
+                    this.npcs.push(this.innKeeper);
+                }
+            }
+
+            this.playerTileX = this.player.getTilePos().x;
+            this.playerTileY = this.player.getTilePos().y;
+            this.movedFromSpawn = false;
         }
 
     }
@@ -258,11 +379,53 @@ export default class GameScene extends Phaser.Scene {
         this.gridControls.update();
         this.gridPhysics.update(delta);
 
+        // Check if the player's position has changed
+        const xPositionChanged = this.playerTileX != this.player.getTilePos().x;
+        const yPositionChanged = this.playerTileY != this.player.getTilePos().y;
+        // Get the player's current position
+        const playerPos = this.player.getPosition();
+
+        // If the bot exists and the player has moved, update the bot's position
+        if (this.bots.length > 0 && this.bots[0]) {
+            if (xPositionChanged || yPositionChanged) {
+                console.log({
+                    botX: this.bots[0].getTilePos().x,
+                    botY: this.bots[0].getTilePos().y
+                });
+
+                // Update the bot's position to be the player's previous position
+                // this.bots[0].setPosition(new Phaser.Math.Vector2(playerPos));
+                const duration = 245; // 1 second
+                // Create a tween that moves the bot's sprite to the new position
+                this.tweens.add({
+                    targets: this.bots[0].sprite,
+                    x: playerPos.x,
+                    y: playerPos.y,
+                    duration: duration,
+                    ease: Phaser.Math.Easing.Linear
+                });
+            }
+            // Update the bot
+            this.bots[0].update(delta);
+        }
+
+
         let checkForAFight = false;
 
         // determine if the player is in hostile territory
+
+        if (xPositionChanged || yPositionChanged) {
+            console.log({playerPos});
+            console.log({
+                playerTilePosX: this.player.getTilePos().x,
+                playerTilePosY: this.player.getTilePos().y
+            });
+            this.movedFromSpawn = true;
+
+        }
+
         if (
-            (this.playerTileX != this.player.getTilePos().x || this.playerTileY != this.player.getTilePos().y) &&
+            (xPositionChanged || yPositionChanged) &&
             !this.exitingCurrentLevel &&
             !this.nonHostileSpace
         ) {
@@ -280,7 +443,8 @@ export default class GameScene extends Phaser.Scene {
                 false,
                 1
             )?.properties.key === 'town' &&
-            !this.exitingCurrentLevel
+            !this.exitingCurrentLevel &&
+            this.movedFromSpawn
         ) {
             checkForAFight = false;
             this.exitingCurrentLevel = true;
@@ -365,7 +529,7 @@ export default class GameScene extends Phaser.Scene {
             //     this.uiScene.selectCancel();
             // }
 
-            if (this.weaponMerchant || this.innKeeper || this.armorMerchant) {
+            if (this.weaponMerchant || this.innKeeper || this.armorMerchant || this.itemMerchant || this.botScientist) {
                 // space bar pressed on game scene (npc[s] found)
                 if (
                     this.uiScene.interactionState === 'mainselect' // ||
@@ -376,6 +540,8 @@ export default class GameScene extends Phaser.Scene {
                     if (this.weaponMerchant) this.weaponMerchant.listenForInteractEvent();
                     if (this.armorMerchant) this.armorMerchant.listenForInteractEvent();
                     if (this.innKeeper) this.innKeeper.listenForInteractEvent();
+                    if (this.itemMerchant) this.itemMerchant.listenForInteractEvent();
+                    if (this.botScientist) this.botScientist.listenForInteractEvent();
                 }
             }
         }
@@ -390,7 +556,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public wake() {
-        this.uiScene.musicScene.changeSong('title');
+        this.uiScene.musicScene.changeSong('overworld');
         this.uiScene.scene.bringToTop();
         this.gamePadScene?.scene.restart();
 

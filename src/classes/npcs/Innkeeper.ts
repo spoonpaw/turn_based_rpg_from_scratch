@@ -52,7 +52,7 @@ export default class Innkeeper extends NPC {
                 this.gameScene.gamePadScene?.scene.restart();
                 this.uiScene.interactionState = 'mainselect';
                 eventsCenter.removeListener('space');
-                eventsCenter.removeListener('no');
+                // eventsCenter.removeListener('no');
 
                 this.uiScene.goldFrame.setVisible(false);
                 this.uiScene.goldIcon.setVisible(false);
@@ -86,7 +86,7 @@ export default class Innkeeper extends NPC {
             eventsCenter.removeListener('yes');
             eventsCenter.on('yes', () => {
                 this.uiScene.interactionState = 'innkeeperresponse';
-                eventsCenter.removeListener('no');
+                // eventsCenter.removeListener('no');
                 eventsCenter.removeListener('yes');
                 this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
                 this.uiScene.yesButton.setVisible(false);

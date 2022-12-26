@@ -9,10 +9,9 @@ import Item from './Item';
 export default class Player {
     public stats: Stats;
     private uiScene!: UIScene;
-
     constructor(
         public sprite: Phaser.GameObjects.Sprite,
-        private tilePos: Phaser.Math.Vector2,
+        public tilePos: Phaser.Math.Vector2,
         public gold: number,
         public experience: number,
         public type: string,
@@ -46,7 +45,6 @@ export default class Player {
 
     public createStatsForNewPlayer(job: string): Stats {
         if (job === 'Soldier') {
-
             return new Stats(
                 Soldier.advancement[0].strength,
                 Soldier.advancement[0].agility,
@@ -60,7 +58,6 @@ export default class Player {
                 Soldier.advancement[0].strength,
                 Soldier.advancement[0].agility / 2
             );
-
         }
         else {
             return new Stats(
