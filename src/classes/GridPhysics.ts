@@ -19,8 +19,10 @@ export default class GridPhysics {
         };
     private readonly speedPixelsPerSecond: number = GameScene.TILE_SIZE * 4;
     private tileSizePixelsWalked = 0;
+    private gameScene!: GameScene;
 
-    public constructor(private player: Player, private tileMap: Phaser.Tilemaps.Tilemap) {
+    public constructor(private player: Player, public tileMap: Phaser.Tilemaps.Tilemap) {
+        this.gameScene = <GameScene>this.player.sprite.scene.scene.get('Game');
     }
 
     public movePlayer(direction: Direction): void {
@@ -32,6 +34,9 @@ export default class GridPhysics {
         }
         else {
             this.facingDirection = direction;
+            if (this.gameScene.bots[0]) {
+                this.gameScene.bots[0].lastTilePos = this.player.tilePos.clone();
+            }
             this.startMoving(direction);
         }
     }
@@ -109,7 +114,6 @@ export default class GridPhysics {
 
     private updatePlayerPosition(delta: number) {
         const pixelsToWalkThisUpdate = this.getPixelsToWalkThisUpdate(delta);
-
         if (!this.willCrossTileBorderThisUpdate(pixelsToWalkThisUpdate)) {
             this.movePlayerSprite(pixelsToWalkThisUpdate);
         }
@@ -123,7 +127,7 @@ export default class GridPhysics {
         }
     }
 
-    private updatePlayerTilePos() {
+    private updatePlayerTilePos(): void {
         this.player.setTilePos(
             this.player
                 .getTilePos()

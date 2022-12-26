@@ -3,7 +3,7 @@ import UIActionButton from '../classes/UIActionButton';
 export default class MusicScene extends Phaser.Scene {
 
     public battleSong!: Phaser.Sound.BaseSound;
-    public titleSong!: Phaser.Sound.BaseSound;
+    public overworldSong!: Phaser.Sound.BaseSound;
     public gameOverSong!: Phaser.Sound.BaseSound;
     public townSong!: Phaser.Sound.BaseSound;
     public muted = false;
@@ -15,13 +15,13 @@ export default class MusicScene extends Phaser.Scene {
     }
 
     public create() {
-        this.titleSong = this.sound.add('titlesong', {
+        this.overworldSong = this.sound.add('overworldsong', {
             volume: 0.5,
             loop: true
         });
 
         this.battleSong = this.sound.add('battlesong', {
-            volume: 0.5,
+            volume: 0.35,
             loop: true
         });
 
@@ -64,9 +64,9 @@ export default class MusicScene extends Phaser.Scene {
         if (this.muted) {
             return;
         }
-        else if (this.currentTrack === 'title') {
-            // playing the title track!
-            this.titleSong.play();
+        else if (this.currentTrack === 'overworld') {
+            // playing the overworld track!
+            this.overworldSong.play();
         }
         else if (this.currentTrack === 'battle') {
             this.battleSong.play();
@@ -81,8 +81,8 @@ export default class MusicScene extends Phaser.Scene {
 
     public unmuteMusic() {
         // unmuting the music!!
-        if (this.currentTrack === 'title') {
-            this.titleSong.play();
+        if (this.currentTrack === 'overworld') {
+            this.overworldSong.play();
         }
         else if (this.currentTrack === 'battle') {
             this.battleSong.play();
@@ -97,8 +97,8 @@ export default class MusicScene extends Phaser.Scene {
 
     public muteMusic() {
         // muting music!
-        if (this.currentTrack === 'title') {
-            this.titleSong.stop();
+        if (this.currentTrack === 'overworld') {
+            this.overworldSong.stop();
         }
         else if (this.currentTrack === 'battle') {
             this.battleSong.stop();

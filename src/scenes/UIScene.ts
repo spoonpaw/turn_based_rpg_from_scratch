@@ -404,6 +404,8 @@ export default class UIScene extends Phaser.Scene {
         this.sellItemButton.buttonText.setVisible(false);
         this.unequipButton.setVisible(false);
         this.unequipButton.buttonText.setVisible(false);
+        this.characterDetailDisplay.setVisible(false);
+        this.characterDetailDisplayFrame.setVisible(false);
 
         for (const subInventoryButton of this.subInventoryButtons) {
             if (subInventoryButton.visible) {
@@ -413,22 +415,8 @@ export default class UIScene extends Phaser.Scene {
         }
 
         this.destroyInventoryButtons();
-        // for (const inventoryButton of this.inventoryButtons) {
-        //     if (inventoryButton.visible) {
-        //         inventoryButton.setVisible(false);
-        //         inventoryButton.buttonText.setVisible(false);
-        //         inventoryButton.deselect();
-        //     }
-        // }
 
         this.destroyMerchantInventoryButtons();
-        // for (const merchantInventoryButton of this.merchantInventoryButtons) {
-        //     if (merchantInventoryButton.visible) {
-        //         merchantInventoryButton.setVisible(false);
-        //         merchantInventoryButton.buttonText.setVisible(false);
-        //         merchantInventoryButton.deselect();
-        //     }
-        // }
 
         for (const subAbilityButton of this.subAbilityButtons) {
             if (subAbilityButton.visible) {
@@ -451,13 +439,6 @@ export default class UIScene extends Phaser.Scene {
         }
 
         this.destroyInventoryToSellButtons();
-        // for (const inventoryToSellButton of this.inventoryToSellButtons) {
-        //     if (inventoryToSellButton.visible) {
-        //         inventoryToSellButton.setVisible(false);
-        //         inventoryToSellButton.buttonText.setVisible(false);
-        //         inventoryToSellButton.deselect();
-        //     }
-        // }
 
         this.classString.setVisible(false);
         this.levelString.setVisible(false);
@@ -509,7 +490,7 @@ export default class UIScene extends Phaser.Scene {
             .setOrigin(0, 0);
         this.leftSideDialogFrame.setVisible(false);
 
-        this.rightSideDialogOptionsFrame = this.add.image(670, 380, 'rightsidedialogoptionsframe')
+        this.rightSideDialogOptionsFrame = this.add.image(670, 380, 'sideoptionsframe')
             .setOrigin(0, 0);
         this.rightSideDialogOptionsFrame.setVisible(false);
 
@@ -1536,6 +1517,7 @@ export default class UIScene extends Phaser.Scene {
             'bagbuttonactive',
             '',
             () => {
+                eventsCenter.emit('inventory');
                 if (
                     this.interactionState === 'inventory' ||
                     this.interactionState.startsWith('equipment') ||
@@ -1553,7 +1535,8 @@ export default class UIScene extends Phaser.Scene {
                     this.interactionState === 'ability' ||
                     this.interactionState === 'charactersheet' ||
                     this.interactionState.startsWith('merchant') ||
-                    this.interactionState.startsWith('innkeeper')
+                    this.interactionState.startsWith('innkeeper') ||
+                    this.interactionState.startsWith('botscientist')
                 ) {
                     this.selectCancel();
                 }
@@ -1675,6 +1658,7 @@ export default class UIScene extends Phaser.Scene {
             'bookbuttonactive',
             '',
             () => {
+                eventsCenter.emit('ability');
                 if (
                     this.interactionState === 'inventory' ||
                     this.interactionState === 'equipment' ||
@@ -1682,7 +1666,8 @@ export default class UIScene extends Phaser.Scene {
                     this.interactionState.startsWith('selecting') ||
                     this.interactionState.startsWith('inventoryaction') ||
                     this.interactionState.startsWith('merchant') ||
-                    this.interactionState.startsWith('innkeeper')
+                    this.interactionState.startsWith('innkeeper') ||
+                    this.interactionState.startsWith('botscientist')
                 ) {
                     this.selectCancel();
                 }
@@ -1738,6 +1723,7 @@ export default class UIScene extends Phaser.Scene {
             'pagebuttonactive',
             '',
             () => {
+                eventsCenter.emit('charactersheet');
                 if (
                     this.interactionState === 'inventory' ||
                     this.interactionState === 'equipment' ||
@@ -1745,7 +1731,8 @@ export default class UIScene extends Phaser.Scene {
                     this.interactionState.startsWith('selecting') ||
                     this.interactionState.startsWith('inventoryaction') ||
                     this.interactionState.startsWith('merchant') ||
-                    this.interactionState.startsWith('innkeeper')
+                    this.interactionState.startsWith('innkeeper') ||
+                    this.interactionState.startsWith('botscientist')
                 ) {
                     this.selectCancel();
                 }

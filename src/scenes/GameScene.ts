@@ -1,3 +1,4 @@
+import Bot from '../classes/Bot';
 import GridControls from '../classes/GridControls';
 import GridPhysics from '../classes/GridPhysics';
 import Item from '../classes/Item';
@@ -16,6 +17,8 @@ import UIScene from './UIScene';
 export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
     public armorMerchant!: Merchant;
+    public botScientist!: BotScientist;
+    public bots: Bot[] = [];
     public currentMap!: string;
     public cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     public gamePadScene?: GamePadScene;
@@ -35,9 +38,9 @@ export default class GameScene extends Phaser.Scene {
     public weaponMerchant!: Merchant;
     private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private exitingCurrentLevel!: boolean;
-    private nonHostileSpace!: boolean;
     private movedFromSpawn!: boolean;
-    public botScientist!: BotScientist;
+    private nonHostileSpace!: boolean;
+
     public constructor() {
         super('Game');
     }
@@ -73,13 +76,15 @@ export default class GameScene extends Phaser.Scene {
             this.musicScene.scene.bringToTop();
 
             if (this.musicScene.gameOverSong.isPlaying) {
-                this.musicScene.changeSong('title');
+                this.musicScene.changeSong('overworld');
             }
 
             this.nonHostileSpace = true;
             this.currentMap = levels.town.name;
             this.exitingCurrentLevel = false;
-            this.currentTilemap = this.make.tilemap({key: levels.town.tilemapKey});
+            this.currentTilemap = this.make.tilemap(
+                {key: levels.town.tilemapKey}
+            );
             this.currentTilemap.addTilesetImage(levels.town.tilesetName, levels.town.tilesetKey);
             for (let i = 0; i < this.currentTilemap.layers.length; i++) {
                 const layer = this.currentTilemap
@@ -374,14 +379,49 @@ export default class GameScene extends Phaser.Scene {
         this.gridControls.update();
         this.gridPhysics.update(delta);
 
+        // Check if the player's position has changed
+        const xPositionChanged = this.playerTileX != this.player.getTilePos().x;
+        const yPositionChanged = this.playerTileY != this.player.getTilePos().y;
+        // Get the player's current position
+        const playerPos = this.player.getPosition();
+
+        // If the bot exists and the player has moved, update the bot's position
+        if (this.bots.length > 0 && this.bots[0]) {
+            if (xPositionChanged || yPositionChanged) {
+                console.log({
+                    botX: this.bots[0].getTilePos().x,
+                    botY: this.bots[0].getTilePos().y
+                });
+
+                // Update the bot's position to be the player's previous position
+                // this.bots[0].setPosition(new Phaser.Math.Vector2(playerPos));
+                const duration = 245; // 1 second
+                // Create a tween that moves the bot's sprite to the new position
+                this.tweens.add({
+                    targets: this.bots[0].sprite,
+                    x: playerPos.x,
+                    y: playerPos.y,
+                    duration: duration,
+                    ease: Phaser.Math.Easing.Linear
+                });
+            }
+            // Update the bot
+            this.bots[0].update(delta);
+        }
+
+
         let checkForAFight = false;
 
         // determine if the player is in hostile territory
-        const xPositionChanged = this.playerTileX != this.player.getTilePos().x;
-        const yPositionChanged = this.playerTileY != this.player.getTilePos().y;
 
         if (xPositionChanged || yPositionChanged) {
+            console.log({playerPos});
+            console.log({
+                playerTilePosX: this.player.getTilePos().x,
+                playerTilePosY: this.player.getTilePos().y
+            });
             this.movedFromSpawn = true;
+
         }
 
         if (
@@ -516,7 +556,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public wake() {
-        this.uiScene.musicScene.changeSong('title');
+        this.uiScene.musicScene.changeSong('overworld');
         this.uiScene.scene.bringToTop();
         this.gamePadScene?.scene.restart();
 

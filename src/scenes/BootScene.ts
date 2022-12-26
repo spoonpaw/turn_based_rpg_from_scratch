@@ -74,8 +74,8 @@ export default class BootScene extends Phaser.Scene {
 
     private loadAudio() {
         // load music mp3s
-        this.load.audio('battlesong', 'assets/sounds/songs/embattledPredistortion.mp3');
-        this.load.audio('titlesong', 'assets/sounds/songs/ennui.mp3');
+        this.load.audio('battlesong', 'assets/sounds/songs/dontBeAshamed.mp3');
+        this.load.audio('overworldsong', 'assets/sounds/songs/ennui.mp3');
         this.load.audio('gameoversong', 'assets/sounds/songs/theGreatGreen.mp3');
         this.load.audio('townsong', 'assets/sounds/songs/loveAndSolitude.mp3');
 
@@ -152,7 +152,7 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('prefab5', 'assets/images/ui/prefab5.png');
 
         this.load.image('sidedialogframe', 'assets/images/ui/leftSideDialogFrame.png');
-        this.load.image('rightsidedialogoptionsframe', 'assets/images/ui/rightSideDialogOptionsFrame.png');
+        this.load.image('sideoptionsframe', 'assets/images/ui/rightSideDialogOptionsFrame.png');
 
         this.load.image('gameActionMenuFrame', 'assets/images/ui/gameActionMenuFrame.png');
 
@@ -173,6 +173,7 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('confirmSelectedAbilityOrItemFrame', 'assets/images/ui/confirmSelectedAbilityOrItemFrame.png');
         this.load.image('confirmSelectedAbilityOrItemFrameB', 'assets/images/ui/confirmSelectedAbilityOrItemFrameB.png');
         this.load.image('characterDetailDisplayFrame', 'assets/images/ui/characterDetailDisplayFrame.png');
+        this.load.image('keyboardInputFrame', 'assets/images/ui/keyboardInputFrame.png');
 
         this.load.image('pic', 'assets/images/baal-loader.png');
         this.load.image('pic2', 'assets/images/atari-fujilogo.png');

@@ -16,7 +16,7 @@ export const levels: ILevelDataContainer = {
         npcs: [],
         enemies: ['seedspiker', 'sentientrock', 'deadlyflower'],
         // enemies: ['seedspiker'],
-        music: 'title'
+        music: 'overworld'
     },
     town: {
         name: 'town',
@@ -82,7 +82,8 @@ export const levels: ILevelDataContainer = {
                 y: 14,
             }
         ],
-        music: 'town'
+        music: 'town',
+        containers: [],
     }
 };
 
@@ -95,6 +96,11 @@ export interface ILevelData {
         y: number;
         inventory?: ItemInterface[];
     }[];
+    containers?: {
+        x: number;
+        y: number;
+        inventory: ItemInterface[];
+    }[]
     spawnCoords: {
         name: string;
         x: number;

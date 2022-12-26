@@ -368,8 +368,6 @@ export default class BattleScene extends Phaser.Scene {
         // sets the battle music - muted for now
 
         this.musicScene.changeSong('battle');
-        // this.musicScene.titleSong.stop();
-        // this.musicScene.battleSong.play();
 
         // set background to grey
         this.cameras.main.setBackgroundColor('rgb(235, 235, 235)');
