@@ -107,9 +107,36 @@ export default class extends NPC {
                 'Soldier',
                 'Red Bot'
             );
+
+            // set all the player2 ui elements to visible with red bot's stats
+
+            this.uiScene.player2hpText.setText(`HP: ${redBot.stats.currentHP ?? '0'} / ${redBot.stats.maxHP ?? '0'}`);
+
+            let currentMP;
+            let maxMP;
+
+            if (this.gameScene.bots[0]?.type === 'Soldier') {
+                currentMP = 0;
+                maxMP = 0;
+            }
+            else {
+                currentMP = this.gameScene.bots[0]?.stats.currentMP ?? 0;
+                maxMP = this.gameScene.bots[0]?.stats.maxMP ?? 0;
+            }
+
+            this.uiScene.player2ManaText.setText(`MP: ${currentMP} / ${maxMP}`);
+
+
+            this.uiScene.player2Button.setVisible(true);
+            this.uiScene.player2hpText.setVisible(true);
+            this.uiScene.player2HeartIcon.setVisible(true);
+            this.uiScene.player2ManaText.setVisible(true);
+            this.uiScene.player2ManaIcon.setVisible(true);
+
             this.gameScene.bots.push(
                 redBot
             );
+
             this.gameScene.setupBotGridPhysics();
 
             this.uiScene.characterDetailDisplayFrame.setX(335);
@@ -120,7 +147,7 @@ export default class extends NPC {
             this.uiScene.characterDetailDisplay.setY(275);
             this.uiScene.characterDetailDisplay.setVisible(true);
 
-            // the player does not want to give the bot a custom name
+            // set up the no listener to hear if the player does not want to give the bot a custom name
             eventsCenter.removeListener('no');
             eventsCenter.on('no', () => {
                 eventsCenter.removeListener('no');
@@ -218,16 +245,5 @@ export default class extends NPC {
         console.log(`selected name is ${string}`);
         // TODO: rename the robot if needed
         this.gameScene.bots[0].name = string;
-        // const botSprite = this.gameScene.add.sprite(0, 0, 'redbot');
-        // botSprite.setDepth(1);
-        // const redBot = new Bot(
-        //     botSprite,
-        //     0,
-        //     'Soldier',
-        //     string
-        // );
-        // this.gameScene.bots.push(
-        //     redBot
-        // );
     }
 }

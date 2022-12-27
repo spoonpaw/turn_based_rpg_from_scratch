@@ -20,12 +20,11 @@ export default class GamePadScene extends Phaser.Scene {
         this.musicScene = <MusicScene>this.scene.get('Music');
         this.sfxScene = <SFXScene>this.scene.get('SFX');
         this.scene.bringToTop();
-        // this.gameScene.uiScene.scene.bringToTop();
         this.musicScene.scene.bringToTop();
         this.sfxScene.scene.bringToTop();
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        this.joyStick = this.plugins.get('rexVirtualJoyStick').add(this, {
+
+        const plugin = this.plugins.get('rexVirtualJoyStick');
+        this.joyStick = (plugin as any).add(this, {
             x: 110,
             y: 510,
             radius: 100,
@@ -35,7 +34,6 @@ export default class GamePadScene extends Phaser.Scene {
             forceMin: 16,
             enable: true
         });
-        // .on('update', this.dumpJoyStickState, this);
 
         this.text = this.add.text(0, 0, '');
         this.text.setVisible(false);
@@ -45,10 +43,8 @@ export default class GamePadScene extends Phaser.Scene {
 
     dumpJoyStickState() {
         const cursorKeys = this.joyStick.createCursorKeys();
-        // let s = 'Key down: ';
         for (const name in cursorKeys) {
             if (cursorKeys[name].isDown) {
-                // s += name + ' ';
 
                 // make the character move in the pressed direction
                 if (name === 'up') {
@@ -66,10 +62,6 @@ export default class GamePadScene extends Phaser.Scene {
 
             }
         }
-        // s += '\n';
-        // s += ('Force: ' + Math.floor(this.joyStick.force * 100) / 100 + '\n');
-        // s += ('Angle: ' + Math.floor(this.joyStick.angle * 100) / 100 + '\n');
-        // this.text.setText(s);
     }
 
     public update() {

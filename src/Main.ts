@@ -39,25 +39,13 @@ const config: Phaser.Types.Core.GameConfig = {
         BattleScene,
         BattleUIScene,
         GameOverScene,
-        // DialogScene,
-        // YesNoDialogScene,
         SFXScene,
         GamePadScene,
         KeyboardScene
     ],
+    roundPixels: false,
     backgroundColor: '#000000',
-    // parent: 'phaser-container',
-    // dom: {
-    //     createContainer: true
-    // },
     plugins: {
-        // scene: [
-        //     {
-        //         key: 'rexUI',
-        //         plugin: RexUIPlugin,
-        //         mapping: 'rexUI'
-        //     }
-        // ],
         global: [{
             key: 'rexVirtualJoyStick',
             plugin: VirtualJoyStickPlugin,

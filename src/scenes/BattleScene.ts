@@ -358,6 +358,7 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private startBattle(): void {
+        // TODO: add all the bots to the scene if there are any!
         this.musicScene.scene.bringToTop();
 
         this.uiScene.selectCancel();
