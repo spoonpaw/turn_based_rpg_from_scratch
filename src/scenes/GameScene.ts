@@ -1,4 +1,5 @@
 import Bot from '../classes/Bot';
+import BotGridPhysics from '../classes/BotGridPhysics';
 import GridControls from '../classes/GridControls';
 import GridPhysics from '../classes/GridPhysics';
 import Item from '../classes/Item';
@@ -13,6 +14,7 @@ import {Equipment} from '../types/Equipment';
 import GamePadScene from './GamePadScene';
 import MusicScene from './MusicScene';
 import UIScene from './UIScene';
+// import BotGridControls from '../classes/BotGridControls';
 
 export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
@@ -40,6 +42,9 @@ export default class GameScene extends Phaser.Scene {
     private exitingCurrentLevel!: boolean;
     private movedFromSpawn!: boolean;
     private nonHostileSpace!: boolean;
+    botGridPhysics!: BotGridPhysics;
+    private lastPlayerDirection!: Direction;
+    // private botGridControls!: BotGridControls;
 
     public constructor() {
         super('Game');
@@ -96,7 +101,7 @@ export default class GameScene extends Phaser.Scene {
             const playerSprite = this.add.sprite(0, 0, 'hero');
             playerSprite.setDepth(2);
             this.cameras.main.startFollow(playerSprite);
-            this.cameras.main.roundPixels = true;
+            this.cameras.main.setRoundPixels(false);
 
             const aBunchOfPotions = [];
             const potionItem = items.find(obj => {
@@ -253,7 +258,7 @@ export default class GameScene extends Phaser.Scene {
             const playerSprite = this.add.sprite(0, 0, 'hero');
             playerSprite.setDepth(2);
             this.cameras.main.startFollow(playerSprite);
-            this.cameras.main.roundPixels = true;
+            this.cameras.main.setRoundPixels(false);
             this.player = new Player(
                 playerSprite,
                 new Phaser.Math.Vector2(
@@ -380,33 +385,33 @@ export default class GameScene extends Phaser.Scene {
         this.gridPhysics.update(delta);
 
         // Check if the player's position has changed
-        const xPositionChanged = this.playerTileX != this.player.getTilePos().x;
-        const yPositionChanged = this.playerTileY != this.player.getTilePos().y;
+        const xPositionChanged = this.playerTileX !== this.player.getTilePos().x;
+        const yPositionChanged = this.playerTileY !== this.player.getTilePos().y;
+
+
         // Get the player's current position
-        const playerPos = this.player.getPosition();
 
         // If the bot exists and the player has moved, update the bot's position
         if (this.bots.length > 0 && this.bots[0]) {
-            if (xPositionChanged || yPositionChanged) {
-                console.log({
-                    botX: this.bots[0].getTilePos().x,
-                    botY: this.bots[0].getTilePos().y
-                });
-
-                // Update the bot's position to be the player's previous position
-                // this.bots[0].setPosition(new Phaser.Math.Vector2(playerPos));
-                const duration = 245; // 1 second
-                // Create a tween that moves the bot's sprite to the new position
-                this.tweens.add({
-                    targets: this.bots[0].sprite,
-                    x: playerPos.x,
-                    y: playerPos.y,
-                    duration: duration,
-                    ease: Phaser.Math.Easing.Linear
-                });
+            this.botGridPhysics.update(delta);
+            if ((xPositionChanged || yPositionChanged)) {
+                // Get the player's current position
+                const playerPos = this.player.getTilePos();
+                // Add the player's position to the path
+                this.bots[0].path.push(playerPos);
+                console.log({botPath: this.bots[0].path});
+                // this.botGridPhysics.moveBot(this.lastPlayerDirection);
             }
-            // Update the bot
-            this.bots[0].update(delta);
+            this.bots[0].update();
+        }
+
+        if (xPositionChanged) {
+            // Update the last player direction
+            this.lastPlayerDirection = this.playerTileX < this.player.getTilePos().x ? Direction.RIGHT : Direction.LEFT;
+        }
+        if (yPositionChanged) {
+            // Update the last player direction
+            this.lastPlayerDirection = this.playerTileY < this.player.getTilePos().y ? Direction.DOWN : Direction.UP;
         }
 
 
@@ -415,7 +420,6 @@ export default class GameScene extends Phaser.Scene {
         // determine if the player is in hostile territory
 
         if (xPositionChanged || yPositionChanged) {
-            console.log({playerPos});
             console.log({
                 playerTilePosX: this.player.getTilePos().x,
                 playerTilePosY: this.player.getTilePos().y
@@ -432,6 +436,7 @@ export default class GameScene extends Phaser.Scene {
             checkForAFight = true;
         }
 
+        // update the player's NEW X Y Coords in the tile map
         this.playerTileX = this.player.getTilePos().x;
         this.playerTileY = this.player.getTilePos().y;
 
@@ -565,6 +570,34 @@ export default class GameScene extends Phaser.Scene {
         this.cursors.right.reset();
         this.cursors.up.reset();
         this.cursors.down.reset();
+    }
+
+    private createBotAnimation(name: string, startFrame: number, endFrame: number) {
+        this.anims.create({
+            key: name,
+            frames: this.anims.generateFrameNumbers('redbot', {
+                start: startFrame,
+                end: endFrame
+            }),
+            frameRate: 5,
+            repeat: -1,
+            yoyo: true
+        });
+    }
+
+    public setupBotGridPhysics() {
+        this.bots[0].path.push(this.player.getTilePos());
+        console.log('just pushed the player\'s coordinates to the bot\'s path');
+        console.log('player\'s coords');
+        console.log(this.player.getTilePos());
+        console.log('path:');
+        console.log(this.bots[0].path);
+        this.botGridPhysics = new BotGridPhysics(this.bots[0], this.currentTilemap);
+        // this.botGridControls = new BotGridControls(this.input, this.gridPhysics);
+        this.createBotAnimation('redbot_up', 6, 7);
+        this.createBotAnimation('redbot_right', 4, 5);
+        this.createBotAnimation('redbot_down', 0, 1);
+        this.createBotAnimation('redbot_left', 2, 3);
     }
 
     private createPlayerAnimation(name: string, startFrame: number, endFrame: number) {
