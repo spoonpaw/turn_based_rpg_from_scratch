@@ -37,6 +37,7 @@ export default class BattleUIScene extends Phaser.Scene {
     private subInventoryBagButton!: UIActionButton;
     private subInventoryButtons: UIActionButton[] = [];
     private useButton!: UIActionButton;
+    private tacticsButton!: UIActionButton;
 
     public constructor() {
         super('BattleUI');
@@ -271,10 +272,22 @@ export default class BattleUIScene extends Phaser.Scene {
             });
         this.actionButtons.push(this.attackButton);
 
-        this.runButton = new UIActionButton(
+        this.tacticsButton = new UIActionButton(
             this,
             30,
             615,
+            'bagbutton',
+            'bagbuttonactive',
+            'Tactics',
+            () => {
+                console.log('tactics button clicked');
+            }
+        );
+
+        this.runButton = new UIActionButton(
+            this,
+            30,
+            665,
             'runbutton',
             'runbuttonactive',
             'Escape',

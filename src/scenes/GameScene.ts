@@ -1,3 +1,6 @@
+
+// TODO: add an npc who walks in a predescribed pattern and will stop and speak when interacted with
+
 import {clone} from 'lodash';
 
 import Bot from '../classes/Bot';

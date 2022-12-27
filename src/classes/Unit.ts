@@ -19,7 +19,8 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         x: number,
         y: number,
         texture: string | Phaser.Textures.Texture,
-        frame: string | number | undefined
+        frame: string | number | undefined,
+        public name: string
     ) {
         super(scene, x, y, texture, frame);
 

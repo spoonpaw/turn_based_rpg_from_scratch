@@ -8,8 +8,6 @@
 
 // TODO: add a sign that can be read
 
-// TODO: add an npc who walks in a predescribed pattern and will stop and speak when interacted with
-
 
 
 import {Enemy} from '../classes/Enemy';
@@ -36,6 +34,8 @@ export default class BattleScene extends Phaser.Scene {
     private index!: number;
     private musicScene!: MusicScene;
     private player1MPText!: Phaser.GameObjects.Text;
+    private player2?: PlayerCharacter;
+    private player2HPText!: Phaser.GameObjects.Text;
     private turnIndex!: number;
     private turnUnits!: (PlayerCharacter | Enemy)[];
     private uiScene!: UIScene;
@@ -197,7 +197,12 @@ export default class BattleScene extends Phaser.Scene {
         return statIncreaseRangeIncrementObject?.increment ?? 0;
     }
 
-    private handleActionSelection(data: { action: string, target: Enemy | PlayerCharacter }): void {
+    private handleActionSelection(
+        data: {
+            action: string,
+            target: Enemy | PlayerCharacter
+        }
+    ): void {
         this.interactionState = `handling${data.action}select`;
 
         this.turnUnits = BattleScene.sortUnits(this.units);
@@ -390,13 +395,72 @@ export default class BattleScene extends Phaser.Scene {
         this.add.image(236, 606, 'heroMenuFrame')
             .setOrigin(0, 0);
 
+        // if there is a player 2 (i.e. bots) generate a frame for them
+        if (this.gameScene.bots.length > 0) {
+            if (this.gameScene.bots[0]) {
+                this.add.image(470, 606, 'heroMenuFrame')
+                    .setOrigin(0, 0);
+            }
+            this.player2 = new PlayerCharacter(
+                this,
+                504,
+                675,
+                this.gameScene.bots[0].sprite.texture,
+                0,
+                this.gameScene.bots[0].name
+            );
+            this.add.existing(this.player2);
+
+            this.add.text(
+                484,
+                610,
+                this.gameScene.bots[0].name,
+                {
+                    fontSize: '45px',
+                    color: '#fff',
+                    fontFamily: 'CustomFont'
+                })
+                .setResolution(10);
+
+
+            this.player2HPText = this.add.text(
+                534,
+                645,
+                `HP: ${this.gameScene.bots[0].stats.currentHP}/${this.gameScene.player.stats.maxHP}`, {
+                    fontSize: '35px',
+                    color: '#fff',
+                    fontFamily: 'CustomFont'
+                })
+                .setResolution(10);
+
+            let currentMP;
+            let maxMP;
+
+            if (this.gameScene.player.type === 'Soldier') {
+                currentMP = 0;
+                maxMP = 0;
+            }
+            else {
+                currentMP = this.gameScene.player.stats.currentMP;
+                maxMP = this.gameScene.player.stats.maxMP;
+            }
+            this.player1MPText = this.add.text(534, 670, `MP: ${currentMP}/${maxMP}`, {
+                fontSize: '35px',
+                color: '#fff',
+                fontFamily: 'CustomFont'
+            })
+                .setResolution(10);
+
+        }
+
         // instantiate the warrior player (player 1)
         const soldier = new PlayerCharacter(
             this,
             270,
             675,
             'hero',
-            0
+            0,
+            'Soldier' // TODO: let the player pick their name
         );
 
         this.add.existing(soldier);
@@ -447,12 +511,17 @@ export default class BattleScene extends Phaser.Scene {
             Number(this.game.config.width) / 2,
             280,
             selectedEnemy,
-            undefined
+            undefined,
+            selectedEnemy
         );
 
         this.add.existing(enemy);
 
         this.heroes = [soldier];
+
+        if (this.player2) {
+            this.heroes.push(this.player2);
+        }
 
         this.enemies = [enemy];
 
@@ -461,15 +530,6 @@ export default class BattleScene extends Phaser.Scene {
         this.index = -1;
 
         this.scene.run('BattleUI');
-        // this.battleUIScene = <BattleUIScene>this.scene.get('BattleUI');
-        //
-        // if (this.musicScene.muted) {
-        //     this.battleUIScene.musicMuteButton.select();
-        // }
-        // else {
-        //     this.battleUIScene.musicMuteButton.deselect();
-        // }
-
 
         eventsCenter.removeListener('actionSelect');
         eventsCenter.on('actionSelect', this.handleActionSelection, this);

@@ -19,14 +19,16 @@ export default class PlayerCharacter extends Unit {
         x: number,
         y: number,
         texture: string | Phaser.Textures.Texture,
-        frame: string | number | undefined
+        frame: string | number | undefined,
+        name: string
     ) {
         super(
             scene,
             x,
             y,
             texture,
-            frame
+            frame,
+            name
         );
         this.battleScene = <BattleScene>this.scene.scene.get('Battle');
         this.stats = this.gameScene.player.stats;
@@ -154,6 +156,10 @@ export default class PlayerCharacter extends Unit {
     }
 
     public runTurn(data: { action: string; target: Enemy | PlayerCharacter; }) {
+        // TODO: fix this. add logic such that if the actor is a bot, they need to be
+        //  able to make their own decision on how to deal with the situation
+
+        // TODO: if the all targets are dead, return runtime 0 and don't show any messages
         const target = data.target;
         let runtimeInMS = 0;
 
