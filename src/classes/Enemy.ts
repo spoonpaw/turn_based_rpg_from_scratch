@@ -22,18 +22,20 @@ export class Enemy extends Unit {
     public type!: string;
 
     constructor(
-        scene: BattleScene,
+        public scene: BattleScene,
         x: number,
         y: number,
         texture: string | Phaser.Textures.Texture,
-        frame: string | number | undefined
+        frame: string | number | undefined,
+        name: string
     ) {
         super(
             scene,
             x,
             y,
             texture,
-            frame
+            frame,
+            name
         );
 
         this.battleScene = <BattleScene>this.scene.scene.get('Battle');
@@ -59,8 +61,6 @@ export class Enemy extends Unit {
         );
 
         this.type = enemy?.type ?? '???';
-
-        this.scene = scene;
 
         this.setScale(1.5);
         this.setInteractive();
