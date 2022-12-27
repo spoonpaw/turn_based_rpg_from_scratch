@@ -7,24 +7,11 @@ import Vector2 = Phaser.Math.Vector2;
 
 export default class Bot {
     public tilePos!: Phaser.Math.Vector2;
-    private lastMovementIntent = Direction.NONE;
-    public movementDirection: Direction = Direction.NONE;
-
-    public movementDirectionVectors: {
-        [key in Direction]: Vector2;
-    } = {
-            'none': Vector2.ZERO,
-            'up': Vector2.UP,
-            'down': Vector2.DOWN,
-            'left': Vector2.LEFT,
-            'right': Vector2.RIGHT,
-        };
-    private tileSizePixelsWalked = 0;
     public stats: Stats;
     private uiScene: UIScene;
     private gameScene: GameScene;
-    private speedPixelsPerSecond: number = GameScene.TILE_SIZE * 4;
-    public lastTilePos!: Phaser.Math.Vector2;
+    public path: Phaser.Math.Vector2[] = [];
+
 
     constructor(
         public sprite: Phaser.GameObjects.Sprite,
@@ -91,8 +78,6 @@ export default class Bot {
 
     public setPosition(position: Phaser.Math.Vector2) {
         this.sprite.setPosition(position.x, position.y);
-        // this.tilePos.x = Math.floor(position.x / GameScene.TILE_SIZE);
-        // this.tilePos.y = Math.floor(position.y / GameScene.TILE_SIZE);
     }
 
     public getPosition(): Phaser.Math.Vector2 {
@@ -103,14 +88,6 @@ export default class Bot {
         this.tilePos = tilePosition.clone();
     }
 
-    private updateBotTilePos(): void {
-        this.setTilePos(
-            this
-                .getTilePos()
-                .add(this.movementDirectionVectors[this.movementDirection] ?? new Vector2())
-        );
-    }
-
     public stopAnimation(direction: Direction) {
         if (!this.sprite.anims) return;
         const animationManager = this.sprite.anims.animationManager;
@@ -119,106 +96,85 @@ export default class Bot {
         this.sprite.setFrame(standingFrame);
     }
 
-    private stopMoving(): void {
-        this.stopAnimation(this.movementDirection);
-        this.movementDirection = Direction.NONE;
+    public startAnimation(animationKey: string) {
+        this.sprite.anims.play(animationKey);
     }
 
-    private willCrossTileBorderThisUpdate(
-        pixelsToWalkThisUpdate: number
-    ): boolean {
-        return (
-            this.tileSizePixelsWalked + pixelsToWalkThisUpdate >= GameScene.TILE_SIZE
-        );
-    }
-
-    private updateBotPosition(delta: number) {
-        const pixelsToWalkThisUpdate = this.getPixelsToWalkThisUpdate(delta);
-        if (!this.willCrossTileBorderThisUpdate(pixelsToWalkThisUpdate)) {
-            this.moveBotSprite(pixelsToWalkThisUpdate);
-        }
-        else if (this.shouldContinueMoving()) {
-            this.moveBotSprite(pixelsToWalkThisUpdate);
-            this.updateBotTilePos();
-        }
-        else {
-            this.moveBotSprite(GameScene.TILE_SIZE - this.tileSizePixelsWalked);
-            this.stopMoving();
-        }
-    }
-
-    private hasNoTile(pos: Vector2): boolean {
-        return !this.gameScene.gridPhysics.tileMap.layers.some((layer) =>
-            this.gameScene.gridPhysics.tileMap.hasTileAt(pos.x, pos.y, layer.name)
-        );
-    }
-
-    private hasBlockingTile(pos: Vector2): boolean {
-        if (this.hasNoTile(pos)) return true;
-        return this.gameScene.gridPhysics.tileMap.layers.some((layer) => {
-            const tile = this.gameScene.gridPhysics.tileMap.getTileAt(pos.x, pos.y, false, layer.name);
-            return tile && tile.properties.collides;
-        });
-    }
-
-    private tilePosInDirection(direction: Direction): Vector2 {
-        return this
-            .getTilePos()
-            .add(this.movementDirectionVectors[direction] ?? new Vector2());
-    }
-
-    private isBlockingDirection(direction: Direction): boolean {
-        return this.hasBlockingTile(this.tilePosInDirection(direction));
-    }
-
-    private shouldContinueMoving(): boolean {
-        return (
-            this.movementDirection == this.lastMovementIntent &&
-            !this.isBlockingDirection(this.lastMovementIntent)
-        );
-    }
-
-    private startMoving(direction: Direction): void {
-        this.startAnimation(direction);
-        this.movementDirection = direction;
-        this.updateBotTilePos();
-    }
-
-    public startAnimation(direction: Direction) {
-        this.sprite.anims.play(direction);
-    }
 
     public getTilePos(): Phaser.Math.Vector2 {
         return this.tilePos.clone();
     }
 
-    private getPixelsToWalkThisUpdate(delta: number): number {
-        const deltaInSeconds = delta / 1000;
-        return this.speedPixelsPerSecond * deltaInSeconds;
-    }
+    public update() {
+        // If the bot is not currently moving and there are coordinates in the path, start moving
+        if (this.path.length > 0) {
+            // console.log({
+            //     botX: this.getTilePos().x,
+            //     botY: this.getTilePos().y
+            // });
+            // Get the next coordinate in the path
+            const nextCoordinate = this.path[0];
+            // Calculate the direction to move in
+            const direction = this.calculateDirection(nextCoordinate);
+            // Check if moving in the calculated direction would bring the bot to the player's current square
+            const playerPos = this.gameScene.player.getTilePos();
+            const newPos = this.tilePos.clone();
+            if (direction === Direction.UP) newPos.y--;
+            else if (direction === Direction.RIGHT) newPos.x++;
+            else if (direction === Direction.DOWN) newPos.y++;
+            else if (direction === Direction.LEFT) newPos.x--;
 
-
-    public moveBotSprite(pixelsToMove: number) {
-        const directionVec = this.movementDirectionVectors[
-            this.movementDirection
-        ]?.clone();
-        const movementDistance = directionVec?.multiply(
-            new Vector2(pixelsToMove)
-        );
-        const newBotPos = this.getPosition().add(movementDistance ?? new Vector2());
-        this.setPosition(newBotPos);
-        this.tileSizePixelsWalked += pixelsToMove;
-        this.tileSizePixelsWalked %= GameScene.TILE_SIZE;
-    }
-
-    private isMoving(): boolean {
-        return this.movementDirection != Direction.NONE;
-    }
-
-    update(delta: number): void {
-        if (this.isMoving()) {
-            this.updateBotPosition(delta);
+            if (newPos.x !== playerPos.x || newPos.y !== playerPos.y) {
+                // Start moving in the calculated direction
+                this.gameScene.botGridPhysics.moveBot(direction);
+            }
+            // If the bot has reached its destination, remove it from the path
+            if (this.hasReachedDestination()) {
+                console.log('destination reached, removing first vector');
+                this.path.shift();
+            }
         }
-        this.lastMovementIntent = Direction.NONE;
+
     }
+
+    public hasReachedDestination(): boolean {
+        if (this.path.length === 0) return true;
+        const destination = this.path[0];
+
+        // Check if the player is occupying the destination square
+        const playerTilePos = this.gameScene.player.getTilePos();
+        if (destination.x === playerTilePos.x && destination.y === playerTilePos.y) {
+            return false;
+        }
+
+        // Calculate the distance between the current position and the destination
+        const dx = this.tilePos.x - destination.x;
+        const dy = this.tilePos.y - destination.y;
+
+        // If the distance is within a certain threshold, consider the destination reached
+        const threshold = 0.1;
+        return Math.abs(dx) <= threshold && Math.abs(dy) <= threshold;
+    }
+
+
+    private calculateDirection(coordinate: Phaser.Math.Vector2): Direction {
+        // Calculate the direction based on the difference between the current position and the target coordinate
+        const dx = coordinate.x - this.getTilePos().x;
+        const dy = coordinate.y - this.getTilePos().y;
+
+        if (dx < 0) {
+            return Direction.LEFT;
+        }
+        else if (dx > 0) {
+            return Direction.RIGHT;
+        }
+        else if (dy < 0) {
+            return Direction.UP;
+        }
+        else if (dy > 0) {
+            return Direction.DOWN;
+        }
+        return Direction.NONE;
+    }
+
 }

@@ -110,6 +110,7 @@ export default class extends NPC {
             this.gameScene.bots.push(
                 redBot
             );
+            this.gameScene.setupBotGridPhysics();
 
             this.uiScene.characterDetailDisplayFrame.setX(335);
             this.uiScene.characterDetailDisplayFrame.setY(275);
