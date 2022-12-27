@@ -97,6 +97,8 @@ export default class Bot {
     }
 
     public startAnimation(animationKey: string) {
+        if (!animationKey) return;
+        console.log({animationKey});
         this.sprite.anims.play(animationKey);
     }
 
@@ -108,10 +110,6 @@ export default class Bot {
     public update() {
         // If the bot is not currently moving and there are coordinates in the path, start moving
         if (this.path.length > 0) {
-            // console.log({
-            //     botX: this.getTilePos().x,
-            //     botY: this.getTilePos().y
-            // });
             // Get the next coordinate in the path
             const nextCoordinate = this.path[0];
             // Calculate the direction to move in
@@ -130,7 +128,7 @@ export default class Bot {
             }
             // If the bot has reached its destination, remove it from the path
             if (this.hasReachedDestination()) {
-                console.log('destination reached, removing first vector');
+                // destination reached, removing first vector
                 this.path.shift();
             }
         }

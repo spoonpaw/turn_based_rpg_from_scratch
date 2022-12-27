@@ -15,6 +15,8 @@ export default class UIScene extends Phaser.Scene {
     public buyButton!: UIActionButton;
     public cancelButton!: UIActionButton;
     public cancelMenuFrame!: Phaser.GameObjects.Image;
+    public characterDetailDisplay!: Phaser.GameObjects.Image;
+    public characterDetailDisplayFrame!: Phaser.GameObjects.Image;
     public confirmSelectedAbilityOrItemFrame!: Phaser.GameObjects.Image;
     public confirmSelectedAbilityOrItemFrameB!: Phaser.GameObjects.Image;
     public currentNPC!: Merchant | Innkeeper;
@@ -42,6 +44,7 @@ export default class UIScene extends Phaser.Scene {
     public purchaseItemButton!: UIActionButton;
     public rightSideDialogFrame!: Phaser.GameObjects.Image;
     public rightSideDialogOptionsFrame!: Phaser.GameObjects.Image;
+    public rightSideDialogText!: Phaser.GameObjects.Text;
     public selectedItemAndAbilityIcon!: UIActionButton;
     public sellButton!: UIActionButton;
     public sellItemButton!: UIActionButton;
@@ -81,6 +84,11 @@ export default class UIScene extends Phaser.Scene {
     private message!: GameMessage;
     private offHandItemButton!: UIActionButton;
     private offHandString!: Phaser.GameObjects.Text;
+    public player2Button!: UIActionButton;
+    public player2HeartIcon!: Phaser.GameObjects.Image;
+    public player2ManaIcon!: Phaser.GameObjects.Image;
+    public player2ManaText!: Phaser.GameObjects.Text;
+    public player2hpText!: Phaser.GameObjects.Text;
     private selectedItemAndAbilityCommandText!: Phaser.GameObjects.Text;
     private strengthString!: Phaser.GameObjects.Text;
     private subAbilityButton!: UIActionButton;
@@ -89,9 +97,6 @@ export default class UIScene extends Phaser.Scene {
     private tillNextLevelString!: Phaser.GameObjects.Text;
     private unequipButton!: UIActionButton;
     private vitalityString!: Phaser.GameObjects.Text;
-    public rightSideDialogText!: Phaser.GameObjects.Text;
-    public characterDetailDisplay!: Phaser.GameObjects.Image;
-    public characterDetailDisplayFrame!: Phaser.GameObjects.Image;
 
     public constructor() {
         super('UI');
@@ -1472,6 +1477,8 @@ export default class UIScene extends Phaser.Scene {
 
         // set up gold text and icon
         this.manaIcon = this.add.image(100, 663, 'mana');
+        this.player2ManaIcon = this.add.image(330, 663, 'mana');
+        this.player2ManaIcon.setVisible(false);
 
         let currentMP;
         let maxMP;
@@ -1485,6 +1492,7 @@ export default class UIScene extends Phaser.Scene {
             maxMP = this.gameScene.player.stats.maxMP;
         }
 
+        // player 1 mana text
         this.manaText = this.add.text(
             115,
             647,
@@ -1493,7 +1501,27 @@ export default class UIScene extends Phaser.Scene {
             .setStroke('#000000', 2)
             .setResolution(10);
 
-        // create the hp text game object
+
+        if (this.gameScene.bots[0]?.type === 'Soldier') {
+            currentMP = 0;
+            maxMP = 0;
+        }
+        else {
+            currentMP = this.gameScene.bots[0]?.stats.currentMP ?? 0;
+            maxMP = this.gameScene.bots[0]?.stats.maxMP ?? 0;
+        }
+
+        this.player2ManaText = this.add.text(
+            345,
+            647,
+            `MP: ${currentMP} / ${maxMP}`,
+            {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
+            .setStroke('#000000', 2)
+            .setResolution(10);
+        this.player2ManaText.setVisible(false);
+
+
+        // create the hp text game object (player 1)
         this.hpText = this.add.text(
             115,
             620,
@@ -1501,9 +1529,23 @@ export default class UIScene extends Phaser.Scene {
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(10);
+
+        this.player2hpText = this.add.text(
+            345,
+            620,
+            `HP: ${this.gameScene.bots[0]?.stats.currentHP ?? '0'} / ${this.gameScene.bots[0]?.stats.maxHP ?? '0'}`,
+            {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'}
+        )
+            .setStroke('#000000', 2)
+            .setResolution(10);
+        this.player2hpText.setVisible(false);
+
         // create heart icon
         this.heartIcon = this.add.image(100, 638, 'heart')
             .setScale(1.25);
+        this.player2HeartIcon = this.add.image(330, 638, 'heart')
+            .setScale(1.25);
+        this.player2HeartIcon.setVisible(false);
 
         this.goldIcon = this.add.image(563, 142, 'coin')
             .setScale(1.25);
@@ -1589,6 +1631,7 @@ export default class UIScene extends Phaser.Scene {
             }
         );
 
+        // player 1 button
         this.characterButton = new UIActionButton(
             this,
             68,
@@ -1649,6 +1692,19 @@ export default class UIScene extends Phaser.Scene {
                 }
             }
         );
+
+        this.player2Button = new UIActionButton(
+            this,
+            298,
+            650,
+            'gameActionMenuRedBotButton',
+            'gameActionMenuRedBotButtonActive',
+            '',
+            () => {
+                // TODO: write logic here so the 2nd player can be healed or whatever when clicked
+            }
+        );
+        this.player2Button.setVisible(false);
 
         this.abilityButton = new UIActionButton(
             this,

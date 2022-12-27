@@ -1,3 +1,5 @@
+import {clone} from 'lodash';
+
 import Bot from '../classes/Bot';
 import BotGridPhysics from '../classes/BotGridPhysics';
 import GridControls from '../classes/GridControls';
@@ -59,8 +61,7 @@ export default class GameScene extends Phaser.Scene {
         this.input.keyboard!.enabled = true;
 
         this.gamePadScene?.scene.restart();
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
+
         if (this.operatingSystem === 'mobile') {
             // launching the game pad scene
             this.scene.launch('GamePad');
@@ -101,7 +102,6 @@ export default class GameScene extends Phaser.Scene {
             const playerSprite = this.add.sprite(0, 0, 'hero');
             playerSprite.setDepth(2);
             this.cameras.main.startFollow(playerSprite);
-            this.cameras.main.setRoundPixels(false);
 
             const aBunchOfPotions = [];
             const potionItem = items.find(obj => {
@@ -258,7 +258,6 @@ export default class GameScene extends Phaser.Scene {
             const playerSprite = this.add.sprite(0, 0, 'hero');
             playerSprite.setDepth(2);
             this.cameras.main.startFollow(playerSprite);
-            this.cameras.main.setRoundPixels(false);
             this.player = new Player(
                 playerSprite,
                 new Phaser.Math.Vector2(
@@ -272,6 +271,42 @@ export default class GameScene extends Phaser.Scene {
                 this.player.equipment,
                 this.player.stats
             );
+
+
+
+            // Spawn the bots if there are any
+            if (this.bots.length > 0) {
+
+                // TODO: Spawn the bot!
+
+                //clone the bot
+                const botClone = clone(this.bots[0]);
+
+                const botSprite = this.add.sprite(0, 0, botClone.sprite.texture);
+                botSprite.depth = 1;
+                const bot = new Bot(
+                    botSprite,
+                    botClone.experience,
+                    botClone.type,
+                    botClone.name
+                );
+                this.bots[0] = bot;
+
+                this.setupBotGridPhysics();
+
+                console.log({
+                    bot,
+                    botSpriteTexture: bot.sprite.texture,
+                    playerTilePositionX: this.player.getTilePos().x,
+                    playerTilePositionY: this.player.getTilePos().y,
+
+                });
+                // botSprite.setPosition(this.player.getTilePos().x, this.player.getTilePos().y);
+
+                // botSprite.visible = true;
+            }
+
+
 
             this.setupPlayerGridPhysics();
 
@@ -399,8 +434,6 @@ export default class GameScene extends Phaser.Scene {
                 const playerPos = this.player.getTilePos();
                 // Add the player's position to the path
                 this.bots[0].path.push(playerPos);
-                console.log({botPath: this.bots[0].path});
-                // this.botGridPhysics.moveBot(this.lastPlayerDirection);
             }
             this.bots[0].update();
         }
@@ -420,12 +453,7 @@ export default class GameScene extends Phaser.Scene {
         // determine if the player is in hostile territory
 
         if (xPositionChanged || yPositionChanged) {
-            console.log({
-                playerTilePosX: this.player.getTilePos().x,
-                playerTilePosY: this.player.getTilePos().y
-            });
             this.movedFromSpawn = true;
-
         }
 
         if (

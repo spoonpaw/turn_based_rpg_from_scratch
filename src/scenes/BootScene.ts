@@ -96,31 +96,31 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('buttonhover', 'assets/images/ui/buttonHover.png');
         this.load.image('button2hover', 'assets/images/ui/button2Hover.png');
 
-        this.load.image('bagbutton', 'assets/images/ui/bagButton.png');
-        this.load.image('bagbuttonactive', 'assets/images/ui/bagButtonActive.png');
+        this.load.image('armorbutton', 'assets/images/ui/armorButton.png');
+        this.load.image('armorbuttonactive', 'assets/images/ui/armorButtonActive.png');
         this.load.image('attackbutton', 'assets/images/ui/attackButton.png');
         this.load.image('attackbuttonactive', 'assets/images/ui/attackButtonActive.png');
+        this.load.image('bagbutton', 'assets/images/ui/bagButton.png');
+        this.load.image('bagbuttonactive', 'assets/images/ui/bagButtonActive.png');
         this.load.image('bookbutton', 'assets/images/ui/bookButton.png');
         this.load.image('bookbuttonactive', 'assets/images/ui/bookButtonActive.png');
-        this.load.image('runbutton', 'assets/images/ui/runButton.png');
-        this.load.image('runbuttonactive', 'assets/images/ui/runButtonActive.png');
         this.load.image('cancelbutton', 'assets/images/ui/cancelButton.png');
-        this.load.image('pagebutton', 'assets/images/ui/pageButton.png');
-        this.load.image('pagebuttonactive', 'assets/images/ui/pageButtonActive.png');
         this.load.image('checkbutton', 'assets/images/ui/checkButton.png');
+        this.load.image('coinbutton', 'assets/images/ui/coinButton.png');
+        this.load.image('coinbuttonactive', 'assets/images/ui/coinButtonActive.png');
         this.load.image('crossbutton', 'assets/images/ui/crossButton.png');
         this.load.image('facebutton', 'assets/images/ui/faceButton.png');
         this.load.image('facebuttonactive', 'assets/images/ui/faceButtonActive.png');
-        this.load.image('staffbutton', 'assets/images/ui/staffButton.png');
-        this.load.image('staffbuttonactive', 'assets/images/ui/staffButtonActive.png');
         this.load.image('musicbutton', 'assets/images/ui/musicButton.png');
         this.load.image('musicinactivebutton', 'assets/images/ui/musicInactiveButton.png');
+        this.load.image('pagebutton', 'assets/images/ui/pageButton.png');
+        this.load.image('pagebuttonactive', 'assets/images/ui/pageButtonActive.png');
+        this.load.image('runbutton', 'assets/images/ui/runButton.png');
+        this.load.image('runbuttonactive', 'assets/images/ui/runButtonActive.png');
         this.load.image('sfxbutton', 'assets/images/ui/sfxButton.png');
         this.load.image('sfxinactivebutton', 'assets/images/ui/sfxInactiveButton.png');
-        this.load.image('coinbutton', 'assets/images/ui/coinButton.png');
-        this.load.image('coinbuttonactive', 'assets/images/ui/coinButtonActive.png');
-        this.load.image('armorbutton', 'assets/images/ui/armorButton.png');
-        this.load.image('armorbuttonactive', 'assets/images/ui/armorButtonActive.png');
+        this.load.image('staffbutton', 'assets/images/ui/staffButton.png');
+        this.load.image('staffbuttonactive', 'assets/images/ui/staffButtonActive.png');
 
         this.load.image('chromaticsword', 'assets/images/ui/chromaticSword.png');
         this.load.image('chromaticswordactive', 'assets/images/ui/chromaticSwordActive.png');
@@ -158,6 +158,8 @@ export default class BootScene extends Phaser.Scene {
 
         this.load.image('gameActionMenuCharacterButton', 'assets/images/ui/characterButton.png');
         this.load.image('gameActionMenuCharacterButtonActive', 'assets/images/ui/characterButtonActive.png');
+        this.load.image('gameActionMenuRedBotButton', 'assets/images/ui/redBotButton.png');
+        this.load.image('gameActionMenuRedBotButtonActive', 'assets/images/ui/redBotButtonActive.png');
 
         this.load.image('actionMenuFrame', 'assets/images/ui/actionMenuFrame.png');
         this.load.image('goldFrame', 'assets/images/ui/goldFrame.png');
