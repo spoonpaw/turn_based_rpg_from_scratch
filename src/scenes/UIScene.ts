@@ -198,7 +198,6 @@ export default class UIScene extends Phaser.Scene {
 
                 () => {
                     this.interactionState = 'equipmentbody';
-                    console.log({bodyArmor: this.gameScene.player.equipment.body});
                     this.headItemButton.deselect();
                     this.offHandItemButton.deselect();
                     this.mainHandItemButton.deselect();
@@ -850,12 +849,8 @@ export default class UIScene extends Phaser.Scene {
                     //  process the sale
 
                     const itemIndex = this.interactionState.split('merchantsellitem')[1];
-                    console.log({index: itemIndex});
                     const itemToSell = this.gameScene.player.inventory[Number(itemIndex)];
-                    console.log({itemToSell});
-                    console.log({itemIndex, playerInventory: this.gameScene.player.inventory});
                     const sellPrice = itemToSell.sellPrice;
-                    console.log(`selling ${itemToSell.name}`);
                     this.gameScene.player.inventory.splice(Number(itemIndex), 1);
                     this.gameScene.player.gold += sellPrice;
 
@@ -1138,7 +1133,6 @@ export default class UIScene extends Phaser.Scene {
                     const slotToUnequip = this.interactionState.split('equipment')[1];
                     const itemToUnequip = cloneDeep(this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment]) as Item;
 
-                    console.log({slotToUnequip, itemToUnequip});
                     this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment] = undefined;
                     this.gameScene.player.inventory.push(itemToUnequip);
                     this.destroyEquipmentButtons();
@@ -1209,7 +1203,6 @@ export default class UIScene extends Phaser.Scene {
             'bagbuttonactive',
             'Buy',
             () => {
-                console.log('buy button clicked');
                 // compare to the 'merchant talked to section of code
                 if (this.interactionState === 'merchantbuy') {
                     return;
@@ -1256,7 +1249,6 @@ export default class UIScene extends Phaser.Scene {
                 if (this.interactionState === 'merchantsell') {
                     return;
                 }
-                console.log('sell button clicked');
                 // compare to the 'merchant talked to section of code
                 this.interactionState = 'merchantsell';
 
@@ -1650,8 +1642,6 @@ export default class UIScene extends Phaser.Scene {
             '',
             () => {
                 // uncomment to log interaction state by clicking player portrait
-                console.log({interactionState: this.interactionState});
-                console.log({currentMap: this.gameScene.currentMap});
                 if (this.interactionState.startsWith('inventoryaction')) {
                     const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
 
@@ -2019,9 +2009,6 @@ export default class UIScene extends Phaser.Scene {
                 item.activeKey,
                 item.name,
                 () => {
-                    console.log('clicked an inventory button (selecting to sell)');
-                    console.log({clickedItem: this.gameScene.player.inventory[index]});
-                    console.log({inventoryToSellButtons: this.inventoryToSellButtons});
                     this.interactionState = `merchantsellitem${index}`;
                     this.inventoryIndex = index;
                     this.inventoryToSellButtons[index].select();

@@ -98,7 +98,6 @@ export default class Bot {
 
     public startAnimation(animationKey: string) {
         if (!animationKey) return;
-        console.log({animationKey});
         this.sprite.anims.play(animationKey);
     }
 

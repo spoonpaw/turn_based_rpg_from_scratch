@@ -56,7 +56,6 @@ export default class KeyboardScene extends Phaser.Scene {
             'checkbutton',
             'Accept',
             () => {
-                console.log('keyboard accept button pressed');
                 eventsCenter.emit(
                     'keyboardaccept',
                     [
@@ -75,7 +74,6 @@ export default class KeyboardScene extends Phaser.Scene {
             'crossbutton',
             'Reject',
             () => {
-                console.log('keyboard reject button pressed');
 
                 eventsCenter.emit(
                     'keyboardreject'
@@ -96,7 +94,6 @@ export default class KeyboardScene extends Phaser.Scene {
         )
             .setInteractive()
             .on('pointerdown', () => {
-                console.log('space key pressed');
                 if (
                     this.getFullStringFromInput().length === 14 &&
                     !this.getFullStringFromInput().endsWith('_')
@@ -131,7 +128,6 @@ export default class KeyboardScene extends Phaser.Scene {
         )
             .setInteractive()
             .on('pointerdown', () => {
-                console.log('delete button clicked!');
                 const originalString = this.getFullStringFromInput().split('_')[0];
                 const stringMinusLastLetter = originalString.slice(0, -1);
                 this.setInputFromString(stringMinusLastLetter);
@@ -151,7 +147,6 @@ export default class KeyboardScene extends Phaser.Scene {
         )
             .setInteractive()
             .on('pointerdown', () => {
-                console.log('caps lock clicked!');
                 this.capsLock = !this.capsLock;
                 for (const keyboardButton of Object.values(this.keyboardButtonDictionary)) {
                     if (this.capsLock) {
@@ -222,7 +217,6 @@ export default class KeyboardScene extends Phaser.Scene {
                     })
                     .setInteractive()
                     .on('pointerdown', () => {
-                        console.log(`${char} clicked`);
                         let adjustedChar = char;
                         if (this.capsLock) {
                             adjustedChar = char.toUpperCase();

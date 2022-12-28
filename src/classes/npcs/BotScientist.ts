@@ -30,7 +30,6 @@ export default class extends NPC {
     }
 
     public runDialog() {
-        console.log('you are talking to the bot scientist');
         this.uiScene.interactionState = 'botscientistselect';
         this.gameScene.gamePadScene?.scene.stop();
 
@@ -44,10 +43,6 @@ export default class extends NPC {
         let greeting;
         if (this.checkIfPlayerHasBot()) {
             greeting = 'Bot Scientist:\nGreetings, adventurer. Thy Bot is a fine companion. The biodome shields us, for now. Keep vigilant, for danger lurks ever-present. Goodbye.';
-            console.log(this.uiScene.leftSideDialogText.getTextMetrics());
-
-            console.log(this.uiScene.leftSideDialogText.toJSON());
-
         }
         else {
             greeting = 'Bot Scientist:\nSo, thou expectest me to build a Bot to aid thee in thy battles? Very well, shall I commence construction at once, brave adventurer?';
@@ -243,7 +238,6 @@ export default class extends NPC {
                         eventsCenter.removeListener('keyboardreject');
                         eventsCenter.removeListener('keyboardaccept');
                         this.uiScene.selectCancel();
-                        console.log({args: string});
                         if (string instanceof Array) {
                             this.keyboardResponseHandler(string[0]);
                         }
@@ -268,7 +262,6 @@ export default class extends NPC {
                     'inventory',
                     () => {
                         eventsCenter.removeListener('inventory');
-                        console.log('inventory heard by bot scientist!!');
                         this.rejectInput();
                     }
                 );
@@ -305,11 +298,9 @@ export default class extends NPC {
         eventsCenter.removeListener('keyboardaccept');
         eventsCenter.removeListener('yes');
         eventsCenter.removeListener('no');
-        console.log('putting the bot in the gamescene array');
         if (string === undefined || string === '') {
             string = 'Red Bot';
         }
-        console.log(`selected name is ${string}`);
         // TODO: rename the robot if needed
         this.gameScene.bots[0].name = string;
     }
