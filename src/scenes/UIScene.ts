@@ -559,13 +559,22 @@ export default class UIScene extends Phaser.Scene {
             .setLineSpacing(-18);
 
         this.leftSideDialogText = this.add.text(50, 380, '', {
-            color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
+            color: '#ffffff',
+            align: 'left',
+            fontFamily:'CustomFont',
+            fontSize: '50px',
+            wordWrap: {
                 width: 610,
                 useAdvancedWrap: true
+            },
+            metrics: {
+                ascent: 42,
+                descent: 11,
+                fontSize: 50
             }
         })
             .setResolution(10)
-            .setFontSize(50)
+            // .setFontSize(50)
             .setLineSpacing(-18);
 
         this.commandMenuText = this.add.text(244, 440, 'Command?', {
@@ -1889,7 +1898,11 @@ export default class UIScene extends Phaser.Scene {
     }
 
     public updateHP(hp: number, maxHp: number) {
-        this.hpText.text = `HP: ${hp} / ${maxHp}`;
+        this.hpText.setText(`HP: ${hp} / ${maxHp}`);
+    }
+
+    public updatePlayer2HP(hp: number, maxHP: number) {
+        this.player2hpText.setText(`HP: ${hp} / ${maxHP}`)
     }
 
     public updateMP(currentMP: number, maxMP: number) {

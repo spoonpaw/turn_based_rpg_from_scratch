@@ -5,6 +5,7 @@ import BattleScene from '../scenes/BattleScene';
 import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
+import BotCharacter from './BotCharacter';
 import Item from './Item';
 import PlayerCharacter from './PlayerCharacter';
 import Unit from './Unit';
@@ -88,7 +89,7 @@ export class Enemy extends Unit {
         return 0;
     }
 
-    public calculateAttackDamage(target: (PlayerCharacter | Enemy)): number {
+    public calculateAttackDamage(target: (PlayerCharacter | Enemy | BotCharacter)): number {
         return Math.max(
             1,
             Math.floor(
@@ -151,12 +152,16 @@ export class Enemy extends Unit {
 
     getInitiative(): number {
         return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
-
     }
 
     public runTurn(): number {
         // just attack player 1
-        const target = this.battleScene.heroes[0];
+        const target = this.battleScene.heroes[
+            Phaser.Math.RND.between(
+                0,
+                this.battleScene.heroes.length - 1
+            )
+        ];
         let runtimeInMS = 0;
 
         let damage = 0;
@@ -166,13 +171,13 @@ export class Enemy extends Unit {
             damage = this.calculateAttackDamage(target);
             target.applyHPChange(damage);
             runtimeInMS += 2000;
-            eventsCenter.emit('Message', `${this.type} attacked ${target.type} for ${damage} HP!`);
+            eventsCenter.emit('Message', `${this.type} attacked ${target.name ?? target.type} for ${damage} HP!`);
 
         }
 
         else {
             this.battleScene.sfxScene.playSound('dodge');
-            eventsCenter.emit('Message', `${this.type} attacked ${target.type}. ${target.type} dodged the attack!`);
+            eventsCenter.emit('Message', `${this.type} attacked ${target.name ?? target.type}. ${target.name ?? target.type} dodged the attack!`);
             runtimeInMS += 2000;
             return runtimeInMS;
         }

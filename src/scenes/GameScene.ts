@@ -1,6 +1,13 @@
 
 // TODO: add an npc who walks in a predescribed pattern and will stop and speak when interacted with
 
+// TODO: add an npc questgiver
+
+// TODO: add items in the dressers
+
+// TODO: add a sign that can be read
+
+
 import {clone} from 'lodash';
 
 import Bot from '../classes/Bot';

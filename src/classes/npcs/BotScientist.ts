@@ -44,6 +44,9 @@ export default class extends NPC {
         let greeting;
         if (this.checkIfPlayerHasBot()) {
             greeting = 'Bot Scientist:\nGreetings, adventurer. Thy Bot is a fine companion. The biodome shields us, for now. Keep vigilant, for danger lurks ever-present. Goodbye.';
+            console.log(this.uiScene.leftSideDialogText.getTextMetrics());
+
+            console.log(this.uiScene.leftSideDialogText.toJSON());
 
         }
         else {
@@ -260,24 +263,30 @@ export default class extends NPC {
 
                 // add listeners for the inventory/ability/charactersheet button being pressed
                 //  this should cancel the naming process
+                eventsCenter.removeListener('inventory');
                 eventsCenter.on(
                     'inventory',
                     () => {
+                        eventsCenter.removeListener('inventory');
                         console.log('inventory heard by bot scientist!!');
                         this.rejectInput();
                     }
                 );
 
+                eventsCenter.removeListener('ability');
                 eventsCenter.on(
                     'ability',
                     () => {
+                        eventsCenter.removeListener('ability');
                         this.rejectInput();
                     }
                 );
 
+                eventsCenter.removeListener('charactersheet');
                 eventsCenter.on(
                     'charactersheet',
                     () => {
+                        eventsCenter.removeListener('charactersheet');
                         this.rejectInput();
                     }
                 );

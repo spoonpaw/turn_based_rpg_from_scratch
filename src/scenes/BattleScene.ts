@@ -1,15 +1,8 @@
-// TODO: Add an npc that
 
 // TODO: Add Ability button functionality
 
-// TODO: add an npc questgiver
 
-// TODO: add items in the dressers
-
-// TODO: add a sign that can be read
-
-
-
+import BotCharacter from '../classes/BotCharacter';
 import {Enemy} from '../classes/Enemy';
 import PlayerCharacter from '../classes/PlayerCharacter';
 import {enemies} from '../enemies/enemies';
@@ -24,22 +17,22 @@ import UIScene from './UIScene';
 
 export default class BattleScene extends Phaser.Scene {
     public enemies!: Enemy[];
-    public heroes!: PlayerCharacter[];
+    public heroes!: (PlayerCharacter | BotCharacter)[];
     public interactionState!: string;
     public player1HPText!: Phaser.GameObjects.Text;
     public sfxScene!: SFXScene;
     private background!: Phaser.GameObjects.Image;
     private battleUIScene!: BattleUIScene;
-    private gameScene!: GameScene;
+    gameScene!: GameScene;
     private index!: number;
     private musicScene!: MusicScene;
     private player1MPText!: Phaser.GameObjects.Text;
-    private player2?: PlayerCharacter;
-    private player2HPText!: Phaser.GameObjects.Text;
+    private player2?: PlayerCharacter | BotCharacter;
+    player2HPText!: Phaser.GameObjects.Text;
     private turnIndex!: number;
-    private turnUnits!: (PlayerCharacter | Enemy)[];
+    private turnUnits!: (PlayerCharacter | BotCharacter | Enemy)[];
     private uiScene!: UIScene;
-    private units!: (PlayerCharacter | Enemy)[];
+    private units!: (PlayerCharacter | BotCharacter | Enemy)[];
 
     public constructor() {
         super('Battle');
@@ -49,7 +42,7 @@ export default class BattleScene extends Phaser.Scene {
         return Phaser.Math.Between(1, 2) === 1;
     }
 
-    private static sortUnits(units: (PlayerCharacter | Enemy)[]): (PlayerCharacter | Enemy)[] {
+    private static sortUnits(units: (PlayerCharacter | BotCharacter | Enemy)[]): (PlayerCharacter | BotCharacter | Enemy)[] {
 
         return units.sort((a, b) => {
             // randomize the turn order every round based on agility
@@ -200,7 +193,7 @@ export default class BattleScene extends Phaser.Scene {
     private handleActionSelection(
         data: {
             action: string,
-            target: Enemy | PlayerCharacter
+            target: Enemy | PlayerCharacter | BotCharacter
         }
     ): void {
         this.interactionState = `handling${data.action}select`;
@@ -227,7 +220,7 @@ export default class BattleScene extends Phaser.Scene {
             else {
                 // announce that the run failed! then let the enemies act!!
                 this.turnUnits = this.units.filter(value => {
-                    return !(value instanceof PlayerCharacter);
+                    return !(value instanceof PlayerCharacter || value instanceof BotCharacter);
                 });
                 eventsCenter.emit('Message', `${this.heroes[0].type} has failed to retreat!`);
                 this.time.addEvent({
@@ -244,7 +237,7 @@ export default class BattleScene extends Phaser.Scene {
         this.parseNextUnitTurn(data);
     }
 
-    private parseNextUnitTurn(data: { action: string; target: Enemy | PlayerCharacter }): void {
+    private parseNextUnitTurn(data: { action: string; target: Enemy | PlayerCharacter | BotCharacter }): void {
         this.turnIndex += 1;
 
         let turnRunTime = 0;
@@ -255,7 +248,7 @@ export default class BattleScene extends Phaser.Scene {
                 turnRunTime += currentUnit.runTurn();
             }
         }
-        // current unit must be a player character if not an enemy
+        // current unit must be a player character or bot if not an enemy
         else {
             if (currentUnit.living) {
                 turnRunTime += currentUnit.runTurn(data);
@@ -290,10 +283,8 @@ export default class BattleScene extends Phaser.Scene {
 
     private sendPlayerInfoToGameScene(): void {
         for (const unit of this.heroes) {
-            if (unit.type === 'Soldier') {
+            if (unit instanceof PlayerCharacter) {
                 this.gameScene.player.stats.currentHP = unit.stats.currentHP;
-                // eventsCenter.emit('updateHP', [this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP]);
-                // this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
 
                 let goldAmount = 0;
                 let experienceAmount = 0;
@@ -313,7 +304,6 @@ export default class BattleScene extends Phaser.Scene {
 
                 this.gameScene.player.gold += goldAmount;
 
-                // eventsCenter.emit('updateGold', this.gameScene.player.gold);
                 eventsCenter.emit('updateMP', this.gameScene.player.stats.currentMP, this.gameScene.player.stats.maxMP);
 
                 const currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)));
@@ -330,9 +320,9 @@ export default class BattleScene extends Phaser.Scene {
                         vitality: this.gameScene.player.stats.vitality + this.getStatIncrease('vitality', newLevel),
                         intellect: this.gameScene.player.stats.intellect + this.getStatIncrease('intellect', newLevel),
                         luck: this.gameScene.player.stats.luck + this.getStatIncrease('luck', newLevel),
-                        currentHP: this.heroes[0].stats.currentHP,
+                        currentHP: unit.stats.currentHP, // getting the stat from the battle
                         maxHP: this.gameScene.player.stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
-                        currentMP: this.heroes[0].stats.currentMP,
+                        currentMP: unit.stats.currentMP, // getting the stat from the battle
                         maxMP: this.gameScene.player.stats.maxMP + this.getStatIncrease('intellect', newLevel) * 2,
                         attack: this.gameScene.player.stats.attack + this.getStatIncrease('strength', newLevel),
                         defense: this.gameScene.player.stats.defense + this.getStatIncrease('agility', newLevel) / 2
@@ -342,6 +332,52 @@ export default class BattleScene extends Phaser.Scene {
                 this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
 
                 eventsCenter.emit('updateXP', this.gameScene.player.experience);
+            }
+
+            else {
+                // unit must be a bot character at this point
+                this.gameScene.bots[0].stats.currentHP = unit.stats.currentHP;
+
+                const currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.bots[0].experience)));
+
+                let experienceAmount = 0;
+
+                for (const enemy of this.enemies) {
+                    const enemyData = enemies.find(obj => {
+                        return obj.name === enemy.texture.key;
+                    });
+                    experienceAmount += enemyData?.experience ?? 0;
+                }
+
+                if (this.interactionState === 'handlingrunselect') {
+                    experienceAmount = 0;
+                }
+
+                this.gameScene.bots[0].experience += experienceAmount;
+
+                const newLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.bots[0].experience)));
+
+                if (currentLevel < newLevel) {
+
+                    this.gameScene.bots[0].stats = {
+                        strength: this.gameScene.bots[0].stats.strength + this.getStatIncrease('strength', newLevel),
+                        agility: this.gameScene.bots[0].stats.agility + this.getStatIncrease('agility', newLevel),
+                        vitality: this.gameScene.bots[0].stats.vitality + this.getStatIncrease('vitality', newLevel),
+                        intellect: this.gameScene.bots[0].stats.intellect + this.getStatIncrease('intellect', newLevel),
+                        luck: this.gameScene.bots[0].stats.luck + this.getStatIncrease('luck', newLevel),
+                        currentHP: unit.stats.currentHP,
+                        maxHP: this.gameScene.bots[0].stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
+                        currentMP: unit.stats.currentMP,
+                        maxMP: this.gameScene.bots[0].stats.maxMP + this.getStatIncrease('intellect', newLevel) * 2,
+                        attack: this.gameScene.bots[0].stats.attack + this.getStatIncrease('strength', newLevel),
+                        defense: this.gameScene.bots[0].stats.defense + this.getStatIncrease('agility', newLevel) / 2
+                    };
+
+                }
+                // TODO: make an update player2 hp method
+                this.uiScene.updatePlayer2HP(unit.stats.currentHP, unit.stats.maxHP);
+
+                // eventsCenter.emit('updateXP', this.gameScene.player.experience);
             }
         }
     }
@@ -361,6 +397,13 @@ export default class BattleScene extends Phaser.Scene {
 
         eventsCenter.emit('Message', `You receive ${goldAmount} gold pieces.\nYou receive ${experienceAmount} experience points.`);
     }
+
+    private shortenTextByPixel(phasertext: Phaser.GameObjects.Text, maxpixel: number) {
+        while (phasertext.width > maxpixel) {
+            phasertext.text = phasertext.text.substring(0, phasertext.text.length - 1);
+        }
+    }
+
 
     private startBattle(): void {
         // TODO: add all the bots to the scene if there are any!
@@ -401,7 +444,7 @@ export default class BattleScene extends Phaser.Scene {
                 this.add.image(470, 606, 'heroMenuFrame')
                     .setOrigin(0, 0);
             }
-            this.player2 = new PlayerCharacter(
+            this.player2 = new BotCharacter(
                 this,
                 504,
                 675,
@@ -411,16 +454,19 @@ export default class BattleScene extends Phaser.Scene {
             );
             this.add.existing(this.player2);
 
-            this.add.text(
-                484,
-                610,
-                this.gameScene.bots[0].name,
-                {
-                    fontSize: '45px',
-                    color: '#fff',
-                    fontFamily: 'CustomFont'
-                })
-                .setResolution(10);
+            this.shortenTextByPixel(
+                this.add.text(
+                    484,
+                    610,
+                    this.gameScene.bots[0].name,
+                    {
+                        fontSize: '45px',
+                        color: '#fff',
+                        fontFamily: 'CustomFont'
+                    })
+                    .setResolution(10),
+                210
+            );
 
 
             this.player2HPText = this.add.text(
@@ -465,16 +511,20 @@ export default class BattleScene extends Phaser.Scene {
 
         this.add.existing(soldier);
 
-        this.add.text(
-            250,
-            610,
-            'Soldier',
-            {
-                fontSize: '45px',
-                color: '#fff',
-                fontFamily: 'CustomFont'
-            })
-            .setResolution(10);
+        this.shortenTextByPixel(
+
+            this.add.text(
+                250,
+                610,
+                'Soldier',
+                {
+                    fontSize: '45px',
+                    color: '#fff',
+                    fontFamily: 'CustomFont'
+                })
+                .setResolution(10),
+            210
+        );
 
         this.player1HPText = this.add.text(
             300,

@@ -194,14 +194,15 @@ export default class KeyboardScene extends Phaser.Scene {
         for (let i = 0; i < 14; i++) {
             this.keyboardInputTextArray.push(
                 this.add.text(
-                    45 + (i * 43),
-                    288,
+                    65 + (i * 43),
+                    328,
                     '',
                     {
                         fontSize: '70px',
                         color: '#fff',
                         fontFamily: 'CustomFont',
                     })
+                    .setOrigin(0.5, 0.5)
             );
         }
         this.keyboardInputTextArray[0].setText('_');

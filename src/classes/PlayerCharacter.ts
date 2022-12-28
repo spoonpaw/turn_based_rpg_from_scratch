@@ -3,14 +3,15 @@ import BattleUIScene from '../scenes/BattleUIScene';
 import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
+import BotCharacter from './BotCharacter';
 import {Enemy} from './Enemy';
-import Item from './Item';
+// import Item from './Item';
 import Unit from './Unit';
 
 export default class PlayerCharacter extends Unit {
     public damageTween!: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
     public equipment: Equipment;
-    public inventory!: Item[];
+    // public inventory!: Item[];
     public stats!: Stats;
     public type: string;
 
@@ -91,7 +92,7 @@ export default class PlayerCharacter extends Unit {
         return this.stats.currentHP - initialCharacterHP;
     }
 
-    public calculateAttackDamage(target: (PlayerCharacter | Enemy)): number {
+    public calculateAttackDamage(target: (PlayerCharacter | Enemy | BotCharacter)): number {
         return Math.max(
             1,
             Math.floor(
@@ -155,12 +156,14 @@ export default class PlayerCharacter extends Unit {
         return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
     }
 
-    public runTurn(data: { action: string; target: Enemy | PlayerCharacter; }) {
-        // TODO: fix this. add logic such that if the actor is a bot, they need to be
-        //  able to make their own decision on how to deal with the situation
-
-        // TODO: if the all targets are dead, return runtime 0 and don't show any messages
+    public runTurn(
+        data: {
+            action: string;
+            target: Enemy | PlayerCharacter | BotCharacter;
+        }
+    ): number {
         const target = data.target;
+        if (!target.living) return 0;
         let runtimeInMS = 0;
 
         if (data.action === 'attack') {

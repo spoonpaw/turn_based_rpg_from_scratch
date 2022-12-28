@@ -383,7 +383,7 @@ export default class BattleUIScene extends Phaser.Scene {
 
                 // get the selected item!!!
                 const selectedItemIndex = Number(this.battleScene.interactionState.split('inventoryaction')[1]);
-                const selectedItem = this.battleScene.heroes[0].inventory[selectedItemIndex];
+                const selectedItem = this.battleScene.gameScene.player.inventory[selectedItemIndex];
 
                 this.selectedItemAndAbilityIcon = new UIActionButton(
                     this,
@@ -444,7 +444,7 @@ export default class BattleUIScene extends Phaser.Scene {
 
     public generateInventoryButtons() {
         // iterate over all inventory entries
-        for (const [index, item] of this.battleScene.heroes[0].inventory.entries()) {
+        for (const [index, item] of this.battleScene.gameScene.player.inventory.entries()) {
 
             const inventoryButton = new UIActionButton(
                 this,
@@ -457,7 +457,7 @@ export default class BattleUIScene extends Phaser.Scene {
                     // display text here describing the selected item
                     this.battleScene.interactionState = `selectinginventoryaction${index}`;
                     const selectedItemIndex = Number(this.battleScene.interactionState.split('selectinginventoryaction')[1]);
-                    const selectedItem = this.battleScene.heroes[0].inventory[selectedItemIndex];
+                    const selectedItem = this.battleScene.gameScene.player.inventory[selectedItemIndex];
                     this.cancelMenuFrame.setVisible(false);
                     this.inventoryAndAbilityDetailFrame.setVisible(true);
                     this.inventoryAndAbilityDetailText.setText(selectedItem.description);
