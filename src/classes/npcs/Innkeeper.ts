@@ -48,6 +48,7 @@ export default class Innkeeper extends NPC {
             this.uiScene.interactButton.buttonText.setVisible(false);
 
             eventsCenter.removeListener('space');
+
             eventsCenter.on('space', () => {
                 this.gameScene.gamePadScene?.scene.restart();
                 this.uiScene.interactionState = 'mainselect';

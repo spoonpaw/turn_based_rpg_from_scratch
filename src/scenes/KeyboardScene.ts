@@ -3,8 +3,8 @@ import eventsCenter from '../utils/EventsCenter';
 
 export default class KeyboardScene extends Phaser.Scene {
     public capsLock!: boolean;
-    public keyboardButtonDictionary: { [key: string]: Phaser.GameObjects.Text } = {};
-    public keyboardInputTextArray: Phaser.GameObjects.Text[] = [];
+    public keyboardButtonDictionary!: { [key: string]: Phaser.GameObjects.Text };
+    public keyboardInputTextArray!: Phaser.GameObjects.Text[];
     public keysList = [
         ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
         ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
@@ -25,6 +25,8 @@ export default class KeyboardScene extends Phaser.Scene {
     }
 
     public create() {
+        this.keyboardInputTextArray = [];
+        this.keyboardButtonDictionary = {};
         this.capsLock = false;
         this.keyboardFrame = this.add.image(
             40, 380, 'sidedialogframe'

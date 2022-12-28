@@ -181,7 +181,7 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('pic2', 'assets/images/atari-fujilogo.png');
         this.load.image('title', 'assets/images/afterlife-title-screen4.png');
 
-        this.load.image('tiles', 'assets/images/basictiles3.png');
+        this.load.image('tiles', 'assets/images/basictiles4.png');
         this.load.image('heart', 'assets/images/heart.png');
 
         this.load.image('dragonblue', 'assets/images/dragonblue.png');
