@@ -25,6 +25,10 @@ export default class extends NPC {
         }
     }
 
+    private checkIfPlayerHasBot() {
+        return this.gameScene.bots.length > 0;
+    }
+
     public runDialog() {
         console.log('you are talking to the bot scientist');
         this.uiScene.interactionState = 'botscientistselect';
@@ -36,59 +40,113 @@ export default class extends NPC {
         if (this.gameScene.gridPhysics.facingDirection === 'left') this.sprite.setFrame(2);
 
         this.uiScene.leftSideDialogFrame.setVisible(true);
-        this.uiScene.leftSideDialogText.setText('Bot Scientist:\nSo, thou expectest me to build a Bot to aid thee in thy battles? Very well, shall I commence construction at once, brave adventurer?');
+
+        let greeting;
+        if (this.checkIfPlayerHasBot()) {
+            greeting = 'Bot Scientist:\nGreetings, adventurer. Thy Bot is a fine companion. The biodome shields us, for now. Keep vigilant, for danger lurks ever-present. Goodbye.';
+
+        }
+        else {
+            greeting = 'Bot Scientist:\nSo, thou expectest me to build a Bot to aid thee in thy battles? Very well, shall I commence construction at once, brave adventurer?';
+        }
+
+        this.uiScene.leftSideDialogText.setText(greeting);
         this.uiScene.leftSideDialogText.setVisible(true);
-        this.uiScene.rightSideDialogOptionsFrame.setVisible(true);
-        this.uiScene.yesButton.setVisible(true);
-        this.uiScene.yesButton.buttonText.setVisible(true);
-        this.uiScene.noButton.setVisible(true);
-        this.uiScene.noButton.buttonText.setVisible(true);
 
-        this.uiScene.interactFrame.setVisible(false);
-        this.uiScene.interactButton.setVisible(false);
-        this.uiScene.interactButton.buttonText.setVisible(false);
+        if (this.checkIfPlayerHasBot()) {
+            this.uiScene.cancelMenuFrame.setX(670);
+            this.uiScene.cancelMenuFrame.setY(380);
+            this.uiScene.cancelButton.setX(702);
+            this.uiScene.cancelButton.setY(415);
+            this.uiScene.cancelButton.buttonText.setX(722);
+            this.uiScene.cancelButton.buttonText.setY(390);
+            this.uiScene.cancelButton.buttonText.setText('Farewell');
+            this.uiScene.cancelMenuFrame.setVisible(true);
+            this.uiScene.cancelButton.setVisible(true);
+            this.uiScene.cancelButton.buttonText.setVisible(true);
 
-        // eventsCenter.removeListener('space');
-        eventsCenter.on('space', () => {
-            // if (this.uiScene.interactionState === 'botscientistresponse') {
-            //     this.keyboardResponseHandler();
-            // }
-            this.gameScene.gamePadScene?.scene.restart();
-            this.uiScene.interactionState = 'mainselect';
-            eventsCenter.removeListener('space');
-            eventsCenter.removeListener('yes');
-            // eventsCenter.removeListener('no');
+            eventsCenter.on('space', () => {
+                this.gameScene.gamePadScene?.scene.restart();
+                this.uiScene.interactionState = 'mainselect';
+                eventsCenter.removeListener('space');
+                // eventsCenter.removeListener('no');
 
-            // this.uiScene.goldFrame.setVisible(false);
-            // this.uiScene.goldIcon.setVisible(false);
-            // this.uiScene.goldText.setVisible(false);
-            this.uiScene.leftSideDialogFrame.setVisible(false);
-            this.uiScene.leftSideDialogText.setText('');
-            this.uiScene.leftSideDialogText.setVisible(false);
-            this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
-            this.uiScene.yesButton.setVisible(false);
-            this.uiScene.yesButton.buttonText.setVisible(false);
-            this.uiScene.noButton.setVisible(false);
-            this.uiScene.noButton.buttonText.setVisible(false);
-            this.uiScene.characterDetailDisplayFrame.setVisible(false);
-            this.uiScene.characterDetailDisplay.setVisible(false);
+                this.uiScene.leftSideDialogFrame.setVisible(false);
+                this.uiScene.leftSideDialogText.setText('');
+                this.uiScene.leftSideDialogText.setVisible(false);
+                this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
+                this.uiScene.cancelButton.setVisible(false);
+                this.uiScene.cancelButton.buttonText.setVisible(false);
+                this.uiScene.cancelMenuFrame.setVisible(false);
 
-            this.uiScene.cancelMenuFrame.setVisible(false);
-            this.uiScene.cancelButton.setVisible(false);
-            this.uiScene.cancelButton.buttonText.setVisible(false);
 
-            this.gameScene.input.keyboard!.enabled = true;
+                this.gameScene.input.keyboard!.enabled = true;
 
-            this.gameScene.cursors.up.reset();
-            this.gameScene.cursors.left.reset();
-            this.gameScene.cursors.down.reset();
-            this.gameScene.cursors.right.reset();
-            this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W).reset();
-            this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A).reset();
-            this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S).reset();
-            this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D).reset();
+                this.gameScene.cursors.up.reset();
+                this.gameScene.cursors.left.reset();
+                this.gameScene.cursors.down.reset();
+                this.gameScene.cursors.right.reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D).reset();
+            });
+        }
 
-        });
+        if (!this.checkIfPlayerHasBot()){
+            this.uiScene.rightSideDialogOptionsFrame.setVisible(true);
+            this.uiScene.yesButton.setVisible(true);
+            this.uiScene.yesButton.buttonText.setVisible(true);
+            this.uiScene.noButton.setVisible(true);
+            this.uiScene.noButton.buttonText.setVisible(true);
+
+            this.uiScene.interactFrame.setVisible(false);
+            this.uiScene.interactButton.setVisible(false);
+            this.uiScene.interactButton.buttonText.setVisible(false);
+
+            // eventsCenter.removeListener('space');
+            eventsCenter.on('space', () => {
+                // if (this.uiScene.interactionState === 'botscientistresponse') {
+                //     this.keyboardResponseHandler();
+                // }
+                this.gameScene.gamePadScene?.scene.restart();
+                this.uiScene.interactionState = 'mainselect';
+                eventsCenter.removeListener('space');
+                eventsCenter.removeListener('yes');
+                // eventsCenter.removeListener('no');
+
+                // this.uiScene.goldFrame.setVisible(false);
+                // this.uiScene.goldIcon.setVisible(false);
+                // this.uiScene.goldText.setVisible(false);
+                this.uiScene.leftSideDialogFrame.setVisible(false);
+                this.uiScene.leftSideDialogText.setText('');
+                this.uiScene.leftSideDialogText.setVisible(false);
+                this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
+                this.uiScene.yesButton.setVisible(false);
+                this.uiScene.yesButton.buttonText.setVisible(false);
+                this.uiScene.noButton.setVisible(false);
+                this.uiScene.noButton.buttonText.setVisible(false);
+                this.uiScene.characterDetailDisplayFrame.setVisible(false);
+                this.uiScene.characterDetailDisplay.setVisible(false);
+
+                this.uiScene.cancelMenuFrame.setVisible(false);
+                this.uiScene.cancelButton.setVisible(false);
+                this.uiScene.cancelButton.buttonText.setVisible(false);
+
+                this.gameScene.input.keyboard!.enabled = true;
+
+                this.gameScene.cursors.up.reset();
+                this.gameScene.cursors.left.reset();
+                this.gameScene.cursors.down.reset();
+                this.gameScene.cursors.right.reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S).reset();
+                this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D).reset();
+
+            });
+        }
+
         eventsCenter.removeListener('yes');
         // the player is saying yes, they want the bot (this spawns the bot)
         eventsCenter.on('yes', () => {
