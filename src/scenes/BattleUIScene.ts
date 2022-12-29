@@ -124,7 +124,7 @@ export default class BattleUIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.commandMenuText.setVisible(false);
 
         this.selectedItemAndAbilityCommandText = this.add.text(
@@ -136,7 +136,7 @@ export default class BattleUIScene extends Phaser.Scene {
                 color: '#fff',
                 fontFamily: 'CustomFont'
             })
-            .setResolution(10);
+            .setResolution(3);
         this.selectedItemAndAbilityCommandText.setVisible(false);
 
         this.inventoryAndAbilityDetailText = this.add.text(
@@ -160,7 +160,7 @@ export default class BattleUIScene extends Phaser.Scene {
         );
         this.inventoryAndAbilityDetailText.setLineSpacing(-16);
         this.inventoryAndAbilityDetailText.setVisible(false);
-        this.inventoryAndAbilityDetailText.setResolution(10);
+        this.inventoryAndAbilityDetailText.setResolution(3);
 
         // create buttons and badges third
         this.hotkeyButton1 = new UIActionButton(

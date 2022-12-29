@@ -543,7 +543,7 @@ export default class UIScene extends Phaser.Scene {
                 useAdvancedWrap: true
             }
         })
-            .setResolution(10)
+            .setResolution(3)
             .setFontSize(50);
         this.goldText.setVisible(false);
 
@@ -553,7 +553,7 @@ export default class UIScene extends Phaser.Scene {
                 useAdvancedWrap: true
             }
         })
-            .setResolution(10)
+            .setResolution(3)
             .setFontSize(50)
             .setLineSpacing(-18);
 
@@ -572,7 +572,7 @@ export default class UIScene extends Phaser.Scene {
                 fontSize: 50
             }
         })
-            .setResolution(10)
+            .setResolution(3)
             // .setFontSize(50)
             .setLineSpacing(-18);
 
@@ -581,7 +581,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.commandMenuText.setVisible(false);
 
         this.selectedItemAndAbilityCommandText = this.add.text(
@@ -594,7 +594,7 @@ export default class UIScene extends Phaser.Scene {
                 fontFamily: 'CustomFont'
             }
         )
-            .setResolution(10);
+            .setResolution(3);
         this.selectedItemAndAbilityCommandText.setVisible(false);
 
 
@@ -605,7 +605,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.headString.setVisible(false);
         this.equipmentStrings.push(this.headString);
 
@@ -614,7 +614,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.bodyString.setVisible(false);
         this.equipmentStrings.push(this.bodyString);
 
@@ -623,7 +623,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.mainHandString.setVisible(false);
         this.equipmentStrings.push(this.mainHandString);
 
@@ -632,7 +632,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.offHandString.setVisible(false);
         this.equipmentStrings.push(this.offHandString);
 
@@ -645,7 +645,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.classString.setVisible(false);
 
         this.levelString = this.add.text(540, 221, `Level: ${Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)))}`, {
@@ -653,7 +653,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.levelString.setVisible(false);
 
         this.hitPointString = this.add.text(540, 257, `Hit Points: ${this.gameScene.player.stats.currentHP}/${this.gameScene.player.stats.maxHP}`, {
@@ -661,7 +661,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.hitPointString.setVisible(false);
 
         this.manaPointString = this.add.text(540, 293, 'Mana Points: 0/0', {
@@ -669,7 +669,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.manaPointString.setVisible(false);
 
         this.strengthString = this.add.text(540, 329, `Strength: ${Math.floor(this.gameScene.player.getCombinedStat('strength'))}`, {
@@ -677,7 +677,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.strengthString.setVisible(false);
 
         this.agilityString = this.add.text(540, 365, `Agility: ${Math.floor(this.gameScene.player.stats.agility)}`, {
@@ -685,7 +685,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.agilityString.setVisible(false);
 
         this.vitalityString = this.add.text(540, 401, `Vitality: ${Math.floor(this.gameScene.player.stats.vitality)}`, {
@@ -693,7 +693,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.vitalityString.setVisible(false);
 
         this.intellectString = this.add.text(540, 437, `Intellect: ${Math.floor(this.gameScene.player.stats.intellect)}`, {
@@ -701,7 +701,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.intellectString.setVisible(false);
 
         this.luckString = this.add.text(540, 473, `Luck: ${Math.floor(this.gameScene.player.stats.luck)}`, {
@@ -709,7 +709,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.luckString.setVisible(false);
 
         this.defenseString = this.add.text(540, 509, `Defense: ${this.gameScene.player.getCombinedStat('defense')}`, {
@@ -717,7 +717,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.defenseString.setVisible(false);
 
         this.tillNextLevelString = this.add.text(540, 545, `Till Next Level: ${this.calculateTilNextLevel()}`, {
@@ -725,7 +725,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.tillNextLevelString.setVisible(false);
 
         // END CHARACTER SHEET STRING SECTION
@@ -1474,7 +1474,7 @@ export default class UIScene extends Phaser.Scene {
         );
         this.inventoryAndAbilityDetailText.setLineSpacing(-16);
         this.inventoryAndAbilityDetailText.setVisible(false);
-        this.inventoryAndAbilityDetailText.setResolution(10);
+        this.inventoryAndAbilityDetailText.setResolution(3);
 
         // set up gold text and icon
         this.manaIcon = this.add.image(100, 663, 'mana');
@@ -1500,7 +1500,7 @@ export default class UIScene extends Phaser.Scene {
             `MP: ${currentMP} / ${maxMP}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
-            .setResolution(10);
+            .setResolution(3);
 
 
         if (this.gameScene.bots[0]?.type === 'Soldier') {
@@ -1518,7 +1518,7 @@ export default class UIScene extends Phaser.Scene {
             `MP: ${currentMP} / ${maxMP}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
-            .setResolution(10);
+            .setResolution(3);
         this.player2ManaText.setVisible(false);
 
 
@@ -1529,7 +1529,7 @@ export default class UIScene extends Phaser.Scene {
             `HP: ${this.gameScene.player.stats.currentHP} / ${this.gameScene.player.stats.maxHP}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
-            .setResolution(10);
+            .setResolution(3);
 
         this.player2hpText = this.add.text(
             345,
@@ -1538,7 +1538,7 @@ export default class UIScene extends Phaser.Scene {
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'}
         )
             .setStroke('#000000', 2)
-            .setResolution(10);
+            .setResolution(3);
         this.player2hpText.setVisible(false);
 
         // create heart icon

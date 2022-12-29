@@ -34,7 +34,7 @@ export default class GameMessage extends Phaser.GameObjects.Container {
             }
         );
         this.text.setLineSpacing(-10);
-        this.text.setResolution(10);
+        this.text.setResolution(3);
         this.text.setFontSize(55);
         this.add(this.text);
         this.text.setOrigin(0);

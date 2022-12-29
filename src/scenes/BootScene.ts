@@ -30,7 +30,7 @@ export default class BootScene extends Phaser.Scene {
             },
         });
         loadingText.setOrigin(0.5, 0.5);
-        loadingText.setResolution(10);
+        loadingText.setResolution(3);
 
         const percentText = this.make.text({
             x: width / 2,
@@ -42,7 +42,7 @@ export default class BootScene extends Phaser.Scene {
             }
         });
         percentText.setOrigin(0.5, 0.5);
-        percentText.setResolution(10);
+        percentText.setResolution(3);
 
         this.load.on('progress', function (value: number) {
             percentText.setText(parseInt(String(value * 100)) + '%');

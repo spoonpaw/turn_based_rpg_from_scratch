@@ -50,7 +50,7 @@ export default class UIActionButton extends Phaser.GameObjects.Container {
                     fontFamily: 'CustomFont'
                 }
             );
-            this.buttonText.setResolution(10);
+            this.buttonText.setResolution(3);
             this.buttonText.setInteractive();
             this.buttonText.on('pointerdown', () => {
                 this.targetCallback();

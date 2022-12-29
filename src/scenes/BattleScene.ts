@@ -398,10 +398,11 @@ export default class BattleScene extends Phaser.Scene {
         eventsCenter.emit('Message', `You receive ${goldAmount} gold pieces.\nYou receive ${experienceAmount} experience points.`);
     }
 
-    private shortenTextByPixel(phasertext: Phaser.GameObjects.Text, maxpixel: number) {
+    private shortenTextByPixel(phasertext: Phaser.GameObjects.Text, maxpixel: number): Phaser.GameObjects.Text {
         while (phasertext.width > maxpixel) {
             phasertext.text = phasertext.text.substring(0, phasertext.text.length - 1);
         }
+        return phasertext;
     }
 
 
@@ -438,7 +439,7 @@ export default class BattleScene extends Phaser.Scene {
         this.add.image(236, 606, 'heroMenuFrame')
             .setOrigin(0, 0);
 
-        // if there is a player 2 (i.e. bots) generate a frame for them
+        // if there is a player 2 (i.e. bots) generate everything for them
         if (this.gameScene.bots.length > 0) {
             if (this.gameScene.bots[0]) {
                 this.add.image(470, 606, 'heroMenuFrame')
@@ -460,14 +461,19 @@ export default class BattleScene extends Phaser.Scene {
                     610,
                     this.gameScene.bots[0].name,
                     {
-                        fontSize: '45px',
+                        fontSize: '44px',
                         color: '#fff',
-                        fontFamily: 'CustomFont'
+                        fontFamily: 'CustomFont',
+                        metrics: {
+                            ascent: 37,
+                            descent: 10,
+                            fontSize: 47
+                        }
+
                     })
-                    .setResolution(10),
+                    .setResolution(3),
                 210
             );
-
 
             this.player2HPText = this.add.text(
                 534,
@@ -477,7 +483,7 @@ export default class BattleScene extends Phaser.Scene {
                     color: '#fff',
                     fontFamily: 'CustomFont'
                 })
-                .setResolution(10);
+                .setResolution(3);
 
             let currentMP;
             let maxMP;
@@ -495,7 +501,7 @@ export default class BattleScene extends Phaser.Scene {
                 color: '#fff',
                 fontFamily: 'CustomFont'
             })
-                .setResolution(10);
+                .setResolution(3);
 
         }
 
@@ -522,7 +528,7 @@ export default class BattleScene extends Phaser.Scene {
                     color: '#fff',
                     fontFamily: 'CustomFont'
                 })
-                .setResolution(10),
+                .setResolution(3),
             210
         );
 
@@ -534,7 +540,7 @@ export default class BattleScene extends Phaser.Scene {
                 color: '#fff',
                 fontFamily: 'CustomFont'
             })
-            .setResolution(10);
+            .setResolution(3);
 
         let currentMP;
         let maxMP;
@@ -552,7 +558,7 @@ export default class BattleScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
 
         const selectedEnemy: string = Phaser.Math.RND.pick(levels[this.gameScene.currentMap as keyof typeof levels].enemies ?? []);
 
