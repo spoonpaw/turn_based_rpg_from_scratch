@@ -1,12 +1,12 @@
-import Soldier from '../jobs/Soldier';
 import GameScene from '../scenes/GameScene';
 import UIScene from '../scenes/UIScene';
 import Stats from '../stats/Stats';
 import {Direction} from '../types/Direction';
 import {Equipment} from '../types/Equipment';
+import GameActor from './GameActor';
 import Item from './Item';
 
-export default class Player {
+export default class Player extends GameActor{
     public stats: Stats;
     private uiScene!: UIScene;
     constructor(
@@ -19,6 +19,7 @@ export default class Player {
         public equipment: Equipment,
         stats?: Stats
     ) {
+        super();
         this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
 
         const offsetX = GameScene.TILE_SIZE / 2;
@@ -30,7 +31,7 @@ export default class Player {
             tilePos.y * GameScene.TILE_SIZE + offsetY
         );
         this.sprite.setFrame(1);
-        this.stats = stats ?? this.createStatsForNewPlayer(this.type);
+        this.stats = stats ?? this.createStats(this.type);
 
         this.sprite.setInteractive();
 
@@ -43,37 +44,32 @@ export default class Player {
         );
     }
 
-    public createStatsForNewPlayer(job: string): Stats {
-        if (job === 'Soldier') {
-            return new Stats(
-                Soldier.advancement[0].strength,
-                Soldier.advancement[0].agility,
-                Soldier.advancement[0].vitality,
-                Soldier.advancement[0].intellect,
-                Soldier.advancement[0].luck,
-                Soldier.advancement[0].vitality * 2,
-                Soldier.advancement[0].vitality * 2,
-                Soldier.advancement[0].intellect * 2,
-                Soldier.advancement[0].intellect * 2,
-                Soldier.advancement[0].strength,
-                Soldier.advancement[0].agility / 2
-            );
-        }
-        else {
-            return new Stats(
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0
-            );
-        }
+    public getPosition(): Phaser.Math.Vector2 {
+        return this.sprite.getBottomCenter();
+    }
+
+    public getTilePos(): Phaser.Math.Vector2 {
+        return this.tilePos.clone();
+    }
+
+    public setPosition(position: Phaser.Math.Vector2): void {
+        this.sprite.setPosition(position.x, position.y);
+    }
+
+    public setTilePos(tilePosition: Phaser.Math.Vector2): void {
+        this.tilePos = tilePosition.clone();
+    }
+
+    public startAnimation(direction: Direction) {
+        this.sprite.anims.play(direction);
+    }
+
+    public stopAnimation(direction: Direction) {
+        if (!this.sprite.anims) return;
+        const animationManager = this.sprite.anims.animationManager;
+        const standingFrame = animationManager.get(direction).frames[1].frame.name;
+        this.sprite.anims.stop();
+        this.sprite.setFrame(standingFrame);
     }
 
     public getCombinedStat(stat: keyof typeof this.stats): number {
@@ -105,34 +101,6 @@ export default class Player {
         }
 
         return baseStat + totalEquipmentBonus;
-    }
-
-    public getPosition(): Phaser.Math.Vector2 {
-        return this.sprite.getBottomCenter();
-    }
-
-    public getTilePos(): Phaser.Math.Vector2 {
-        return this.tilePos.clone();
-    }
-
-    public setPosition(position: Phaser.Math.Vector2): void {
-        this.sprite.setPosition(position.x, position.y);
-    }
-
-    public setTilePos(tilePosition: Phaser.Math.Vector2): void {
-        this.tilePos = tilePosition.clone();
-    }
-
-    public startAnimation(direction: Direction) {
-        this.sprite.anims.play(direction);
-    }
-
-    public stopAnimation(direction: Direction) {
-        if (!this.sprite.anims) return;
-        const animationManager = this.sprite.anims.animationManager;
-        const standingFrame = animationManager.get(direction).frames[1].frame.name;
-        this.sprite.anims.stop();
-        this.sprite.setFrame(standingFrame);
     }
 
 }

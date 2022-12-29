@@ -59,12 +59,34 @@ export default class MusicScene extends Phaser.Scene {
     }
 
     public changeSong(songName: string) {
-        this.muteMusic();
         this.currentTrack = songName;
-        if (this.muted) {
-            return;
+        this.stopAllSongs();
+        if (!this.muted) {
+            this.playCurrentSong();
         }
-        else if (this.currentTrack === 'overworld') {
+    }
+
+    public unmuteMusic() {
+        // unmuting the music!!
+        if (!this.muted) {
+            this.playCurrentSong();
+        }
+    }
+
+    public muteMusic() {
+        // muting music!
+        this.stopAllSongs();
+    }
+
+    private stopAllSongs() {
+        this.overworldSong.stop();
+        this.battleSong.stop();
+        this.gameOverSong.stop();
+        this.townSong.stop();
+    }
+
+    private playCurrentSong() {
+        if (this.currentTrack === 'overworld') {
             // playing the overworld track!
             this.overworldSong.play();
         }
@@ -76,38 +98,6 @@ export default class MusicScene extends Phaser.Scene {
         }
         else if (this.currentTrack === 'town') {
             this.townSong.play();
-        }
-    }
-
-    public unmuteMusic() {
-        // unmuting the music!!
-        if (this.currentTrack === 'overworld') {
-            this.overworldSong.play();
-        }
-        else if (this.currentTrack === 'battle') {
-            this.battleSong.play();
-        }
-        else if (this.currentTrack === 'gameover') {
-            this.gameOverSong.play();
-        }
-        else if (this.currentTrack === 'town') {
-            this.townSong.play();
-        }
-    }
-
-    public muteMusic() {
-        // muting music!
-        if (this.currentTrack === 'overworld') {
-            this.overworldSong.stop();
-        }
-        else if (this.currentTrack === 'battle') {
-            this.battleSong.stop();
-        }
-        else if (this.currentTrack === 'gameover') {
-            this.gameOverSong.stop();
-        }
-        else if (this.currentTrack === 'town') {
-            this.townSong.stop();
         }
     }
 }
