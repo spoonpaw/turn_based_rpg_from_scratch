@@ -5,6 +5,7 @@ import BattleUIScene from '../scenes/BattleUIScene';
 import GameScene from '../scenes/GameScene';
 import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
+// import { getCombinedStat } from '../utils/getCombinedStat';
 import Item from './Item';
 
 
@@ -48,6 +49,7 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
     abstract updateSceneOnReceivingDamage(): void;
 
+
     public getCombinedStat(stat: keyof typeof this.stats): number {
         const baseStat = this.stats[stat];
         let weaponBonus = 0;
@@ -78,6 +80,4 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
         return baseStat + totalEquipmentBonus;
     }
-
-
 }

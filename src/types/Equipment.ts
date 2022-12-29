@@ -5,4 +5,5 @@ export interface Equipment {
     head: Item | undefined;
     offhand: Item | undefined;
     weapon: Item | undefined;
+    [key: string]: Item | undefined;
 }

@@ -61,7 +61,7 @@ export default class Merchant extends NPC {
         this.uiScene.sellButton.setVisible(true);
         this.uiScene.sellButton.buttonText.setVisible(true);
 
-        this.uiScene.updateAndShowCancelButton(315, 315, 'Cancel');
+        this.uiScene.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
         this.uiScene.destroyMerchantInventoryButtons();
         this.uiScene.generateMerchantInventoryButtons(this.inventory);

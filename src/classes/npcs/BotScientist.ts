@@ -53,7 +53,7 @@ export default class extends NPC {
 
         if (this.checkIfPlayerHasBot()) {
 
-            this.uiScene.updateAndShowCancelButton(670, 380, 'Farewell');
+            this.uiScene.updateAndShowCancelButton(670, 380, 'Farewell', true);
 
             eventsCenter.on('space', () => {
                 this.gameScene.gamePadScene?.scene.restart();

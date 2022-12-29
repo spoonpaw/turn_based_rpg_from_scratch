@@ -7,6 +7,7 @@ import Merchant from '../classes/npcs/Merchant';
 import UIActionButton from '../classes/UIActionButton';
 import {ItemInterface} from '../items/items';
 import eventsCenter from '../utils/EventsCenter';
+import {updateCancelButton} from '../utils/updateCancelButton';
 import GameScene from './GameScene';
 import MusicScene from './MusicScene';
 import SFXScene from './SFXScene';
@@ -315,7 +316,7 @@ export default class UIScene extends Phaser.Scene {
                     this.purchaseItemButton.buttonText.setText(`Purchase for ${item.cost} gold`);
                     this.purchaseItemButton.buttonText.setVisible(true);
 
-                    this.updateAndShowCancelButton(10, 460, 'Cancel');
+                    this.updateAndShowCancelButton(10, 460, 'Cancel', true);
 
                     if (item.type === 'consumable') {
                         this.inventoryAndAbilityDetailText.setText(
@@ -820,6 +821,7 @@ export default class UIScene extends Phaser.Scene {
         this.selectedItemAndAbilityIcon.setVisible(false);
         this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
 
+
         this.sellItemButton = new UIActionButton(
             this,
             35,
@@ -828,49 +830,29 @@ export default class UIScene extends Phaser.Scene {
             'checkbutton',
             'Sell',
             () => {
-
                 if (
                     this.currentNPC instanceof Merchant &&
                     this.currentNPC.inventory &&
                     this.interactionState.startsWith('merchantsellitem')
                 ) {
-                    // handle selling the item, take the item from the player
-                    //  and put the gold in their inventory
-                    //  process the sale
-
                     const itemIndex = this.interactionState.split('merchantsellitem')[1];
                     const itemToSell = this.gameScene.player.inventory[Number(itemIndex)];
                     const sellPrice = itemToSell.sellPrice;
                     this.gameScene.player.inventory.splice(Number(itemIndex), 1);
                     this.gameScene.player.gold += sellPrice;
 
-                    // hide all merchant related frames
-                    this.inventoryAndAbilityMenuFrame.setVisible(false);
-                    this.subInventoryAndAbilityMenuFrame.setVisible(false);
-                    this.inventoryAndAbilityDetailFrame.setVisible(false);
-                    this.inventoryAndAbilityDetailText.setVisible(false);
-                    this.sellItemButton.setVisible(false);
-                    this.sellItemButton.buttonText.setVisible(false);
-                    this.buyButton.setVisible(false);
-                    this.buyButton.buttonText.setVisible(false);
-                    this.sellButton.setVisible(false);
-                    this.sellButton.buttonText.setVisible(false);
-
-                    for (const inventoryToSellButton of this.inventoryToSellButtons) {
-                        inventoryToSellButton.setVisible(false);
-                        inventoryToSellButton.buttonText.setVisible(false);
-                    }
-
+                    this.hideMerchantFrames();
                     this.leftSideDialogFrame.setVisible(true);
                     this.leftSideDialogText.setText('Merchant:\nThanketh thee f\'r thy patronage!');
                     this.leftSideDialogText.setVisible(true);
 
-                    this.updateAndShowCancelButton(670, 380, 'Farewell');
+                    this.updateAndShowCancelButton(670, 380, 'Farewell', true);
 
                     this.updateGold();
                 }
             }
         );
+
         this.sellItemButton.setVisible(false);
         this.sellItemButton.buttonText.setVisible(false);
 
@@ -892,85 +874,15 @@ export default class UIScene extends Phaser.Scene {
                     // get the item index from the interaction state
                     const itemIndex = this.interactionState.split('merchantbuyitem')[1];
                     const selectedItem = this.currentNPC.inventory[Number(itemIndex)];
-                    // purchasing ${selectedItem.name}
-                    // get the player's gold, if it's too low then he gets nothing
 
                     if (this.gameScene.player.inventory.length === 8) {
-                        // hide all the merchant related frames
-                        this.inventoryAndAbilityMenuFrame.setVisible(false);
-                        this.subInventoryAndAbilityMenuFrame.setVisible(false);
-                        this.inventoryAndAbilityDetailFrame.setVisible(false);
-                        this.inventoryAndAbilityDetailText.setVisible(false);
-                        this.purchaseItemButton.setVisible(false);
-                        this.purchaseItemButton.buttonText.setVisible(false);
-                        this.buyButton.setVisible(false);
-                        this.buyButton.buttonText.setVisible(false);
-                        this.sellButton.setVisible(false);
-                        this.sellButton.buttonText.setVisible(false);
-
-                        for (const merchantInventoryButton of this.merchantInventoryButtons) {
-                            merchantInventoryButton.setVisible(false);
-                            merchantInventoryButton.buttonText.setVisible(false);
-                        }
-                        this.leftSideDialogFrame.setVisible(true);
-                        this.leftSideDialogText.setText('Merchant:\nThou art ov\'r encumb\'r\'d!');
-                        this.leftSideDialogText.setVisible(true);
-
-                        this.updateAndShowCancelButton(670, 380, 'Farewell');
+                        this.showMerchantRejection('Thou art ov\'r encumb\'r\'d!');
                     }
                     else if (this.gameScene.player.gold < selectedItem.cost) {
-                        // process the rejection
-
-                        // hide all the merchant related frames
-                        this.inventoryAndAbilityMenuFrame.setVisible(false);
-                        this.subInventoryAndAbilityMenuFrame.setVisible(false);
-                        this.inventoryAndAbilityDetailFrame.setVisible(false);
-                        this.inventoryAndAbilityDetailText.setVisible(false);
-                        this.purchaseItemButton.setVisible(false);
-                        this.purchaseItemButton.buttonText.setVisible(false);
-                        this.buyButton.setVisible(false);
-                        this.buyButton.buttonText.setVisible(false);
-                        this.sellButton.setVisible(false);
-                        this.sellButton.buttonText.setVisible(false);
-
-                        for (const merchantInventoryButton of this.merchantInventoryButtons) {
-                            merchantInventoryButton.setVisible(false);
-                            merchantInventoryButton.buttonText.setVisible(false);
-                        }
-                        this.leftSideDialogFrame.setVisible(true);
-                        this.leftSideDialogText.setText('Merchant:\nYou haven\'t enough coin!');
-                        this.leftSideDialogText.setVisible(true);
-
-                        this.updateAndShowCancelButton(670, 380, 'Farewell');
+                        this.showMerchantRejection('You haven\'t enough coin!');
                     }
                     else {
-                        // handle buying the item, take the gold from the player
-                        //  and put the item in their inventory
-                        //  process the purchase
-                        this.interactionState = 'merchantresponse';
-
-                        // hide all the merchant related frames
-                        this.inventoryAndAbilityMenuFrame.setVisible(false);
-                        this.subInventoryAndAbilityMenuFrame.setVisible(false);
-                        this.inventoryAndAbilityDetailFrame.setVisible(false);
-                        this.inventoryAndAbilityDetailText.setVisible(false);
-                        this.purchaseItemButton.setVisible(false);
-                        this.purchaseItemButton.buttonText.setVisible(false);
-                        this.buyButton.setVisible(false);
-                        this.buyButton.buttonText.setVisible(false);
-                        this.sellButton.setVisible(false);
-                        this.sellButton.buttonText.setVisible(false);
-
-                        for (const merchantInventoryButton of this.merchantInventoryButtons) {
-                            merchantInventoryButton.setVisible(false);
-                            merchantInventoryButton.buttonText.setVisible(false);
-                        }
-                        this.leftSideDialogFrame.setVisible(true);
-                        this.leftSideDialogText.setText('Merchant:\nThanketh thee f\'r thy patronage!');
-                        this.leftSideDialogText.setVisible(true);
-
-                        this.updateAndShowCancelButton(670, 380, 'Farewell');
-
+                        this.gameScene.player.gold -= selectedItem.cost;
                         this.gameScene.player.inventory.push(
                             new Item(
                                 selectedItem.key,
@@ -984,14 +896,21 @@ export default class UIScene extends Phaser.Scene {
                                 selectedItem.classes,
                                 selectedItem.minimumLevel,
                                 selectedItem.stats
-                            )
-                        );
-                        this.gameScene.player.gold -= selectedItem.cost;
-                        this.updateGold();
+                            ));
+
+                        // hide all the merchant related frames
+                        this.hideMerchantFrames();
+                        this.leftSideDialogFrame.setVisible(true);
+                        this.leftSideDialogText.setText('Merchant:\nThanketh thee f\'r thy patronage!');
+                        this.leftSideDialogText.setVisible(true);
+
+                        this.updateAndShowCancelButton(670, 380, 'Farewell', true);
                     }
                 }
             }
         );
+
+
         this.purchaseItemButton.setVisible(false);
         this.purchaseItemButton.buttonText.setVisible(false);
 
@@ -1070,13 +989,7 @@ export default class UIScene extends Phaser.Scene {
                     this.rightSideDialogText.setText('Not enough inventory space to remove the item.');
                     this.rightSideDialogText.setVisible(true);
 
-                    this.cancelButton.setX(247);
-                    this.cancelButton.setY(572);
-                    this.cancelButton.buttonText.setX(267);
-                    this.cancelButton.buttonText.setY(547);
-
-                    this.cancelButton.setVisible(true);
-                    this.cancelButton.buttonText.setVisible(true);
+                    this.updateAndShowCancelButton(215, 537, 'Cancel', false);
                 }
                 else {
                     // take the item out of the player's equipment, put
@@ -1101,7 +1014,7 @@ export default class UIScene extends Phaser.Scene {
                     this.unequipButton.setVisible(false);
                     this.unequipButton.buttonText.setVisible(false);
 
-                    this.updateAndShowCancelButton(315, 315, 'Cancel');
+                    this.updateAndShowCancelButton(315, 315, 'Cancel', true);
                 }
             }
         );
@@ -1339,7 +1252,7 @@ export default class UIScene extends Phaser.Scene {
                     equipmentButton.buttonText.setVisible(true);
                 }
 
-                this.updateAndShowCancelButton(315, 315, 'Cancel');
+                this.updateAndShowCancelButton(315, 315, 'Cancel', true);
             }
         );
         this.subInventoryEquipmentButton.setVisible(false);
@@ -1566,7 +1479,7 @@ export default class UIScene extends Phaser.Scene {
                 this.subInventoryEquipmentButton.deselect();
                 this.subInventoryQuestButton.deselect();
 
-                this.updateAndShowCancelButton(315, 315, 'Cancel');
+                this.updateAndShowCancelButton(315, 315, 'Cancel', true);
             }
         );
 
@@ -1693,7 +1606,7 @@ export default class UIScene extends Phaser.Scene {
                     subAbilityButton.buttonText.setVisible(true);
                 }
 
-                this.updateAndShowCancelButton(315, 315, 'Cancel');
+                this.updateAndShowCancelButton(315, 315, 'Cancel', true);
             }
         );
 
@@ -1735,7 +1648,7 @@ export default class UIScene extends Phaser.Scene {
                 this.characterSheetButton.select();
                 this.inventoryAndAbilityMenuFrame.setVisible(true);
 
-                this.updateAndShowCancelButton(315, 488, 'Cancel');
+                this.updateAndShowCancelButton(315, 488, 'Cancel', true);
 
                 this.classString.setVisible(true);
                 this.levelString.setVisible(true);
@@ -1941,7 +1854,7 @@ export default class UIScene extends Phaser.Scene {
                     this.sellItemButton.buttonText.setText(`Sell for ${item.sellPrice} gold`);
                     this.sellItemButton.buttonText.setVisible(true);
 
-                    this.updateAndShowCancelButton(10, 460, 'Cancel');
+                    this.updateAndShowCancelButton(10, 460, 'Cancel', true);
 
                     if (item.type === 'weapon' || item.type === 'bodyarmor') {
                         this.inventoryAndAbilityDetailText.setText(
@@ -1982,16 +1895,44 @@ export default class UIScene extends Phaser.Scene {
         this.tillNextLevelString.setText(`Till Next Level: ${this.calculateTilNextLevel()}`);
     }
 
-    public updateAndShowCancelButton(x: number, y: number, text: string) {
-        this.cancelMenuFrame.setX(x);
-        this.cancelMenuFrame.setY(y);
-        this.cancelButton.setX(x + 32);
-        this.cancelButton.setY(y + 35);
-        this.cancelButton.buttonText.setX(x + 52);
-        this.cancelButton.buttonText.setY(y + 10);
-        this.cancelButton.buttonText.setText(text);
-        this.cancelMenuFrame.setVisible(true);
-        this.cancelButton.setVisible(true);
-        this.cancelButton.buttonText.setVisible(true);
+
+    public updateAndShowCancelButton(x: number, y: number, text: string, show: boolean) {
+        // call the new function to update the cancel button and its components, and control the visibility of the cancel frame
+        updateCancelButton(this.cancelButton, this.cancelMenuFrame, x, y, text, show);
+    }
+
+    public showMerchantRejection(rejectionText: string) {
+        // hide all the merchant related frames
+        this.hideMerchantFrames();
+        this.leftSideDialogFrame.setVisible(true);
+        this.leftSideDialogText.setText(`Merchant:\n${rejectionText}`);
+        this.leftSideDialogText.setVisible(true);
+
+        this.updateAndShowCancelButton(670, 380, 'Farewell', true);
+    }
+
+    private hideMerchantFrames() {
+        this.inventoryAndAbilityMenuFrame.setVisible(false);
+        this.subInventoryAndAbilityMenuFrame.setVisible(false);
+        this.inventoryAndAbilityDetailFrame.setVisible(false);
+        this.inventoryAndAbilityDetailText.setVisible(false);
+        this.purchaseItemButton.setVisible(false);
+        this.purchaseItemButton.buttonText.setVisible(false);
+        this.buyButton.setVisible(false);
+        this.buyButton.buttonText.setVisible(false);
+        this.sellButton.setVisible(false);
+        this.sellButton.buttonText.setVisible(false);
+        this.sellItemButton.setVisible(false);
+        this.sellItemButton.buttonText.setVisible(false);
+
+        for (const inventoryToSellButton of this.inventoryToSellButtons) {
+            inventoryToSellButton.setVisible(false);
+            inventoryToSellButton.buttonText.setVisible(false);
+        }
+
+        for (const merchantInventoryButton of this.merchantInventoryButtons) {
+            merchantInventoryButton.setVisible(false);
+            merchantInventoryButton.buttonText.setVisible(false);
+        }
     }
 }

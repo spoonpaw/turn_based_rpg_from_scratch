@@ -95,7 +95,7 @@ export default class Innkeeper extends NPC {
                 this.uiScene.noButton.setVisible(false);
                 this.uiScene.noButton.buttonText.setVisible(false);
                 
-                this.uiScene.updateAndShowCancelButton(670, 380, 'Farewell');
+                this.uiScene.updateAndShowCancelButton(670, 380, 'Farewell', true);
 
                 // if the player doesn't have enough gold, tell him so
                 //  otherwise heal him!

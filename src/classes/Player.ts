@@ -3,8 +3,10 @@ import UIScene from '../scenes/UIScene';
 import Stats from '../stats/Stats';
 import {Direction} from '../types/Direction';
 import {Equipment} from '../types/Equipment';
+// import { getCombinedStat } from '../utils/getCombinedStat';
 import GameActor from './GameActor';
 import Item from './Item';
+
 
 export default class Player extends GameActor{
     public stats: Stats;
@@ -72,35 +74,8 @@ export default class Player extends GameActor{
         this.sprite.setFrame(standingFrame);
     }
 
-    public getCombinedStat(stat: keyof typeof this.stats): number {
-        const baseStat = this.stats[stat];
-        let weaponBonus = 0;
-        if (this.equipment.weapon) {
-            weaponBonus += this.equipment.weapon.stats![stat as keyof typeof this.equipment.weapon.stats];
-        }
-
-        let headBonus = 0;
-        if (this.equipment.head) {
-            headBonus += this.equipment.head.stats![stat as keyof typeof this.equipment.head.stats];
-        }
-
-        let bodyBonus = 0;
-        if (this.equipment.body) {
-            bodyBonus += this.equipment.body.stats![stat as keyof typeof this.equipment.body.stats];
-        }
-
-        let offHandBonus = 0;
-        if (this.equipment.offhand) {
-            offHandBonus += this.equipment.offhand.stats![stat as keyof typeof this.equipment.offhand.stats];
-        }
-
-        const totalEquipmentBonus = weaponBonus + headBonus + bodyBonus + offHandBonus;
-
-        if (stat === 'defense') {
-            return (this.stats.agility / 2) + totalEquipmentBonus;
-        }
-
-        return baseStat + totalEquipmentBonus;
-    }
-
+    // public getCombinedStat(stat: keyof typeof this.stats): number {
+    //     // call the new function to calculate the combined stat
+    //     return getCombinedStat(this.stats, this.equipment, stat);
+    // }
 }

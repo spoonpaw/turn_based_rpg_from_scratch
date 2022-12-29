@@ -1,6 +1,7 @@
 import Message from '../classes/Message';
 import UIActionButton from '../classes/UIActionButton';
 import eventsCenter from '../utils/EventsCenter';
+import {updateCancelButton} from '../utils/updateCancelButton';
 import BattleScene from './BattleScene';
 import MusicScene from './MusicScene';
 
@@ -565,19 +566,7 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.commandMenuText.setText('');
 
-        this.cancelButton.setX(347);
-        this.cancelButton.setY(350);
-
-        this.cancelButton.buttonText.setY(325);
-        this.cancelButton.buttonText.setX(367);
-
-        this.cancelMenuFrame.setX(315);
-        this.cancelMenuFrame.setY(315);
-
-        this.cancelButton.setVisible(true);
-        this.cancelButton.buttonText.setText('Cancel');
-        this.cancelButton.buttonText.setVisible(true);
-        this.cancelMenuFrame.setVisible(true);
+        this.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
         this.battleScene.interactionState = 'ability';
 
@@ -597,15 +586,6 @@ export default class BattleUIScene extends Phaser.Scene {
         this.hotkeyMenuFrame.setVisible(true);
         this.hotkeyButton1.setVisible(true);
         this.hotkeyBadge1.setVisible(true);
-
-        this.cancelMenuFrame.setX(698);
-        this.cancelMenuFrame.setY(430);
-
-        this.cancelButton.setX(730);
-        this.cancelButton.setY(465);
-
-        this.cancelButton.buttonText.setX(750);
-        this.cancelButton.buttonText.setY(440);
 
         this.inventoryAndAbilityDetailFrame.setVisible(false);
         this.inventoryAndAbilityDetailText.setVisible(false);
@@ -628,11 +608,8 @@ export default class BattleUIScene extends Phaser.Scene {
         this.selectedItemAndAbilityCommandText.setVisible(false);
 
         this.confirmMenuFrame.setVisible(true);
-        this.cancelMenuFrame.setVisible(true);
 
-        this.cancelButton.setVisible(true);
-        this.cancelButton.buttonText.setText('Cancel');
-        this.cancelButton.buttonText.setVisible(true);
+        this.updateAndShowCancelButton(698, 430, 'Cancel', true);
 
         this.commandMenuText.setText('Choose A Target');
         this.commandMenuText.setVisible(true);
@@ -700,19 +677,8 @@ export default class BattleUIScene extends Phaser.Scene {
         this.inventoryAndAbilityMenuFrame.setVisible(true);
         this.subInventoryAndAbilityMenuFrame.setVisible(true);
 
-        this.cancelButton.setX(347);
-        this.cancelButton.setY(350);
+        this.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
-        this.cancelButton.buttonText.setY(325);
-        this.cancelButton.buttonText.setX(367);
-
-        this.cancelMenuFrame.setX(315);
-        this.cancelMenuFrame.setY(315);
-
-        this.cancelButton.setVisible(true);
-        this.cancelButton.buttonText.setText('Cancel');
-        this.cancelButton.buttonText.setVisible(true);
-        this.cancelMenuFrame.setVisible(true);
 
         this.battleScene.interactionState = 'inventory';
 
@@ -730,6 +696,12 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.subInventoryBagButton.select();
     }
+
+    public updateAndShowCancelButton(x: number, y: number, text: string, show: boolean) {
+        // call the new function to update the cancel button and its components, and control the visibility of the cancel frame
+        updateCancelButton(this.cancelButton, this.cancelMenuFrame, x, y, text, show);
+    }
+
 
     private selectRun() {
         this.closeInventory();
