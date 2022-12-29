@@ -52,16 +52,8 @@ export default class extends NPC {
         this.uiScene.leftSideDialogText.setVisible(true);
 
         if (this.checkIfPlayerHasBot()) {
-            this.uiScene.cancelMenuFrame.setX(670);
-            this.uiScene.cancelMenuFrame.setY(380);
-            this.uiScene.cancelButton.setX(702);
-            this.uiScene.cancelButton.setY(415);
-            this.uiScene.cancelButton.buttonText.setX(722);
-            this.uiScene.cancelButton.buttonText.setY(390);
-            this.uiScene.cancelButton.buttonText.setText('Farewell');
-            this.uiScene.cancelMenuFrame.setVisible(true);
-            this.uiScene.cancelButton.setVisible(true);
-            this.uiScene.cancelButton.buttonText.setVisible(true);
+
+            this.uiScene.updateAndShowCancelButton(670, 380, 'Farewell');
 
             eventsCenter.on('space', () => {
                 this.gameScene.gamePadScene?.scene.restart();

@@ -310,22 +310,12 @@ export default class UIScene extends Phaser.Scene {
                             uiButton.deselect();
                         }
                     }
-                    this.cancelMenuFrame.setVisible(false);
-                    this.cancelButton.setVisible(false);
-                    this.cancelButton.buttonText.setVisible(false);
                     this.inventoryAndAbilityDetailFrame.setVisible(true);
                     this.purchaseItemButton.setVisible(true);
                     this.purchaseItemButton.buttonText.setText(`Purchase for ${item.cost} gold`);
                     this.purchaseItemButton.buttonText.setVisible(true);
-                    this.cancelMenuFrame.setX(10);
-                    this.cancelMenuFrame.setY(460);
-                    this.cancelMenuFrame.setVisible(true);
-                    this.cancelButton.setX(42);
-                    this.cancelButton.setY(495);
-                    this.cancelButton.setVisible(true);
-                    this.cancelButton.buttonText.setX(62);
-                    this.cancelButton.buttonText.setY(470);
-                    this.cancelButton.buttonText.setVisible(true);
+
+                    this.updateAndShowCancelButton(10, 460, 'Cancel');
 
                     if (item.type === 'consumable') {
                         this.inventoryAndAbilityDetailText.setText(
@@ -875,16 +865,7 @@ export default class UIScene extends Phaser.Scene {
                     this.leftSideDialogText.setText('Merchant:\nThanketh thee f\'r thy patronage!');
                     this.leftSideDialogText.setVisible(true);
 
-                    this.cancelMenuFrame.setX(670);
-                    this.cancelMenuFrame.setY(380);
-                    this.cancelMenuFrame.setVisible(true);
-                    this.cancelButton.setX(702);
-                    this.cancelButton.setY(415);
-                    this.cancelButton.setVisible(true);
-                    this.cancelButton.buttonText.setX(722);
-                    this.cancelButton.buttonText.setY(390);
-                    this.cancelButton.buttonText.setText('Farewell');
-                    this.cancelButton.buttonText.setVisible(true);
+                    this.updateAndShowCancelButton(670, 380, 'Farewell');
 
                     this.updateGold();
                 }
@@ -935,16 +916,7 @@ export default class UIScene extends Phaser.Scene {
                         this.leftSideDialogText.setText('Merchant:\nThou art ov\'r encumb\'r\'d!');
                         this.leftSideDialogText.setVisible(true);
 
-                        this.cancelMenuFrame.setX(670);
-                        this.cancelMenuFrame.setY(380);
-                        this.cancelMenuFrame.setVisible(true);
-                        this.cancelButton.setX(702);
-                        this.cancelButton.setY(415);
-                        this.cancelButton.setVisible(true);
-                        this.cancelButton.buttonText.setX(722);
-                        this.cancelButton.buttonText.setY(390);
-                        this.cancelButton.buttonText.setText('Farewell');
-                        this.cancelButton.buttonText.setVisible(true);
+                        this.updateAndShowCancelButton(670, 380, 'Farewell');
                     }
                     else if (this.gameScene.player.gold < selectedItem.cost) {
                         // process the rejection
@@ -969,16 +941,7 @@ export default class UIScene extends Phaser.Scene {
                         this.leftSideDialogText.setText('Merchant:\nYou haven\'t enough coin!');
                         this.leftSideDialogText.setVisible(true);
 
-                        this.cancelMenuFrame.setX(670);
-                        this.cancelMenuFrame.setY(380);
-                        this.cancelMenuFrame.setVisible(true);
-                        this.cancelButton.setX(702);
-                        this.cancelButton.setY(415);
-                        this.cancelButton.setVisible(true);
-                        this.cancelButton.buttonText.setX(722);
-                        this.cancelButton.buttonText.setY(390);
-                        this.cancelButton.buttonText.setText('Farewell');
-                        this.cancelButton.buttonText.setVisible(true);
+                        this.updateAndShowCancelButton(670, 380, 'Farewell');
                     }
                     else {
                         // handle buying the item, take the gold from the player
@@ -1006,16 +969,7 @@ export default class UIScene extends Phaser.Scene {
                         this.leftSideDialogText.setText('Merchant:\nThanketh thee f\'r thy patronage!');
                         this.leftSideDialogText.setVisible(true);
 
-                        this.cancelMenuFrame.setX(670);
-                        this.cancelMenuFrame.setY(380);
-                        this.cancelMenuFrame.setVisible(true);
-                        this.cancelButton.setX(702);
-                        this.cancelButton.setY(415);
-                        this.cancelButton.setVisible(true);
-                        this.cancelButton.buttonText.setX(722);
-                        this.cancelButton.buttonText.setY(390);
-                        this.cancelButton.buttonText.setText('Farewell');
-                        this.cancelButton.buttonText.setVisible(true);
+                        this.updateAndShowCancelButton(670, 380, 'Farewell');
 
                         this.gameScene.player.inventory.push(
                             new Item(
@@ -1121,7 +1075,6 @@ export default class UIScene extends Phaser.Scene {
                     this.cancelButton.buttonText.setX(267);
                     this.cancelButton.buttonText.setY(547);
 
-
                     this.cancelButton.setVisible(true);
                     this.cancelButton.buttonText.setVisible(true);
                 }
@@ -1142,6 +1095,13 @@ export default class UIScene extends Phaser.Scene {
                         equipmentButton.setVisible(true);
                         equipmentButton.buttonText.setVisible(true);
                     }
+
+                    this.inventoryAndAbilityDetailFrame.setVisible(false);
+                    this.inventoryAndAbilityDetailText.setVisible(false);
+                    this.unequipButton.setVisible(false);
+                    this.unequipButton.buttonText.setVisible(false);
+
+                    this.updateAndShowCancelButton(315, 315, 'Cancel');
                 }
             }
         );
@@ -1379,19 +1339,7 @@ export default class UIScene extends Phaser.Scene {
                     equipmentButton.buttonText.setVisible(true);
                 }
 
-                this.cancelButton.setX(347);
-                this.cancelButton.setY(350);
-
-                this.cancelButton.buttonText.setY(325);
-                this.cancelButton.buttonText.setX(367);
-
-                this.cancelMenuFrame.setX(315);
-                this.cancelMenuFrame.setY(315);
-
-                this.cancelMenuFrame.setVisible(true);
-                this.cancelButton.setVisible(true);
-                this.cancelButton.buttonText.setText('Cancel');
-                this.cancelButton.buttonText.setVisible(true);
+                this.updateAndShowCancelButton(315, 315, 'Cancel');
             }
         );
         this.subInventoryEquipmentButton.setVisible(false);
@@ -1618,17 +1566,7 @@ export default class UIScene extends Phaser.Scene {
                 this.subInventoryEquipmentButton.deselect();
                 this.subInventoryQuestButton.deselect();
 
-                this.cancelMenuFrame.setX(315);
-                this.cancelMenuFrame.setY(315);
-                this.cancelMenuFrame.setVisible(true);
-
-                this.cancelButton.setX(347);
-                this.cancelButton.setY(350);
-                this.cancelButton.buttonText.setX(367);
-                this.cancelButton.buttonText.setY(325);
-                this.cancelButton.setVisible(true);
-                this.cancelButton.buttonText.setText('Cancel');
-                this.cancelButton.buttonText.setVisible(true);
+                this.updateAndShowCancelButton(315, 315, 'Cancel');
             }
         );
 
@@ -1755,18 +1693,7 @@ export default class UIScene extends Phaser.Scene {
                     subAbilityButton.buttonText.setVisible(true);
                 }
 
-                this.cancelMenuFrame.setX(315);
-                this.cancelMenuFrame.setY(315);
-                this.cancelMenuFrame.setVisible(true);
-
-                this.cancelButton.setX(347);
-                this.cancelButton.setY(350);
-                this.cancelButton.buttonText.setX(367);
-                this.cancelButton.buttonText.setY(325);
-                this.cancelButton.setVisible(true);
-                this.cancelButton.buttonText.setText('Cancel');
-                this.cancelButton.buttonText.setVisible(true);
-
+                this.updateAndShowCancelButton(315, 315, 'Cancel');
             }
         );
 
@@ -1808,17 +1735,7 @@ export default class UIScene extends Phaser.Scene {
                 this.characterSheetButton.select();
                 this.inventoryAndAbilityMenuFrame.setVisible(true);
 
-                this.cancelMenuFrame.setX(315);
-                this.cancelMenuFrame.setY(488);
-                this.cancelMenuFrame.setVisible(true);
-
-                this.cancelButton.setX(347);
-                this.cancelButton.setY(523);
-                this.cancelButton.buttonText.setX(367);
-                this.cancelButton.buttonText.setY(498);
-                this.cancelButton.setVisible(true);
-                this.cancelButton.buttonText.setText('Cancel');
-                this.cancelButton.buttonText.setVisible(true);
+                this.updateAndShowCancelButton(315, 488, 'Cancel');
 
                 this.classString.setVisible(true);
                 this.levelString.setVisible(true);
@@ -2024,15 +1941,7 @@ export default class UIScene extends Phaser.Scene {
                     this.sellItemButton.buttonText.setText(`Sell for ${item.sellPrice} gold`);
                     this.sellItemButton.buttonText.setVisible(true);
 
-                    this.cancelMenuFrame.setX(10);
-                    this.cancelMenuFrame.setY(460);
-                    this.cancelMenuFrame.setVisible(true);
-                    this.cancelButton.setX(42);
-                    this.cancelButton.setY(495);
-                    this.cancelButton.setVisible(true);
-                    this.cancelButton.buttonText.setX(62);
-                    this.cancelButton.buttonText.setY(470);
-                    this.cancelButton.buttonText.setVisible(true);
+                    this.updateAndShowCancelButton(10, 460, 'Cancel');
 
                     if (item.type === 'weapon' || item.type === 'bodyarmor') {
                         this.inventoryAndAbilityDetailText.setText(
@@ -2073,7 +1982,7 @@ export default class UIScene extends Phaser.Scene {
         this.tillNextLevelString.setText(`Till Next Level: ${this.calculateTilNextLevel()}`);
     }
 
-    private updateAndShowCancelButton(x: number, y: number, text: string) {
+    public updateAndShowCancelButton(x: number, y: number, text: string) {
         this.cancelMenuFrame.setX(x);
         this.cancelMenuFrame.setY(y);
         this.cancelButton.setX(x + 32);
