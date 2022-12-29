@@ -1,12 +1,22 @@
+import Phaser from 'phaser';
+
 import BattleScene from '../scenes/BattleScene';
 import BattleUIScene from '../scenes/BattleUIScene';
 import GameScene from '../scenes/GameScene';
 import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
+import Item from './Item';
+
 
 export default abstract class Unit extends Phaser.GameObjects.Sprite {
     abstract damageTween: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
-    abstract equipment: Equipment;
+    public equipment: Equipment = {
+        body: undefined,
+        head: undefined,
+        offhand: undefined,
+        weapon: undefined
+    };
+    public inventory: Item[] = [];
     public living: boolean;
     abstract stats: Stats;
     abstract type: string;

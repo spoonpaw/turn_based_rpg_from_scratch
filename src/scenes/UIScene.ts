@@ -198,7 +198,6 @@ export default class UIScene extends Phaser.Scene {
 
                 () => {
                     this.interactionState = 'equipmentbody';
-                    console.log({bodyArmor: this.gameScene.player.equipment.body});
                     this.headItemButton.deselect();
                     this.offHandItemButton.deselect();
                     this.mainHandItemButton.deselect();
@@ -544,7 +543,7 @@ export default class UIScene extends Phaser.Scene {
                 useAdvancedWrap: true
             }
         })
-            .setResolution(10)
+            .setResolution(3)
             .setFontSize(50);
         this.goldText.setVisible(false);
 
@@ -554,18 +553,27 @@ export default class UIScene extends Phaser.Scene {
                 useAdvancedWrap: true
             }
         })
-            .setResolution(10)
+            .setResolution(3)
             .setFontSize(50)
             .setLineSpacing(-18);
 
         this.leftSideDialogText = this.add.text(50, 380, '', {
-            color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
+            color: '#ffffff',
+            align: 'left',
+            fontFamily:'CustomFont',
+            fontSize: '50px',
+            wordWrap: {
                 width: 610,
                 useAdvancedWrap: true
+            },
+            metrics: {
+                ascent: 42,
+                descent: 11,
+                fontSize: 50
             }
         })
-            .setResolution(10)
-            .setFontSize(50)
+            .setResolution(3)
+            // .setFontSize(50)
             .setLineSpacing(-18);
 
         this.commandMenuText = this.add.text(244, 440, 'Command?', {
@@ -573,7 +581,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.commandMenuText.setVisible(false);
 
         this.selectedItemAndAbilityCommandText = this.add.text(
@@ -586,7 +594,7 @@ export default class UIScene extends Phaser.Scene {
                 fontFamily: 'CustomFont'
             }
         )
-            .setResolution(10);
+            .setResolution(3);
         this.selectedItemAndAbilityCommandText.setVisible(false);
 
 
@@ -597,7 +605,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.headString.setVisible(false);
         this.equipmentStrings.push(this.headString);
 
@@ -606,7 +614,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.bodyString.setVisible(false);
         this.equipmentStrings.push(this.bodyString);
 
@@ -615,7 +623,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.mainHandString.setVisible(false);
         this.equipmentStrings.push(this.mainHandString);
 
@@ -624,7 +632,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.offHandString.setVisible(false);
         this.equipmentStrings.push(this.offHandString);
 
@@ -637,7 +645,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.classString.setVisible(false);
 
         this.levelString = this.add.text(540, 221, `Level: ${Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)))}`, {
@@ -645,7 +653,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.levelString.setVisible(false);
 
         this.hitPointString = this.add.text(540, 257, `Hit Points: ${this.gameScene.player.stats.currentHP}/${this.gameScene.player.stats.maxHP}`, {
@@ -653,7 +661,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.hitPointString.setVisible(false);
 
         this.manaPointString = this.add.text(540, 293, 'Mana Points: 0/0', {
@@ -661,7 +669,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.manaPointString.setVisible(false);
 
         this.strengthString = this.add.text(540, 329, `Strength: ${Math.floor(this.gameScene.player.getCombinedStat('strength'))}`, {
@@ -669,7 +677,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.strengthString.setVisible(false);
 
         this.agilityString = this.add.text(540, 365, `Agility: ${Math.floor(this.gameScene.player.stats.agility)}`, {
@@ -677,7 +685,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.agilityString.setVisible(false);
 
         this.vitalityString = this.add.text(540, 401, `Vitality: ${Math.floor(this.gameScene.player.stats.vitality)}`, {
@@ -685,7 +693,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.vitalityString.setVisible(false);
 
         this.intellectString = this.add.text(540, 437, `Intellect: ${Math.floor(this.gameScene.player.stats.intellect)}`, {
@@ -693,7 +701,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.intellectString.setVisible(false);
 
         this.luckString = this.add.text(540, 473, `Luck: ${Math.floor(this.gameScene.player.stats.luck)}`, {
@@ -701,7 +709,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.luckString.setVisible(false);
 
         this.defenseString = this.add.text(540, 509, `Defense: ${this.gameScene.player.getCombinedStat('defense')}`, {
@@ -709,7 +717,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.defenseString.setVisible(false);
 
         this.tillNextLevelString = this.add.text(540, 545, `Till Next Level: ${this.calculateTilNextLevel()}`, {
@@ -717,7 +725,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setResolution(10);
+            .setResolution(3);
         this.tillNextLevelString.setVisible(false);
 
         // END CHARACTER SHEET STRING SECTION
@@ -841,12 +849,8 @@ export default class UIScene extends Phaser.Scene {
                     //  process the sale
 
                     const itemIndex = this.interactionState.split('merchantsellitem')[1];
-                    console.log({index: itemIndex});
                     const itemToSell = this.gameScene.player.inventory[Number(itemIndex)];
-                    console.log({itemToSell});
-                    console.log({itemIndex, playerInventory: this.gameScene.player.inventory});
                     const sellPrice = itemToSell.sellPrice;
-                    console.log(`selling ${itemToSell.name}`);
                     this.gameScene.player.inventory.splice(Number(itemIndex), 1);
                     this.gameScene.player.gold += sellPrice;
 
@@ -1129,7 +1133,6 @@ export default class UIScene extends Phaser.Scene {
                     const slotToUnequip = this.interactionState.split('equipment')[1];
                     const itemToUnequip = cloneDeep(this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment]) as Item;
 
-                    console.log({slotToUnequip, itemToUnequip});
                     this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment] = undefined;
                     this.gameScene.player.inventory.push(itemToUnequip);
                     this.destroyEquipmentButtons();
@@ -1200,7 +1203,6 @@ export default class UIScene extends Phaser.Scene {
             'bagbuttonactive',
             'Buy',
             () => {
-                console.log('buy button clicked');
                 // compare to the 'merchant talked to section of code
                 if (this.interactionState === 'merchantbuy') {
                     return;
@@ -1247,7 +1249,6 @@ export default class UIScene extends Phaser.Scene {
                 if (this.interactionState === 'merchantsell') {
                     return;
                 }
-                console.log('sell button clicked');
                 // compare to the 'merchant talked to section of code
                 this.interactionState = 'merchantsell';
 
@@ -1473,7 +1474,7 @@ export default class UIScene extends Phaser.Scene {
         );
         this.inventoryAndAbilityDetailText.setLineSpacing(-16);
         this.inventoryAndAbilityDetailText.setVisible(false);
-        this.inventoryAndAbilityDetailText.setResolution(10);
+        this.inventoryAndAbilityDetailText.setResolution(3);
 
         // set up gold text and icon
         this.manaIcon = this.add.image(100, 663, 'mana');
@@ -1499,7 +1500,7 @@ export default class UIScene extends Phaser.Scene {
             `MP: ${currentMP} / ${maxMP}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
-            .setResolution(10);
+            .setResolution(3);
 
 
         if (this.gameScene.bots[0]?.type === 'Soldier') {
@@ -1517,7 +1518,7 @@ export default class UIScene extends Phaser.Scene {
             `MP: ${currentMP} / ${maxMP}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
-            .setResolution(10);
+            .setResolution(3);
         this.player2ManaText.setVisible(false);
 
 
@@ -1528,7 +1529,7 @@ export default class UIScene extends Phaser.Scene {
             `HP: ${this.gameScene.player.stats.currentHP} / ${this.gameScene.player.stats.maxHP}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
-            .setResolution(10);
+            .setResolution(3);
 
         this.player2hpText = this.add.text(
             345,
@@ -1537,7 +1538,7 @@ export default class UIScene extends Phaser.Scene {
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'}
         )
             .setStroke('#000000', 2)
-            .setResolution(10);
+            .setResolution(3);
         this.player2hpText.setVisible(false);
 
         // create heart icon
@@ -1641,8 +1642,6 @@ export default class UIScene extends Phaser.Scene {
             '',
             () => {
                 // uncomment to log interaction state by clicking player portrait
-                console.log({interactionState: this.interactionState});
-                console.log({currentMap: this.gameScene.currentMap});
                 if (this.interactionState.startsWith('inventoryaction')) {
                     const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
 
@@ -1889,7 +1888,11 @@ export default class UIScene extends Phaser.Scene {
     }
 
     public updateHP(hp: number, maxHp: number) {
-        this.hpText.text = `HP: ${hp} / ${maxHp}`;
+        this.hpText.setText(`HP: ${hp} / ${maxHp}`);
+    }
+
+    public updatePlayer2HP(hp: number, maxHP: number) {
+        this.player2hpText.setText(`HP: ${hp} / ${maxHP}`)
     }
 
     public updateMP(currentMP: number, maxMP: number) {
@@ -2006,9 +2009,6 @@ export default class UIScene extends Phaser.Scene {
                 item.activeKey,
                 item.name,
                 () => {
-                    console.log('clicked an inventory button (selecting to sell)');
-                    console.log({clickedItem: this.gameScene.player.inventory[index]});
-                    console.log({inventoryToSellButtons: this.inventoryToSellButtons});
                     this.interactionState = `merchantsellitem${index}`;
                     this.inventoryIndex = index;
                     this.inventoryToSellButtons[index].select();

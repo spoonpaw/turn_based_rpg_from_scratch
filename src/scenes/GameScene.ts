@@ -1,6 +1,13 @@
 
 // TODO: add an npc who walks in a predescribed pattern and will stop and speak when interacted with
 
+// TODO: add an npc questgiver
+
+// TODO: add items in the dressers
+
+// TODO: add a sign that can be read
+
+
 import {clone} from 'lodash';
 
 import Bot from '../classes/Bot';
@@ -297,16 +304,6 @@ export default class GameScene extends Phaser.Scene {
 
                 this.setupBotGridPhysics();
 
-                console.log({
-                    bot,
-                    botSpriteTexture: bot.sprite.texture,
-                    playerTilePositionX: this.player.getTilePos().x,
-                    playerTilePositionY: this.player.getTilePos().y,
-
-                });
-                // botSprite.setPosition(this.player.getTilePos().x, this.player.getTilePos().y);
-
-                // botSprite.visible = true;
             }
 
 
@@ -618,11 +615,6 @@ export default class GameScene extends Phaser.Scene {
 
     public setupBotGridPhysics() {
         this.bots[0].path.push(this.player.getTilePos());
-        console.log('just pushed the player\'s coordinates to the bot\'s path');
-        console.log('player\'s coords');
-        console.log(this.player.getTilePos());
-        console.log('path:');
-        console.log(this.bots[0].path);
         this.botGridPhysics = new BotGridPhysics(this.bots[0], this.currentTilemap);
         // this.botGridControls = new BotGridControls(this.input, this.gridPhysics);
         this.createBotAnimation('redbot_up', 6, 7);
