@@ -2072,4 +2072,17 @@ export default class UIScene extends Phaser.Scene {
         this.defenseString.setText(`Defense: ${Math.floor(this.gameScene.player.getCombinedStat('defense'))}`);
         this.tillNextLevelString.setText(`Till Next Level: ${this.calculateTilNextLevel()}`);
     }
+
+    private updateAndShowCancelButton(x: number, y: number, text: string) {
+        this.cancelMenuFrame.setX(x);
+        this.cancelMenuFrame.setY(y);
+        this.cancelButton.setX(x + 32);
+        this.cancelButton.setY(y + 35);
+        this.cancelButton.buttonText.setX(x + 52);
+        this.cancelButton.buttonText.setY(y + 10);
+        this.cancelButton.buttonText.setText(text);
+        this.cancelMenuFrame.setVisible(true);
+        this.cancelButton.setVisible(true);
+        this.cancelButton.buttonText.setVisible(true);
+    }
 }

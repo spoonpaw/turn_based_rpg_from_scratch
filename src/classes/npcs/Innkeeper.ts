@@ -117,6 +117,13 @@ export default class Innkeeper extends NPC {
                     this.gameScene.player.gold -= 3;
                     this.uiScene.goldText.setText(`${this.gameScene.player.gold} gp`);
                     this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
+                    if (this.gameScene.bots.length > 0) {
+                        this.gameScene.bots[0].stats.currentHP = this.gameScene.bots[0].stats.maxHP;
+                        this.uiScene.updatePlayer2HP(
+                            this.gameScene.bots[0].stats.currentHP,
+                            this.gameScene.bots[0].stats.maxHP
+                        );
+                    }
                     this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
                     this.uiScene.updateMP(this.gameScene.player.stats.currentMP, this.gameScene.player.stats.maxMP);
                 }

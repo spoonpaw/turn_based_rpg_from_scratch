@@ -489,18 +489,24 @@ export default class BattleUIScene extends Phaser.Scene {
     }
 
     public hideUIFrames() {
-        this.cancelButton.setVisible(false);
-        this.cancelButton.buttonText.setVisible(false);
-        // this.cancelText.setVisible(false);
-        this.cancelMenuFrame.setVisible(false);
-        this.confirmMenuFrame.setVisible(false);
-        this.commandMenuFrame.setVisible(false);
-        this.commandMenuText.setVisible(false);
-        this.selectedItemAndAbilityCommandText.setVisible(false);
-        this.hotkeyMenuFrame.setVisible(false);
-        this.hotkeyButton1.setVisible(false);
-        this.hotkeyBadge1.setVisible(false);
+        const elementsToHide = [
+            this.cancelButton,
+            this.cancelButton.buttonText,
+            this.cancelMenuFrame,
+            this.confirmMenuFrame,
+            this.commandMenuFrame,
+            this.commandMenuText,
+            this.selectedItemAndAbilityCommandText,
+            this.hotkeyMenuFrame,
+            this.hotkeyButton1,
+            this.hotkeyBadge1
+        ];
+
+        for (const element of elementsToHide) {
+            element.setVisible(false);
+        }
     }
+
 
     public showCommandAndHotkeyFrames() {
         this.commandMenuFrame.setVisible(true);
@@ -512,7 +518,6 @@ export default class BattleUIScene extends Phaser.Scene {
     }
 
     private initiateBattleUI() {
-
         this.hideUIFrames();
         eventsCenter.emit('Message', `A ${this.battleScene.enemies[0].type} approaches.`);
     }
@@ -624,7 +629,7 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.confirmMenuFrame.setVisible(true);
         this.cancelMenuFrame.setVisible(true);
-        // this.cancelText.setVisible(true);
+
         this.cancelButton.setVisible(true);
         this.cancelButton.buttonText.setText('Cancel');
         this.cancelButton.buttonText.setVisible(true);

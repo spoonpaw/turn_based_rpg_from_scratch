@@ -1,11 +1,11 @@
-import Soldier from '../jobs/Soldier';
 import GameScene from '../scenes/GameScene';
 import UIScene from '../scenes/UIScene';
 import Stats from '../stats/Stats';
 import {Direction} from '../types/Direction';
 import Vector2 = Phaser.Math.Vector2;
+import GameActor from './GameActor';
 
-export default class Bot {
+export default class Bot extends GameActor{
     public tilePos!: Phaser.Math.Vector2;
     public stats: Stats;
     private uiScene: UIScene;
@@ -22,6 +22,7 @@ export default class Bot {
         stats?: Stats
     ) {
 
+        super();
         this.gameScene = <GameScene>this.sprite.scene.scene.get('Game');
         this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
 
@@ -36,44 +37,10 @@ export default class Bot {
             startingPositionY * GameScene.TILE_SIZE + offsetY
         );
         this.sprite.setFrame(1);
-        this.stats = stats ?? this.createStatsForNewBot(this.type);
+        this.stats = stats ?? this.createStats(this.type);
 
         // Initialize this.tilePos here
         this.tilePos = new Vector2(startingPositionX, startingPositionY);
-    }
-
-    private createStatsForNewBot(type: string) {
-        if (type === 'Soldier') {
-            return new Stats(
-                Soldier.advancement[0].strength,
-                Soldier.advancement[0].agility,
-                Soldier.advancement[0].vitality,
-                Soldier.advancement[0].intellect,
-                Soldier.advancement[0].luck,
-                Soldier.advancement[0].vitality * 2,
-                Soldier.advancement[0].vitality * 2,
-                Soldier.advancement[0].intellect * 2,
-                Soldier.advancement[0].intellect * 2,
-                Soldier.advancement[0].strength,
-                Soldier.advancement[0].agility / 2
-            );
-
-        }
-        else {
-            return new Stats(
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0
-            );
-        }
     }
 
     public setPosition(position: Phaser.Math.Vector2) {

@@ -70,7 +70,7 @@ export default class TitleScene extends Phaser.Scene {
 
     public handleInput(camera: Camera) {
         // sets the overworld music
-        this.musicScene.changeSong('overworld');
+        this.musicScene.changeSong('town');
 
         this.input.keyboard!.enabled = false;
         this.input.enabled = false;
