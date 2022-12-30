@@ -355,17 +355,19 @@ export default class BattleUIScene extends Phaser.Scene {
                 this.subInventoryBagButton.setVisible(false);
                 this.subInventoryBagButton.buttonText.setVisible(false);
 
-                this.cancelMenuFrame.setX(698);
-                this.cancelMenuFrame.setY(430);
-                this.cancelMenuFrame.setVisible(true);
+                // this.cancelMenuFrame.setX(698);
+                // this.cancelMenuFrame.setY(430);
+                // this.cancelMenuFrame.setVisible(true);
 
                 this.confirmSelectedAbilityOrItemFrame.setVisible(true);
                 this.confirmSelectedAbilityOrItemFrameB.setVisible(true);
 
-                this.cancelButton.setX(730);
-                this.cancelButton.setY(465);
-                this.cancelButton.buttonText.setX(750);
-                this.cancelButton.buttonText.setY(440);
+                // this.cancelButton.setX(730);
+                // this.cancelButton.setY(465);
+                // this.cancelButton.buttonText.setX(750);
+                // this.cancelButton.buttonText.setY(440);
+
+                this.updateAndShowCancelButton(698, 430, 'Cancel', true);
 
                 this.inventoryAndAbilityMenuFrame.setVisible(false);
                 for (const inventoryButton of this.inventoryButtons) {
@@ -459,18 +461,20 @@ export default class BattleUIScene extends Phaser.Scene {
                     this.battleScene.interactionState = `selectinginventoryaction${index}`;
                     const selectedItemIndex = Number(this.battleScene.interactionState.split('selectinginventoryaction')[1]);
                     const selectedItem = this.battleScene.gameScene.player.inventory[selectedItemIndex];
-                    this.cancelMenuFrame.setVisible(false);
+                    // this.cancelMenuFrame.setVisible(false);
                     this.inventoryAndAbilityDetailFrame.setVisible(true);
                     this.inventoryAndAbilityDetailText.setText(selectedItem.description);
                     this.inventoryAndAbilityDetailText.setVisible(true);
                     this.useButton.setVisible(true);
                     this.useButton.buttonText.setVisible(true);
 
-                    this.cancelButton.setX(185);
-                    this.cancelButton.setY(392);
+                    // this.cancelButton.setX(185);
+                    // this.cancelButton.setY(392);
 
-                    this.cancelButton.buttonText.setX(205);
-                    this.cancelButton.buttonText.setY(367);
+                    // this.cancelButton.buttonText.setX(205);
+                    // this.cancelButton.buttonText.setY(367);
+
+                    this.updateAndShowCancelButton(153, 357, 'Cancel', false);
 
                     this.inventoryIndex = index;
                     this.inventoryButtons[index].select();
