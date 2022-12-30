@@ -1039,23 +1039,35 @@ export default class UIScene extends Phaser.Scene {
                 this.inventoryAndAbilityDetailText.setVisible(false);
                 this.equipButton.setVisible(false);
                 this.equipButton.buttonText.setVisible(false);
-                this.cancelButton.setX(347);
-                this.cancelButton.setY(350);
-                this.cancelButton.buttonText.setY(325);
-                this.cancelButton.buttonText.setX(367);
-                this.cancelMenuFrame.setX(315);
-                this.cancelMenuFrame.setY(315);
-                this.cancelMenuFrame.setVisible(true);
+
+                this.updateAndShowCancelButton(315, 315, 'Cancel', true);
+
 
                 const itemToEquip = this.gameScene.player.inventory[inventorySlotNumber];
+                this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
+
                 if (itemToEquip.type === 'weapon') {
+                    // check if there's already a weapon equipped
+                    if (this.gameScene.player.equipment.weapon) {
+                        // if there is, add it back to the inventory at the same index as the item being equipped
+                        this.gameScene.player.inventory.splice(
+                            inventorySlotNumber,
+                            0,
+                            this.gameScene.player.equipment.weapon
+                        );
+                    }
                     this.gameScene.player.equipment.weapon = itemToEquip;
                 }
                 else if (itemToEquip.type === 'bodyarmor') {
+                    if (this.gameScene.player.equipment.body) {
+                        this.gameScene.player.inventory.splice(
+                            inventorySlotNumber,
+                            0,
+                            this.gameScene.player.equipment.body
+                        );
+                    }
                     this.gameScene.player.equipment.body = itemToEquip;
                 }
-
-                this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
 
                 this.destroyInventoryButtons();
                 this.generateInventoryButtons();
