@@ -46,31 +46,8 @@ export default class BotCharacter extends Unit {
         // TODO: setup pointerdown listeners for healing, items...
     }
 
-    applyHPChange(hpChangeAmount: number): number {
-        const initialCharacterHP = this.stats.currentHP;
-
-        // handle healing hp change (negative hp change signifies healing)
-        if (hpChangeAmount < 0) {
-            this.stats.currentHP = Math.min(this.stats.maxHP, this.stats.currentHP - hpChangeAmount);
-        }
-
-        // apply damage
-        else {
-            // handle the math of taking damage,
-            this.stats.currentHP -= hpChangeAmount;
-            this.updateSceneOnReceivingDamage();
-        }
-
-        if (this.stats.currentHP <= 0) {
-            this.stats.currentHP = 0;
-            this.living = false;
-        }
-
-        // setting up the ui hp
-        this.battleScene.player2HPText.setText(`HP: ${this.stats.currentHP}/${this.stats.maxHP}`);
-
-
-        return this.stats.currentHP - initialCharacterHP;
+    public applyHPChange(hpChangeAmount: number): number {
+        return super.applyHPChange(hpChangeAmount, this.battleScene.player2HPText);
     }
 
     public runTurn(): number {

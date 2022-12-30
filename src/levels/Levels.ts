@@ -15,7 +15,6 @@ export const levels: ILevelDataContainer = {
         ],
         npcs: [],
         enemies: ['seedspiker', 'sentientrock', 'deadlyflower'],
-        // enemies: ['seedspiker'],
         music: 'overworld'
     },
     town: {

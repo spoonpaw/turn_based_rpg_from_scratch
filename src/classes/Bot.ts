@@ -55,14 +55,6 @@ export default class Bot extends GameActor{
         this.tilePos = tilePosition.clone();
     }
 
-    public stopAnimation(direction: Direction) {
-        if (!this.sprite.anims) return;
-        const animationManager = this.sprite.anims.animationManager;
-        const standingFrame = animationManager.get(direction).frames[1].frame.name;
-        this.sprite.anims.stop();
-        this.sprite.setFrame(standingFrame);
-    }
-
     public startAnimation(animationKey: string) {
         if (!animationKey) return;
         this.sprite.anims.play(animationKey);

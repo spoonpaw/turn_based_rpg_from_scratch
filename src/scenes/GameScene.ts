@@ -26,7 +26,6 @@ import {Equipment} from '../types/Equipment';
 import GamePadScene from './GamePadScene';
 import MusicScene from './MusicScene';
 import UIScene from './UIScene';
-// import BotGridControls from '../classes/BotGridControls';
 
 export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
@@ -78,7 +77,6 @@ export default class GameScene extends Phaser.Scene {
             this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
         }
 
-        // this.activeDialogScene = false;
 
         // if data is empty then the game just started so load the player in the spawn location
         if (data && Object.keys(data).length === 0) {
@@ -141,8 +139,6 @@ export default class GameScene extends Phaser.Scene {
             this.player = new Player(
                 playerSprite,
                 new Phaser.Math.Vector2(
-                    // levels.town.spawnCoords[0].x,
-                    // levels.town.spawnCoords[0].y
                     12,
                     14
                 ),
@@ -287,9 +283,8 @@ export default class GameScene extends Phaser.Scene {
             // Spawn the bots if there are any
             if (this.bots.length > 0) {
 
-                // TODO: Spawn the bot!
+                // Spawn the bot!
 
-                //clone the bot
                 const botClone = clone(this.bots[0]);
 
                 const botSprite = this.add.sprite(0, 0, botClone.sprite.texture);
@@ -558,16 +553,11 @@ export default class GameScene extends Phaser.Scene {
             Phaser.Input.Keyboard.JustDown(this.cursors.space)
         ) {
             this.spaceDown = true;
-            // if (this.uiScene.interactionState !== 'mainselect') {
-            //     this.uiScene.selectCancel();
-            // }
 
             if (this.weaponMerchant || this.innKeeper || this.armorMerchant || this.itemMerchant || this.botScientist) {
                 // space bar pressed on game scene (npc[s] found)
                 if (
-                    this.uiScene.interactionState === 'mainselect' // ||
-                    // this.uiScene.interactionState === 'cancelmouse' // ||
-                    // this.uiScene.interactionState === 'cancel'
+                    this.uiScene.interactionState === 'mainselect'
                 ) {
                     // listening for interactivity on npcs
                     if (this.weaponMerchant) this.weaponMerchant.listenForInteractEvent();
@@ -580,8 +570,7 @@ export default class GameScene extends Phaser.Scene {
         }
 
         if (
-            Phaser.Input.Keyboard.JustUp(this.cursors.space) // &&
-            //     this.uiScene.interactionState === 'cancel'
+            Phaser.Input.Keyboard.JustUp(this.cursors.space)
         ) {
             // space bar lifted! (game scene)
             this.spaceDown = false;
@@ -616,7 +605,6 @@ export default class GameScene extends Phaser.Scene {
     public setupBotGridPhysics() {
         this.bots[0].path.push(this.player.getTilePos());
         this.botGridPhysics = new BotGridPhysics(this.bots[0], this.currentTilemap);
-        // this.botGridControls = new BotGridControls(this.input, this.gridPhysics);
         this.createBotAnimation('redbot_up', 6, 7);
         this.createBotAnimation('redbot_right', 4, 5);
         this.createBotAnimation('redbot_down', 0, 1);

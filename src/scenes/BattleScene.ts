@@ -1,4 +1,3 @@
-
 // TODO: Add Ability button functionality
 
 
@@ -17,18 +16,18 @@ import UIScene from './UIScene';
 
 export default class BattleScene extends Phaser.Scene {
     public enemies!: Enemy[];
+    gameScene!: GameScene;
     public heroes!: (PlayerCharacter | BotCharacter)[];
     public interactionState!: string;
     public player1HPText!: Phaser.GameObjects.Text;
+    player2HPText!: Phaser.GameObjects.Text;
     public sfxScene!: SFXScene;
     private background!: Phaser.GameObjects.Image;
     private battleUIScene!: BattleUIScene;
-    gameScene!: GameScene;
     private index!: number;
     private musicScene!: MusicScene;
     private player1MPText!: Phaser.GameObjects.Text;
     private player2?: PlayerCharacter | BotCharacter;
-    player2HPText!: Phaser.GameObjects.Text;
     private turnIndex!: number;
     private turnUnits!: (PlayerCharacter | BotCharacter | Enemy)[];
     private uiScene!: UIScene;
@@ -88,6 +87,23 @@ export default class BattleScene extends Phaser.Scene {
         return {levelUp: newLevel > currentLevel, newLevel};
     }
 
+    private checkForPlayer2LevelUp(): { levelUp: boolean, newLevel: number } {
+        let experienceAmount = 0;
+
+        for (const enemy of this.enemies) {
+            const enemyData = enemies.find(obj => {
+                return obj.name === enemy.texture.key;
+            });
+            experienceAmount += enemyData?.experience ?? 0;
+        }
+
+        const currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.bots[0].experience)));
+
+        const newLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.bots[0].experience + experienceAmount)));
+
+        return {levelUp: newLevel > currentLevel, newLevel};
+    }
+
     private checkForVictory(): boolean {
         let victory = true;
         // if all enemies are dead we have victory
@@ -138,10 +154,8 @@ export default class BattleScene extends Phaser.Scene {
         // cut gold in half, set hit points to full, cut to game over screen, respawn
         eventsCenter.emit('Message', 'Thou art vanquished!');
         this.gameScene.player.gold = Math.floor(this.gameScene.player.gold / 2);
-        // eventsCenter.emit('updateGold', this.gameScene.player.gold);
         eventsCenter.emit('updateMP', this.gameScene.player.stats.currentMP, this.gameScene.player.stats.maxMP);
         this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
-        // eventsCenter.emit('updateHP', [this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP]);
         this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
 
         this.time.addEvent({
@@ -335,6 +349,7 @@ export default class BattleScene extends Phaser.Scene {
             }
 
             else {
+                console.log('setting the bots hp on the game scene!!');
                 // unit must be a bot character at this point
                 this.gameScene.bots[0].stats.currentHP = unit.stats.currentHP;
 
@@ -374,12 +389,16 @@ export default class BattleScene extends Phaser.Scene {
                     };
 
                 }
-                // TODO: make an update player2 hp method
-                this.uiScene.updatePlayer2HP(unit.stats.currentHP, unit.stats.maxHP);
-
-                // eventsCenter.emit('updateXP', this.gameScene.player.experience);
+                this.uiScene.updatePlayer2HP(this.gameScene.bots[0].stats.currentHP, this.gameScene.bots[0].stats.maxHP);
             }
         }
+    }
+
+    private shortenTextByPixel(phasertext: Phaser.GameObjects.Text, maxpixel: number): Phaser.GameObjects.Text {
+        while (phasertext.width > maxpixel) {
+            phasertext.text = phasertext.text.substring(0, phasertext.text.length - 1);
+        }
+        return phasertext;
     }
 
     private showGoldAndExperience(currentEnemies: Enemy[]): void {
@@ -398,16 +417,7 @@ export default class BattleScene extends Phaser.Scene {
         eventsCenter.emit('Message', `You receive ${goldAmount} gold pieces.\nYou receive ${experienceAmount} experience points.`);
     }
 
-    private shortenTextByPixel(phasertext: Phaser.GameObjects.Text, maxpixel: number): Phaser.GameObjects.Text {
-        while (phasertext.width > maxpixel) {
-            phasertext.text = phasertext.text.substring(0, phasertext.text.length - 1);
-        }
-        return phasertext;
-    }
-
-
     private startBattle(): void {
-        // TODO: add all the bots to the scene if there are any!
         this.musicScene.scene.bringToTop();
 
         this.uiScene.selectCancel();
@@ -518,7 +528,6 @@ export default class BattleScene extends Phaser.Scene {
         this.add.existing(soldier);
 
         this.shortenTextByPixel(
-
             this.add.text(
                 250,
                 610,
@@ -613,6 +622,14 @@ export default class BattleScene extends Phaser.Scene {
                 levelUpDelay += 2000;
             }
 
+            let player2LevelUpData = {levelUp: false, newLevel: 0};
+            if (this.gameScene.bots.length > 0) {
+                player2LevelUpData = this.checkForPlayer2LevelUp();
+                if (player2LevelUpData.levelUp) {
+                    levelUpDelay += 2000;
+                }
+            }
+
             // deliver the victory message and exit the battle
             eventsCenter.emit('Message', 'Thine enemies are slain.');
             this.time.addEvent({
@@ -628,10 +645,35 @@ export default class BattleScene extends Phaser.Scene {
                     callback: () => {
                         eventsCenter.emit(
                             'Message',
-                            `${this.heroes[0].type} has reached level ${levelUpData.newLevel}!`);
+                            `${this.heroes[0].type} has reached level ${levelUpData.newLevel}!`
+                        );
                         // at the same time that this happens, update the battle scene max hp
 
-                        this.player1HPText.setText(`HP: ${this.heroes[0].stats.currentHP}/${this.heroes[0].stats.maxHP + this.getStatIncrease('vitality', levelUpData.newLevel) * 2}`);
+                        this.player1HPText.setText(
+                            `HP: ${this.heroes[0].stats.currentHP}/${this.heroes[0].stats.maxHP + this.getStatIncrease(
+                                'vitality',
+                                levelUpData.newLevel
+                            ) * 2}`
+                        );
+                    }
+                });
+            }
+
+            if (this.gameScene.bots.length > 0 && player2LevelUpData?.levelUp) {
+                this.time.addEvent({
+                    delay: 6000,
+                    callback: () => {
+                        eventsCenter.emit(
+                            'Message',
+                            `${this.gameScene.bots[0].name} has reached level ${player2LevelUpData.newLevel}!`
+                        );
+
+                        this.player2HPText.setText(
+                            `HP: ${this.gameScene.bots[0].stats.currentHP}/${this.gameScene.bots[0].stats.maxHP + this.getStatIncrease(
+                                'vitality',
+                                player2LevelUpData.newLevel
+                            ) * 2}`
+                        );
                     }
                 });
             }
