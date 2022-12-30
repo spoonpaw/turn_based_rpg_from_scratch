@@ -162,7 +162,7 @@ export default class PlayerCharacter extends Unit {
         }
         else if (data.action === 'Cypressium Staff') {
             runtimeInMS += 2000;
-            eventsCenter.emit('Message', `${this.type} uses an extendable cypressiom staff on ${target.type}; it has no effect.`);
+            eventsCenter.emit('Message', `${this.type} uses a ${this.name} on ${target.type}; it has no effect.`);
         }
         else if (data.action === 'Health Potion') {
             // get the selected inventory slot index from the battle ui scene delete it from the player's inventory
