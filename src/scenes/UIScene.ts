@@ -39,9 +39,13 @@ export default class UIScene extends Phaser.Scene {
     public leftSideDialogFrame!: Phaser.GameObjects.Image;
     public leftSideDialogText!: Phaser.GameObjects.Text;
     public merchantInventoryButtons: UIActionButton[] = [];
-    // public musicMuteButton!: UIActionButton;
     public musicScene!: MusicScene;
     public noButton!: UIActionButton;
+    public player2Button!: UIActionButton;
+    public player2HeartIcon!: Phaser.GameObjects.Image;
+    public player2ManaIcon!: Phaser.GameObjects.Image;
+    public player2ManaText!: Phaser.GameObjects.Text;
+    public player2hpText!: Phaser.GameObjects.Text;
     public purchaseItemButton!: UIActionButton;
     public rightSideDialogFrame!: Phaser.GameObjects.Image;
     public rightSideDialogOptionsFrame!: Phaser.GameObjects.Image;
@@ -85,11 +89,6 @@ export default class UIScene extends Phaser.Scene {
     private message!: GameMessage;
     private offHandItemButton!: UIActionButton;
     private offHandString!: Phaser.GameObjects.Text;
-    public player2Button!: UIActionButton;
-    public player2HeartIcon!: Phaser.GameObjects.Image;
-    public player2ManaIcon!: Phaser.GameObjects.Image;
-    public player2ManaText!: Phaser.GameObjects.Text;
-    public player2hpText!: Phaser.GameObjects.Text;
     private selectedItemAndAbilityCommandText!: Phaser.GameObjects.Text;
     private strengthString!: Phaser.GameObjects.Text;
     private subAbilityButton!: UIActionButton;
@@ -98,6 +97,7 @@ export default class UIScene extends Phaser.Scene {
     private tillNextLevelString!: Phaser.GameObjects.Text;
     private unequipButton!: UIActionButton;
     private vitalityString!: Phaser.GameObjects.Text;
+    private dropButton!: UIActionButton;
 
     public constructor() {
         super('UI');
@@ -108,7 +108,9 @@ export default class UIScene extends Phaser.Scene {
         this.sfxScene = <SFXScene>this.scene.get('SFX');
 
         this.cursors = this.input.keyboard!.createCursorKeys();
-        this.setupUIElements();
+        this.setupFrames();
+        this.setupText();
+        this.setupButtonsAndBadges();
         this.setupEvents();
 
         this.message = new GameMessage(this);
@@ -249,7 +251,27 @@ export default class UIScene extends Phaser.Scene {
                 this.gameScene.player.equipment.weapon.name,
 
                 () => {
-                    return;
+                    this.interactionState = 'equipmentweapon';
+                    this.headItemButton.deselect();
+                    this.offHandItemButton.deselect();
+                    this.mainHandItemButton.select();
+                    this.bodyItemButton.deselect();
+                    const weapon = this.gameScene.player.equipment.weapon;
+                    this.cancelMenuFrame.setVisible(false);
+                    this.cancelButton.setY(392);
+                    this.cancelButton.buttonText.setY(367);
+                    this.inventoryAndAbilityDetailFrame.setVisible(true);
+                    this.inventoryAndAbilityDetailText.setText(
+                        `${weapon?.description}\n\n
+                            Strength: ${weapon?.stats?.strength}, Agility: ${weapon?.stats?.agility},
+                                Vitality: ${weapon?.stats?.vitality}, Intellect: ${weapon?.stats?.intellect},
+                                Luck: ${weapon?.stats?.luck}, Defense: ${weapon?.stats?.defense},
+                                Classes: ${weapon?.classes},
+                                Minimum Level: ${weapon?.minimumLevel}`);
+
+                    this.inventoryAndAbilityDetailText.setVisible(true);
+                    this.unequipButton.setVisible(true);
+                    this.unequipButton.buttonText.setVisible(true);
                 }
             );
         }
@@ -350,7 +372,6 @@ export default class UIScene extends Phaser.Scene {
     public selectCancel() {
 
         if (this.gameScene.operatingSystem !== 'desktop') {
-            // this.scene.launch('GamePad');
             this.gameScene.gamePadScene?.scene.restart();
         }
         // entering ui scene 'selectcancel' method
@@ -371,6 +392,8 @@ export default class UIScene extends Phaser.Scene {
         this.inventoryAndAbilityDetailFrame.setVisible(false);
         this.useButton.setVisible(false);
         this.useButton.buttonText.setVisible(false);
+        this.dropButton.setVisible(false);
+        this.dropButton.buttonText.setVisible(false);
         this.equipButton.setVisible(false);
         this.equipButton.buttonText.setVisible(false);
         this.inventoryAndAbilityDetailText.setVisible(false);
@@ -461,269 +484,294 @@ export default class UIScene extends Phaser.Scene {
 
     }
 
-    public setupUIElements() {
+    public showMerchantRejection(rejectionText: string) {
+        // hide all the merchant related frames
+        this.hideMerchantFrames();
+        this.leftSideDialogFrame.setVisible(true);
+        this.leftSideDialogText.setText(`Merchant:\n${rejectionText}`);
+        this.leftSideDialogText.setVisible(true);
 
-        // START FRAME SECTION
-        this.characterDetailDisplayFrame = this.add.image(
-            335,
-            275,
-            'characterDetailDisplayFrame'
-        );
-        this.characterDetailDisplayFrame.setVisible(false);
+        this.updateAndShowCancelButton(670, 380, 'Farewell', true);
+    }
 
-        this.actionMenuFrame = this.add.image(
-            460,
-            650,
-            'gameActionMenuFrame'
-        );
+    public update() {
+        if (Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
+            eventsCenter.emit('space');
+            // this.gameScene.spaceDown = true;
+            if (
+                this.interactionState === 'cancelmouse' ||
+                this.interactionState === 'mainselectnodialog'
+            ) {
+                this.interactionState = 'mainselect';
 
-        this.rightSideDialogFrame = this.add.image(215, 380, 'sidedialogframe')
-            .setOrigin(0, 0);
-        this.rightSideDialogFrame.setVisible(false);
+                if (
+                    this.gameScene.weaponMerchant ||
+                    this.gameScene.innKeeper ||
+                    this.gameScene.armorMerchant ||
+                    this.gameScene.itemMerchant ||
+                    this.gameScene.botScientist
+                ) {
+                    // space bar pressed on game scene (npc[s] found)
 
-        this.leftSideDialogFrame = this.add.image(40, 380, 'sidedialogframe')
-            .setOrigin(0, 0);
-        this.leftSideDialogFrame.setVisible(false);
+                    // listening for interactivity on npcs
+                    if (this.gameScene.weaponMerchant) this.gameScene.weaponMerchant.listenForInteractEvent();
+                    if (this.gameScene.armorMerchant) this.gameScene.armorMerchant.listenForInteractEvent();
+                    if (this.gameScene.innKeeper) this.gameScene.innKeeper.listenForInteractEvent();
+                    if (this.gameScene.itemMerchant) this.gameScene.itemMerchant.listenForInteractEvent();
+                }
+            }
+            else if (
+                // this.interactionState === 'inventory' ||
+                this.interactionState === 'ability' ||
+                this.interactionState === 'charactersheet' ||
+                this.interactionState.startsWith('selectinginventoryaction') ||
+                this.interactionState.startsWith('inventory') ||
+                this.interactionState.startsWith('equipment')
+            ) {
+                this.selectCancel();
+            }
+        }
+        if (Phaser.Input.Keyboard.JustUp(this.cursors.space)) {
+            this.gameScene.spaceDown = false;
 
-        this.rightSideDialogOptionsFrame = this.add.image(670, 380, 'sideoptionsframe')
-            .setOrigin(0, 0);
-        this.rightSideDialogOptionsFrame.setVisible(false);
+        }
+    }
 
-        this.cancelMenuFrame = this.add.image(315, 315, 'cancelMenuFrame')
-            .setOrigin(0, 0);
-        this.cancelMenuFrame.setVisible(false);
+    public updateAndShowCancelButton(x: number, y: number, text: string, show: boolean) {
+        // call the new function to update the cancel button and its components, and control the visibility of the cancel frame
+        updateCancelButton(this.cancelButton, this.cancelMenuFrame, x, y, text, show);
+    }
 
-        this.inventoryAndAbilityMenuFrame = this.add.image(532, 181, 'inventoryAndAbilityMenuFrame')
-            .setOrigin(0, 0);
+    public updateGold() {
+        this.goldText.setText(`${this.gameScene.player.gold} gp`);
+    }
+
+    public updateHP(hp: number, maxHp: number) {
+        this.hpText.setText(`HP: ${hp} / ${maxHp}`);
+    }
+
+    public updateMP(currentMP: number, maxMP: number) {
+        // this.goldText.text = `Gold: ${gold}`;
+        if (this.gameScene.player.type === 'Soldier') {
+            currentMP = 0;
+            maxMP = 0;
+        }
+
+        this.manaText.text = `MP: ${currentMP} / ${maxMP}`;
+    }
+
+    public updatePlayer2HP(hp: number, maxHP: number) {
+        this.player2hpText.setText(`HP: ${hp} / ${maxHP}`)
+    }
+
+    private calculateTilNextLevel(): number {
+        const currentExp = this.gameScene.player.experience;
+        let currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(currentExp)));
+        const nextLevel = currentLevel + 1;
+        let expCounter = 0;
+        while (currentLevel < nextLevel) {
+            expCounter++;
+            currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(currentExp + expCounter)));
+        }
+        return expCounter;
+
+    }
+
+    private destroyInventoryToSellButtons() {
+        for (const inventoryToSellButton of this.inventoryToSellButtons) {
+            inventoryToSellButton.destroy();
+            inventoryToSellButton.buttonText.destroy();
+        }
+        this.inventoryToSellButtons = [];
+
+    }
+
+    private generateInventoryButtons() {
+        // iterate over all inventory entries
+        // generate inventory buttons
+        for (const [index, item] of this.gameScene.player.inventory.entries()) {
+
+            const inventoryButton = new UIActionButton(
+                this,
+                564,
+                216 + (index * 50),
+                item.key,
+                item.activeKey,
+                item.name,
+                () => {
+                    this.interactionState = `selectinginventoryaction${index}`;
+
+                    this.inventoryIndex = index;
+                    this.inventoryButtons[index].select();
+                    for (const [inventoryButtonIndex, inventoryButton] of this.inventoryButtons.entries()) {
+                        if (inventoryButtonIndex !== index) {
+                            inventoryButton.deselect();
+                        }
+                    }
+
+                    this.inventoryAndAbilityDetailFrame.setVisible(true);
+                    // if consumable, get the description of the item for this text and
+                    //  show the use button
+
+                    //  if equipment, show stats and equip button
+                    if (item.type === 'consumable') {
+                        this.inventoryAndAbilityDetailText.setText(item.description);
+                        this.equipButton.setVisible(false);
+                        this.equipButton.buttonText.setVisible(false);
+                        this.useButton.setVisible(true);
+                        this.useButton.buttonText.setVisible(true);
+                        this.dropButton.setVisible(true);
+                        this.dropButton.buttonText.setVisible(true);
+
+                    }
+                    else if (
+                        item.type === 'weapon' ||
+                        item.type === 'bodyarmor'
+                    ) {
+                        this.inventoryAndAbilityDetailText.setText(
+                            `${item.description}\n\n
+                            Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
+                                Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
+                                Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
+                                Classes: ${item.classes},
+                                Minimum Level: ${item.minimumLevel}`
+                        );
+                        this.useButton.setVisible(false);
+                        this.useButton.buttonText.setVisible(false);
+                        this.dropButton.setVisible(true);
+                        this.dropButton.buttonText.setVisible(true);
+                        this.equipButton.setVisible(true);
+                        this.equipButton.buttonText.setVisible(true);
+                    }
+                    this.inventoryAndAbilityDetailText.setVisible(true);
+
+                    this.updateAndShowCancelButton(353, 357, 'Cancel', false);
+                }
+            );
+            inventoryButton.setVisible(false);
+            inventoryButton.buttonText.setVisible(false);
+
+            this.inventoryButtons.push(inventoryButton);
+        }
+    }
+
+    private generateInventoryToSellButtons() {
+        for (const [index, item] of this.gameScene.player.inventory.entries()) {
+
+            const inventoryToSellButton = new UIActionButton(
+                this,
+                564,
+                216 + (index * 50),
+                item.key,
+                item.activeKey,
+                item.name,
+                () => {
+                    this.interactionState = `merchantsellitem${index}`;
+                    this.inventoryIndex = index;
+                    this.inventoryToSellButtons[index].select();
+
+                    for (const [inventoryButtonIndex, inventoryToSellButton] of this.inventoryToSellButtons.entries()) {
+                        if (inventoryButtonIndex !== index) {
+                            inventoryToSellButton.deselect();
+                        }
+                    }
+
+                    this.inventoryAndAbilityDetailFrame.setVisible(true);
+                    this.sellItemButton.setVisible(true);
+                    this.sellItemButton.buttonText.setText(`Sell for ${item.sellPrice} gold`);
+                    this.sellItemButton.buttonText.setVisible(true);
+
+                    this.updateAndShowCancelButton(10, 460, 'Cancel', true);
+
+                    if (item.type === 'weapon' || item.type === 'bodyarmor') {
+                        this.inventoryAndAbilityDetailText.setText(
+                            `${item.description}\n\n
+                            Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
+                                Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
+                                Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
+                                Classes: ${item.classes},
+                                Minimum Level: ${item.minimumLevel}`
+                        );
+                    }
+                    else if (item.type === 'consumable') {
+                        this.inventoryAndAbilityDetailText.setText(item.description);
+                    }
+
+                    this.inventoryAndAbilityDetailText.setVisible(true);
+
+                }
+            );
+            inventoryToSellButton.setVisible(false);
+            inventoryToSellButton.buttonText.setVisible(false);
+
+            this.inventoryToSellButtons.push(inventoryToSellButton);
+        }
+
+    }
+
+    private hideMerchantFrames() {
         this.inventoryAndAbilityMenuFrame.setVisible(false);
-
-        this.goldFrame = this.add.image(532, 108, 'goldFrame')
-            .setOrigin(0, 0);
-        this.goldFrame.setVisible(false);
-
-        this.subInventoryAndAbilityMenuFrame = this.add.image(236, 430, 'subInventoryAndAbilityMenuFrame')
-            .setOrigin(0, 0);
         this.subInventoryAndAbilityMenuFrame.setVisible(false);
-
-        this.confirmSelectedAbilityOrItemFrame = this.add.image(236, 430, 'confirmSelectedAbilityOrItemFrame')
-            .setOrigin(0, 0);
-        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
-
-        this.confirmSelectedAbilityOrItemFrameB = this.add.image(236, 505, 'confirmSelectedAbilityOrItemFrameB')
-            .setOrigin(0, 0);
-        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-
-        this.inventoryAndAbilityDetailFrame = this.add.image(3, 105, 'inventoryAndAbilityDetailFrame')
-            .setOrigin(0, 0);
         this.inventoryAndAbilityDetailFrame.setVisible(false);
+        this.inventoryAndAbilityDetailText.setVisible(false);
+        this.purchaseItemButton.setVisible(false);
+        this.purchaseItemButton.buttonText.setVisible(false);
+        this.buyButton.setVisible(false);
+        this.buyButton.buttonText.setVisible(false);
+        this.sellButton.setVisible(false);
+        this.sellButton.buttonText.setVisible(false);
+        this.sellItemButton.setVisible(false);
+        this.sellItemButton.buttonText.setVisible(false);
 
-        this.interactFrame = this.add.image(
-            Number(this.game.config.width) / 2,
-            550,
-            'cancelMenuFrame'
-        );
-        this.interactFrame.setVisible(false);
+        for (const inventoryToSellButton of this.inventoryToSellButtons) {
+            inventoryToSellButton.setVisible(false);
+            inventoryToSellButton.buttonText.setVisible(false);
+        }
 
-        // END FRAME SECTION
+        for (const merchantInventoryButton of this.merchantInventoryButtons) {
+            merchantInventoryButton.setVisible(false);
+            merchantInventoryButton.buttonText.setVisible(false);
+        }
+    }
 
-        // START TEXT SECTION
-
-        this.goldText = this.add.text(584, 112, '0 gp', {
-            color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
-                width: 610,
-                useAdvancedWrap: true
-            }
-        })
-            .setResolution(3)
-            .setFontSize(50);
-        this.goldText.setVisible(false);
-
-        this.rightSideDialogText = this.add.text(225, 380, '', {
-            color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
-                width: 610,
-                useAdvancedWrap: true
-            }
-        })
-            .setResolution(3)
-            .setFontSize(50)
-            .setLineSpacing(-18);
-
-        this.leftSideDialogText = this.add.text(50, 380, '', {
-            color: '#ffffff',
-            align: 'left',
-            fontFamily:'CustomFont',
-            fontSize: '50px',
-            wordWrap: {
-                width: 610,
-                useAdvancedWrap: true
-            },
-            metrics: {
-                ascent: 42,
-                descent: 11,
-                fontSize: 50
-            }
-        })
-            .setResolution(3)
-            // .setFontSize(50)
-            .setLineSpacing(-18);
-
-        this.commandMenuText = this.add.text(244, 440, 'Command?', {
-            fontSize: '55px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.commandMenuText.setVisible(false);
-
-        this.selectedItemAndAbilityCommandText = this.add.text(
-            244,
-            510,
-            'Choose A Target',
-            {
-                fontSize: '55px',
-                color: '#fff',
-                fontFamily: 'CustomFont'
-            }
-        )
-            .setResolution(3);
-        this.selectedItemAndAbilityCommandText.setVisible(false);
-
-
-        // START EQUIPMENT STRING SECTION
-
-        this.headString = this.add.text(540, 180, 'Head:', {
-            fontSize: '50px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.headString.setVisible(false);
-        this.equipmentStrings.push(this.headString);
-
-        this.bodyString = this.add.text(540, 275, 'Body:', {
-            fontSize: '50px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.bodyString.setVisible(false);
-        this.equipmentStrings.push(this.bodyString);
-
-        this.mainHandString = this.add.text(540, 370, 'Main Hand:', {
-            fontSize: '50px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.mainHandString.setVisible(false);
-        this.equipmentStrings.push(this.mainHandString);
-
-        this.offHandString = this.add.text(540, 465, 'Off Hand:', {
-            fontSize: '50px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.offHandString.setVisible(false);
-        this.equipmentStrings.push(this.offHandString);
-
-        // END EQUIPMENT STRING SECTION
-
-        // START CHARACTER SHEET STRING SECTION
-
-        this.classString = this.add.text(540, 185, 'Class: Soldier', {
-            fontSize: '48px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.classString.setVisible(false);
-
-        this.levelString = this.add.text(540, 221, `Level: ${Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)))}`, {
-            fontSize: '48px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.levelString.setVisible(false);
-
-        this.hitPointString = this.add.text(540, 257, `Hit Points: ${this.gameScene.player.stats.currentHP}/${this.gameScene.player.stats.maxHP}`, {
-            fontSize: '48px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.hitPointString.setVisible(false);
-
-        this.manaPointString = this.add.text(540, 293, 'Mana Points: 0/0', {
-            fontSize: '48px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.manaPointString.setVisible(false);
-
-        this.strengthString = this.add.text(540, 329, `Strength: ${Math.floor(this.gameScene.player.getCombinedStat('strength'))}`, {
-            fontSize: '48px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.strengthString.setVisible(false);
-
-        this.agilityString = this.add.text(540, 365, `Agility: ${Math.floor(this.gameScene.player.stats.agility)}`, {
-            fontSize: '48px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.agilityString.setVisible(false);
-
-        this.vitalityString = this.add.text(540, 401, `Vitality: ${Math.floor(this.gameScene.player.stats.vitality)}`, {
-            fontSize: '48px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.vitalityString.setVisible(false);
-
-        this.intellectString = this.add.text(540, 437, `Intellect: ${Math.floor(this.gameScene.player.stats.intellect)}`, {
-            fontSize: '48px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.intellectString.setVisible(false);
-
-        this.luckString = this.add.text(540, 473, `Luck: ${Math.floor(this.gameScene.player.stats.luck)}`, {
-            fontSize: '48px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.luckString.setVisible(false);
-
-        this.defenseString = this.add.text(540, 509, `Defense: ${this.gameScene.player.getCombinedStat('defense')}`, {
-            fontSize: '48px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.defenseString.setVisible(false);
-
-        this.tillNextLevelString = this.add.text(540, 545, `Till Next Level: ${this.calculateTilNextLevel()}`, {
-            fontSize: '48px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
-            .setResolution(3);
-        this.tillNextLevelString.setVisible(false);
-
-        // END CHARACTER SHEET STRING SECTION
-
-        // END TEXT SECTION
+    private setupButtonsAndBadges() {
 
         // START BUTTON SECTION
+        this.dropButton = new UIActionButton(
+            this,
+            208,
+            392,
+            'crossbutton',
+            'crossbutton',
+            'Drop',
+            () => {
+                this.interactionState = 'inventory';
+                // setting the interaction state from the use button
+                // get inventory slot number from interaction state
+                const selectedItemIndex = Number(this.interactionState.split('selectinginventoryaction')[1]);
+                this.gameScene.player.inventory.splice(selectedItemIndex, 1);
+                this.inventoryAndAbilityDetailFrame.setVisible(false);
+                this.inventoryAndAbilityDetailText.setVisible(false);
+                this.equipButton.setVisible(false);
+                this.equipButton.buttonText.setVisible(false);
+                this.useButton.setVisible(false);
+                this.useButton.buttonText.setVisible(false);
+                this.dropButton.setVisible(false);
+                this.dropButton.buttonText.setVisible(false);
+
+                this.updateAndShowCancelButton(315, 315, 'Cancel', true);
+
+                this.destroyInventoryButtons();
+                this.generateInventoryButtons();
+                for (const inventoryButton of this.inventoryButtons) {
+                    inventoryButton.setVisible(true);
+                    inventoryButton.buttonText.setVisible(true);
+                }
+            }
+        );
+        this.dropButton.setVisible(false);
+        this.dropButton.buttonText.setVisible(false);
+
         this.interactButton = new UIActionButton(
             this,
             385,
@@ -794,7 +842,7 @@ export default class UIScene extends Phaser.Scene {
 
         this.cancelButton = new UIActionButton(
             this,
-            347,
+            367,
             350,
             'crossbutton',
             'crossbutton',
@@ -910,7 +958,6 @@ export default class UIScene extends Phaser.Scene {
             }
         );
 
-
         this.purchaseItemButton.setVisible(false);
         this.purchaseItemButton.buttonText.setVisible(false);
 
@@ -940,12 +987,10 @@ export default class UIScene extends Phaser.Scene {
                 this.subInventoryQuestButton.buttonText.setVisible(false);
                 this.useButton.setVisible(false);
                 this.useButton.buttonText.setVisible(false);
+                this.dropButton.setVisible(false);
+                this.dropButton.buttonText.setVisible(false);
                 this.selectedItemAndAbilityIcon.setVisible(true);
                 this.selectedItemAndAbilityIcon.buttonText.setVisible(true);
-
-                // this.cancelMenuFrame.setX(698);
-                // this.cancelMenuFrame.setY(430);
-                // this.cancelMenuFrame.setVisible(true);
 
                 this.confirmSelectedAbilityOrItemFrame.setVisible(true);
                 this.confirmSelectedAbilityOrItemFrameB.setVisible(true);
@@ -953,18 +998,10 @@ export default class UIScene extends Phaser.Scene {
                 this.selectedItemAndAbilityCommandText.setText('Choose A Target');
                 this.selectedItemAndAbilityCommandText.setVisible(true);
 
-                // this.commandMenuText.setText('\nChoose A Target');
-                // this.commandMenuText.setVisible(true);
-
                 for (const inventoryButton of this.inventoryButtons) {
                     inventoryButton.setVisible(false);
                     inventoryButton.buttonText.setVisible(false);
                 }
-
-                // this.cancelButton.setX(730);
-                // this.cancelButton.setY(465);
-                // this.cancelButton.buttonText.setX(750);
-                // this.cancelButton.buttonText.setY(440);
 
                 this.updateAndShowCancelButton(698, 430, 'Cancel', true);
 
@@ -1042,9 +1079,10 @@ export default class UIScene extends Phaser.Scene {
                 this.inventoryAndAbilityDetailText.setVisible(false);
                 this.equipButton.setVisible(false);
                 this.equipButton.buttonText.setVisible(false);
+                this.dropButton.setVisible(false);
+                this.dropButton.buttonText.setVisible(false);
 
                 this.updateAndShowCancelButton(315, 315, 'Cancel', true);
-
 
                 const itemToEquip = this.gameScene.player.inventory[inventorySlotNumber];
                 this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
@@ -1078,6 +1116,7 @@ export default class UIScene extends Phaser.Scene {
                     inventoryButton.setVisible(true);
                     inventoryButton.buttonText.setVisible(true);
                 }
+                this.interactionState = 'inventory';
             }
         );
         this.equipButton.setVisible(false);
@@ -1102,15 +1141,6 @@ export default class UIScene extends Phaser.Scene {
                 this.purchaseItemButton.buttonText.setVisible(false);
                 this.sellItemButton.setVisible(false);
                 this.sellItemButton.buttonText.setVisible(false);
-
-                // this.cancelButton.setX(347);
-                // this.cancelButton.setY(350);
-
-                // this.cancelButton.buttonText.setY(325);
-                // this.cancelButton.buttonText.setX(367);
-
-                // this.cancelMenuFrame.setX(315);
-                // this.cancelMenuFrame.setY(315);
 
                 this.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
@@ -1144,15 +1174,6 @@ export default class UIScene extends Phaser.Scene {
 
                 this.buyButton.deselect();
                 this.sellButton.select();
-
-                // this.cancelButton.setX(347);
-                // this.cancelButton.setY(350);
-
-                // this.cancelButton.buttonText.setY(325);
-                // this.cancelButton.buttonText.setX(367);
-
-                // this.cancelMenuFrame.setX(315);
-                // this.cancelMenuFrame.setY(315);
 
                 this.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
@@ -1199,20 +1220,12 @@ export default class UIScene extends Phaser.Scene {
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
                 this.useButton.setVisible(false);
                 this.useButton.buttonText.setVisible(false);
+                this.dropButton.setVisible(false);
+                this.dropButton.buttonText.setVisible(false);
                 this.equipButton.setVisible(false);
                 this.equipButton.buttonText.setVisible(false);
                 this.unequipButton.setVisible(false);
                 this.unequipButton.buttonText.setVisible(false);
-
-                // this.cancelButton.setX(347);
-                // this.cancelButton.setY(350);
-
-                // this.cancelButton.buttonText.setY(325);
-                // this.cancelButton.buttonText.setX(367);
-
-                // this.cancelMenuFrame.setX(315);
-                // this.cancelMenuFrame.setY(315);
-                // this.cancelMenuFrame.setVisible(true);
 
                 this.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
@@ -1257,6 +1270,8 @@ export default class UIScene extends Phaser.Scene {
                 this.inventoryAndAbilityDetailText.setVisible(false);
                 this.useButton.setVisible(false);
                 this.useButton.buttonText.setVisible(false);
+                this.dropButton.setVisible(false);
+                this.dropButton.buttonText.setVisible(false);
                 this.equipButton.setVisible(false);
                 this.equipButton.buttonText.setVisible(false);
 
@@ -1513,6 +1528,10 @@ export default class UIScene extends Phaser.Scene {
             'gameActionMenuCharacterButtonActive',
             '',
             () => {
+                console.log({
+                    interactionState: this.interactionState,
+                    inventory: this.gameScene.player.inventory
+                });
                 // uncomment to log interaction state by clicking player portrait
                 if (this.interactionState.startsWith('inventoryaction')) {
                     const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
@@ -1573,6 +1592,56 @@ export default class UIScene extends Phaser.Scene {
             '',
             () => {
                 // TODO: write logic here so the 2nd player can be healed or whatever when clicked
+                if (this.interactionState.startsWith('inventoryaction')) {
+                    const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
+
+                    // using inventory slot number ${inventorySlotNumber} on hero
+                    this.gameScene.input.keyboard!.enabled = false;
+
+                    this.cancelMenuFrame.setVisible(false);
+                    this.cancelButton.setVisible(false);
+                    this.cancelButton.buttonText.setVisible(false);
+                    this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+                    this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+                    this.selectedItemAndAbilityIcon.setVisible(false);
+                    this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+                    this.commandMenuText.setVisible(false);
+                    this.selectedItemAndAbilityCommandText.setVisible(false);
+
+                    this.inventoryButton.deselect();
+                    this.interactionState = 'handlinghealthpotionselect';
+
+                    this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
+
+                    // finish using the item -> affect the target, delete item from bag
+                    //  display new health on screen if needed -> re-enable the keyboard on game scene
+                    // just used an item on the game scene!
+                    this.destroyInventoryButtons();
+
+                    const actualAmountHealed = Math.min(
+                        30,
+                        this.gameScene.bots[0].stats.maxHP - this.gameScene.bots[0].stats.currentHP
+                    );
+
+                    this.gameScene.bots[0].stats.currentHP += actualAmountHealed;
+                    this.updatePlayer2HP(this.gameScene.bots[0].stats.currentHP, this.gameScene.bots[0].stats.maxHP);
+
+                    this.sfxScene.playSound('potion');
+                    eventsCenter.emit('GameMessage', `${this.gameScene.player.type} uses a health potion on ${this.gameScene.bots[0].name}, healing them for ${actualAmountHealed} HP.`);
+
+                    this.generateInventoryButtons();
+                    this.gameScene.input.keyboard!.resetKeys();
+
+
+                    this.time.addEvent({
+                        delay: 2000,
+                        callbackScope: this,
+                        callback: () => {
+                            this.gameScene.input.keyboard!.enabled = true;
+                            this.interactionState = 'mainselect';
+                        }
+                    });
+                }
             }
         );
         this.player2Button.setVisible(false);
@@ -1685,224 +1754,269 @@ export default class UIScene extends Phaser.Scene {
             }
         );
 
-        // START HTML SECTION
-
-
-        // END HTML SECTION
     }
 
-    public update() {
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
-            eventsCenter.emit('space');
-            // this.gameScene.spaceDown = true;
-            if (
-                this.interactionState === 'cancelmouse' ||
-                this.interactionState === 'mainselectnodialog'
-            ) {
-                this.interactionState = 'mainselect';
+    private setupFrames() {
+        // START FRAME SECTION
+        this.characterDetailDisplayFrame = this.add.image(
+            335,
+            275,
+            'characterDetailDisplayFrame'
+        );
+        this.characterDetailDisplayFrame.setVisible(false);
 
-                if (
-                    this.gameScene.weaponMerchant ||
-                    this.gameScene.innKeeper ||
-                    this.gameScene.armorMerchant ||
-                    this.gameScene.itemMerchant ||
-                    this.gameScene.botScientist
-                ) {
-                    // space bar pressed on game scene (npc[s] found)
+        this.actionMenuFrame = this.add.image(
+            460,
+            650,
+            'gameActionMenuFrame'
+        );
 
-                    // listening for interactivity on npcs
-                    if (this.gameScene.weaponMerchant) this.gameScene.weaponMerchant.listenForInteractEvent();
-                    if (this.gameScene.armorMerchant) this.gameScene.armorMerchant.listenForInteractEvent();
-                    if (this.gameScene.innKeeper) this.gameScene.innKeeper.listenForInteractEvent();
-                    if (this.gameScene.itemMerchant) this.gameScene.itemMerchant.listenForInteractEvent();
-                }
+        this.rightSideDialogFrame = this.add.image(215, 380, 'sidedialogframe')
+            .setOrigin(0, 0);
+        this.rightSideDialogFrame.setVisible(false);
+
+        this.leftSideDialogFrame = this.add.image(40, 380, 'sidedialogframe')
+            .setOrigin(0, 0);
+        this.leftSideDialogFrame.setVisible(false);
+
+        this.rightSideDialogOptionsFrame = this.add.image(670, 380, 'sideoptionsframe')
+            .setOrigin(0, 0);
+        this.rightSideDialogOptionsFrame.setVisible(false);
+
+        this.cancelMenuFrame = this.add.image(315, 315, 'cancelMenuFrame')
+            .setOrigin(0, 0);
+        this.cancelMenuFrame.setVisible(false);
+
+        this.inventoryAndAbilityMenuFrame = this.add.image(532, 181, 'inventoryAndAbilityMenuFrame')
+            .setOrigin(0, 0);
+        this.inventoryAndAbilityMenuFrame.setVisible(false);
+
+        this.goldFrame = this.add.image(532, 108, 'goldFrame')
+            .setOrigin(0, 0);
+        this.goldFrame.setVisible(false);
+
+        this.subInventoryAndAbilityMenuFrame = this.add.image(236, 430, 'subInventoryAndAbilityMenuFrame')
+            .setOrigin(0, 0);
+        this.subInventoryAndAbilityMenuFrame.setVisible(false);
+
+        this.confirmSelectedAbilityOrItemFrame = this.add.image(236, 430, 'confirmSelectedAbilityOrItemFrame')
+            .setOrigin(0, 0);
+        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+
+        this.confirmSelectedAbilityOrItemFrameB = this.add.image(236, 505, 'confirmSelectedAbilityOrItemFrameB')
+            .setOrigin(0, 0);
+        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+
+        this.inventoryAndAbilityDetailFrame = this.add.image(3, 105, 'inventoryAndAbilityDetailFrame')
+            .setOrigin(0, 0);
+        this.inventoryAndAbilityDetailFrame.setVisible(false);
+
+        this.interactFrame = this.add.image(
+            Number(this.game.config.width) / 2,
+            550,
+            'cancelMenuFrame'
+        );
+        this.interactFrame.setVisible(false);
+        // END FRAME SECTION
+    }
+
+    private setupText() {
+        // START TEXT SECTION
+
+        this.goldText = this.add.text(584, 112, '0 gp', {
+            color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
+                width: 610,
+                useAdvancedWrap: true
             }
-            else if (
-                // this.interactionState === 'inventory' ||
-                this.interactionState === 'ability' ||
-                this.interactionState === 'charactersheet' ||
-                this.interactionState.startsWith('selectinginventoryaction') ||
-                this.interactionState.startsWith('inventory') ||
-                this.interactionState.startsWith('equipment')
-            ) {
-                this.selectCancel();
+        })
+            .setResolution(3)
+            .setFontSize(50);
+        this.goldText.setVisible(false);
+
+        this.rightSideDialogText = this.add.text(225, 380, '', {
+            color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
+                width: 610,
+                useAdvancedWrap: true
             }
-        }
-        if (Phaser.Input.Keyboard.JustUp(this.cursors.space)) {
-            this.gameScene.spaceDown = false;
+        })
+            .setResolution(3)
+            .setFontSize(50)
+            .setLineSpacing(-18);
 
-        }
-    }
+        this.leftSideDialogText = this.add.text(50, 380, '', {
+            color: '#ffffff',
+            align: 'left',
+            fontFamily:'CustomFont',
+            fontSize: '50px',
+            wordWrap: {
+                width: 610,
+                useAdvancedWrap: true
+            },
+            metrics: {
+                ascent: 42,
+                descent: 11,
+                fontSize: 50
+            }
+        })
+            .setResolution(3)
+            // .setFontSize(50)
+            .setLineSpacing(-18);
 
-    public updateGold() {
-        this.goldText.setText(`${this.gameScene.player.gold} gp`);
-    }
+        this.commandMenuText = this.add.text(244, 440, 'Command?', {
+            fontSize: '55px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.commandMenuText.setVisible(false);
 
-    public updateHP(hp: number, maxHp: number) {
-        this.hpText.setText(`HP: ${hp} / ${maxHp}`);
-    }
+        this.selectedItemAndAbilityCommandText = this.add.text(
+            244,
+            510,
+            'Choose A Target',
+            {
+                fontSize: '55px',
+                color: '#fff',
+                fontFamily: 'CustomFont'
+            }
+        )
+            .setResolution(3);
+        this.selectedItemAndAbilityCommandText.setVisible(false);
 
-    public updatePlayer2HP(hp: number, maxHP: number) {
-        this.player2hpText.setText(`HP: ${hp} / ${maxHP}`)
-    }
 
-    public updateMP(currentMP: number, maxMP: number) {
-        // this.goldText.text = `Gold: ${gold}`;
-        if (this.gameScene.player.type === 'Soldier') {
-            currentMP = 0;
-            maxMP = 0;
-        }
+        // START EQUIPMENT STRING SECTION
 
-        this.manaText.text = `MP: ${currentMP} / ${maxMP}`;
-    }
+        this.headString = this.add.text(540, 180, 'Head:', {
+            fontSize: '50px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.headString.setVisible(false);
+        this.equipmentStrings.push(this.headString);
 
-    private calculateTilNextLevel(): number {
-        const currentExp = this.gameScene.player.experience;
-        let currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(currentExp)));
-        const nextLevel = currentLevel + 1;
-        let expCounter = 0;
-        while (currentLevel < nextLevel) {
-            expCounter++;
-            currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(currentExp + expCounter)));
-        }
-        return expCounter;
+        this.bodyString = this.add.text(540, 275, 'Body:', {
+            fontSize: '50px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.bodyString.setVisible(false);
+        this.equipmentStrings.push(this.bodyString);
 
-    }
+        this.mainHandString = this.add.text(540, 370, 'Main Hand:', {
+            fontSize: '50px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.mainHandString.setVisible(false);
+        this.equipmentStrings.push(this.mainHandString);
 
-    private destroyInventoryToSellButtons() {
-        for (const inventoryToSellButton of this.inventoryToSellButtons) {
-            inventoryToSellButton.destroy();
-            inventoryToSellButton.buttonText.destroy();
-        }
-        this.inventoryToSellButtons = [];
+        this.offHandString = this.add.text(540, 465, 'Off Hand:', {
+            fontSize: '50px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.offHandString.setVisible(false);
+        this.equipmentStrings.push(this.offHandString);
 
-    }
+        // END EQUIPMENT STRING SECTION
 
-    private generateInventoryButtons() {
-        // iterate over all inventory entries
-        // generate inventory buttons
-        for (const [index, item] of this.gameScene.player.inventory.entries()) {
+        // START CHARACTER SHEET STRING SECTION
 
-            const inventoryButton = new UIActionButton(
-                this,
-                564,
-                216 + (index * 50),
-                item.key,
-                item.activeKey,
-                item.name,
-                () => {
-                    this.interactionState = `selectinginventoryaction${index}`;
+        this.classString = this.add.text(540, 185, 'Class: Soldier', {
+            fontSize: '48px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.classString.setVisible(false);
 
-                    this.inventoryIndex = index;
-                    this.inventoryButtons[index].select();
-                    for (const [inventoryButtonIndex, inventoryButton] of this.inventoryButtons.entries()) {
-                        if (inventoryButtonIndex !== index) {
-                            inventoryButton.deselect();
-                        }
-                    }
+        this.levelString = this.add.text(540, 221, `Level: ${Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)))}`, {
+            fontSize: '48px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.levelString.setVisible(false);
 
-                    // this.cancelMenuFrame.setVisible(false);
+        this.hitPointString = this.add.text(540, 257, `Hit Points: ${this.gameScene.player.stats.currentHP}/${this.gameScene.player.stats.maxHP}`, {
+            fontSize: '48px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.hitPointString.setVisible(false);
 
-                    this.inventoryAndAbilityDetailFrame.setVisible(true);
-                    // if consumable, get the description of the item for this text and
-                    //  show the use button
+        this.manaPointString = this.add.text(540, 293, 'Mana Points: 0/0', {
+            fontSize: '48px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.manaPointString.setVisible(false);
 
-                    //  if equipment, show stats and equip button
-                    if (item.type === 'consumable') {
-                        this.inventoryAndAbilityDetailText.setText(item.description);
-                        this.equipButton.setVisible(false);
-                        this.equipButton.buttonText.setVisible(false);
-                        this.useButton.setVisible(true);
-                        this.useButton.buttonText.setVisible(true);
+        this.strengthString = this.add.text(540, 329, `Strength: ${Math.floor(this.gameScene.player.getCombinedStat('strength'))}`, {
+            fontSize: '48px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.strengthString.setVisible(false);
 
-                    }
-                    else if (
-                        item.type === 'weapon' ||
-                        item.type === 'bodyarmor'
-                    ) {
-                        this.inventoryAndAbilityDetailText.setText(
-                            `${item.description}\n\n
-                            Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
-                                Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
-                                Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
-                                Classes: ${item.classes},
-                                Minimum Level: ${item.minimumLevel}`
-                        );
-                        this.useButton.setVisible(false);
-                        this.useButton.buttonText.setVisible(false);
-                        this.equipButton.setVisible(true);
-                        this.equipButton.buttonText.setVisible(true);
-                    }
-                    this.inventoryAndAbilityDetailText.setVisible(true);
+        this.agilityString = this.add.text(540, 365, `Agility: ${Math.floor(this.gameScene.player.stats.agility)}`, {
+            fontSize: '48px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.agilityString.setVisible(false);
 
-                    // this.cancelButton.setX(185);
-                    // this.cancelButton.setY(392);
+        this.vitalityString = this.add.text(540, 401, `Vitality: ${Math.floor(this.gameScene.player.stats.vitality)}`, {
+            fontSize: '48px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.vitalityString.setVisible(false);
 
-                    // this.cancelButton.buttonText.setX(205);
-                    // this.cancelButton.buttonText.setY(367);
+        this.intellectString = this.add.text(540, 437, `Intellect: ${Math.floor(this.gameScene.player.stats.intellect)}`, {
+            fontSize: '48px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.intellectString.setVisible(false);
 
-                    this.updateAndShowCancelButton(153, 357, 'Cancel', false);
-                }
-            );
-            inventoryButton.setVisible(false);
-            inventoryButton.buttonText.setVisible(false);
+        this.luckString = this.add.text(540, 473, `Luck: ${Math.floor(this.gameScene.player.stats.luck)}`, {
+            fontSize: '48px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.luckString.setVisible(false);
 
-            this.inventoryButtons.push(inventoryButton);
-        }
-    }
+        this.defenseString = this.add.text(540, 509, `Defense: ${this.gameScene.player.getCombinedStat('defense')}`, {
+            fontSize: '48px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.defenseString.setVisible(false);
 
-    private generateInventoryToSellButtons() {
-        for (const [index, item] of this.gameScene.player.inventory.entries()) {
+        this.tillNextLevelString = this.add.text(540, 545, `Till Next Level: ${this.calculateTilNextLevel()}`, {
+            fontSize: '48px',
+            color: '#fff',
+            fontFamily: 'CustomFont'
+        })
+            .setResolution(3);
+        this.tillNextLevelString.setVisible(false);
 
-            const inventoryToSellButton = new UIActionButton(
-                this,
-                564,
-                216 + (index * 50),
-                item.key,
-                item.activeKey,
-                item.name,
-                () => {
-                    this.interactionState = `merchantsellitem${index}`;
-                    this.inventoryIndex = index;
-                    this.inventoryToSellButtons[index].select();
+        // END CHARACTER SHEET STRING SECTION
 
-                    for (const [inventoryButtonIndex, inventoryToSellButton] of this.inventoryToSellButtons.entries()) {
-                        if (inventoryButtonIndex !== index) {
-                            inventoryToSellButton.deselect();
-                        }
-                    }
-
-                    this.inventoryAndAbilityDetailFrame.setVisible(true);
-                    this.sellItemButton.setVisible(true);
-                    this.sellItemButton.buttonText.setText(`Sell for ${item.sellPrice} gold`);
-                    this.sellItemButton.buttonText.setVisible(true);
-
-                    this.updateAndShowCancelButton(10, 460, 'Cancel', true);
-
-                    if (item.type === 'weapon' || item.type === 'bodyarmor') {
-                        this.inventoryAndAbilityDetailText.setText(
-                            `${item.description}\n\n
-                            Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
-                                Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
-                                Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
-                                Classes: ${item.classes},
-                                Minimum Level: ${item.minimumLevel}`
-                        );
-                    }
-                    else if (item.type === 'consumable') {
-                        this.inventoryAndAbilityDetailText.setText(item.description);
-                    }
-
-                    this.inventoryAndAbilityDetailText.setVisible(true);
-
-                }
-            );
-            inventoryToSellButton.setVisible(false);
-            inventoryToSellButton.buttonText.setVisible(false);
-
-            this.inventoryToSellButtons.push(inventoryToSellButton);
-        }
-
+        // END TEXT SECTION
     }
 
     private updateCharacterSheetStrings() {
@@ -1916,46 +2030,5 @@ export default class UIScene extends Phaser.Scene {
         this.luckString.setText(`Luck: ${Math.floor(this.gameScene.player.stats.luck)}`);
         this.defenseString.setText(`Defense: ${Math.floor(this.gameScene.player.getCombinedStat('defense'))}`);
         this.tillNextLevelString.setText(`Till Next Level: ${this.calculateTilNextLevel()}`);
-    }
-
-
-    public updateAndShowCancelButton(x: number, y: number, text: string, show: boolean) {
-        // call the new function to update the cancel button and its components, and control the visibility of the cancel frame
-        updateCancelButton(this.cancelButton, this.cancelMenuFrame, x, y, text, show);
-    }
-
-    public showMerchantRejection(rejectionText: string) {
-        // hide all the merchant related frames
-        this.hideMerchantFrames();
-        this.leftSideDialogFrame.setVisible(true);
-        this.leftSideDialogText.setText(`Merchant:\n${rejectionText}`);
-        this.leftSideDialogText.setVisible(true);
-
-        this.updateAndShowCancelButton(670, 380, 'Farewell', true);
-    }
-
-    private hideMerchantFrames() {
-        this.inventoryAndAbilityMenuFrame.setVisible(false);
-        this.subInventoryAndAbilityMenuFrame.setVisible(false);
-        this.inventoryAndAbilityDetailFrame.setVisible(false);
-        this.inventoryAndAbilityDetailText.setVisible(false);
-        this.purchaseItemButton.setVisible(false);
-        this.purchaseItemButton.buttonText.setVisible(false);
-        this.buyButton.setVisible(false);
-        this.buyButton.buttonText.setVisible(false);
-        this.sellButton.setVisible(false);
-        this.sellButton.buttonText.setVisible(false);
-        this.sellItemButton.setVisible(false);
-        this.sellItemButton.buttonText.setVisible(false);
-
-        for (const inventoryToSellButton of this.inventoryToSellButtons) {
-            inventoryToSellButton.setVisible(false);
-            inventoryToSellButton.buttonText.setVisible(false);
-        }
-
-        for (const merchantInventoryButton of this.merchantInventoryButtons) {
-            merchantInventoryButton.setVisible(false);
-            merchantInventoryButton.buttonText.setVisible(false);
-        }
     }
 }

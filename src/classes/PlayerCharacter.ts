@@ -66,30 +66,7 @@ export default class PlayerCharacter extends Unit {
     }
 
     public applyHPChange(hpChangeAmount: number): number {
-        const initialCharacterHP = this.stats.currentHP;
-
-        // handle healing hp change (negative hp change signifies healing)
-        if (hpChangeAmount < 0) {
-            this.stats.currentHP = Math.min(this.stats.maxHP, this.stats.currentHP - hpChangeAmount);
-        }
-
-        // apply damage
-        else {
-            // handle the math of taking damage,
-            this.stats.currentHP -= hpChangeAmount;
-            this.updateSceneOnReceivingDamage();
-        }
-
-        if (this.stats.currentHP <= 0) {
-            this.stats.currentHP = 0;
-            this.living = false;
-        }
-
-        // setting up the ui hp
-        this.battleScene.player1HPText.setText(`HP: ${this.stats.currentHP}/${this.stats.maxHP}`);
-
-        // return actual hp change
-        return this.stats.currentHP - initialCharacterHP;
+        return super.applyHPChange(hpChangeAmount, this.battleScene.player1HPText);
     }
 
     public calculateAttackDamage(target: (PlayerCharacter | Enemy | BotCharacter)): number {

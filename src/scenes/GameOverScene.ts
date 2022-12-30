@@ -1,11 +1,9 @@
-// import TweenHelper from '../utils/TweenHelper';
 import GameScene from './GameScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
 import MusicScene from './MusicScene';
 
 export default class GameOverScene extends Phaser.Scene {
     private gameOverText!: Phaser.GameObjects.Text;
-    // private musicMuteButton!: UIActionButton;
     private musicScene!: MusicScene;
     private gameScene!: GameScene;
 
@@ -40,7 +38,6 @@ export default class GameOverScene extends Phaser.Scene {
 
         pressAnyKeyText.setOrigin(0.5);
 
-        // TweenHelper.flashElement(this, pressAnyKeyText);
         this.scene.scene.tweens.add({
             targets: pressAnyKeyText,
             duration: 1500,

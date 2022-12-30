@@ -19,7 +19,6 @@ export default class Merchant extends NPC {
     }
 
     public listenForInteractEvent() {
-        // if (Phaser.Input.Keyboard.JustDown(this.gameScene.cursors.space)) {
         // merchant just heard the space bar somewhere!
         if (this.testForInteractionReadyState()) {
             this.runDialog();
@@ -28,7 +27,6 @@ export default class Merchant extends NPC {
             // merchant is not getting talked to
             return;
         }
-        // }
     }
 
     public runDialog() {
@@ -36,9 +34,7 @@ export default class Merchant extends NPC {
         this.uiScene.interactionState = 'merchantbuy';
         this.gameScene.gamePadScene?.scene.stop();
         this.uiScene.currentNPC = this;
-        // this.gameScene.input.keyboard.resetKeys();
         this.gameScene.input.keyboard!.enabled = false;
-        // this.gameScene.activeDialogScene = true;
         if (this.gameScene.gridPhysics.facingDirection === 'right') this.sprite.setFrame(1);
         if (this.gameScene.gridPhysics.facingDirection === 'up') this.sprite.setFrame(0);
         if (this.gameScene.gridPhysics.facingDirection === 'left') this.sprite.setFrame(2);
@@ -70,7 +66,6 @@ export default class Merchant extends NPC {
         eventsCenter.on('space', () => {
             this.uiScene.interactionState = 'mainselect';
             eventsCenter.removeListener('space');
-            // eventsCenter.removeListener('no');
             // close the merchant select scene
 
             this.gameScene.gamePadScene?.scene.restart();
@@ -125,8 +120,6 @@ export default class Merchant extends NPC {
             this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A).reset();
             this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S).reset();
             this.gameScene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D).reset();
-
-            // this.gameScene.input.keyboard.resetKeys();
 
         });
 

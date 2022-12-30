@@ -1,11 +1,13 @@
 import Soldier from '../jobs/Soldier';
 import Stats from '../stats/Stats';
+import {Direction} from '../types/Direction';
 import {Equipment} from '../types/Equipment';
 import { getCombinedStat } from '../utils/EquipmentUtils';
 
 export default class GameActor {
     public equipment!: Equipment;
     public stats!: Stats;
+    public sprite!: Phaser.GameObjects.Sprite;
     protected createStats(job: string) {
         if (job === 'Soldier') {
             return new Stats(
@@ -43,4 +45,12 @@ export default class GameActor {
         return getCombinedStat(this.stats, this.equipment, stat);
     }
 
+
+    public stopAnimation(direction: Direction) {
+        if (!this.sprite.anims) return;
+        const animationManager = this.sprite.anims.animationManager;
+        const standingFrame = animationManager.get(direction).frames[1].frame.name;
+        this.sprite.anims.stop();
+        this.sprite.setFrame(standingFrame);
+    }
 }

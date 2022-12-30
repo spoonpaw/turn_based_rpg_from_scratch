@@ -66,13 +66,13 @@ export default class Player extends GameActor{
         this.sprite.anims.play(direction);
     }
 
-    public stopAnimation(direction: Direction) {
-        if (!this.sprite.anims) return;
-        const animationManager = this.sprite.anims.animationManager;
-        const standingFrame = animationManager.get(direction).frames[1].frame.name;
-        this.sprite.anims.stop();
-        this.sprite.setFrame(standingFrame);
-    }
+    // public stopAnimation(direction: Direction) {
+    //     if (!this.sprite.anims) return;
+    //     const animationManager = this.sprite.anims.animationManager;
+    //     const standingFrame = animationManager.get(direction).frames[1].frame.name;
+    //     this.sprite.anims.stop();
+    //     this.sprite.setFrame(standingFrame);
+    // }
 
     // public getCombinedStat(stat: keyof typeof this.stats): number {
     //     // call the new function to calculate the combined stat

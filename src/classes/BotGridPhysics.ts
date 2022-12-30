@@ -41,17 +41,7 @@ export default class BotGridPhysics extends GridPhysics {
 
 
     public moveBot(direction: Direction): void {
-        this.lastMovementIntent = direction;
-        if (this.isMoving()) return;
-        if (this.isBlockingDirection(direction)) {
-            this.facingDirection = direction;
-            this.playerOrNPC.stopAnimation(direction);
-        }
-        else {
-            this.facingDirection = direction;
-
-            this.startMoving(direction);
-        }
+        this.move(direction);
     }
 
     protected moveBotSprite(pixelsToMove: number) {

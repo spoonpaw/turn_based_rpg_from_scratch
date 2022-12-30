@@ -5,7 +5,6 @@ import BattleUIScene from '../scenes/BattleUIScene';
 import GameScene from '../scenes/GameScene';
 import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
-// import { getCombinedStat } from '../utils/getCombinedStat';
 import Item from './Item';
 
 
@@ -43,7 +42,7 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         this.living = true;
     }
 
-    abstract applyHPChange(hpChangeAmount: number): number;
+    // abstract applyHPChange(hpChangeAmount: number): number;
 
     abstract getInitiative(): number;
 
@@ -79,5 +78,33 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         }
 
         return baseStat + totalEquipmentBonus;
+    }
+
+
+    applyHPChange(hpChangeAmount: number, hpText: Phaser.GameObjects.Text) {
+        const initialCharacterHP = this.stats.currentHP;
+
+        // handle healing hp change (negative hp change signifies healing)
+        if (hpChangeAmount < 0) {
+            this.stats.currentHP = Math.min(this.stats.maxHP, this.stats.currentHP - hpChangeAmount);
+        }
+
+        // apply damage
+        else {
+            // handle the math of taking damage,
+            this.stats.currentHP -= hpChangeAmount;
+            this.updateSceneOnReceivingDamage();
+        }
+
+        if (this.stats.currentHP <= 0) {
+            this.stats.currentHP = 0;
+            this.living = false;
+        }
+
+        // setting up the ui hp
+        hpText.setText(`HP: ${this.stats.currentHP}/${this.stats.maxHP}`);
+
+        // return actual hp change
+        return this.stats.currentHP - initialCharacterHP;
     }
 }
