@@ -2,6 +2,7 @@ import UIActionButton from '../classes/UIActionButton';
 import eventsCenter from '../utils/EventsCenter';
 
 export default class KeyboardScene extends Phaser.Scene {
+    public cursor!: Phaser.GameObjects.Rectangle;
     public capsLock!: boolean;
     public keyboardButtonDictionary!: { [key: string]: Phaser.GameObjects.Text };
     public keyboardInputTextArray!: Phaser.GameObjects.Text[];
@@ -39,6 +40,20 @@ export default class KeyboardScene extends Phaser.Scene {
             .setOrigin(0, 0);
 
         this.createKeyboardKeys();
+
+        // create the cursor rectangle
+        this.cursor = this.add.rectangle(
+            // position it at the location of the next letter
+            65,
+            328,
+            // set its width and height to match the size of a letter
+            37,
+            50,
+            // set its color to white
+            0xbcbcbc
+        )
+            .setVisible(true);
+
         this.createKeyboardInputText();
 
         this.rightSideOptionsFrame = this.add.image(
@@ -59,7 +74,7 @@ export default class KeyboardScene extends Phaser.Scene {
                 eventsCenter.emit(
                     'keyboardaccept',
                     [
-                        this.getFullStringFromInput().split('_')[0]
+                        this.getFullStringFromInput()
                     ]
                 );
                 this.scene.stop();
@@ -94,9 +109,9 @@ export default class KeyboardScene extends Phaser.Scene {
         )
             .setInteractive()
             .on('pointerdown', () => {
+                // check if string is already too long
                 if (
-                    this.getFullStringFromInput().length === 14 &&
-                    !this.getFullStringFromInput().endsWith('_')
+                    this.getFullStringFromInput().length === 14
                 ) {
                     // cut the last letter off the string
                     const stringMinusLastLetter = this.getFullStringFromInput().slice(0, -1);
@@ -111,8 +126,11 @@ export default class KeyboardScene extends Phaser.Scene {
                     // set the input text to...
                     this.setInputFromString(
                         // the input text without trailing underscores plus the pressed character
-                        this.getFullStringFromInput().split('_')[0] + ' '
+                        this.getFullStringFromInput() + ' '
                     );
+                    if (this.getFullStringFromInput().length < 14) {
+                        this.cursor.setX(this.cursor.x + 43);
+                    }
                 }
             });
 
@@ -128,10 +146,16 @@ export default class KeyboardScene extends Phaser.Scene {
         )
             .setInteractive()
             .on('pointerdown', () => {
-                const originalString = this.getFullStringFromInput().split('_')[0];
+                const originalString = this.getFullStringFromInput();
+                if (originalString.length === 0) {
+                    return;
+                }
                 const stringMinusLastLetter = originalString.slice(0, -1);
                 this.setInputFromString(stringMinusLastLetter);
-
+                if (stringMinusLastLetter.length === 13) {
+                    return;
+                }
+                this.cursor.setX(this.cursor.x - 43);
 
             });
 
@@ -162,24 +186,15 @@ export default class KeyboardScene extends Phaser.Scene {
 
     public update(time: number, delta: number) {
         this.timer += delta;
-        while (this.timer > 1000) {
+        while(this.timer > 1000) {
             this.timer -= 1000;
 
-            // check if the last character of the string was an underscore
-            if (this.getFullStringFromInput().endsWith('_')) {
-                // set the input text to... (set it to the actual string first)
-                this.setInputFromString(
-                    // everything before the underscore
-                    this.getFullStringFromInput().split('_')[0]
-                );
+            if (!this.cursor.visible) {
+                this.cursor.setVisible(true);
             }
-            else {
-                if (this.getFullStringFromInput().length < 14) {
-                    this.setInputFromString(
-                        this.getFullStringFromInput() + '_'
-                    );
-                }
 
+            else {
+                this.cursor.setVisible(false);
             }
         }
     }
@@ -200,7 +215,6 @@ export default class KeyboardScene extends Phaser.Scene {
                     .setOrigin(0.5, 0.5)
             );
         }
-        this.keyboardInputTextArray[0].setText('_');
     }
 
     private createKeyboardKeys() {
@@ -224,8 +238,7 @@ export default class KeyboardScene extends Phaser.Scene {
 
                         // check that the string length is 14 and doesn't end with an underscore
                         if (
-                            this.getFullStringFromInput().length === 14 &&
-                            !this.getFullStringFromInput().endsWith('_')
+                            this.getFullStringFromInput().length === 14
                         ) {
                             // cut the last letter off the string
                             const stringMinusLastLetter = this.getFullStringFromInput().slice(0, -1);
@@ -240,8 +253,11 @@ export default class KeyboardScene extends Phaser.Scene {
                             // set the input text to...
                             this.setInputFromString(
                                 // the input text without trailing underscores plus the pressed character
-                                this.getFullStringFromInput().split('_')[0] + adjustedChar
+                                this.getFullStringFromInput() + adjustedChar
                             );
+                            if (this.getFullStringFromInput().length < 14) {
+                                this.cursor.setX(this.cursor.x + 43);
+                            }
                         }
                     });
             }
