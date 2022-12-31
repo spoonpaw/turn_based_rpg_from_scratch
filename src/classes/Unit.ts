@@ -19,7 +19,7 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
     public inventory: Item[] = [];
     public living: boolean;
     abstract stats: Stats;
-    abstract type: string;
+    abstract key: string;
     protected battleScene: BattleScene;
     protected battleUIScene: BattleUIScene;
     protected gameScene: GameScene;

@@ -1,5 +1,6 @@
 import {cloneDeep} from 'lodash';
 
+import GameActor from '../classes/GameActor';
 import GameMessage from '../classes/GameMessage';
 import Item from '../classes/Item';
 import Innkeeper from '../classes/npcs/Innkeeper';
@@ -98,6 +99,10 @@ export default class UIScene extends Phaser.Scene {
     private unequipButton!: UIActionButton;
     private vitalityString!: Phaser.GameObjects.Text;
     private dropButton!: UIActionButton;
+    private player1CharacterSheetButton!: UIActionButton;
+    private player2CharacterSheetButton!: UIActionButton;
+    private player3CharacterSheetButton!: UIActionButton;
+    private nameText!: Phaser.GameObjects.Text;
 
     public constructor() {
         super('UI');
@@ -424,6 +429,7 @@ export default class UIScene extends Phaser.Scene {
         this.unequipButton.buttonText.setVisible(false);
         this.characterDetailDisplay.setVisible(false);
         this.characterDetailDisplayFrame.setVisible(false);
+        this.nameText.setVisible(false);
 
         for (const subInventoryButton of this.subInventoryButtons) {
             if (subInventoryButton.visible) {
@@ -442,6 +448,11 @@ export default class UIScene extends Phaser.Scene {
                 subAbilityButton.buttonText.setVisible(false);
             }
         }
+
+        this.player1CharacterSheetButton.setVisible(false);
+        this.player1CharacterSheetButton.buttonText.setVisible(false);
+        this.player2CharacterSheetButton.setVisible(false);
+        this.player2CharacterSheetButton.buttonText.setVisible(false);
 
         for (const equipmentString of this.equipmentStrings) {
             if (equipmentString.visible) {
@@ -523,7 +534,7 @@ export default class UIScene extends Phaser.Scene {
             else if (
                 // this.interactionState === 'inventory' ||
                 this.interactionState === 'ability' ||
-                this.interactionState === 'charactersheet' ||
+                this.interactionState.startsWith('charactersheet') ||
                 this.interactionState.startsWith('selectinginventoryaction') ||
                 this.interactionState.startsWith('inventory') ||
                 this.interactionState.startsWith('equipment')
@@ -552,7 +563,7 @@ export default class UIScene extends Phaser.Scene {
 
     public updateMP(currentMP: number, maxMP: number) {
         // this.goldText.text = `Gold: ${gold}`;
-        if (this.gameScene.player.type === 'Soldier') {
+        if (this.gameScene.player.type.name.endsWith('Soldier')) {
             currentMP = 0;
             maxMP = 0;
         }
@@ -564,8 +575,8 @@ export default class UIScene extends Phaser.Scene {
         this.player2hpText.setText(`HP: ${hp} / ${maxHP}`)
     }
 
-    private calculateTilNextLevel(): number {
-        const currentExp = this.gameScene.player.experience;
+    private calculateTilNextLevel(gameActor: GameActor): number {
+        const currentExp = gameActor.experience;
         let currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(currentExp)));
         const nextLevel = currentLevel + 1;
         let expCounter = 0;
@@ -1335,6 +1346,74 @@ export default class UIScene extends Phaser.Scene {
         this.subAbilityButtons.push(this.subAbilityButton);
 
         // END SUBABILITY BUTTONS SECTION
+
+        // START SUBCHARACTER SHEET BUTTONS SECTION
+        this.player1CharacterSheetButton = new UIActionButton(
+            this,
+            265,
+            465,
+            'pagebutton',
+            'pagebuttonactive',
+            'Player',
+            () => {
+                if (this.interactionState === 'charactersheet1'){
+                    return;
+                }
+                this.interactionState = 'charactersheet1';
+                this.player1CharacterSheetButton.select();
+                this.player2CharacterSheetButton.deselect();
+                this.player3CharacterSheetButton.deselect();
+
+                this.updateCharacterSheetStrings(this.gameScene.player);
+            }
+        );
+        this.player1CharacterSheetButton.setVisible(false);
+        this.player1CharacterSheetButton.buttonText.setVisible(false);
+
+        this.player2CharacterSheetButton = new UIActionButton(
+            this,
+            265,
+            515,
+            'pagebutton',
+            'pagebuttonactive',
+            'Companion 1',
+            () => {
+                if (this.interactionState === 'charactersheet2'){
+                    return;
+                }
+                this.interactionState = 'charactersheet2';
+                this.player1CharacterSheetButton.deselect();
+                this.player2CharacterSheetButton.select();
+                this.player3CharacterSheetButton.deselect();
+
+                this.updateCharacterSheetStrings(this.gameScene.bots[0]);
+            }
+        );
+        this.player2CharacterSheetButton.setVisible(false);
+        this.player2CharacterSheetButton.buttonText.setVisible(false);
+
+        this.player3CharacterSheetButton = new UIActionButton(
+            this,
+            265,
+            565,
+            'pagebutton',
+            'pagebuttonactive',
+            'Bot 2',
+            () => {
+                if (this.interactionState === 'charactersheet3'){
+                    return;
+                }
+                this.interactionState = 'charactersheet3';
+                this.player1CharacterSheetButton.deselect();
+                this.player2CharacterSheetButton.deselect();
+                this.player3CharacterSheetButton.select();
+            }
+        );
+        this.player3CharacterSheetButton.setVisible(false);
+        this.player3CharacterSheetButton.buttonText.setVisible(false);
+
+
+        // END SUBCHARACTER SHEET BUTTONS SECTION
         // END BUTTON SECTION
 
         // START IMAGE SECTION
@@ -1381,7 +1460,7 @@ export default class UIScene extends Phaser.Scene {
         let currentMP;
         let maxMP;
 
-        if (this.gameScene.player.type === 'Soldier') {
+        if (this.gameScene.player.type.name === 'PlayerSoldier') {
             currentMP = 0;
             maxMP = 0;
         }
@@ -1400,7 +1479,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
 
 
-        if (this.gameScene.bots[0]?.type === 'Soldier') {
+        if (this.gameScene.bots[0]?.type.name === 'MonsterSoldier') {
             currentMP = 0;
             maxMP = 0;
         }
@@ -1473,7 +1552,7 @@ export default class UIScene extends Phaser.Scene {
                 }
                 else if (
                     this.interactionState === 'ability' ||
-                    this.interactionState === 'charactersheet' ||
+                    this.interactionState.startsWith('charactersheet') ||
                     this.interactionState.startsWith('merchant') ||
                     this.interactionState.startsWith('innkeeper') ||
                     this.interactionState.startsWith('botscientist')
@@ -1566,7 +1645,7 @@ export default class UIScene extends Phaser.Scene {
                     this.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
 
                     this.sfxScene.playSound('potion');
-                    eventsCenter.emit('GameMessage', `${this.gameScene.player.type} uses a health potion on ${this.gameScene.player.type}, healing them for ${actualAmountHealed} HP.`);
+                    eventsCenter.emit('GameMessage', `${this.gameScene.player.name} uses a health potion on ${this.gameScene.player.name}, healing them for ${actualAmountHealed} HP.`);
 
                     this.generateInventoryButtons();
                     this.gameScene.input.keyboard!.resetKeys();
@@ -1627,7 +1706,7 @@ export default class UIScene extends Phaser.Scene {
                     this.updatePlayer2HP(this.gameScene.bots[0].stats.currentHP, this.gameScene.bots[0].stats.maxHP);
 
                     this.sfxScene.playSound('potion');
-                    eventsCenter.emit('GameMessage', `${this.gameScene.player.type} uses a health potion on ${this.gameScene.bots[0].name}, healing them for ${actualAmountHealed} HP.`);
+                    eventsCenter.emit('GameMessage', `${this.gameScene.player.name} uses a health potion on ${this.gameScene.bots[0].name}, healing them for ${actualAmountHealed} HP.`);
 
                     this.generateInventoryButtons();
                     this.gameScene.input.keyboard!.resetKeys();
@@ -1658,7 +1737,7 @@ export default class UIScene extends Phaser.Scene {
                 if (
                     this.interactionState === 'inventory' ||
                     this.interactionState === 'equipment' ||
-                    this.interactionState === 'charactersheet' ||
+                    this.interactionState.startsWith('charactersheet') ||
                     this.interactionState.startsWith('selecting') ||
                     this.interactionState.startsWith('inventoryaction') ||
                     this.interactionState.startsWith('merchant') ||
@@ -1708,7 +1787,7 @@ export default class UIScene extends Phaser.Scene {
             'pagebuttonactive',
             '',
             () => {
-                eventsCenter.emit('charactersheet');
+                eventsCenter.emit('charactersheet1');
                 if (
                     this.interactionState === 'inventory' ||
                     this.interactionState === 'equipment' ||
@@ -1721,7 +1800,7 @@ export default class UIScene extends Phaser.Scene {
                 ) {
                     this.selectCancel();
                 }
-                else if (this.interactionState === 'charactersheet') {
+                else if (this.interactionState.startsWith('charactersheet')) {
                     this.selectCancel();
                     if (this.gameScene.operatingSystem !== 'desktop') {
                         // this.scene.launch('GamePad');
@@ -1729,16 +1808,34 @@ export default class UIScene extends Phaser.Scene {
                     }
                     return;
                 }
+                this.interactionState = 'charactersheet1';
                 // set up the character sheet -> query and update
                 //  the stats before showing the character sheet
-                this.updateCharacterSheetStrings();
+                this.updateCharacterSheetStrings(this.gameScene.player);
                 // this.gameScene.gamePadScene?.scene.stop();
 
-                this.interactionState = 'charactersheet';
                 this.characterSheetButton.select();
                 this.inventoryAndAbilityMenuFrame.setVisible(true);
+                this.subInventoryAndAbilityMenuFrame.setVisible(true);
 
-                this.updateAndShowCancelButton(315, 488, 'Cancel', true);
+                this.player1CharacterSheetButton.select();
+                this.player1CharacterSheetButton.setVisible(true);
+                this.player1CharacterSheetButton.buttonText.setVisible(true);
+
+                this.goldFrame.setVisible(true);
+                this.nameText.setVisible(true);
+
+                this.player2CharacterSheetButton.deselect();
+                this.player3CharacterSheetButton.deselect();
+
+                // TODO: if there are bots, show buttons to show their character sheets.
+
+                if (this.gameScene.bots.length > 0) {
+                    this.player2CharacterSheetButton.setVisible(true);
+                    this.player2CharacterSheetButton.buttonText.setVisible(true);
+                }
+
+                this.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
                 this.classString.setVisible(true);
                 this.levelString.setVisible(true);
@@ -1822,6 +1919,16 @@ export default class UIScene extends Phaser.Scene {
 
     private setupText() {
         // START TEXT SECTION
+        this.nameText = this.add.text(538, 122, this.gameScene.player.name, {
+            color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
+                width: 610,
+                useAdvancedWrap: true
+            }
+        })
+            .setResolution(3)
+            .setFontSize(50);
+        this.shrinkTextByPixel(this.nameText, 375);
+        this.nameText.setVisible(false);
 
         this.goldText = this.add.text(584, 112, '0 gp', {
             color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
@@ -2006,7 +2113,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.defenseString.setVisible(false);
 
-        this.tillNextLevelString = this.add.text(540, 545, `Till Next Level: ${this.calculateTilNextLevel()}`, {
+        this.tillNextLevelString = this.add.text(540, 545, `Till Next Level: ${this.calculateTilNextLevel(this.gameScene.player)}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2019,16 +2126,30 @@ export default class UIScene extends Phaser.Scene {
         // END TEXT SECTION
     }
 
-    private updateCharacterSheetStrings() {
-        this.levelString.setText(`Level: ${Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)))}`);
-        this.hitPointString.setText(`Hit Points: ${this.gameScene.player.stats.currentHP}/${this.gameScene.player.stats.maxHP}`);
+    private updateCharacterSheetStrings(gameActor: GameActor) {
+
+        this.nameText.setText(gameActor.name);
+        this.shrinkTextByPixel(this.nameText, 375);
+
+        this.levelString.setText(`Level: ${Math.max(1, Math.ceil(0.3 * Math.sqrt(gameActor.experience)))}`);
+        this.hitPointString.setText(`Hit Points: ${gameActor.stats.currentHP}/${gameActor.stats.maxHP}`);
         this.manaPointString.setText('Mana Points: 0/0');
-        this.strengthString.setText(`Strength: ${Math.floor(this.gameScene.player.getCombinedStat('strength'))}`);
-        this.agilityString.setText(`Agility: ${Math.floor(this.gameScene.player.stats.agility)}`);
-        this.vitalityString.setText(`Vitality: ${Math.floor(this.gameScene.player.stats.vitality)}`);
-        this.intellectString.setText(`Intellect: ${Math.floor(this.gameScene.player.stats.intellect)}`);
-        this.luckString.setText(`Luck: ${Math.floor(this.gameScene.player.stats.luck)}`);
-        this.defenseString.setText(`Defense: ${Math.floor(this.gameScene.player.getCombinedStat('defense'))}`);
-        this.tillNextLevelString.setText(`Till Next Level: ${this.calculateTilNextLevel()}`);
+        this.strengthString.setText(`Strength: ${Math.floor(gameActor.getCombinedStat('strength'))}`);
+        this.agilityString.setText(`Agility: ${Math.floor(gameActor.stats.agility)}`);
+        this.vitalityString.setText(`Vitality: ${Math.floor(gameActor.stats.vitality)}`);
+        this.intellectString.setText(`Intellect: ${Math.floor(gameActor.stats.intellect)}`);
+        this.luckString.setText(`Luck: ${Math.floor(gameActor.stats.luck)}`);
+        this.defenseString.setText(`Defense: ${Math.floor(gameActor.getCombinedStat('defense'))}`);
+        this.tillNextLevelString.setText(`Till Next Level: ${this.calculateTilNextLevel(gameActor)}`);
+
+    }
+
+    private shrinkTextByPixel(phasertext: Phaser.GameObjects.Text, maxpixel: number): Phaser.GameObjects.Text {
+        let fontSize = phasertext.height;
+        while (phasertext.width > maxpixel) {
+            fontSize--;
+            phasertext.setStyle({ fontSize: fontSize + 'px' });
+        }
+        return phasertext;
     }
 }

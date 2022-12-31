@@ -20,6 +20,7 @@ import Innkeeper from '../classes/npcs/Innkeeper';
 import Merchant from '../classes/npcs/Merchant';
 import Player from '../classes/Player';
 import {items} from '../items/items';
+import playerSoldierJob from '../jobs/players/PlayerSoldier';
 import {ILevelData, levels} from '../levels/Levels';
 import {Direction} from '../types/Direction';
 import {Equipment} from '../types/Equipment';
@@ -66,7 +67,15 @@ export default class GameScene extends Phaser.Scene {
         return randNum === 0;
     }
 
-    public create(data?: { levelData?: ILevelData }) {
+    public create(
+        data: {
+            nameData?: string;
+            levelData?: ILevelData
+        }
+    ) {
+        console.log('creating game scene!!');
+        console.log({data});
+        console.log(Object.keys(data));
         this.input.keyboard!.enabled = true;
 
         this.gamePadScene?.scene.restart();
@@ -76,10 +85,8 @@ export default class GameScene extends Phaser.Scene {
             this.scene.launch('GamePad');
             this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
         }
-
-
         // if data is empty then the game just started so load the player in the spawn location
-        if (data && Object.keys(data).length === 0) {
+        if (data.nameData) {
 
             // create the game scene when the level 1 player initially spawns.
             // create the map
@@ -137,6 +144,7 @@ export default class GameScene extends Phaser.Scene {
             };
 
             this.player = new Player(
+                data.nameData,
                 playerSprite,
                 new Phaser.Math.Vector2(
                     12,
@@ -144,7 +152,7 @@ export default class GameScene extends Phaser.Scene {
                 ),
                 this.player?.gold ?? 500,
                 this.player?.experience ?? 0,
-                'Soldier',
+                playerSoldierJob,
                 aBunchOfPotions,
                 emptyEquipment
             );
@@ -241,7 +249,7 @@ export default class GameScene extends Phaser.Scene {
             this.playerTileY = this.player.getTilePos().y;
 
         }
-        else if (data?.levelData) {
+        else if (data.levelData) {
 
             this.uiScene.scene.bringToTop();
 
@@ -265,6 +273,7 @@ export default class GameScene extends Phaser.Scene {
             playerSprite.setDepth(2);
             this.cameras.main.startFollow(playerSprite);
             this.player = new Player(
+                this.player.name,
                 playerSprite,
                 new Phaser.Math.Vector2(
                     data.levelData.spawnCoords[0].x,
@@ -272,7 +281,8 @@ export default class GameScene extends Phaser.Scene {
                 ),
                 this.player.gold,
                 this.player.experience,
-                'Soldier',
+                // 'PlayerSoldier',
+                playerSoldierJob,
                 this.player.inventory,
                 this.player.equipment,
                 this.player.stats
@@ -290,10 +300,10 @@ export default class GameScene extends Phaser.Scene {
                 const botSprite = this.add.sprite(0, 0, botClone.sprite.texture);
                 botSprite.depth = 1;
                 const bot = new Bot(
+                    botClone.name,
                     botSprite,
                     botClone.experience,
-                    botClone.type,
-                    botClone.name
+                    botClone.type
                 );
                 this.bots[0] = bot;
 

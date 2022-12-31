@@ -2,8 +2,8 @@ import Stats from '../stats/Stats';
 
 export const enemies: enemyArray = [
     {
-        name: 'seedspiker',
-        type: 'Seed Spiker',
+        name: 'Seed Spiker',
+        key: 'seedspiker',
         level: 1,
         experience: 4,
         gold: 3,
@@ -22,8 +22,8 @@ export const enemies: enemyArray = [
         }
     },
     {
-        name: 'sentientrock',
-        type: 'Sentient Rock',
+        name: 'Sentient Rock',
+        key: 'sentientrock',
         level: 1,
         experience: 6,
         gold: 4,
@@ -42,8 +42,8 @@ export const enemies: enemyArray = [
         }
     },
     {
-        name: 'deadlyflower',
-        type: 'Deadly Flower',
+        name: 'Deadly Flower',
+        key: 'deadlyflower',
         level: 2,
         experience: 8,
         gold: 5,
@@ -65,7 +65,7 @@ export const enemies: enemyArray = [
 
 type enemyArray = {
     name: string,
-    type: string,
+    key: string,
     level: number,
     experience: number,
     gold: number,
