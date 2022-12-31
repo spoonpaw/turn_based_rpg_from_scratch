@@ -13,7 +13,7 @@ export default class PlayerCharacter extends Unit {
     public equipment: Equipment;
     // public inventory!: Item[];
     public stats!: Stats;
-    public type: string;
+    public key!: string;
 
     constructor(
         scene: BattleScene,
@@ -31,18 +31,16 @@ export default class PlayerCharacter extends Unit {
             frame,
             name
         );
-        this.battleScene = <BattleScene>this.scene.scene.get('Battle');
+        const battleUIScene = <BattleUIScene>scene.scene.get('BattleUI');
         this.stats = this.gameScene.player.stats;
         this.equipment = this.gameScene.player.equipment;
         this.inventory = this.gameScene.player.inventory;
-        this.type = 'Soldier';
+        this.key = 'PlayerSoldier';
 
         this.setInteractive();
         this.on('pointerdown', () => {
             if (scene.interactionState.startsWith('inventoryaction')) {
                 const inventorySlotNumber = Number(scene.interactionState.split('inventoryaction')[1]);
-
-                const battleUIScene = <BattleUIScene>scene.scene.get('BattleUI');
 
                 battleUIScene.message.setVisible(false);
                 battleUIScene.confirmSelectedAbilityOrItemFrame.setVisible(false);
@@ -120,26 +118,26 @@ export default class PlayerCharacter extends Unit {
                 if (!this.criticalStrikeTest()) {
                     this.battleScene.sfxScene.playSound('attack');
                     damage += this.calculateAttackDamage(target);
-                    eventsCenter.emit('Message', `${this.type} attacked ${target.type} for ${damage} HP!`);
+                    eventsCenter.emit('Message', `${this.name} attacked ${target.name} for ${damage} HP!`);
                 }
                 else {
                     this.battleScene.sfxScene.playSound('criticalattack');
                     damage += this.calculateCriticalStrikeDamage();
-                    eventsCenter.emit('Message', `${this.type} attacked ${target.type} for ${damage} HP! A critical strike!`);
+                    eventsCenter.emit('Message', `${this.name} attacked ${target.name} for ${damage} HP! A critical strike!`);
                 }
                 runtimeInMS += 2000;
                 target.applyHPChange(damage);
             }
             else {
                 this.battleScene.sfxScene.playSound('dodge');
-                eventsCenter.emit('Message', `${this.type} attacked ${target.type}. ${target.type} dodged the attack!`);
+                eventsCenter.emit('Message', `${this.name} attacked ${target.name}. ${target.name} dodged the attack!`);
                 runtimeInMS += 2000;
                 return runtimeInMS;
             }
         }
         else if (data.action === 'Cypressium Staff') {
             runtimeInMS += 2000;
-            eventsCenter.emit('Message', `${this.type} uses a ${this.name} on ${target.type}; it has no effect.`);
+            eventsCenter.emit('Message', `${this.name} uses a ${this.name} on ${target.name}; it has no effect.`);
         }
         else if (data.action === 'Health Potion') {
             // get the selected inventory slot index from the battle ui scene delete it from the player's inventory
@@ -163,7 +161,7 @@ export default class PlayerCharacter extends Unit {
                 runtimeInMS += 2000;
                 const amountHealed = data.target.applyHPChange(-30);
                 this.battleScene.sfxScene.playSound('potion');
-                eventsCenter.emit('Message', `${this.type} uses a health potion on ${target.type}, healing them for ${amountHealed} HP.`);
+                eventsCenter.emit('Message', `${this.name} uses a health potion on ${target.name}, healing them for ${amountHealed} HP.`);
             }
         }
 

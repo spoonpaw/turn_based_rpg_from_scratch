@@ -1,3 +1,4 @@
+import monsterSoldierJob from '../../jobs/monsters/MonsterSoldier';
 import GameScene from '../../scenes/GameScene';
 import UIScene from '../../scenes/UIScene';
 import eventsCenter from '../../utils/EventsCenter';
@@ -94,20 +95,12 @@ export default class extends NPC {
             this.uiScene.interactButton.setVisible(false);
             this.uiScene.interactButton.buttonText.setVisible(false);
 
-            // eventsCenter.removeListener('space');
             eventsCenter.on('space', () => {
-                // if (this.uiScene.interactionState === 'botscientistresponse') {
-                //     this.keyboardResponseHandler();
-                // }
                 this.gameScene.gamePadScene?.scene.restart();
                 this.uiScene.interactionState = 'mainselect';
                 eventsCenter.removeListener('space');
                 eventsCenter.removeListener('yes');
-                // eventsCenter.removeListener('no');
 
-                // this.uiScene.goldFrame.setVisible(false);
-                // this.uiScene.goldIcon.setVisible(false);
-                // this.uiScene.goldText.setVisible(false);
                 this.uiScene.leftSideDialogFrame.setVisible(false);
                 this.uiScene.leftSideDialogText.setText('');
                 this.uiScene.leftSideDialogText.setVisible(false);
@@ -141,19 +134,17 @@ export default class extends NPC {
         // the player is saying yes, they want the bot (this spawns the bot)
         eventsCenter.on('yes', () => {
             this.uiScene.interactionState = 'botscientistresponse';
-            // eventsCenter.removeListener('no');
             eventsCenter.removeListener('yes');
-            // eventsCenter.removeListener('space');
             this.uiScene.leftSideDialogText.setText('Bot Scientist:\nGood friend, the Red Bot hath joined your party. Art thou inclined to give it a name, or doth thou prefer to leave it nameless?');
 
             // spawn the bot here!! rename him after the fact
             const botSprite = this.gameScene.add.sprite(0, 0, 'redbot');
             botSprite.setDepth(1);
             const redBot = new Bot(
+                'Red Bot',
                 botSprite,
                 0,
-                'Soldier',
-                'Red Bot'
+                monsterSoldierJob
             );
 
             // set all the player2 ui elements to visible with red bot's stats
@@ -163,7 +154,7 @@ export default class extends NPC {
             let currentMP;
             let maxMP;
 
-            if (this.gameScene.bots[0]?.type === 'Soldier') {
+            if (this.gameScene.bots[0]?.type.name === 'MonsterSoldier') {
                 currentMP = 0;
                 maxMP = 0;
             }
@@ -222,7 +213,7 @@ export default class extends NPC {
                 this.uiScene.characterDetailDisplay.setX(335);
                 this.uiScene.characterDetailDisplay.setY(175);
 
-                this.sprite.scene.scene.launch('Keyboard');
+                this.sprite.scene.scene.launch('Keyboard', {});
 
                 eventsCenter.on(
                     'keyboardaccept',

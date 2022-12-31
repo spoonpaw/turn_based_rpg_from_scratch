@@ -5,8 +5,9 @@ import BotCharacter from '../classes/BotCharacter';
 import {Enemy} from '../classes/Enemy';
 import PlayerCharacter from '../classes/PlayerCharacter';
 import {enemies} from '../enemies/enemies';
-import soldier, {IStatIncreases} from '../jobs/Soldier';
+import soldier from '../jobs/players/PlayerSoldier';
 import {levels} from '../levels/Levels';
+import { IStatIncreases } from '../types/Advancement';
 import eventsCenter from '../utils/EventsCenter';
 import BattleUIScene from './BattleUIScene';
 import GameScene from './GameScene';
@@ -20,7 +21,7 @@ export default class BattleScene extends Phaser.Scene {
     public heroes!: (PlayerCharacter | BotCharacter)[];
     public interactionState!: string;
     public player1HPText!: Phaser.GameObjects.Text;
-    player2HPText!: Phaser.GameObjects.Text;
+    public player2HPText!: Phaser.GameObjects.Text;
     public sfxScene!: SFXScene;
     private background!: Phaser.GameObjects.Image;
     private battleUIScene!: BattleUIScene;
@@ -75,7 +76,7 @@ export default class BattleScene extends Phaser.Scene {
 
         for (const enemy of this.enemies) {
             const enemyData = enemies.find(obj => {
-                return obj.name === enemy.texture.key;
+                return obj.key === enemy.texture.key;
             });
             experienceAmount += enemyData?.experience ?? 0;
         }
@@ -92,7 +93,7 @@ export default class BattleScene extends Phaser.Scene {
 
         for (const enemy of this.enemies) {
             const enemyData = enemies.find(obj => {
-                return obj.name === enemy.texture.key;
+                return obj.key === enemy.texture.key;
             });
             experienceAmount += enemyData?.experience ?? 0;
         }
@@ -236,7 +237,7 @@ export default class BattleScene extends Phaser.Scene {
                 this.turnUnits = this.units.filter(value => {
                     return !(value instanceof PlayerCharacter || value instanceof BotCharacter);
                 });
-                eventsCenter.emit('Message', `${this.heroes[0].type} has failed to retreat!`);
+                eventsCenter.emit('Message', `${this.gameScene.player.name} has failed to retreat!`);
                 this.time.addEvent({
                     delay: 2000,
                     callback: this.parseNextUnitTurn,
@@ -305,7 +306,7 @@ export default class BattleScene extends Phaser.Scene {
 
                 for (const enemy of this.enemies) {
                     const enemyData = enemies.find(obj => {
-                        return obj.name === enemy.texture.key;
+                        return obj.key === enemy.texture.key;
                     });
                     goldAmount += enemyData?.gold ?? 0;
                     experienceAmount += enemyData?.experience ?? 0;
@@ -359,7 +360,7 @@ export default class BattleScene extends Phaser.Scene {
 
                 for (const enemy of this.enemies) {
                     const enemyData = enemies.find(obj => {
-                        return obj.name === enemy.texture.key;
+                        return obj.key === enemy.texture.key;
                     });
                     experienceAmount += enemyData?.experience ?? 0;
                 }
@@ -401,6 +402,15 @@ export default class BattleScene extends Phaser.Scene {
         return phasertext;
     }
 
+    private shrinkTextByPixel(phasertext: Phaser.GameObjects.Text, maxpixel: number): Phaser.GameObjects.Text {
+        let fontSize = phasertext.height;
+        while (phasertext.width > maxpixel) {
+            fontSize--;
+            phasertext.setStyle({ fontSize: fontSize + 'px' });
+        }
+        return phasertext;
+    }
+
     private showGoldAndExperience(currentEnemies: Enemy[]): void {
         // the gold pieces/experience points should vary depending on the enemy
         let goldAmount = 0;
@@ -408,7 +418,7 @@ export default class BattleScene extends Phaser.Scene {
 
         for (const enemy of currentEnemies) {
             const enemyData = enemies.find(obj => {
-                return obj.name === enemy.texture.key;
+                return obj.key === enemy.texture.key;
             });
             goldAmount += enemyData?.gold ?? 0;
             experienceAmount += enemyData?.experience ?? 0;
@@ -488,7 +498,7 @@ export default class BattleScene extends Phaser.Scene {
             this.player2HPText = this.add.text(
                 534,
                 645,
-                `HP: ${this.gameScene.bots[0].stats.currentHP}/${this.gameScene.player.stats.maxHP}`, {
+                `HP: ${this.gameScene.bots[0].stats.currentHP}/${this.gameScene.bots[0].stats.maxHP}`, {
                     fontSize: '35px',
                     color: '#fff',
                     fontFamily: 'CustomFont'
@@ -498,7 +508,7 @@ export default class BattleScene extends Phaser.Scene {
             let currentMP;
             let maxMP;
 
-            if (this.gameScene.player.type === 'Soldier') {
+            if (this.gameScene.player.type.name === 'PlayerSoldier') {
                 currentMP = 0;
                 maxMP = 0;
             }
@@ -522,7 +532,7 @@ export default class BattleScene extends Phaser.Scene {
             675,
             'hero',
             0,
-            'Soldier' // TODO: let the player pick their name
+            this.gameScene.player.name // TODO: let the player pick their name
         );
 
         this.add.existing(soldier);
@@ -531,7 +541,7 @@ export default class BattleScene extends Phaser.Scene {
             this.add.text(
                 250,
                 610,
-                'Soldier',
+                this.gameScene.player.name,
                 {
                     fontSize: '45px',
                     color: '#fff',
@@ -554,7 +564,7 @@ export default class BattleScene extends Phaser.Scene {
         let currentMP;
         let maxMP;
 
-        if (this.gameScene.player.type === 'Soldier') {
+        if (this.gameScene.player.type.name === 'PlayerSoldier') {
             currentMP = 0;
             maxMP = 0;
         }
@@ -569,15 +579,19 @@ export default class BattleScene extends Phaser.Scene {
         })
             .setResolution(3);
 
-        const selectedEnemy: string = Phaser.Math.RND.pick(levels[this.gameScene.currentMap as keyof typeof levels].enemies ?? []);
+        // const selectedEnemy: string = Phaser.Math.RND.pick(levels[this.gameScene.currentMap as keyof typeof levels].enemies ?? []);
+        const selectedEnemyKey: string = Phaser.Math.RND.pick(levels[this.gameScene.currentMap as keyof typeof levels].enemies ?? []);
+
 
         const enemy = new Enemy(
             this,
             Number(this.game.config.width) / 2,
             280,
-            selectedEnemy,
+            selectedEnemyKey,
             undefined,
-            selectedEnemy
+            enemies.find((obj) => {
+                return obj.key === selectedEnemyKey;
+            })!.name
         );
 
         this.add.existing(enemy);
@@ -645,7 +659,7 @@ export default class BattleScene extends Phaser.Scene {
                     callback: () => {
                         eventsCenter.emit(
                             'Message',
-                            `${this.heroes[0].type} has reached level ${levelUpData.newLevel}!`
+                            `${this.heroes[0].name} has reached level ${levelUpData.newLevel}!`
                         );
                         // at the same time that this happens, update the battle scene max hp
 

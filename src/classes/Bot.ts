@@ -4,27 +4,38 @@ import Stats from '../stats/Stats';
 import {Direction} from '../types/Direction';
 import Vector2 = Phaser.Math.Vector2;
 import GameActor from './GameActor';
+import {MonsterJob} from './Jobs/MonsterJob';
 
 export default class Bot extends GameActor{
     public tilePos!: Phaser.Math.Vector2;
-    public stats: Stats;
+    // public stats: Stats;
     private uiScene: UIScene;
     private gameScene: GameScene;
     public path: Phaser.Math.Vector2[] = [];
 
 
     constructor(
-        public sprite: Phaser.GameObjects.Sprite,
+        name: string,
+        sprite: Phaser.GameObjects.Sprite,
         // private tilePos: Phaser.Math.Vector2,
-        public experience: number,
-        public type: string,
-        public name: string,
+        experience: number,
+        public type: MonsterJob,
         stats?: Stats
     ) {
-
-        super();
-        this.gameScene = <GameScene>this.sprite.scene.scene.get('Game');
-        this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
+        super(
+            name,
+            sprite,
+            experience
+        );
+        console.log({
+            botName: name,
+            botSprite: sprite,
+            botExperience: experience,
+            botType: type,
+            botStats: stats
+        });
+        this.gameScene = <GameScene>sprite.scene.scene.get('Game');
+        this.uiScene = <UIScene>sprite.scene.scene.get('UI');
 
         const offsetX = GameScene.TILE_SIZE / 2;
         const offsetY = GameScene.TILE_SIZE;

@@ -6,22 +6,30 @@ import {Equipment} from '../types/Equipment';
 // import { getCombinedStat } from '../utils/getCombinedStat';
 import GameActor from './GameActor';
 import Item from './Item';
+import {PlayerJob} from './Jobs/PlayerJob';
 
 
 export default class Player extends GameActor{
-    public stats: Stats;
+    // public stats: Stats;
     private uiScene!: UIScene;
     constructor(
-        public sprite: Phaser.GameObjects.Sprite,
+        name: string,
+        sprite: Phaser.GameObjects.Sprite,
         public tilePos: Phaser.Math.Vector2,
         public gold: number,
-        public experience: number,
-        public type: string,
+        experience: number,
+        // public type: string,
+        public type: PlayerJob,
         public inventory: Item[],
         public equipment: Equipment,
         stats?: Stats
     ) {
-        super();
+        super(
+            name,
+            sprite,
+            experience
+        );
+        console.log({playerType: this.type});
         this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
 
         const offsetX = GameScene.TILE_SIZE / 2;
@@ -65,17 +73,4 @@ export default class Player extends GameActor{
     public startAnimation(direction: Direction) {
         this.sprite.anims.play(direction);
     }
-
-    // public stopAnimation(direction: Direction) {
-    //     if (!this.sprite.anims) return;
-    //     const animationManager = this.sprite.anims.animationManager;
-    //     const standingFrame = animationManager.get(direction).frames[1].frame.name;
-    //     this.sprite.anims.stop();
-    //     this.sprite.setFrame(standingFrame);
-    // }
-
-    // public getCombinedStat(stat: keyof typeof this.stats): number {
-    //     // call the new function to calculate the combined stat
-    //     return getCombinedStat(this.stats, this.equipment, stat);
-    // }
 }

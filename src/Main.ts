@@ -12,6 +12,7 @@ import VirtualJoyStickPlugin from 'phaser3-rex-plugins/plugins/virtualjoystick-p
 
 import GamePadScene from './scenes/GamePadScene';
 import KeyboardScene from './scenes/KeyboardScene';
+import PlayerNameSelectScene from './scenes/PlayerNameSelectScene';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -41,7 +42,8 @@ const config: Phaser.Types.Core.GameConfig = {
         GameOverScene,
         SFXScene,
         GamePadScene,
-        KeyboardScene
+        KeyboardScene,
+        PlayerNameSelectScene
     ],
     roundPixels: false,
     backgroundColor: '#000000',

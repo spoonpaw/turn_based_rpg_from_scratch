@@ -1,5 +1,5 @@
 import BattleScene from '../scenes/BattleScene';
-import GameScene from '../scenes/GameScene';
+import BattleUIScene from '../scenes/BattleUIScene';
 import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
@@ -16,7 +16,7 @@ export default class BotCharacter extends Unit {
         weapon: undefined
     };
     public stats!: Stats;
-    public type!: string;
+    public key!: string;
 
     constructor(
         scene: BattleScene,
@@ -34,16 +34,41 @@ export default class BotCharacter extends Unit {
             frame,
             name
         );
-        this.gameScene = <GameScene>this.scene.scene.get('Game');
+        const battleUIScene = <BattleUIScene>scene.scene.get('BattleUI');
 
         // TODO: there needs to be a logical want of figuring
         //  out which bot this list is meant to reflect.
         //  for now we can just use this this.gameScene.bots[0]
         this.stats = this.gameScene.bots[0].stats;
-        this.type = this.gameScene.bots[0].type;
+        this.name = this.gameScene.bots[0].name;
 
 
         // TODO: setup pointerdown listeners for healing, items...
+        this.setInteractive();
+        this.on('pointerdown', () => {
+            if (scene.interactionState.startsWith('inventoryaction')) {
+                const inventorySlotNumber = Number(scene.interactionState.split('inventoryaction')[1]);
+
+                battleUIScene.message.setVisible(false);
+                battleUIScene.confirmSelectedAbilityOrItemFrame.setVisible(false);
+                battleUIScene.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+                battleUIScene.selectedItemAndAbilityIcon.setVisible(false);
+                battleUIScene.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+                battleUIScene.selectedItemAndAbilityCommandText.setVisible(false);
+
+                for (const item of battleUIScene.inventoryButtons) {
+                    item.deselect();
+                    item.setVisible(false);
+                    item.buttonText.setVisible(false);
+                }
+
+                eventsCenter.emit('actionSelect', {
+                    action: this.gameScene.player.inventory[inventorySlotNumber].name,
+                    target: this
+                });
+            }
+
+        });
     }
 
     public applyHPChange(hpChangeAmount: number): number {
@@ -64,14 +89,14 @@ export default class BotCharacter extends Unit {
             damage = this.calculateAttackDamage(target);
             target.applyHPChange(damage);
             runtimeInMS += 2000;
-            eventsCenter.emit('Message', `${this.name} attacked ${target.type} for ${damage} HP!`);
+            eventsCenter.emit('Message', `${this.name} attacked ${target.name} for ${damage} HP!`);
 
         }
 
         else {
             // target dodged
             this.battleScene.sfxScene.playSound('dodge');
-            eventsCenter.emit('Message', `${this.name} attacked ${target.type}. ${target.type} dodged the attack!`);
+            eventsCenter.emit('Message', `${this.name} attacked ${target.name}. ${target.name} dodged the attack!`);
             runtimeInMS += 2000;
             return runtimeInMS;
         }

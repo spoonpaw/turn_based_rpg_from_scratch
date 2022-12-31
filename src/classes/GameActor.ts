@@ -1,27 +1,52 @@
-import Soldier from '../jobs/Soldier';
+import MonsterSoldier from '../jobs/monsters/MonsterSoldier';
+import PlayerSoldier from '../jobs/players/PlayerSoldier';
 import Stats from '../stats/Stats';
 import {Direction} from '../types/Direction';
 import {Equipment} from '../types/Equipment';
 import { getCombinedStat } from '../utils/EquipmentUtils';
+import {Job} from './Jobs/Job';
 
 export default class GameActor {
     public equipment!: Equipment;
     public stats!: Stats;
-    public sprite!: Phaser.GameObjects.Sprite;
-    protected createStats(job: string) {
-        if (job === 'Soldier') {
+    // public sprite!: Phaser.GameObjects.Sprite;
+    // public experience!: number;
+    constructor(
+        public name: string,
+        public sprite: Phaser.GameObjects.Sprite,
+        public experience: number
+    ) {
+
+    }
+    protected createStats(job: Job) {
+        if (job.name === 'PlayerSoldier') {
             return new Stats(
-                Soldier.advancement[0].strength,
-                Soldier.advancement[0].agility,
-                Soldier.advancement[0].vitality,
-                Soldier.advancement[0].intellect,
-                Soldier.advancement[0].luck,
-                Soldier.advancement[0].vitality * 2,
-                Soldier.advancement[0].vitality * 2,
-                Soldier.advancement[0].intellect * 2,
-                Soldier.advancement[0].intellect * 2,
-                Soldier.advancement[0].strength,
-                Soldier.advancement[0].agility / 2
+                PlayerSoldier.baseStats.strength,
+                PlayerSoldier.baseStats.agility,
+                PlayerSoldier.baseStats.vitality,
+                PlayerSoldier.baseStats.intellect,
+                PlayerSoldier.baseStats.luck,
+                PlayerSoldier.baseStats.vitality * 2,
+                PlayerSoldier.baseStats.vitality * 2,
+                PlayerSoldier.baseStats.intellect * 2,
+                PlayerSoldier.baseStats.intellect * 2,
+                PlayerSoldier.baseStats.strength,
+                PlayerSoldier.baseStats.agility / 2
+            );
+        }
+        else if (job.name === 'MonsterSoldier') {
+            return new Stats(
+                MonsterSoldier.baseStats.strength,
+                MonsterSoldier.baseStats.agility,
+                MonsterSoldier.baseStats.vitality,
+                MonsterSoldier.baseStats.intellect,
+                MonsterSoldier.baseStats.luck,
+                MonsterSoldier.baseStats.vitality * 2,
+                MonsterSoldier.baseStats.vitality * 2,
+                MonsterSoldier.baseStats.intellect * 2,
+                MonsterSoldier.baseStats.intellect * 2,
+                MonsterSoldier.baseStats.strength,
+                MonsterSoldier.baseStats.agility / 2
             );
         }
         else {

@@ -25,7 +25,7 @@ export default class KeyboardScene extends Phaser.Scene {
         super('Keyboard');
     }
 
-    public create() {
+    public create(data: { purpose: string; }) {
         this.keyboardInputTextArray = [];
         this.keyboardButtonDictionary = {};
         this.capsLock = false;
@@ -71,6 +71,7 @@ export default class KeyboardScene extends Phaser.Scene {
             'checkbutton',
             'Accept',
             () => {
+                if (this.getFullStringFromInput().length === 0) return;
                 eventsCenter.emit(
                     'keyboardaccept',
                     [
@@ -97,6 +98,12 @@ export default class KeyboardScene extends Phaser.Scene {
             }
         );
 
+        console.log({data});
+        if (data.purpose === 'playernameselect') {
+            this.rejectButton.setVisible(false);
+            this.rejectButton.buttonText.setVisible(false);
+        }
+
         this.spaceButton = this.add.text(
             250,
             530,
@@ -109,29 +116,7 @@ export default class KeyboardScene extends Phaser.Scene {
         )
             .setInteractive()
             .on('pointerdown', () => {
-                // check if string is already too long
-                if (
-                    this.getFullStringFromInput().length === 14
-                ) {
-                    // cut the last letter off the string
-                    const stringMinusLastLetter = this.getFullStringFromInput().slice(0, -1);
-                    // set the input to the modified with the pressed character appended
-                    this.setInputFromString(
-                        stringMinusLastLetter + ' '
-                    );
-                }
-                // string might be 14 characters long or might not end with an underscore
-                //  but not both
-                else {
-                    // set the input text to...
-                    this.setInputFromString(
-                        // the input text without trailing underscores plus the pressed character
-                        this.getFullStringFromInput() + ' '
-                    );
-                    if (this.getFullStringFromInput().length < 14) {
-                        this.cursor.setX(this.cursor.x + 43);
-                    }
-                }
+                this.inputLetter(' ');
             });
 
         this.deleteButton = this.add.text(
@@ -146,16 +131,7 @@ export default class KeyboardScene extends Phaser.Scene {
         )
             .setInteractive()
             .on('pointerdown', () => {
-                const originalString = this.getFullStringFromInput();
-                if (originalString.length === 0) {
-                    return;
-                }
-                const stringMinusLastLetter = originalString.slice(0, -1);
-                this.setInputFromString(stringMinusLastLetter);
-                if (stringMinusLastLetter.length === 13) {
-                    return;
-                }
-                this.cursor.setX(this.cursor.x - 43);
+                this.backspace();
 
             });
 
@@ -182,11 +158,29 @@ export default class KeyboardScene extends Phaser.Scene {
                     }
                 }
             });
+
+        this.input.keyboard!.on('keydown', (event: KeyboardEvent) => {
+            // Get the key that was pressed
+            const key = event.key;
+            // Check if the key is a letter
+            if (key.length === 1 && key.match(/[a-z]/i)) {
+                // Call the function that inputs the letter
+                this.inputLetter(key);
+            }
+            // Check if the key is the space bar
+            else if (key === ' ') {
+                // Call the function that inputs a space
+                this.inputLetter(' ');
+            }
+            else if (key === 'Backspace') {
+                this.backspace();
+            }
+        });
     }
 
     public update(time: number, delta: number) {
         this.timer += delta;
-        while(this.timer > 1000) {
+        while (this.timer > 1000) {
             this.timer -= 1000;
 
             if (!this.cursor.visible) {
@@ -221,45 +215,22 @@ export default class KeyboardScene extends Phaser.Scene {
         for (const [rowIndex, row] of this.keysList.entries()) {
             for (const [colIndex, char] of row.entries()) {
                 this.keyboardButtonDictionary[char] = this.add.text(
-                    45 + (60 * colIndex) + (16 * rowIndex),
-                    376 + (55 * rowIndex),
+                    62 + (60 * colIndex) + (16 * rowIndex),
+                    413 + (55 * rowIndex),
                     char,
                     {
                         fontSize: '70px',
                         color: '#fff',
                         fontFamily: 'CustomFont'
                     })
+                    .setOrigin(0.5, 0.5)
                     .setInteractive()
-                    .on('pointerdown', () => {
-                        let adjustedChar = char;
-                        if (this.capsLock) {
-                            adjustedChar = char.toUpperCase();
+                    .on(
+                        'pointerdown',
+                        () => {
+                            this.inputLetter(char);
                         }
-
-                        // check that the string length is 14 and doesn't end with an underscore
-                        if (
-                            this.getFullStringFromInput().length === 14
-                        ) {
-                            // cut the last letter off the string
-                            const stringMinusLastLetter = this.getFullStringFromInput().slice(0, -1);
-                            // set the input to the modified with the pressed character appended
-                            this.setInputFromString(
-                                stringMinusLastLetter + adjustedChar
-                            );
-                        }
-                        // string might be 14 characters long or might not end with an underscore
-                        //  but not both
-                        else {
-                            // set the input text to...
-                            this.setInputFromString(
-                                // the input text without trailing underscores plus the pressed character
-                                this.getFullStringFromInput() + adjustedChar
-                            );
-                            if (this.getFullStringFromInput().length < 14) {
-                                this.cursor.setX(this.cursor.x + 43);
-                            }
-                        }
-                    });
+                    );
             }
         }
     }
@@ -279,5 +250,50 @@ export default class KeyboardScene extends Phaser.Scene {
         for (let i = 0; i < this.keyboardInputTextArray.length; i++) {
             this.keyboardInputTextArray[i].setText(string[i] ?? '');
         }
+    }
+
+
+    private inputLetter(char: string) {
+        let adjustedChar = char;
+        if (this.capsLock) {
+            adjustedChar = char.toUpperCase();
+        }
+
+        // check that the string length is 14 and doesn't end with an underscore
+        if (
+            this.getFullStringFromInput().length === 14
+        ) {
+            // cut the last letter off the string
+            const stringMinusLastLetter = this.getFullStringFromInput().slice(0, -1);
+            // set the input to the modified with the pressed character appended
+            this.setInputFromString(
+                stringMinusLastLetter + adjustedChar
+            );
+        }
+        // string might be 14 characters long or might not end with an underscore
+        //  but not both
+        else {
+            // set the input text to...
+            this.setInputFromString(
+                // the input text without trailing underscores plus the pressed character
+                this.getFullStringFromInput() + adjustedChar
+            );
+            if (this.getFullStringFromInput().length < 14) {
+                this.cursor.setX(this.cursor.x + 43);
+            }
+        }
+    }
+
+    private backspace() {
+        const originalString = this.getFullStringFromInput();
+        if (originalString.length === 0) {
+            return;
+        }
+        const stringMinusLastLetter = originalString.slice(0, -1);
+        this.setInputFromString(stringMinusLastLetter);
+        if (stringMinusLastLetter.length === 13) {
+            return;
+        }
+        this.cursor.setX(this.cursor.x - 43);
     }
 }

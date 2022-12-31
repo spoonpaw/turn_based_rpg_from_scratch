@@ -20,7 +20,7 @@ export class Enemy extends Unit {
     };
     public inventory: Item[] = [];
     public stats!: Stats;
-    public type!: string;
+    public key!: string;
 
     constructor(
         public scene: BattleScene,
@@ -43,7 +43,7 @@ export class Enemy extends Unit {
 
         const enemy = _.cloneDeep(
             enemies.find(obj => {
-                return obj.name === this.texture.key;
+                return obj.key === this.texture.key;
             })
         );
 
@@ -61,7 +61,7 @@ export class Enemy extends Unit {
             0
         );
 
-        this.type = enemy?.type ?? '???';
+        this.key = enemy?.key ?? '???';
 
         this.setScale(1.5);
         this.setInteractive();
@@ -139,13 +139,13 @@ export class Enemy extends Unit {
             damage = this.calculateAttackDamage(target);
             target.applyHPChange(damage);
             runtimeInMS += 2000;
-            eventsCenter.emit('Message', `${this.type} attacked ${target.name ?? target.type} for ${damage} HP!`);
+            eventsCenter.emit('Message', `${this.name} attacked ${target.name ?? target.name} for ${damage} HP!`);
 
         }
 
         else {
             this.battleScene.sfxScene.playSound('dodge');
-            eventsCenter.emit('Message', `${this.type} attacked ${target.name ?? target.type}. ${target.name ?? target.type} dodged the attack!`);
+            eventsCenter.emit('Message', `${this.name} attacked ${target.name ?? target.name}. ${target.name ?? target.name} dodged the attack!`);
             runtimeInMS += 2000;
             return runtimeInMS;
         }

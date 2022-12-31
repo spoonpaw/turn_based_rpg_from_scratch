@@ -93,7 +93,7 @@ export const items: itemArray = [
         type: 'bodyarmor',
         cost: 150,
         sellPrice: 80,
-        classes: 'Soldier/Healer',
+        classes: 'PlayerSoldier/Healer',
         minimumLevel: 1,
         stats: {
             strength: 0,
