@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, {clone} from 'lodash';
 
 import {enemies} from '../enemies/enemies';
 import BattleScene from '../scenes/BattleScene';
@@ -123,32 +123,98 @@ export class Enemy extends Unit {
     }
 
     public runTurn(): number {
+        console.log('beginning to run the enemy\'s turn');
+
         // just attack player 1
-        const target = this.battleScene.heroes[
+        let target = this.battleScene.heroes.filter(
+            (obj) => {
+                return obj.living;
+            }
+        )[
             Phaser.Math.RND.between(
                 0,
-                this.battleScene.heroes.length - 1
+                Math.max(0, this.battleScene.heroes.length - 1)
             )
         ];
+
+        console.log({initialTarget: target});
+        if (!target) return 0;
         let runtimeInMS = 0;
 
         let damage = 0;
 
-        if (!this.evadeTest()) {
-            this.battleScene.sfxScene.playSound('attack');
-            damage = this.calculateAttackDamage(target);
-            target.applyHPChange(damage);
-            runtimeInMS += 2000;
-            eventsCenter.emit('Message', `${this.name} attacked ${target.name ?? target.name} for ${damage} HP!`);
+        // check to see if a guard is active on the player. if so, change the target to the
+        //  unit that used Guard
+        let guardOnTarget = false;
+        const initialTarget = clone(target);
+        for (const passiveEffect of this.battleScene.passiveEffects) {
+            if (passiveEffect.ability.name === 'Guard' &&
+                passiveEffect.target.id === target.id &&
+                passiveEffect.actor.living
+            ) {
 
+                target = this.battleScene.heroes.find((obj) => {
+                    return obj.id === passiveEffect.actor.id;
+                }) as PlayerCharacter | BotCharacter | Enemy;
+                guardOnTarget = true;
+
+            }
         }
 
+        console.log({guardOnTarget});
+        console.log({targetAfterCheckingForGuard: target});
+        console.log({initialTargetAfterCheckingForGuard: initialTarget});
+
+        // START NEW CODE
+        if (guardOnTarget) {
+            if (this.evadeTest()) {
+                this.battleScene.sfxScene.playSound('dodge');
+                eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted the attack. ${target.name} dodged the attack!`);
+                runtimeInMS += 2000;
+                return runtimeInMS;
+            }
+            else {
+                this.battleScene.sfxScene.playSound('attack');
+                damage = this.calculateAttackDamage(target);
+                eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted the attack receiving ${damage} damage.`);
+                console.log({damage});
+                target.applyHPChange(damage);
+                runtimeInMS += 2000;
+            }
+        }
         else {
-            this.battleScene.sfxScene.playSound('dodge');
-            eventsCenter.emit('Message', `${this.name} attacked ${target.name ?? target.name}. ${target.name ?? target.name} dodged the attack!`);
-            runtimeInMS += 2000;
-            return runtimeInMS;
+            if (this.evadeTest()) {
+                this.battleScene.sfxScene.playSound('dodge');
+                eventsCenter.emit('Message', `${this.name} attacked ${target.name}. ${target.name} dodged the attack!`);
+                runtimeInMS += 2000;
+                return runtimeInMS;
+            }
+            else {
+                this.battleScene.sfxScene.playSound('attack');
+                damage = this.calculateAttackDamage(target);
+                eventsCenter.emit('Message', `${this.name} attacked ${target.name} for ${damage} HP!`);
+                console.log({damage});
+                target.applyHPChange(damage);
+                runtimeInMS += 2000;
+            }
         }
+
+
+        // OLD CODE
+        // if (!this.evadeTest()) {
+        //     this.battleScene.sfxScene.playSound('attack');
+        //     damage = this.calculateAttackDamage(target);
+        //     target.applyHPChange(damage);
+        //     runtimeInMS += 2000;
+        //     eventsCenter.emit('Message', `${this.name} attacked ${target.name ?? target.name} for ${damage} HP!`);
+        // }
+        //
+        // else {
+        //     this.battleScene.sfxScene.playSound('dodge');
+        //     eventsCenter.emit('Message', `${this.name} attacked ${target.name ?? target.name}. ${target.name ?? target.name} dodged the attack!`);
+        //     runtimeInMS += 2000;
+        //     return runtimeInMS;
+        // }
 
         return runtimeInMS;
     }

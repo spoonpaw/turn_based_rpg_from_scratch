@@ -175,6 +175,11 @@ export default class KeyboardScene extends Phaser.Scene {
             else if (key === 'Backspace') {
                 this.backspace();
             }
+            else if (key === 'Enter') {
+                if (this.getFullStringFromInput().length === 0) return;
+                eventsCenter.emit('keyboardaccept', [this.getFullStringFromInput()]);
+                this.scene.stop();
+            }
         });
     }
 

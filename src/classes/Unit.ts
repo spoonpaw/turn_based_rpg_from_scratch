@@ -9,6 +9,7 @@ import Item from './Item';
 
 
 export default abstract class Unit extends Phaser.GameObjects.Sprite {
+    public id: number;
     abstract damageTween: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
     public equipment: Equipment = {
         body: undefined,
@@ -40,6 +41,8 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         this.battleUIScene = <BattleUIScene>this.scene.scene.get('BattleUI');
 
         this.living = true;
+
+        this.id = this.battleScene.generateID();
     }
 
     // abstract applyHPChange(hpChangeAmount: number): number;

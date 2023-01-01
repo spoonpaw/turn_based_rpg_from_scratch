@@ -1,6 +1,6 @@
 // TODO: Add Ability button functionality
 
-
+import {abilities, IAbility} from '../abilities/abilities';
 import BotCharacter from '../classes/BotCharacter';
 import {Enemy} from '../classes/Enemy';
 import PlayerCharacter from '../classes/PlayerCharacter';
@@ -16,6 +16,13 @@ import SFXScene from './SFXScene';
 import UIScene from './UIScene';
 
 export default class BattleScene extends Phaser.Scene {
+    private _idCounter = 0;
+    public passiveEffects: {
+        actor: PlayerCharacter|BotCharacter|Enemy,
+        target: PlayerCharacter|BotCharacter|Enemy,
+        ability: IAbility,
+        turnDurationRemaining: number
+    }[] = [];
     public enemies!: Enemy[];
     gameScene!: GameScene;
     public heroes!: (PlayerCharacter | BotCharacter)[];
@@ -56,7 +63,6 @@ export default class BattleScene extends Phaser.Scene {
                 return 1;
             }
         });
-
     }
 
     create(): void {
@@ -69,9 +75,10 @@ export default class BattleScene extends Phaser.Scene {
         this.startBattle();
 
         this.sys.events.on('wake', this.startBattle, this);
+
     }
 
-    private checkForLevelUp(): { levelUp: boolean, newLevel: number } {
+    private checkForPlayer1LevelUp(): { levelUp: boolean, newLevel: number } {
         let experienceAmount = 0;
 
         for (const enemy of this.enemies) {
@@ -81,9 +88,8 @@ export default class BattleScene extends Phaser.Scene {
             experienceAmount += enemyData?.experience ?? 0;
         }
 
-        const currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)));
-
-        const newLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience + experienceAmount)));
+        const currentLevel = this.gameScene.player.level;
+        const newLevel = Math.max(1, Math.ceil(this.gameScene.player.LEVELING_RATE * Math.sqrt(this.gameScene.player.experience + experienceAmount)));
 
         return {levelUp: newLevel > currentLevel, newLevel};
     }
@@ -98,9 +104,10 @@ export default class BattleScene extends Phaser.Scene {
             experienceAmount += enemyData?.experience ?? 0;
         }
 
-        const currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.bots[0].experience)));
+        const bot = this.gameScene.bots[0];
+        const currentLevel = bot.level;
 
-        const newLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.bots[0].experience + experienceAmount)));
+        const newLevel = Math.max(1, Math.ceil(bot.LEVELING_RATE * Math.sqrt(this.gameScene.bots[0].experience + experienceAmount)));
 
         return {levelUp: newLevel > currentLevel, newLevel};
     }
@@ -115,6 +122,11 @@ export default class BattleScene extends Phaser.Scene {
         }
 
         return victory;
+    }
+
+    public generateID(): number {
+        return this._idCounter++;
+
     }
 
     private endBattle(): void {
@@ -208,12 +220,35 @@ export default class BattleScene extends Phaser.Scene {
     private handleActionSelection(
         data: {
             action: string,
-            target: Enemy | PlayerCharacter | BotCharacter
+            target: Enemy | PlayerCharacter | BotCharacter,
+            actionType: string
         }
     ): void {
+        console.log({actionType: data.actionType});
+        console.log({action: data.action});
+        let passiveAbilitySelected = false;
+        let selectedAbility;
+        if (data.actionType === 'ability') {
+            // get the ability
+            selectedAbility = abilities.find((obj) => {
+                return obj.name === data.action;
+            });
+            if (selectedAbility!.type === 'passive') {
+                passiveAbilitySelected = true;
+            }
+        }
+
         this.interactionState = `handling${data.action}select`;
 
         this.turnUnits = BattleScene.sortUnits(this.units);
+
+        if (passiveAbilitySelected) {
+            const unitUsingPassiveAbility = this.turnUnits.find((unit) => {
+                return unit instanceof PlayerCharacter;
+            }) as PlayerCharacter | BotCharacter | Enemy;
+            this.turnUnits.splice(this.turnUnits.indexOf(unitUsingPassiveAbility), 1);
+            this.turnUnits.unshift(unitUsingPassiveAbility);
+        }
 
         this.battleUIScene.hideUIFrames();
         this.battleUIScene.closeInventory();
@@ -252,7 +287,12 @@ export default class BattleScene extends Phaser.Scene {
         this.parseNextUnitTurn(data);
     }
 
-    private parseNextUnitTurn(data: { action: string; target: Enemy | PlayerCharacter | BotCharacter }): void {
+    private parseNextUnitTurn(
+        data: {
+            action: string;
+            target: Enemy | PlayerCharacter | BotCharacter
+        }
+    ): void {
         this.turnIndex += 1;
 
         let turnRunTime = 0;
@@ -299,7 +339,8 @@ export default class BattleScene extends Phaser.Scene {
     private sendPlayerInfoToGameScene(): void {
         for (const unit of this.heroes) {
             if (unit instanceof PlayerCharacter) {
-                this.gameScene.player.stats.currentHP = unit.stats.currentHP;
+                const player = this.gameScene.player;
+                player.stats.currentHP = unit.stats.currentHP;
 
                 let goldAmount = 0;
                 let experienceAmount = 0;
@@ -317,44 +358,48 @@ export default class BattleScene extends Phaser.Scene {
                     experienceAmount = 0;
                 }
 
-                this.gameScene.player.gold += goldAmount;
+                player.gold += goldAmount;
 
-                eventsCenter.emit('updateMP', this.gameScene.player.stats.currentMP, this.gameScene.player.stats.maxMP);
+                eventsCenter.emit('updateMP', player.stats.currentMP, player.stats.maxMP);
 
-                const currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)));
+                const currentLevel = player.level;
 
-                this.gameScene.player.experience += experienceAmount;
+                player.experience += experienceAmount;
 
-                const newLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)));
+                const newLevel = Math.max(1, Math.ceil(player.LEVELING_RATE * Math.sqrt(player.experience)));
 
                 if (currentLevel < newLevel) {
 
-                    this.gameScene.player.stats = {
-                        strength: this.gameScene.player.stats.strength + this.getStatIncrease('strength', newLevel),
-                        agility: this.gameScene.player.stats.agility + this.getStatIncrease('agility', newLevel),
-                        vitality: this.gameScene.player.stats.vitality + this.getStatIncrease('vitality', newLevel),
-                        intellect: this.gameScene.player.stats.intellect + this.getStatIncrease('intellect', newLevel),
-                        luck: this.gameScene.player.stats.luck + this.getStatIncrease('luck', newLevel),
+                    player.stats = {
+                        strength: player.stats.strength + this.getStatIncrease('strength', newLevel),
+                        agility: player.stats.agility + this.getStatIncrease('agility', newLevel),
+                        vitality: player.stats.vitality + this.getStatIncrease('vitality', newLevel),
+                        intellect: player.stats.intellect + this.getStatIncrease('intellect', newLevel),
+                        luck: player.stats.luck + this.getStatIncrease('luck', newLevel),
                         currentHP: unit.stats.currentHP, // getting the stat from the battle
-                        maxHP: this.gameScene.player.stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
+                        maxHP: player.stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
                         currentMP: unit.stats.currentMP, // getting the stat from the battle
-                        maxMP: this.gameScene.player.stats.maxMP + this.getStatIncrease('intellect', newLevel) * 2,
-                        attack: this.gameScene.player.stats.attack + this.getStatIncrease('strength', newLevel),
-                        defense: this.gameScene.player.stats.defense + this.getStatIncrease('agility', newLevel) / 2
+                        maxMP: player.stats.maxMP + this.getStatIncrease('intellect', newLevel) * 2,
+                        attack: player.stats.attack + this.getStatIncrease('strength', newLevel),
+                        defense: player.stats.defense + this.getStatIncrease('agility', newLevel) / 2
                     };
 
                 }
-                this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
+                this.uiScene.updateHP(player.stats.currentHP, player.stats.maxHP);
 
-                eventsCenter.emit('updateXP', this.gameScene.player.experience);
+                eventsCenter.emit('updateXP', player.experience);
             }
 
             else {
                 console.log('setting the bots hp on the game scene!!');
+                const bot = this.gameScene.bots[0];
                 // unit must be a bot character at this point
-                this.gameScene.bots[0].stats.currentHP = unit.stats.currentHP;
+                bot.stats.currentHP = unit.stats.currentHP;
+                if (bot.stats.currentHP <= 0) {
+                    bot.stats.currentHP = 1;
+                }
 
-                const currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.bots[0].experience)));
+                const currentLevel = bot.level;
 
                 let experienceAmount = 0;
 
@@ -369,28 +414,28 @@ export default class BattleScene extends Phaser.Scene {
                     experienceAmount = 0;
                 }
 
-                this.gameScene.bots[0].experience += experienceAmount;
+                bot.experience += experienceAmount;
 
-                const newLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.bots[0].experience)));
+                const newLevel = Math.max(1, Math.ceil(bot.LEVELING_RATE * Math.sqrt(bot.experience)));
 
                 if (currentLevel < newLevel) {
 
-                    this.gameScene.bots[0].stats = {
-                        strength: this.gameScene.bots[0].stats.strength + this.getStatIncrease('strength', newLevel),
-                        agility: this.gameScene.bots[0].stats.agility + this.getStatIncrease('agility', newLevel),
-                        vitality: this.gameScene.bots[0].stats.vitality + this.getStatIncrease('vitality', newLevel),
-                        intellect: this.gameScene.bots[0].stats.intellect + this.getStatIncrease('intellect', newLevel),
-                        luck: this.gameScene.bots[0].stats.luck + this.getStatIncrease('luck', newLevel),
+                    bot.stats = {
+                        strength: bot.stats.strength + this.getStatIncrease('strength', newLevel),
+                        agility: bot.stats.agility + this.getStatIncrease('agility', newLevel),
+                        vitality: bot.stats.vitality + this.getStatIncrease('vitality', newLevel),
+                        intellect: bot.stats.intellect + this.getStatIncrease('intellect', newLevel),
+                        luck: bot.stats.luck + this.getStatIncrease('luck', newLevel),
                         currentHP: unit.stats.currentHP,
-                        maxHP: this.gameScene.bots[0].stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
+                        maxHP: bot.stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
                         currentMP: unit.stats.currentMP,
-                        maxMP: this.gameScene.bots[0].stats.maxMP + this.getStatIncrease('intellect', newLevel) * 2,
-                        attack: this.gameScene.bots[0].stats.attack + this.getStatIncrease('strength', newLevel),
-                        defense: this.gameScene.bots[0].stats.defense + this.getStatIncrease('agility', newLevel) / 2
+                        maxMP: bot.stats.maxMP + this.getStatIncrease('intellect', newLevel) * 2,
+                        attack: bot.stats.attack + this.getStatIncrease('strength', newLevel),
+                        defense: bot.stats.defense + this.getStatIncrease('agility', newLevel) / 2
                     };
 
                 }
-                this.uiScene.updatePlayer2HP(this.gameScene.bots[0].stats.currentHP, this.gameScene.bots[0].stats.maxHP);
+                this.uiScene.updatePlayer2HP(bot.stats.currentHP, bot.stats.maxHP);
             }
         }
     }
@@ -428,6 +473,8 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private startBattle(): void {
+        this._idCounter = 0;
+        this.passiveEffects = [];
         this.musicScene.scene.bringToTop();
 
         this.uiScene.selectCancel();
@@ -532,7 +579,7 @@ export default class BattleScene extends Phaser.Scene {
             675,
             'hero',
             0,
-            this.gameScene.player.name // TODO: let the player pick their name
+            this.gameScene.player.name
         );
 
         this.add.existing(soldier);
@@ -615,6 +662,14 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private startNewTurn(): void {
+
+        for (const [index, passiveEffect] of this.passiveEffects.entries()) {
+            passiveEffect.turnDurationRemaining--;
+            if (passiveEffect.turnDurationRemaining === 0) {
+                this.passiveEffects.splice(index, 1);
+            }
+        }
+
         this.battleUIScene.commandMenuText.setText('Command?');
 
         this.turnIndex = -1;
@@ -631,7 +686,7 @@ export default class BattleScene extends Phaser.Scene {
             // calculate for whether the total cut scene time should have a level up message (+2000 ms)
 
             let levelUpDelay = 0;
-            const levelUpData = this.checkForLevelUp();
+            const levelUpData = this.checkForPlayer1LevelUp();
             if (levelUpData.levelUp) {
                 levelUpDelay += 2000;
             }
@@ -653,7 +708,11 @@ export default class BattleScene extends Phaser.Scene {
                 args: [this.enemies]
             });
 
+            console.log('battle won');
+            console.log({player1LevelUpData: levelUpData});
+            let cumulativeLevelUpMessageDelay = 0;
             if (levelUpData.levelUp) {
+                cumulativeLevelUpMessageDelay += 2000;
                 this.time.addEvent({
                     delay: 4000,
                     callback: () => {
@@ -673,9 +732,11 @@ export default class BattleScene extends Phaser.Scene {
                 });
             }
 
+
+            console.log({player2LevelUpData});
             if (this.gameScene.bots.length > 0 && player2LevelUpData?.levelUp) {
                 this.time.addEvent({
-                    delay: 6000,
+                    delay: 4000 + cumulativeLevelUpMessageDelay,
                     callback: () => {
                         eventsCenter.emit(
                             'Message',

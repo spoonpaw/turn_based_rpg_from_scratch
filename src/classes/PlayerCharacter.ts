@@ -1,3 +1,4 @@
+import {abilities, IAbility} from '../abilities/abilities';
 import BattleScene from '../scenes/BattleScene';
 import BattleUIScene from '../scenes/BattleUIScene';
 import Stats from '../stats/Stats';
@@ -39,6 +40,10 @@ export default class PlayerCharacter extends Unit {
 
         this.setInteractive();
         this.on('pointerdown', () => {
+            // if (false) {
+            //
+            // }
+            // else
             if (scene.interactionState.startsWith('inventoryaction')) {
                 const inventorySlotNumber = Number(scene.interactionState.split('inventoryaction')[1]);
 
@@ -135,6 +140,48 @@ export default class PlayerCharacter extends Unit {
                 return runtimeInMS;
             }
         }
+
+        else if (data.action === 'Guard') {
+
+
+            for (const abilityButton of this.battleUIScene.abilityButtons) {
+                abilityButton.destroy();
+                abilityButton.buttonText.destroy();
+            }
+            this.battleUIScene.abilityButtons = [];
+
+            this.battleUIScene.destroyAbilityButtons();
+            this.battleUIScene.generateAbilityButtons();
+
+            if (data.target.living) {
+
+                // calculate the exact amount healed, announce it in a message
+                runtimeInMS += 2000;
+                // TODO: battle scene needs to store an array of passive effects. it needs to know the actor and the
+                //  target for each effect as well as the ability itself. each passive effect must have a number of
+                //  active turns before it expires at the top of each round, the passive effects are iterated over,
+                //  the remaining turn count would be decremented and if the number is zero, then that passive effect
+                // should be removed from the list of passive effects
+                const guardAbility = abilities.find((obj) => {
+                    return obj.name === data.action;
+                }) as IAbility;
+                const passiveGuardEffect = {
+                    actor: this,
+                    target: data.target,
+                    ability: guardAbility,
+                    turnDurationRemaining: guardAbility.turnDuration!
+                };
+                this.battleScene.passiveEffects.push(passiveGuardEffect);
+
+                eventsCenter.emit('Message', `${this.name} steps forward to defend ${target.name}.`);
+            }
+        }
+
+
+
+        // TODO: DON'T HARDCODE ITEMS BY NAME!
+        //  categorize, like not just cypressium staff does this. you need to check if an item is being used.
+        //  if it is some inert object like most equipment then run this branch
         else if (data.action === 'Cypressium Staff') {
             runtimeInMS += 2000;
             eventsCenter.emit('Message', `${this.name} uses a ${this.name} on ${target.name}; it has no effect.`);

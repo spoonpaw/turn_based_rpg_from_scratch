@@ -48,16 +48,16 @@ export default class GamePadScene extends Phaser.Scene {
 
                 // make the character move in the pressed direction
                 if (name === 'up') {
-                    this.gameScene.gridControls.gridPhysics.movePlayer(Direction.UP);
+                    this.gameScene.gridControls.gridPhysics.moveActor(Direction.UP);
                 }
                 else if (name === 'right') {
-                    this.gameScene.gridControls.gridPhysics.movePlayer(Direction.RIGHT);
+                    this.gameScene.gridControls.gridPhysics.moveActor(Direction.RIGHT);
                 }
                 else if (name === 'down') {
-                    this.gameScene.gridControls.gridPhysics.movePlayer(Direction.DOWN);
+                    this.gameScene.gridControls.gridPhysics.moveActor(Direction.DOWN);
                 }
                 else if (name === 'left') {
-                    this.gameScene.gridControls.gridPhysics.movePlayer(Direction.LEFT);
+                    this.gameScene.gridControls.gridPhysics.moveActor(Direction.LEFT);
                 }
 
             }

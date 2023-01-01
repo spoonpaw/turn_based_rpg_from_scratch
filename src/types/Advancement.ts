@@ -16,3 +16,11 @@ export interface IBaseStatBlock {
     vitality: number;
     xp: number;
 }
+
+export interface IAbilityAttainment {
+    name: string,
+    description: string,
+    type: string,
+    targets: string|string[],
+    levelAttained: number
+}

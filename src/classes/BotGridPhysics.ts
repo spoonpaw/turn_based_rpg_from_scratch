@@ -15,7 +15,7 @@ export default class BotGridPhysics extends GridPhysics {
         // Update bot position and velocity based on physics rules
         // ...
         if (this.isMoving()) {
-            this.updateBotPosition(delta);
+            this.updatePosition(delta);
         }
         this.lastMovementIntent = Direction.NONE;
     }
@@ -34,17 +34,17 @@ export default class BotGridPhysics extends GridPhysics {
         else if (direction === Direction.LEFT) {
             animationKey = 'redbot_left';
         }
-        if (this.playerOrNPC instanceof Bot) this.playerOrNPC.startAnimation(animationKey);
+        this.playerOrNPC.startAnimation(animationKey);
         this.movementDirection = direction;
-        this.updateBotTilePos();
+        this.updateTilePos();
     }
 
 
-    public moveBot(direction: Direction): void {
+    public moveActor(direction: Direction): void {
         this.move(direction);
     }
 
-    protected moveBotSprite(pixelsToMove: number) {
+    protected moveActorSprite(pixelsToMove: number) {
         const directionVec = this.movementDirectionVectors[
             this.movementDirection
         ]?.clone();
@@ -57,22 +57,7 @@ export default class BotGridPhysics extends GridPhysics {
         this.tileSizePixelsWalked %= GameScene.TILE_SIZE;
     }
 
-    private updateBotPosition(delta: number) {
-        const pixelsToWalkThisUpdate = this.getPixelsToWalkThisUpdate(delta);
-        if (!this.willCrossTileBorderThisUpdate(pixelsToWalkThisUpdate)) {
-            this.moveBotSprite(pixelsToWalkThisUpdate);
-        }
-        else if (this.shouldContinueMoving()) {
-            this.moveBotSprite(pixelsToWalkThisUpdate);
-            this.updateBotTilePos();
-        }
-        else {
-            this.moveBotSprite(GameScene.TILE_SIZE - this.tileSizePixelsWalked);
-            this.stopMoving();
-        }
-    }
-
-    public updateBotTilePos(): void {
+    public updateTilePos(): void {
         this.playerOrNPC.setTilePos(
             this.playerOrNPC
                 .getTilePos()

@@ -9,7 +9,7 @@ type Vector2 = Phaser.Math.Vector2;
 export default class GridPhysics {
     public facingDirection = Direction.NONE;
     protected lastMovementIntent = Direction.NONE;
-    private gameScene!: GameScene;
+    protected gameScene!: GameScene;
     protected movementDirection: Direction = Direction.NONE;
     protected movementDirectionVectors: {
         [key in Direction]?: Vector2;
@@ -19,7 +19,7 @@ export default class GridPhysics {
             [Direction.LEFT]: Vector2.LEFT,
             [Direction.RIGHT]: Vector2.RIGHT,
         };
-    private readonly speedPixelsPerSecond: number = GameScene.TILE_SIZE * 4;
+    protected readonly speedPixelsPerSecond: number = GameScene.TILE_SIZE * 4;
     protected tileSizePixelsWalked = 0;
 
     public constructor(
@@ -29,10 +29,9 @@ export default class GridPhysics {
         this.gameScene = <GameScene>this.playerOrNPC.sprite.scene.scene.get('Game');
     }
 
-    public movePlayer(direction: Direction): void {
+    public moveActor(direction: Direction): void {
         this.move(direction);
     }
-
 
     public move(direction: Direction) {
         this.lastMovementIntent = direction;
@@ -49,7 +48,7 @@ export default class GridPhysics {
 
     public update(delta: number): void {
         if (this.isMoving()) {
-            this.updatePlayerPosition(delta);
+            this.updatePosition(delta);
         }
         this.lastMovementIntent = Direction.NONE;
     }
@@ -67,7 +66,7 @@ export default class GridPhysics {
         return this.movementDirection != Direction.NONE;
     }
 
-    protected movePlayerSprite(pixelsToMove: number) {
+    protected moveActorSprite(pixelsToMove: number) {
         const directionVec = this.movementDirectionVectors[
             this.movementDirection
         ]?.clone();
@@ -90,7 +89,7 @@ export default class GridPhysics {
     protected startMoving(direction: Direction): void {
         this.playerOrNPC.startAnimation(direction);
         this.movementDirection = direction;
-        this.updatePlayerTilePos();
+        this.updateTilePos();
     }
 
     protected stopMoving(): void {
@@ -98,7 +97,7 @@ export default class GridPhysics {
         this.movementDirection = Direction.NONE;
     }
 
-    protected updatePlayerTilePos(): void {
+    protected updateTilePos(): void {
         this.playerOrNPC.setTilePos(
             this.playerOrNPC
                 .getTilePos()
@@ -114,7 +113,7 @@ export default class GridPhysics {
         );
     }
 
-    private hasBlockingTile(pos: Vector2): boolean {
+    protected hasBlockingTile(pos: Vector2): boolean {
         if (this.hasNoTile(pos)) return true;
         return this.tileMap.layers.some((layer) => {
             const tile = this.tileMap.getTileAt(pos.x, pos.y, false, layer.name);
@@ -128,23 +127,23 @@ export default class GridPhysics {
         );
     }
 
-    private tilePosInDirection(direction: Direction): Vector2 {
+    protected tilePosInDirection(direction: Direction): Vector2 {
         return this.playerOrNPC
             .getTilePos()
             .add(this.movementDirectionVectors[direction] ?? new Vector2());
     }
 
-    private updatePlayerPosition(delta: number) {
+    protected updatePosition(delta: number) {
         const pixelsToWalkThisUpdate = this.getPixelsToWalkThisUpdate(delta);
         if (!this.willCrossTileBorderThisUpdate(pixelsToWalkThisUpdate)) {
-            this.movePlayerSprite(pixelsToWalkThisUpdate);
+            this.moveActorSprite(pixelsToWalkThisUpdate);
         }
         else if (this.shouldContinueMoving()) {
-            this.movePlayerSprite(pixelsToWalkThisUpdate);
-            this.updatePlayerTilePos();
+            this.moveActorSprite(pixelsToWalkThisUpdate);
+            this.updateTilePos();
         }
         else {
-            this.movePlayerSprite(GameScene.TILE_SIZE - this.tileSizePixelsWalked);
+            this.moveActorSprite(GameScene.TILE_SIZE - this.tileSizePixelsWalked);
             this.stopMoving();
         }
     }

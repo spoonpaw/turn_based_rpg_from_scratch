@@ -1,26 +1,26 @@
 import {Direction} from '../types/Direction';
-import GridPhysics from './GridPhysics';
+import PlayerGridPhysics from './PlayerGridPhysics';
 
 export default class GridControls {
     constructor(
         public input: Phaser.Input.InputPlugin,
-        public gridPhysics: GridPhysics
+        public gridPhysics: PlayerGridPhysics
     ) {
     }
 
     public update() {
         const cursors = this.input.keyboard!.createCursorKeys();
         if (cursors.left.isDown || this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
-            this.gridPhysics.movePlayer(Direction.LEFT);
+            this.gridPhysics.moveActor(Direction.LEFT);
         }
         else if (cursors.right.isDown || this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown) {
-            this.gridPhysics.movePlayer(Direction.RIGHT);
+            this.gridPhysics.moveActor(Direction.RIGHT);
         }
         else if (cursors.up.isDown || this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown) {
-            this.gridPhysics.movePlayer(Direction.UP);
+            this.gridPhysics.moveActor(Direction.UP);
         }
         else if (cursors.down.isDown || this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown) {
-            this.gridPhysics.movePlayer(Direction.DOWN);
+            this.gridPhysics.moveActor(Direction.DOWN);
         }
     }
 }

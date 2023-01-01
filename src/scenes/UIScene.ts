@@ -1,10 +1,11 @@
 import {cloneDeep} from 'lodash';
 
-import GameActor from '../classes/GameActor';
+import Bot from '../classes/Bot';
 import GameMessage from '../classes/GameMessage';
 import Item from '../classes/Item';
 import Innkeeper from '../classes/npcs/Innkeeper';
 import Merchant from '../classes/npcs/Merchant';
+import Player from '../classes/Player';
 import UIActionButton from '../classes/UIActionButton';
 import {ItemInterface} from '../items/items';
 import eventsCenter from '../utils/EventsCenter';
@@ -59,7 +60,7 @@ export default class UIScene extends Phaser.Scene {
     public subInventoryBagButton!: UIActionButton;
     public subInventoryEquipmentButton!: UIActionButton;
     public subInventoryQuestButton!: UIActionButton;
-    public useButton!: UIActionButton;
+    public useItemButton!: UIActionButton;
     public yesButton!: UIActionButton;
     private abilityButton!: UIActionButton;
     private actionMenuFrame!: Phaser.GameObjects.Image;
@@ -103,6 +104,8 @@ export default class UIScene extends Phaser.Scene {
     private player2CharacterSheetButton!: UIActionButton;
     private player3CharacterSheetButton!: UIActionButton;
     private nameText!: Phaser.GameObjects.Text;
+    private invisiblePlayer1Button!: Phaser.GameObjects.Rectangle;
+    private invisiblePlayer2Button!: Phaser.GameObjects.Rectangle;
 
     public constructor() {
         super('UI');
@@ -395,8 +398,8 @@ export default class UIScene extends Phaser.Scene {
         this.goldIcon.setVisible(false);
         this.goldText.setVisible(false);
         this.inventoryAndAbilityDetailFrame.setVisible(false);
-        this.useButton.setVisible(false);
-        this.useButton.buttonText.setVisible(false);
+        this.useItemButton.setVisible(false);
+        this.useItemButton.buttonText.setVisible(false);
         this.dropButton.setVisible(false);
         this.dropButton.buttonText.setVisible(false);
         this.equipButton.setVisible(false);
@@ -572,17 +575,17 @@ export default class UIScene extends Phaser.Scene {
     }
 
     public updatePlayer2HP(hp: number, maxHP: number) {
-        this.player2hpText.setText(`HP: ${hp} / ${maxHP}`)
+        this.player2hpText.setText(`HP: ${hp} / ${maxHP}`);
     }
 
-    private calculateTilNextLevel(gameActor: GameActor): number {
-        const currentExp = gameActor.experience;
-        let currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(currentExp)));
+    private calculateTilNextLevel(playerOrBot: Player|Bot): number {
+        const currentExp = playerOrBot.experience;
+        let currentLevel = playerOrBot.level;
         const nextLevel = currentLevel + 1;
         let expCounter = 0;
         while (currentLevel < nextLevel) {
             expCounter++;
-            currentLevel = Math.max(1, Math.ceil(0.3 * Math.sqrt(currentExp + expCounter)));
+            currentLevel = Math.max(1, Math.ceil(playerOrBot.LEVELING_RATE * Math.sqrt(currentExp + expCounter)));
         }
         return expCounter;
 
@@ -629,8 +632,8 @@ export default class UIScene extends Phaser.Scene {
                         this.inventoryAndAbilityDetailText.setText(item.description);
                         this.equipButton.setVisible(false);
                         this.equipButton.buttonText.setVisible(false);
-                        this.useButton.setVisible(true);
-                        this.useButton.buttonText.setVisible(true);
+                        this.useItemButton.setVisible(true);
+                        this.useItemButton.buttonText.setVisible(true);
                         this.dropButton.setVisible(true);
                         this.dropButton.buttonText.setVisible(true);
 
@@ -647,8 +650,8 @@ export default class UIScene extends Phaser.Scene {
                                 Classes: ${item.classes},
                                 Minimum Level: ${item.minimumLevel}`
                         );
-                        this.useButton.setVisible(false);
-                        this.useButton.buttonText.setVisible(false);
+                        this.useItemButton.setVisible(false);
+                        this.useItemButton.buttonText.setVisible(false);
                         this.dropButton.setVisible(true);
                         this.dropButton.buttonText.setVisible(true);
                         this.equipButton.setVisible(true);
@@ -765,8 +768,8 @@ export default class UIScene extends Phaser.Scene {
                 this.inventoryAndAbilityDetailText.setVisible(false);
                 this.equipButton.setVisible(false);
                 this.equipButton.buttonText.setVisible(false);
-                this.useButton.setVisible(false);
-                this.useButton.buttonText.setVisible(false);
+                this.useItemButton.setVisible(false);
+                this.useItemButton.buttonText.setVisible(false);
                 this.dropButton.setVisible(false);
                 this.dropButton.buttonText.setVisible(false);
 
@@ -972,7 +975,7 @@ export default class UIScene extends Phaser.Scene {
         this.purchaseItemButton.setVisible(false);
         this.purchaseItemButton.buttonText.setVisible(false);
 
-        this.useButton = new UIActionButton(
+        this.useItemButton = new UIActionButton(
             this,
             35,
             392,
@@ -996,8 +999,8 @@ export default class UIScene extends Phaser.Scene {
                 this.subInventoryEquipmentButton.buttonText.setVisible(false);
                 this.subInventoryQuestButton.setVisible(false);
                 this.subInventoryQuestButton.buttonText.setVisible(false);
-                this.useButton.setVisible(false);
-                this.useButton.buttonText.setVisible(false);
+                this.useItemButton.setVisible(false);
+                this.useItemButton.buttonText.setVisible(false);
                 this.dropButton.setVisible(false);
                 this.dropButton.buttonText.setVisible(false);
                 this.selectedItemAndAbilityIcon.setVisible(true);
@@ -1018,8 +1021,8 @@ export default class UIScene extends Phaser.Scene {
 
             }
         );
-        this.useButton.setVisible(false);
-        this.useButton.buttonText.setVisible(false);
+        this.useItemButton.setVisible(false);
+        this.useItemButton.buttonText.setVisible(false);
 
         this.unequipButton = new UIActionButton(
             this,
@@ -1229,8 +1232,8 @@ export default class UIScene extends Phaser.Scene {
 
                 this.inventoryAndAbilityDetailText.setVisible(false);
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
-                this.useButton.setVisible(false);
-                this.useButton.buttonText.setVisible(false);
+                this.useItemButton.setVisible(false);
+                this.useItemButton.buttonText.setVisible(false);
                 this.dropButton.setVisible(false);
                 this.dropButton.buttonText.setVisible(false);
                 this.equipButton.setVisible(false);
@@ -1279,8 +1282,8 @@ export default class UIScene extends Phaser.Scene {
 
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
                 this.inventoryAndAbilityDetailText.setVisible(false);
-                this.useButton.setVisible(false);
-                this.useButton.buttonText.setVisible(false);
+                this.useItemButton.setVisible(false);
+                this.useItemButton.buttonText.setVisible(false);
                 this.dropButton.setVisible(false);
                 this.dropButton.buttonText.setVisible(false);
                 this.equipButton.setVisible(false);
@@ -1356,7 +1359,7 @@ export default class UIScene extends Phaser.Scene {
             'pagebuttonactive',
             'Player',
             () => {
-                if (this.interactionState === 'charactersheet1'){
+                if (this.interactionState === 'charactersheet1') {
                     return;
                 }
                 this.interactionState = 'charactersheet1';
@@ -1378,7 +1381,7 @@ export default class UIScene extends Phaser.Scene {
             'pagebuttonactive',
             'Companion 1',
             () => {
-                if (this.interactionState === 'charactersheet2'){
+                if (this.interactionState === 'charactersheet2') {
                     return;
                 }
                 this.interactionState = 'charactersheet2';
@@ -1400,7 +1403,7 @@ export default class UIScene extends Phaser.Scene {
             'pagebuttonactive',
             'Bot 2',
             () => {
-                if (this.interactionState === 'charactersheet3'){
+                if (this.interactionState === 'charactersheet3') {
                     return;
                 }
                 this.interactionState = 'charactersheet3';
@@ -1519,7 +1522,8 @@ export default class UIScene extends Phaser.Scene {
 
         // create heart icon
         this.heartIcon = this.add.image(100, 638, 'heart')
-            .setScale(1.25);
+            .setScale(1.25)
+            .setInteractive();
         this.player2HeartIcon = this.add.image(330, 638, 'heart')
             .setScale(1.25);
         this.player2HeartIcon.setVisible(false);
@@ -1607,60 +1611,23 @@ export default class UIScene extends Phaser.Scene {
             'gameActionMenuCharacterButtonActive',
             '',
             () => {
-                console.log({
-                    interactionState: this.interactionState,
-                    inventory: this.gameScene.player.inventory
-                });
-                // uncomment to log interaction state by clicking player portrait
-                if (this.interactionState.startsWith('inventoryaction')) {
-                    const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
-
-                    // using inventory slot number ${inventorySlotNumber} on hero
-                    this.gameScene.input.keyboard!.enabled = false;
-                    this.cancelMenuFrame.setVisible(false);
-                    this.cancelButton.setVisible(false);
-                    this.cancelButton.buttonText.setVisible(false);
-                    this.confirmSelectedAbilityOrItemFrame.setVisible(false);
-                    this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-                    this.selectedItemAndAbilityIcon.setVisible(false);
-                    this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
-                    this.commandMenuText.setVisible(false);
-                    this.selectedItemAndAbilityCommandText.setVisible(false);
-
-                    this.inventoryButton.deselect();
-                    this.interactionState = 'handlinghealthpotionselect';
-
-                    this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
-
-                    // finish using the item -> affect the target, delete item from bag
-                    //  display new health on screen if needed -> re-enable the keyboard on game scene
-                    // just used an item on the game scene!
-                    this.destroyInventoryButtons();
-
-                    const actualAmountHealed = Math.min(
-                        30,
-                        this.gameScene.player.stats.maxHP - this.gameScene.player.stats.currentHP
-                    );
-                    this.gameScene.player.stats.currentHP += actualAmountHealed;
-                    this.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
-
-                    this.sfxScene.playSound('potion');
-                    eventsCenter.emit('GameMessage', `${this.gameScene.player.name} uses a health potion on ${this.gameScene.player.name}, healing them for ${actualAmountHealed} HP.`);
-
-                    this.generateInventoryButtons();
-                    this.gameScene.input.keyboard!.resetKeys();
-
-                    this.time.addEvent({
-                        delay: 2000,
-                        callbackScope: this,
-                        callback: () => {
-                            this.gameScene.input.keyboard!.enabled = true;
-                            this.interactionState = 'mainselect';
-                        }
-                    });
-                }
+                return;
             }
         );
+
+        this.invisiblePlayer1Button = this.add.rectangle(
+            49,
+            650,
+            215,
+            50,
+            0xFF0000,
+            0
+        )
+            .setOrigin(0, 0.5)
+            .setInteractive()
+            .on('pointerdown', () => {
+                this.player1ButtonCallback();
+            });
 
         this.player2Button = new UIActionButton(
             this,
@@ -1670,60 +1637,24 @@ export default class UIScene extends Phaser.Scene {
             'gameActionMenuRedBotButtonActive',
             '',
             () => {
-                // TODO: write logic here so the 2nd player can be healed or whatever when clicked
-                if (this.interactionState.startsWith('inventoryaction')) {
-                    const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
-
-                    // using inventory slot number ${inventorySlotNumber} on hero
-                    this.gameScene.input.keyboard!.enabled = false;
-
-                    this.cancelMenuFrame.setVisible(false);
-                    this.cancelButton.setVisible(false);
-                    this.cancelButton.buttonText.setVisible(false);
-                    this.confirmSelectedAbilityOrItemFrame.setVisible(false);
-                    this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-                    this.selectedItemAndAbilityIcon.setVisible(false);
-                    this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
-                    this.commandMenuText.setVisible(false);
-                    this.selectedItemAndAbilityCommandText.setVisible(false);
-
-                    this.inventoryButton.deselect();
-                    this.interactionState = 'handlinghealthpotionselect';
-
-                    this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
-
-                    // finish using the item -> affect the target, delete item from bag
-                    //  display new health on screen if needed -> re-enable the keyboard on game scene
-                    // just used an item on the game scene!
-                    this.destroyInventoryButtons();
-
-                    const actualAmountHealed = Math.min(
-                        30,
-                        this.gameScene.bots[0].stats.maxHP - this.gameScene.bots[0].stats.currentHP
-                    );
-
-                    this.gameScene.bots[0].stats.currentHP += actualAmountHealed;
-                    this.updatePlayer2HP(this.gameScene.bots[0].stats.currentHP, this.gameScene.bots[0].stats.maxHP);
-
-                    this.sfxScene.playSound('potion');
-                    eventsCenter.emit('GameMessage', `${this.gameScene.player.name} uses a health potion on ${this.gameScene.bots[0].name}, healing them for ${actualAmountHealed} HP.`);
-
-                    this.generateInventoryButtons();
-                    this.gameScene.input.keyboard!.resetKeys();
-
-
-                    this.time.addEvent({
-                        delay: 2000,
-                        callbackScope: this,
-                        callback: () => {
-                            this.gameScene.input.keyboard!.enabled = true;
-                            this.interactionState = 'mainselect';
-                        }
-                    });
-                }
+                this.player2ButtonCallback();
             }
         );
         this.player2Button.setVisible(false);
+
+        this.invisiblePlayer2Button = this.add.rectangle(
+            279,
+            650,
+            215,
+            50,
+            0xFF0000,
+            0
+        )
+            .setOrigin(0, 0.5)
+            .setInteractive()
+            .on('pointerdown', () => {
+                this.player2ButtonCallback();
+            });
 
         this.abilityButton = new UIActionButton(
             this,
@@ -1828,7 +1759,7 @@ export default class UIScene extends Phaser.Scene {
                 this.player2CharacterSheetButton.deselect();
                 this.player3CharacterSheetButton.deselect();
 
-                // TODO: if there are bots, show buttons to show their character sheets.
+                // if there are bots, show buttons to show their character sheets.
 
                 if (this.gameScene.bots.length > 0) {
                     this.player2CharacterSheetButton.setVisible(true);
@@ -1918,8 +1849,9 @@ export default class UIScene extends Phaser.Scene {
     }
 
     private setupText() {
+        const player = this.gameScene.player;
         // START TEXT SECTION
-        this.nameText = this.add.text(538, 122, this.gameScene.player.name, {
+        this.nameText = this.add.text(538, 122, player.name, {
             color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
                 width: 610,
                 useAdvancedWrap: true
@@ -1953,7 +1885,7 @@ export default class UIScene extends Phaser.Scene {
         this.leftSideDialogText = this.add.text(50, 380, '', {
             color: '#ffffff',
             align: 'left',
-            fontFamily:'CustomFont',
+            fontFamily: 'CustomFont',
             fontSize: '50px',
             wordWrap: {
                 width: 610,
@@ -2033,7 +1965,7 @@ export default class UIScene extends Phaser.Scene {
 
         // START CHARACTER SHEET STRING SECTION
 
-        this.classString = this.add.text(540, 185, 'Class: Soldier', {
+        this.classString = this.add.text(540, 185, `Class: ${player.type.name}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2041,7 +1973,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.classString.setVisible(false);
 
-        this.levelString = this.add.text(540, 221, `Level: ${Math.max(1, Math.ceil(0.3 * Math.sqrt(this.gameScene.player.experience)))}`, {
+        this.levelString = this.add.text(540, 221, `Level: ${player.level}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2049,7 +1981,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.levelString.setVisible(false);
 
-        this.hitPointString = this.add.text(540, 257, `Hit Points: ${this.gameScene.player.stats.currentHP}/${this.gameScene.player.stats.maxHP}`, {
+        this.hitPointString = this.add.text(540, 257, `Hit Points: ${player.stats.currentHP}/${player.stats.maxHP}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2065,7 +1997,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.manaPointString.setVisible(false);
 
-        this.strengthString = this.add.text(540, 329, `Strength: ${Math.floor(this.gameScene.player.getCombinedStat('strength'))}`, {
+        this.strengthString = this.add.text(540, 329, `Strength: ${Math.floor(player.getCombinedStat('strength'))}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2073,7 +2005,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.strengthString.setVisible(false);
 
-        this.agilityString = this.add.text(540, 365, `Agility: ${Math.floor(this.gameScene.player.stats.agility)}`, {
+        this.agilityString = this.add.text(540, 365, `Agility: ${Math.floor(player.stats.agility)}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2081,7 +2013,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.agilityString.setVisible(false);
 
-        this.vitalityString = this.add.text(540, 401, `Vitality: ${Math.floor(this.gameScene.player.stats.vitality)}`, {
+        this.vitalityString = this.add.text(540, 401, `Vitality: ${Math.floor(player.stats.vitality)}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2089,7 +2021,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.vitalityString.setVisible(false);
 
-        this.intellectString = this.add.text(540, 437, `Intellect: ${Math.floor(this.gameScene.player.stats.intellect)}`, {
+        this.intellectString = this.add.text(540, 437, `Intellect: ${Math.floor(player.stats.intellect)}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2097,7 +2029,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.intellectString.setVisible(false);
 
-        this.luckString = this.add.text(540, 473, `Luck: ${Math.floor(this.gameScene.player.stats.luck)}`, {
+        this.luckString = this.add.text(540, 473, `Luck: ${Math.floor(player.stats.luck)}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2105,7 +2037,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.luckString.setVisible(false);
 
-        this.defenseString = this.add.text(540, 509, `Defense: ${this.gameScene.player.getCombinedStat('defense')}`, {
+        this.defenseString = this.add.text(540, 509, `Defense: ${player.getCombinedStat('defense')}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2113,7 +2045,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.defenseString.setVisible(false);
 
-        this.tillNextLevelString = this.add.text(540, 545, `Till Next Level: ${this.calculateTilNextLevel(this.gameScene.player)}`, {
+        this.tillNextLevelString = this.add.text(540, 545, `Till Next Level: ${this.calculateTilNextLevel(player)}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2126,21 +2058,32 @@ export default class UIScene extends Phaser.Scene {
         // END TEXT SECTION
     }
 
-    private updateCharacterSheetStrings(gameActor: GameActor) {
+    private updateCharacterSheetStrings(playerOrBot: Player|Bot) {
 
-        this.nameText.setText(gameActor.name);
+        this.nameText.setText(playerOrBot.name);
         this.shrinkTextByPixel(this.nameText, 375);
 
-        this.levelString.setText(`Level: ${Math.max(1, Math.ceil(0.3 * Math.sqrt(gameActor.experience)))}`);
-        this.hitPointString.setText(`Hit Points: ${gameActor.stats.currentHP}/${gameActor.stats.maxHP}`);
+        let classIdentifier = '';
+        let className = '';
+        if (playerOrBot instanceof Player) {
+            classIdentifier = 'Class';
+            className = playerOrBot.type.properName;
+        }
+        else if (playerOrBot instanceof Bot) {
+            classIdentifier = 'Type';
+            className = playerOrBot.species;
+        }
+        this.classString.setText(`${classIdentifier}: ${className}`);
+        this.levelString.setText(`Level: ${playerOrBot.level}`);
+        this.hitPointString.setText(`Hit Points: ${playerOrBot.stats.currentHP}/${playerOrBot.stats.maxHP}`);
         this.manaPointString.setText('Mana Points: 0/0');
-        this.strengthString.setText(`Strength: ${Math.floor(gameActor.getCombinedStat('strength'))}`);
-        this.agilityString.setText(`Agility: ${Math.floor(gameActor.stats.agility)}`);
-        this.vitalityString.setText(`Vitality: ${Math.floor(gameActor.stats.vitality)}`);
-        this.intellectString.setText(`Intellect: ${Math.floor(gameActor.stats.intellect)}`);
-        this.luckString.setText(`Luck: ${Math.floor(gameActor.stats.luck)}`);
-        this.defenseString.setText(`Defense: ${Math.floor(gameActor.getCombinedStat('defense'))}`);
-        this.tillNextLevelString.setText(`Till Next Level: ${this.calculateTilNextLevel(gameActor)}`);
+        this.strengthString.setText(`Strength: ${Math.floor(playerOrBot.getCombinedStat('strength'))}`);
+        this.agilityString.setText(`Agility: ${Math.floor(playerOrBot.stats.agility)}`);
+        this.vitalityString.setText(`Vitality: ${Math.floor(playerOrBot.stats.vitality)}`);
+        this.intellectString.setText(`Intellect: ${Math.floor(playerOrBot.stats.intellect)}`);
+        this.luckString.setText(`Luck: ${Math.floor(playerOrBot.stats.luck)}`);
+        this.defenseString.setText(`Defense: ${Math.floor(playerOrBot.getCombinedStat('defense'))}`);
+        this.tillNextLevelString.setText(`Till Next Level: ${this.calculateTilNextLevel(playerOrBot)}`);
 
     }
 
@@ -2148,8 +2091,116 @@ export default class UIScene extends Phaser.Scene {
         let fontSize = phasertext.height;
         while (phasertext.width > maxpixel) {
             fontSize--;
-            phasertext.setStyle({ fontSize: fontSize + 'px' });
+            phasertext.setStyle({fontSize: fontSize + 'px'});
         }
         return phasertext;
+    }
+
+    private player1ButtonCallback() {
+        console.log({
+            playerExperience: this.gameScene.player.experience,
+            botExperience: this.gameScene.bots[0].experience
+        });
+        // uncomment to log interaction state by clicking player portrait
+        if (this.interactionState.startsWith('inventoryaction')) {
+            const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
+
+            // using inventory slot number ${inventorySlotNumber} on hero
+            this.gameScene.input.keyboard!.enabled = false;
+            this.cancelMenuFrame.setVisible(false);
+            this.cancelButton.setVisible(false);
+            this.cancelButton.buttonText.setVisible(false);
+            this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+            this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+            this.selectedItemAndAbilityIcon.setVisible(false);
+            this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+            this.commandMenuText.setVisible(false);
+            this.selectedItemAndAbilityCommandText.setVisible(false);
+
+            this.inventoryButton.deselect();
+            this.interactionState = 'handlinghealthpotionselect';
+
+            this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
+
+            // finish using the item -> affect the target, delete item from bag
+            //  display new health on screen if needed -> re-enable the keyboard on game scene
+            // just used an item on the game scene!
+            this.destroyInventoryButtons();
+
+            const actualAmountHealed = Math.min(
+                30,
+                this.gameScene.player.stats.maxHP - this.gameScene.player.stats.currentHP
+            );
+            this.gameScene.player.stats.currentHP += actualAmountHealed;
+            this.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
+
+            this.sfxScene.playSound('potion');
+            eventsCenter.emit('GameMessage', `${this.gameScene.player.name} uses a health potion on ${this.gameScene.player.name}, healing them for ${actualAmountHealed} HP.`);
+
+            this.generateInventoryButtons();
+            this.gameScene.input.keyboard!.resetKeys();
+
+            this.time.addEvent({
+                delay: 2000,
+                callbackScope: this,
+                callback: () => {
+                    this.gameScene.input.keyboard!.enabled = true;
+                    this.interactionState = 'mainselect';
+                }
+            });
+        }
+    }
+    private player2ButtonCallback() {
+        // write logic here so the 2nd player can be healed or whatever when clicked
+        if (this.interactionState.startsWith('inventoryaction')) {
+            const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
+
+            // using inventory slot number ${inventorySlotNumber} on hero
+            this.gameScene.input.keyboard!.enabled = false;
+
+            this.cancelMenuFrame.setVisible(false);
+            this.cancelButton.setVisible(false);
+            this.cancelButton.buttonText.setVisible(false);
+            this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+            this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+            this.selectedItemAndAbilityIcon.setVisible(false);
+            this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+            this.commandMenuText.setVisible(false);
+            this.selectedItemAndAbilityCommandText.setVisible(false);
+
+            this.inventoryButton.deselect();
+            this.interactionState = 'handlinghealthpotionselect';
+
+            this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
+
+            // finish using the item -> affect the target, delete item from bag
+            //  display new health on screen if needed -> re-enable the keyboard on game scene
+            // just used an item on the game scene!
+            this.destroyInventoryButtons();
+
+            const actualAmountHealed = Math.min(
+                30,
+                this.gameScene.bots[0].stats.maxHP - this.gameScene.bots[0].stats.currentHP
+            );
+
+            this.gameScene.bots[0].stats.currentHP += actualAmountHealed;
+            this.updatePlayer2HP(this.gameScene.bots[0].stats.currentHP, this.gameScene.bots[0].stats.maxHP);
+
+            this.sfxScene.playSound('potion');
+            eventsCenter.emit('GameMessage', `${this.gameScene.player.name} uses a health potion on ${this.gameScene.bots[0].name}, healing them for ${actualAmountHealed} HP.`);
+
+            this.generateInventoryButtons();
+            this.gameScene.input.keyboard!.resetKeys();
+
+
+            this.time.addEvent({
+                delay: 2000,
+                callbackScope: this,
+                callback: () => {
+                    this.gameScene.input.keyboard!.enabled = true;
+                    this.interactionState = 'mainselect';
+                }
+            });
+        }
     }
 }

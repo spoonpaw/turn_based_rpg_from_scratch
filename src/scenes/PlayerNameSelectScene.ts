@@ -1,11 +1,15 @@
 import eventsCenter from '../utils/EventsCenter';
 import KeyboardScene from './KeyboardScene';
+import MusicScene from './MusicScene';
+import SFXScene from './SFXScene';
 
 export default class PlayerNameSelectScene extends Phaser.Scene {
     private characterDetailDisplay!: Phaser.GameObjects.Image;
     private keyBoardScene!: KeyboardScene;
     private commandFrame!: Phaser.GameObjects.Image;
     private backgroundRectangle!: Phaser.GameObjects.Rectangle;
+    private musicScene!: MusicScene;
+    private sfxScene!: SFXScene;
     constructor() {
         super('PlayerNameSelect');
     }
@@ -24,7 +28,11 @@ export default class PlayerNameSelectScene extends Phaser.Scene {
 
         this.scene.launch('Keyboard', {purpose: 'playernameselect'});
         this.keyBoardScene = <KeyboardScene>this.scene.get('Keyboard');
+        this.musicScene = <MusicScene>this.scene.get('Music');
+        this.sfxScene = <SFXScene>this.scene.get('SFX');
         this.keyBoardScene.scene.bringToTop();
+        this.musicScene.scene.bringToTop();
+        this.sfxScene.scene.bringToTop();
 
         this.characterDetailDisplay = this.add.image(
             335,

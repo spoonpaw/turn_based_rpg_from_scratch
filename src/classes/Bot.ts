@@ -7,8 +7,8 @@ import GameActor from './GameActor';
 import {MonsterJob} from './Jobs/MonsterJob';
 
 export default class Bot extends GameActor{
+    public LEVELING_RATE = 0.4;
     public tilePos!: Phaser.Math.Vector2;
-    // public stats: Stats;
     private uiScene: UIScene;
     private gameScene: GameScene;
     public path: Phaser.Math.Vector2[] = [];
@@ -17,14 +17,15 @@ export default class Bot extends GameActor{
     constructor(
         name: string,
         sprite: Phaser.GameObjects.Sprite,
-        // private tilePos: Phaser.Math.Vector2,
         experience: number,
+        species: string,
         public type: MonsterJob,
         stats?: Stats
     ) {
         super(
             name,
             sprite,
+            species,
             experience
         );
         console.log({
@@ -93,7 +94,7 @@ export default class Bot extends GameActor{
 
             if (newPos.x !== playerPos.x || newPos.y !== playerPos.y) {
                 // Start moving in the calculated direction
-                this.gameScene.botGridPhysics.moveBot(direction);
+                this.gameScene.botGridPhysics.moveActor(direction);
             }
             // If the bot has reached its destination, remove it from the path
             if (this.hasReachedDestination()) {
@@ -144,4 +145,7 @@ export default class Bot extends GameActor{
         return Direction.NONE;
     }
 
+    get level() {
+        return Math.max(1, Math.ceil(this.LEVELING_RATE * Math.sqrt(this.experience)));
+    }
 }
