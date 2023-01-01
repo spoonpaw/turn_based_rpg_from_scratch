@@ -144,6 +144,7 @@ export default class extends NPC {
                 'Red Bot',
                 botSprite,
                 0,
+                'Red Bot',
                 monsterSoldierJob
             );
 

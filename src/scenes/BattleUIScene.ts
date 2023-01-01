@@ -6,6 +6,7 @@ import BattleScene from './BattleScene';
 import MusicScene from './MusicScene';
 
 export default class BattleUIScene extends Phaser.Scene {
+    public abilityButtons: UIActionButton[] = [];
     public attackButton!: UIActionButton;
     public commandMenuText!: Phaser.GameObjects.Text;
     public confirmSelectedAbilityOrItemFrame!: Phaser.GameObjects.Image;
@@ -16,6 +17,7 @@ export default class BattleUIScene extends Phaser.Scene {
     public selectedItemAndAbilityCommandText!: Phaser.GameObjects.Text;
     public selectedItemAndAbilityIcon!: UIActionButton;
     private abilityButton!: UIActionButton;
+    private abilityIndex!: number;
     private actionButtons: UIActionButton[] = [];
     private bagButton!: UIActionButton;
     private battleScene!: BattleScene;
@@ -37,7 +39,8 @@ export default class BattleUIScene extends Phaser.Scene {
     private subInventoryBagButton!: UIActionButton;
     private subInventoryButtons: UIActionButton[] = [];
     private tacticsButton!: UIActionButton;
-    private useButton!: UIActionButton;
+    private useAbilityButton!: UIActionButton;
+    private useItemButton!: UIActionButton;
 
     public constructor() {
         super('BattleUI');
@@ -49,6 +52,17 @@ export default class BattleUIScene extends Phaser.Scene {
             subAbilityButton.setVisible(false);
             subAbilityButton.buttonText.setVisible(false);
         }
+
+        for (const abilityButton of this.abilityButtons) {
+            abilityButton.deselect();
+            abilityButton.setVisible(false);
+            abilityButton.buttonText.setVisible(false);
+
+        }
+
+        this.useAbilityButton.setVisible(false);
+        this.useAbilityButton.buttonText.setVisible(false);
+
 
         this.inventoryAndAbilityMenuFrame.setVisible(false);
         this.subInventoryAndAbilityMenuFrame.setVisible(false);
@@ -98,7 +112,12 @@ export default class BattleUIScene extends Phaser.Scene {
                 }
                 this.selectAttack();
             }
+            if (event.code === 'Space') {
+                console.log('space pressed on the battle ui scene!');
+                console.log({battleSceneInteractionState: this.battleScene.interactionState});
+            }
         });
+
 
         this.initiateBattleUI();
 
@@ -117,6 +136,62 @@ export default class BattleUIScene extends Phaser.Scene {
         this.actionButtons.forEach((button) => {
             button.deselect();
         });
+    }
+
+    public destroyAbilityButtons() {
+        for (const abilityButton of this.abilityButtons) {
+            abilityButton.destroy();
+            abilityButton.buttonText.destroy();
+        }
+        this.abilityButtons = [];
+    }
+
+    public generateAbilityButtons() {
+
+        const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
+            return ability.levelAttained <= this.battleScene.gameScene.player.level;
+        });
+
+
+
+        // TODO: SPAWN THE ABILITY BUTTONS
+        for (const [index, ability] of availableAbilities.entries()) {
+            const abilityButton = new UIActionButton(
+                this,
+
+                564,
+                216 + (index * 50),
+                'bagbutton',
+                'bagbuttonactive',
+                ability.name,
+                () => {
+                    // display text here describing the selected ability
+                    this.battleScene.interactionState = `selectingabilityaction${index}`;
+                    const selectedAbilityIndex = Number(this.battleScene.interactionState.split('selectingabilityaction')[1]);
+                    const selectedAbility = this.battleScene.gameScene.player.type.skills[selectedAbilityIndex];
+                    this.inventoryAndAbilityDetailFrame.setVisible(true);
+                    console.log({selectedAbility});
+                    this.inventoryAndAbilityDetailText.setText(selectedAbility.description);
+                    this.inventoryAndAbilityDetailText.setVisible(true);
+                    this.useAbilityButton.setVisible(true);
+                    this.useAbilityButton.buttonText.setVisible(true);
+
+                    this.updateAndShowCancelButton(153, 357, 'Cancel', false);
+
+                    this.abilityIndex = index;
+                    this.abilityButtons[index].select();
+                    for (const [abilityButtonIndex, abilityButton] of this.abilityButtons.entries()) {
+                        if (abilityButtonIndex !== index) {
+                            abilityButton.deselect();
+                        }
+                    }
+                }
+            );
+            abilityButton.setVisible(false);
+            abilityButton.buttonText.setVisible(false);
+
+            this.abilityButtons.push(abilityButton);
+        }
     }
 
     public generateInventoryButtons() {
@@ -138,8 +213,8 @@ export default class BattleUIScene extends Phaser.Scene {
                     this.inventoryAndAbilityDetailFrame.setVisible(true);
                     this.inventoryAndAbilityDetailText.setText(selectedItem.description);
                     this.inventoryAndAbilityDetailText.setVisible(true);
-                    this.useButton.setVisible(true);
-                    this.useButton.buttonText.setVisible(true);
+                    this.useItemButton.setVisible(true);
+                    this.useItemButton.buttonText.setVisible(true);
 
                     this.updateAndShowCancelButton(153, 357, 'Cancel', false);
 
@@ -207,6 +282,8 @@ export default class BattleUIScene extends Phaser.Scene {
     }
 
     private selectAbility() {
+        this.destroyAbilityButtons();
+        this.generateAbilityButtons();
         this.disableAllActionButtons();
         this.closeInventory();
 
@@ -232,8 +309,10 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.inventoryAndAbilityDetailFrame.setVisible(false);
         this.inventoryAndAbilityDetailText.setVisible(false);
-        this.useButton.setVisible(false);
-        this.useButton.buttonText.setVisible(false);
+        this.useItemButton.setVisible(false);
+        this.useItemButton.buttonText.setVisible(false);
+        this.useAbilityButton.setVisible(false);
+        this.useAbilityButton.buttonText.setVisible(false);
 
         this.selectedItemAndAbilityIcon.setVisible(false);
         this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
@@ -250,6 +329,12 @@ export default class BattleUIScene extends Phaser.Scene {
         }
 
         this.subAbilityButton.select();
+
+        for (const ability of this.abilityButtons) {
+            ability.setVisible(true);
+            ability.buttonText.setVisible(true);
+
+        }
     }
 
     private selectAttack() {
@@ -263,8 +348,8 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.inventoryAndAbilityDetailFrame.setVisible(false);
         this.inventoryAndAbilityDetailText.setVisible(false);
-        this.useButton.setVisible(false);
-        this.useButton.buttonText.setVisible(false);
+        this.useItemButton.setVisible(false);
+        this.useItemButton.buttonText.setVisible(false);
 
         this.confirmSelectedAbilityOrItemFrame.setVisible(false);
         this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
@@ -323,8 +408,8 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.inventoryAndAbilityDetailFrame.setVisible(false);
         this.inventoryAndAbilityDetailText.setVisible(false);
-        this.useButton.setVisible(false);
-        this.useButton.buttonText.setVisible(false);
+        this.useItemButton.setVisible(false);
+        this.useItemButton.buttonText.setVisible(false);
     }
 
     private selectInventory() {
@@ -347,8 +432,23 @@ export default class BattleUIScene extends Phaser.Scene {
         this.hotkeyMenuFrame.setVisible(false);
         this.hotkeyBadge1.setVisible(false);
 
+        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+
         this.inventoryAndAbilityMenuFrame.setVisible(true);
         this.subInventoryAndAbilityMenuFrame.setVisible(true);
+
+        this.inventoryAndAbilityDetailFrame.setVisible(false);
+        this.inventoryAndAbilityDetailText.setVisible(false);
+        this.useItemButton.setVisible(false);
+        this.useItemButton.buttonText.setVisible(false);
+        this.useAbilityButton.setVisible(false);
+        this.useAbilityButton.buttonText.setVisible(false);
+
+        this.selectedItemAndAbilityIcon.setVisible(false);
+        this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+
+        this.commandMenuText.setText('');
 
         this.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
@@ -378,8 +478,8 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.inventoryAndAbilityDetailFrame.setVisible(false);
         this.inventoryAndAbilityDetailText.setVisible(false);
-        this.useButton.setVisible(false);
-        this.useButton.buttonText.setVisible(false);
+        this.useItemButton.setVisible(false);
+        this.useItemButton.buttonText.setVisible(false);
 
         this.selectedItemAndAbilityIcon.setVisible(false);
         this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
@@ -424,14 +524,18 @@ export default class BattleUIScene extends Phaser.Scene {
             'bookbuttonactive',
             'Ability',
             () => {
-                if (this.battleScene.interactionState !== 'mainselect' &&
-                    this.battleScene.interactionState !== 'attack' &&
-                    this.battleScene.interactionState !== 'inventory' &&
-                    !this.battleScene.interactionState.startsWith('inventoryaction') &&
-                    !this.battleScene.interactionState.startsWith('selecting')) {
-                    return;
+
+
+                if (
+                    this.battleScene.interactionState === 'mainselect' ||
+                    this.battleScene.interactionState.startsWith('inventory') ||
+                    this.battleScene.interactionState === 'attack' ||
+                    this.battleScene.interactionState.startsWith('selecting') ||
+                    this.battleScene.interactionState.startsWith('abilityaction')
+                ) {
+                    this.selectAbility();
                 }
-                this.selectAbility();
+
             });
         this.actionButtons.push(this.abilityButton);
 
@@ -443,14 +547,18 @@ export default class BattleUIScene extends Phaser.Scene {
             'bagbuttonactive',
             'Item',
             () => {
-                if (this.battleScene.interactionState !== 'mainselect' &&
-                    this.battleScene.interactionState !== 'ability' &&
-                    this.battleScene.interactionState !== 'attack') {
-                    return;
+                if (this.battleScene.interactionState === 'mainselect' ||
+                    this.battleScene.interactionState.startsWith('ability') ||
+                    this.battleScene.interactionState === 'attack' ||
+                    this.battleScene.interactionState.startsWith('selecting') ||
+                    this.battleScene.interactionState.startsWith('inventoryaction')
+
+                ) {
+                    eventsCenter.emit('bag');
+                    this.selectInventory();
                 }
-                eventsCenter.emit('bag');
-                this.selectInventory();
-            });
+            }
+        );
         this.actionButtons.push(this.bagButton);
 
         this.subInventoryBagButton = new UIActionButton(
@@ -495,14 +603,14 @@ export default class BattleUIScene extends Phaser.Scene {
             'attackbuttonactive',
             'Attack',
             () => {
-                if (this.battleScene.interactionState !== 'mainselect' &&
-                    this.battleScene.interactionState !== 'inventory' &&
-                    this.battleScene.interactionState !== 'ability' &&
-                    !this.battleScene.interactionState.startsWith('inventoryaction') &&
-                    !this.battleScene.interactionState.startsWith('selecting')) {
-                    return;
+                if (
+                    this.battleScene.interactionState === 'mainselect' ||
+                    this.battleScene.interactionState.startsWith('inventory') ||
+                    this.battleScene.interactionState.startsWith('ability') ||
+                    this.battleScene.interactionState.startsWith('selecting')
+                ) {
+                    this.selectAttack();
                 }
-                this.selectAttack();
             });
         this.actionButtons.push(this.attackButton);
 
@@ -572,7 +680,84 @@ export default class BattleUIScene extends Phaser.Scene {
         this.selectedItemAndAbilityIcon.setVisible(false);
         this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
 
-        this.useButton = new UIActionButton(
+        this.useAbilityButton = new UIActionButton(
+            this,
+            35,
+            392,
+            'checkbutton',
+            'checkbutton',
+            'Use',
+            () => {
+                console.log('using an ability!');
+                console.log({interactionState: this.battleScene.interactionState});
+                this.battleScene.interactionState = this.battleScene.interactionState.split('selecting')[1];
+                this.useAbilityButton.setVisible(false);
+                this.useAbilityButton.buttonText.setVisible(false);
+                this.inventoryAndAbilityDetailFrame.setVisible(false);
+                this.inventoryAndAbilityDetailText.setVisible(false);
+                this.subInventoryAndAbilityMenuFrame.setVisible(false);
+                this.subInventoryBagButton.setVisible(false);
+                this.subInventoryBagButton.buttonText.setVisible(false);
+
+                this.confirmSelectedAbilityOrItemFrame.setVisible(true);
+                this.confirmSelectedAbilityOrItemFrameB.setVisible(true);
+
+                this.updateAndShowCancelButton(698, 430, 'Cancel', true);
+
+
+                this.inventoryAndAbilityMenuFrame.setVisible(false);
+                for (const abilityButton of this.abilityButtons) {
+                    abilityButton.setVisible(false);
+                    abilityButton.buttonText.setVisible(false);
+                }
+
+                for (const subAbilityButton of this.subAbilityButtons) {
+                    subAbilityButton.setVisible(false);
+                    subAbilityButton.buttonText.setVisible(false);
+                }
+
+                this.message.text.setText('');
+
+                this.selectedItemAndAbilityIcon.destroy();
+                this.selectedItemAndAbilityIcon.buttonText.destroy();
+
+
+                // get the selected ability!!!
+                const selectedAbilityIndex = Number(this.battleScene.interactionState.split('abilityaction')[1]);
+
+
+
+                const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
+                    return ability.levelAttained <= this.battleScene.gameScene.player.level;
+                });
+
+                const selectedAbility = availableAbilities[selectedAbilityIndex];
+
+                this.selectedItemAndAbilityIcon = new UIActionButton(
+                    this,
+                    265,
+                    465,
+                    'bagbutton',
+                    'bagbutton',
+                    selectedAbility.name,
+                    () => {
+                        return;
+                    }
+                );
+
+                this.selectedItemAndAbilityIcon.setVisible(true);
+                this.selectedItemAndAbilityIcon.buttonText.setVisible(true);
+
+                this.selectedItemAndAbilityCommandText.setText('Choose A Target');
+                this.selectedItemAndAbilityCommandText.setVisible(true);
+
+
+            }
+        );
+        this.useAbilityButton.setVisible(false);
+        this.useAbilityButton.buttonText.setVisible(false);
+
+        this.useItemButton = new UIActionButton(
             this,
             35,
             392,
@@ -581,8 +766,8 @@ export default class BattleUIScene extends Phaser.Scene {
             'Use',
             () => {
                 this.battleScene.interactionState = this.battleScene.interactionState.split('selecting')[1];
-                this.useButton.setVisible(false);
-                this.useButton.buttonText.setVisible(false);
+                this.useItemButton.setVisible(false);
+                this.useItemButton.buttonText.setVisible(false);
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
                 this.inventoryAndAbilityDetailText.setVisible(false);
                 this.subInventoryAndAbilityMenuFrame.setVisible(false);
@@ -629,8 +814,8 @@ export default class BattleUIScene extends Phaser.Scene {
                 this.selectedItemAndAbilityCommandText.setVisible(true);
             }
         );
-        this.useButton.setVisible(false);
-        this.useButton.buttonText.setVisible(false);
+        this.useItemButton.setVisible(false);
+        this.useItemButton.buttonText.setVisible(false);
 
     }
 

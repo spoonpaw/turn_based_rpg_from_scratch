@@ -8,8 +8,8 @@ import GameActor from './GameActor';
 import Item from './Item';
 import {PlayerJob} from './Jobs/PlayerJob';
 
-
 export default class Player extends GameActor{
+    public LEVELING_RATE = 0.3;
     // public stats: Stats;
     private uiScene!: UIScene;
     constructor(
@@ -18,6 +18,7 @@ export default class Player extends GameActor{
         public tilePos: Phaser.Math.Vector2,
         public gold: number,
         experience: number,
+        species: string,
         // public type: string,
         public type: PlayerJob,
         public inventory: Item[],
@@ -27,6 +28,7 @@ export default class Player extends GameActor{
         super(
             name,
             sprite,
+            species,
             experience
         );
         console.log({playerType: this.type});
@@ -70,7 +72,12 @@ export default class Player extends GameActor{
         this.tilePos = tilePosition.clone();
     }
 
-    public startAnimation(direction: Direction) {
+    public startAnimation(direction: Direction | string) {
         this.sprite.anims.play(direction);
     }
+
+    get level() {
+        return Math.max(1, Math.ceil(this.LEVELING_RATE * Math.sqrt(this.experience)));
+    }
+
 }

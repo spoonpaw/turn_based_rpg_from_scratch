@@ -20,9 +20,9 @@ export default class Message extends Phaser.GameObjects.Container {
                 }
             }
         );
-        this.text.setLineSpacing(-10);
+        this.text.setLineSpacing(-20);
         this.text.setResolution(3);
-        this.text.setFontSize(55);
+        this.text.setFontSize(48);
         this.add(this.text);
         this.text.setOrigin(0);
         this.text.setPosition(image.x + 10, image.y + 5);

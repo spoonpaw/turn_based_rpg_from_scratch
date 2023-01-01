@@ -1,13 +1,13 @@
-import {IBaseStatBlock, IStatIncreases} from '../../types/Advancement';
+import {IAbilityAttainment, IBaseStatBlock, IStatIncreases} from '../../types/Advancement';
 
 export class Job {
-    public name: string;
-    public baseStats: IBaseStatBlock;
-    public statIncreases: IStatIncreases;
 
-    constructor(name: string, baseStats: IBaseStatBlock, statIncreases: IStatIncreases) {
-        this.name = name;
-        this.baseStats = baseStats;
-        this.statIncreases = statIncreases;
+    constructor(
+        public name: string,
+        public properName: string,
+        public baseStats: IBaseStatBlock,
+        public statIncreases: IStatIncreases,
+        public skills: IAbilityAttainment[]
+    ) {
     }
 }

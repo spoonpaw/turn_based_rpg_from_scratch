@@ -48,6 +48,12 @@ const monsterSoldierStatIncreases: IStatIncreases = {
     ]
 };
 
-const monsterSoldierJob = new MonsterJob('MonsterSoldier', monsterSoldierBaseStats, monsterSoldierStatIncreases);
+const monsterSoldierJob = new MonsterJob(
+    'MonsterSoldier',
+    'Soldier',
+    monsterSoldierBaseStats,
+    monsterSoldierStatIncreases,
+    []
+);
 
 export default monsterSoldierJob;

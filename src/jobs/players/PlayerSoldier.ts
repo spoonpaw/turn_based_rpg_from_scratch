@@ -1,5 +1,6 @@
+import {abilities} from '../../abilities/abilities';
 import {PlayerJob} from '../../classes/Jobs/PlayerJob';
-import {IBaseStatBlock, IStatIncreases} from '../../types/Advancement';
+import {IAbilityAttainment, IBaseStatBlock, IStatIncreases} from '../../types/Advancement';
 
 const playerSoldierBaseStats: IBaseStatBlock = {
     level: 1,
@@ -48,6 +49,29 @@ const playerSoldierStatIncreases: IStatIncreases = {
     ]
 };
 
-const playerSoldierJob = new PlayerJob('PlayerSoldier', playerSoldierBaseStats, playerSoldierStatIncreases);
+const guardSkill = abilities.find((obj) => {
+    return obj.name === 'Guard';
+});
+
+const skills: IAbilityAttainment[] = [
+    {
+        name: guardSkill!.name,
+        description: guardSkill!.description,
+        levelAttained: 1,
+        type: guardSkill!.type,
+        targets: guardSkill!.targets
+    }
+];
+
+const properName = 'Soldier';
+
+const playerSoldierJob = new PlayerJob(
+    'PlayerSoldier',
+    properName,
+    playerSoldierBaseStats,
+    playerSoldierStatIncreases,
+    skills
+);
+
 
 export default playerSoldierJob;

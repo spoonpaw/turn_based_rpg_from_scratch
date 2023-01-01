@@ -14,6 +14,7 @@ export default class GameActor {
     constructor(
         public name: string,
         public sprite: Phaser.GameObjects.Sprite,
+        public species: string,
         public experience: number
     ) {
 

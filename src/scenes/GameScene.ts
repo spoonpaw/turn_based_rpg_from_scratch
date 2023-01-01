@@ -13,12 +13,12 @@ import {clone} from 'lodash';
 import Bot from '../classes/Bot';
 import BotGridPhysics from '../classes/BotGridPhysics';
 import GridControls from '../classes/GridControls';
-import GridPhysics from '../classes/GridPhysics';
 import Item from '../classes/Item';
 import BotScientist from '../classes/npcs/BotScientist';
 import Innkeeper from '../classes/npcs/Innkeeper';
 import Merchant from '../classes/npcs/Merchant';
 import Player from '../classes/Player';
+import PlayerGridPhysics from '../classes/PlayerGridPhysics';
 import {items} from '../items/items';
 import playerSoldierJob from '../jobs/players/PlayerSoldier';
 import {ILevelData, levels} from '../levels/Levels';
@@ -37,7 +37,7 @@ export default class GameScene extends Phaser.Scene {
     public cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     public gamePadScene?: GamePadScene;
     public gridControls!: GridControls;
-    public gridPhysics!: GridPhysics;
+    public gridPhysics!: PlayerGridPhysics;
     public innKeeper!: Innkeeper;
     public itemMerchant!: Merchant;
     public musicScene!: MusicScene;
@@ -152,6 +152,7 @@ export default class GameScene extends Phaser.Scene {
                 ),
                 this.player?.gold ?? 500,
                 this.player?.experience ?? 0,
+                'Human',
                 playerSoldierJob,
                 aBunchOfPotions,
                 emptyEquipment
@@ -281,7 +282,7 @@ export default class GameScene extends Phaser.Scene {
                 ),
                 this.player.gold,
                 this.player.experience,
-                // 'PlayerSoldier',
+                'Human',
                 playerSoldierJob,
                 this.player.inventory,
                 this.player.equipment,
@@ -303,8 +304,11 @@ export default class GameScene extends Phaser.Scene {
                     botClone.name,
                     botSprite,
                     botClone.experience,
-                    botClone.type
+                    botClone.species,
+                    botClone.type,
+                    botClone.stats
                 );
+                console.log({newBot: bot});
                 this.bots[0] = bot;
 
                 this.setupBotGridPhysics();
@@ -635,7 +639,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     private setupPlayerGridPhysics() {
-        this.gridPhysics = new GridPhysics(this.player, this.currentTilemap);
+        this.gridPhysics = new PlayerGridPhysics(this.player, this.currentTilemap);
         this.gridControls = new GridControls(this.input, this.gridPhysics);
 
         this.createPlayerAnimation(Direction.UP, 6, 7);

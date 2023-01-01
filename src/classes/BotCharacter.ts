@@ -8,6 +8,7 @@ import PlayerCharacter from './PlayerCharacter';
 import Unit from './Unit';
 
 export default class BotCharacter extends Unit {
+
     public damageTween!: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
     public equipment: Equipment = {
         body: undefined,
@@ -36,17 +37,44 @@ export default class BotCharacter extends Unit {
         );
         const battleUIScene = <BattleUIScene>scene.scene.get('BattleUI');
 
-        // TODO: there needs to be a logical want of figuring
+        // TODO: there needs to be a logical way of figuring
         //  out which bot this list is meant to reflect.
         //  for now we can just use this this.gameScene.bots[0]
         this.stats = this.gameScene.bots[0].stats;
         this.name = this.gameScene.bots[0].name;
 
 
-        // TODO: setup pointerdown listeners for healing, items...
+        // setup pointerdown listeners for healing, items...
         this.setInteractive();
         this.on('pointerdown', () => {
-            if (scene.interactionState.startsWith('inventoryaction')) {
+            if (scene.interactionState.startsWith('abilityaction')) {
+                const abilitySlotNumber = Number(scene.interactionState.split('abilityaction')[1]);
+
+                battleUIScene.message.setVisible(false);
+                battleUIScene.confirmSelectedAbilityOrItemFrame.setVisible(false);
+                battleUIScene.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+                battleUIScene.selectedItemAndAbilityIcon.setVisible(false);
+                battleUIScene.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+                battleUIScene.selectedItemAndAbilityCommandText.setVisible(false);
+
+                for (const abilityButton of battleUIScene.abilityButtons) {
+                    abilityButton.deselect();
+                    abilityButton.setVisible(false);
+                    abilityButton.buttonText.setVisible(false);
+                }
+
+                const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
+                    return ability.levelAttained <= this.battleScene.gameScene.player.level;
+                });
+
+                eventsCenter.emit('actionSelect', {
+                    action: availableAbilities[abilitySlotNumber].name, // action name
+                    target: this,
+                    actionType: 'ability'
+                });
+
+            }
+            else if (scene.interactionState.startsWith('inventoryaction')) {
                 const inventorySlotNumber = Number(scene.interactionState.split('inventoryaction')[1]);
 
                 battleUIScene.message.setVisible(false);
@@ -64,7 +92,8 @@ export default class BotCharacter extends Unit {
 
                 eventsCenter.emit('actionSelect', {
                     action: this.gameScene.player.inventory[inventorySlotNumber].name,
-                    target: this
+                    target: this,
+                    actionType: 'item'
                 });
             }
 
