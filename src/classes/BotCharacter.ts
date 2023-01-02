@@ -141,8 +141,6 @@ export default class BotCharacter extends Unit {
     }
 
     private botButtonCallback() {
-
-
         if (this.battleScene.interactionState.startsWith('abilityaction')) {
             const abilitySlotNumber = Number(this.battleScene.interactionState.split('abilityaction')[1]);
             this.selectAbilityOrItem(abilitySlotNumber, 'ability');
