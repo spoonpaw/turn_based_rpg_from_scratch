@@ -19,8 +19,8 @@ export class Enemy extends Unit {
         weapon: undefined
     };
     public inventory: Item[] = [];
-    public stats!: Stats;
     public key!: string;
+    public stats!: Stats;
 
     constructor(
         public scene: BattleScene,
@@ -180,18 +180,26 @@ export class Enemy extends Unit {
         console.log({targetAfterCheckingForGuard: target});
         console.log({initialTargetAfterCheckingForGuard: initialTarget});
 
-        // START NEW CODE
         if (guardOnTarget) {
             if (this.evadeTest()) {
                 this.battleScene.sfxScene.playSound('dodge');
-                eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted the attack. ${target.name} dodged the attack!`);
+                eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted and dodged the attack!`);
                 runtimeInMS += 2000;
                 return runtimeInMS;
             }
             else {
                 this.battleScene.sfxScene.playSound('attack');
-                damage = this.calculateAttackDamage(target);
-                eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted the attack receiving ${damage} damage.`);
+                damage = this.calculateAttackDamage(target);        // Check if the IDs of the unit using the Guard ability and the unit being guarded match
+                if (initialTarget.id === target.id) {
+                    // If the IDs match, reduce the damage taken by 15%
+                    damage *= 0.85;
+                    damage = Math.floor(damage);
+                    eventsCenter.emit('Message', `${this.name} attacked ${target.name}, who fought defensively and took ${damage} damage.`);
+                }
+                else {
+                    eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted the attack taking ${damage} damage.`);
+
+                }
                 console.log({damage});
                 target.applyHPChange(damage);
                 runtimeInMS += 2000;
@@ -213,23 +221,6 @@ export class Enemy extends Unit {
                 runtimeInMS += 2000;
             }
         }
-
-
-        // OLD CODE
-        // if (!this.evadeTest()) {
-        //     this.battleScene.sfxScene.playSound('attack');
-        //     damage = this.calculateAttackDamage(target);
-        //     target.applyHPChange(damage);
-        //     runtimeInMS += 2000;
-        //     eventsCenter.emit('Message', `${this.name} attacked ${target.name ?? target.name} for ${damage} HP!`);
-        // }
-        //
-        // else {
-        //     this.battleScene.sfxScene.playSound('dodge');
-        //     eventsCenter.emit('Message', `${this.name} attacked ${target.name ?? target.name}. ${target.name ?? target.name} dodged the attack!`);
-        //     runtimeInMS += 2000;
-        //     return runtimeInMS;
-        // }
 
         return runtimeInMS;
     }

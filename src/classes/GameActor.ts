@@ -29,8 +29,8 @@ export default class GameActor {
                 PlayerSoldier.baseStats.luck,
                 PlayerSoldier.baseStats.vitality * 2,
                 PlayerSoldier.baseStats.vitality * 2,
-                PlayerSoldier.baseStats.intellect * 2,
-                PlayerSoldier.baseStats.intellect * 2,
+                100,
+                100,
                 PlayerSoldier.baseStats.strength,
                 PlayerSoldier.baseStats.agility / 2
             );
@@ -44,8 +44,8 @@ export default class GameActor {
                 MonsterSoldier.baseStats.luck,
                 MonsterSoldier.baseStats.vitality * 2,
                 MonsterSoldier.baseStats.vitality * 2,
-                MonsterSoldier.baseStats.intellect * 2,
-                MonsterSoldier.baseStats.intellect * 2,
+                100,
+                100,
                 MonsterSoldier.baseStats.strength,
                 MonsterSoldier.baseStats.agility / 2
             );

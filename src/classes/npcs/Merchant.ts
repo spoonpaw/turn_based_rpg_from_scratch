@@ -43,8 +43,8 @@ export default class Merchant extends NPC {
         this.uiScene.inventoryAndAbilityMenuFrame.setVisible(true);
         this.uiScene.updateGold();
         this.uiScene.goldFrame.setVisible(true);
-        this.uiScene.goldIcon.setVisible(true);
-        this.uiScene.goldText.setVisible(true);
+        this.uiScene.coinIcon.setVisible(true);
+        this.uiScene.coinText.setVisible(true);
         this.uiScene.subInventoryAndAbilityMenuFrame.setVisible(true);
 
 
@@ -75,8 +75,8 @@ export default class Merchant extends NPC {
             this.uiScene.leftSideDialogText.setVisible(false);
             this.uiScene.inventoryAndAbilityMenuFrame.setVisible(false);
             this.uiScene.goldFrame.setVisible(false);
-            this.uiScene.goldIcon.setVisible(false);
-            this.uiScene.goldText.setVisible(false);
+            this.uiScene.coinIcon.setVisible(false);
+            this.uiScene.coinText.setVisible(false);
             this.uiScene.subInventoryAndAbilityMenuFrame.setVisible(false);
             this.uiScene.buyButton.setVisible(false);
             this.uiScene.buyButton.buttonText.setVisible(false);

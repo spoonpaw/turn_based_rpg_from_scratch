@@ -147,24 +147,16 @@ export default class extends NPC {
                 'Red Bot',
                 monsterSoldierJob
             );
+            console.log({redBotStats: redBot.stats});
 
             // set all the player2 ui elements to visible with red bot's stats
 
-            this.uiScene.player2hpText.setText(`HP: ${redBot.stats.currentHP ?? '0'} / ${redBot.stats.maxHP ?? '0'}`);
+            this.uiScene.player2hpText.setText(`HP: ${redBot.stats.currentHP ?? '0'}/${redBot.stats.maxHP ?? '0'}`);
 
-            let currentMP;
-            let maxMP;
+            const currentResource = redBot.stats.currentResource;
+            const maxResource = redBot.stats.maxResource;
 
-            if (this.gameScene.bots[0]?.type.name === 'MonsterSoldier') {
-                currentMP = 0;
-                maxMP = 0;
-            }
-            else {
-                currentMP = this.gameScene.bots[0]?.stats.currentMP ?? 0;
-                maxMP = this.gameScene.bots[0]?.stats.maxMP ?? 0;
-            }
-
-            this.uiScene.player2ManaText.setText(`MP: ${currentMP} / ${maxMP}`);
+            this.uiScene.player2ManaText.setText(`VIM: ${currentResource}/${maxResource}`);
 
 
             this.uiScene.player2Button.setVisible(true);

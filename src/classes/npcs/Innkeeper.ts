@@ -32,8 +32,8 @@ export default class Innkeeper extends NPC {
 
             this.uiScene.updateGold();
             this.uiScene.goldFrame.setVisible(true);
-            this.uiScene.goldIcon.setVisible(true);
-            this.uiScene.goldText.setVisible(true);
+            this.uiScene.coinIcon.setVisible(true);
+            this.uiScene.coinText.setVisible(true);
             this.uiScene.leftSideDialogFrame.setVisible(true);
             this.uiScene.leftSideDialogText.setText('Innkeeper:\nGood day! It costs three gold to rest hither. Dost thou wish to stay?');
             this.uiScene.leftSideDialogText.setVisible(true);
@@ -56,8 +56,8 @@ export default class Innkeeper extends NPC {
                 // eventsCenter.removeListener('no');
 
                 this.uiScene.goldFrame.setVisible(false);
-                this.uiScene.goldIcon.setVisible(false);
-                this.uiScene.goldText.setVisible(false);
+                this.uiScene.coinIcon.setVisible(false);
+                this.uiScene.coinText.setVisible(false);
                 this.uiScene.leftSideDialogFrame.setVisible(false);
                 this.uiScene.leftSideDialogText.setText('');
                 this.uiScene.leftSideDialogText.setVisible(false);
@@ -106,7 +106,7 @@ export default class Innkeeper extends NPC {
                 else {
                     this.uiScene.leftSideDialogText.setText('Innkeeper:\nThank thee! Thou appeareth well rested.');
                     this.gameScene.player.gold -= 3;
-                    this.uiScene.goldText.setText(`${this.gameScene.player.gold} gp`);
+                    this.uiScene.coinText.setText(`${this.gameScene.player.gold} gp`);
                     this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
                     if (this.gameScene.bots.length > 0) {
                         this.gameScene.bots[0].stats.currentHP = this.gameScene.bots[0].stats.maxHP;
@@ -116,7 +116,7 @@ export default class Innkeeper extends NPC {
                         );
                     }
                     this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
-                    this.uiScene.updateMP(this.gameScene.player.stats.currentMP, this.gameScene.player.stats.maxMP);
+                    this.uiScene.updateResource(this.gameScene.player.stats.currentResource, this.gameScene.player.stats.maxResource);
                 }
             });
 

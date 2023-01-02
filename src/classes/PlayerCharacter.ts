@@ -139,14 +139,14 @@ export default class PlayerCharacter extends Unit {
             this.battleUIScene.generateAbilityButtons();
 
             if (data.target.living) {
-
                 // calculate the exact amount healed, announce it in a message
-                runtimeInMS += 2000;
                 // battle scene needs to store an array of passive effects. it needs to know the actor and the
                 //  target for each effect as well as the ability itself. each passive effect must have a number of
                 //  active turns before it expires at the top of each round, the passive effects are iterated over,
                 //  the remaining turn count would be decremented and if the number is zero, then that passive effect
                 // should be removed from the list of passive effects
+
+                runtimeInMS += 2000;
                 const guardAbility = abilities.find((obj) => {
                     return obj.name === data.action;
                 }) as IAbility;
@@ -158,7 +158,13 @@ export default class PlayerCharacter extends Unit {
                 };
                 this.battleScene.passiveEffects.push(passiveGuardEffect);
 
-                eventsCenter.emit('Message', `${this.name} steps forward to defend ${target.name}.`);
+
+                if (data.target.id === this.id) {
+                    eventsCenter.emit('Message', `${this.name} takes a defensive stance.`);
+                }
+                else {
+                    eventsCenter.emit('Message', `${this.name} steps forward to defend ${target.name}.`);
+                }
             }
         }
 
@@ -218,7 +224,7 @@ export default class PlayerCharacter extends Unit {
 
     private playerButtonCallback() {
         if (this.battleScene.interactionState.startsWith('abilityaction')) {
-            // const abilitySlotNumber = Number(this.battleScene.interactionState.split('abilityaction')[1]);
+            const abilitySlotNumber = Number(this.battleScene.interactionState.split('abilityaction')[1]);
 
             this.battleUIScene.message.setVisible(false);
             this.battleUIScene.confirmSelectedAbilityOrItemFrame.setVisible(false);
@@ -232,6 +238,16 @@ export default class PlayerCharacter extends Unit {
                 abilityButton.setVisible(false);
                 abilityButton.buttonText.setVisible(false);
             }
+
+            const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
+                return ability.levelAttained <= this.battleScene.gameScene.player.level;
+            });
+
+            eventsCenter.emit('actionSelect', {
+                action: availableAbilities[abilitySlotNumber].name, // action name
+                target: this,
+                actionType: 'ability'
+            });
         }
         else
         if (this.battleScene.interactionState.startsWith('inventoryaction')) {
