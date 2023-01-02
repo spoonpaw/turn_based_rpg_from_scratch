@@ -7,6 +7,8 @@
 
 // TODO: add a sign that can be read
 
+// TODO: try to remove deepclones to improve performance
+
 
 import {clone} from 'lodash';
 
@@ -57,6 +59,7 @@ export default class GameScene extends Phaser.Scene {
     botGridPhysics!: BotGridPhysics;
     private lastPlayerDirection!: Direction;
     // private botGridControls!: BotGridControls;
+    private encounter_counter = 0;
 
     public constructor() {
         super('Game');
@@ -73,6 +76,8 @@ export default class GameScene extends Phaser.Scene {
             levelData?: ILevelData
         }
     ) {
+        this.encounter_counter = 0;
+
         console.log('creating game scene!!');
         console.log({data});
         console.log(Object.keys(data));
@@ -289,14 +294,11 @@ export default class GameScene extends Phaser.Scene {
                 this.player.stats
             );
 
-
-
             // Spawn the bots if there are any
             if (this.bots.length > 0) {
-
                 // Spawn the bot!
-
                 const botClone = clone(this.bots[0]);
+                const botCloneStats = clone(this.bots[0].stats);
 
                 const botSprite = this.add.sprite(0, 0, botClone.sprite.texture);
                 botSprite.depth = 1;
@@ -306,16 +308,13 @@ export default class GameScene extends Phaser.Scene {
                     botClone.experience,
                     botClone.species,
                     botClone.type,
-                    botClone.stats
+                    botCloneStats
                 );
                 console.log({newBot: bot});
                 this.bots[0] = bot;
 
                 this.setupBotGridPhysics();
-
             }
-
-
 
             this.setupPlayerGridPhysics();
 
@@ -470,7 +469,11 @@ export default class GameScene extends Phaser.Scene {
             !this.exitingCurrentLevel &&
             !this.nonHostileSpace
         ) {
-            checkForAFight = true;
+
+            this.encounter_counter += 1; // Increment encounter counter
+            if (this.encounter_counter >= 3) {
+                checkForAFight = true;
+            }
         }
 
         // update the player's NEW X Y Coords in the tile map
@@ -592,6 +595,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public wake() {
+        this.encounter_counter = 0;
         this.uiScene.musicScene.changeSong('overworld');
         this.uiScene.scene.bringToTop();
         this.gamePadScene?.scene.restart();

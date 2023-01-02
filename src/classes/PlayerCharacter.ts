@@ -1,6 +1,5 @@
 import {abilities, IAbility} from '../abilities/abilities';
 import BattleScene from '../scenes/BattleScene';
-import BattleUIScene from '../scenes/BattleUIScene';
 import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
@@ -15,6 +14,8 @@ export default class PlayerCharacter extends Unit {
     // public inventory!: Item[];
     public stats!: Stats;
     public key!: string;
+
+    private invisiblePlayerButton!: Phaser.GameObjects.Rectangle;
 
     constructor(
         scene: BattleScene,
@@ -32,40 +33,24 @@ export default class PlayerCharacter extends Unit {
             frame,
             name
         );
-        const battleUIScene = <BattleUIScene>scene.scene.get('BattleUI');
         this.stats = this.gameScene.player.stats;
         this.equipment = this.gameScene.player.equipment;
         this.inventory = this.gameScene.player.inventory;
         this.key = 'PlayerSoldier';
 
-        this.setInteractive();
-        this.on('pointerdown', () => {
-            // if (false) {
-            //
-            // }
-            // else
-            if (scene.interactionState.startsWith('inventoryaction')) {
-                const inventorySlotNumber = Number(scene.interactionState.split('inventoryaction')[1]);
-
-                battleUIScene.message.setVisible(false);
-                battleUIScene.confirmSelectedAbilityOrItemFrame.setVisible(false);
-                battleUIScene.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-                battleUIScene.selectedItemAndAbilityIcon.setVisible(false);
-                battleUIScene.selectedItemAndAbilityIcon.buttonText.setVisible(false);
-                battleUIScene.selectedItemAndAbilityCommandText.setVisible(false);
-
-                for (const item of battleUIScene.inventoryButtons) {
-                    item.deselect();
-                    item.setVisible(false);
-                    item.buttonText.setVisible(false);
-                }
-
-                eventsCenter.emit('actionSelect', {
-                    action: this.inventory[inventorySlotNumber].name,
-                    target: this
-                });
-            }
-        });
+        this.invisiblePlayerButton = this.scene.add.rectangle(
+            x - 34,
+            y - 14,
+            229,
+            113,
+            0xFF0000,
+            0
+        )
+            .setOrigin(0, 0.5)
+            .setInteractive()
+            .on('pointerdown', () => {
+                this.playerButtonCallback();
+            });
     }
 
     public applyHPChange(hpChangeAmount: number): number {
@@ -157,7 +142,7 @@ export default class PlayerCharacter extends Unit {
 
                 // calculate the exact amount healed, announce it in a message
                 runtimeInMS += 2000;
-                // TODO: battle scene needs to store an array of passive effects. it needs to know the actor and the
+                // battle scene needs to store an array of passive effects. it needs to know the actor and the
                 //  target for each effect as well as the ability itself. each passive effect must have a number of
                 //  active turns before it expires at the top of each round, the passive effects are iterated over,
                 //  the remaining turn count would be decremented and if the number is zero, then that passive effect
@@ -227,6 +212,35 @@ export default class PlayerCharacter extends Unit {
                 repeat: 3,
                 alpha: 0,
                 yoyo: true
+            });
+        }
+    }
+
+    private playerButtonCallback() {
+        // if (false) {
+        //
+        // }
+        // else
+        if (this.battleScene.interactionState.startsWith('inventoryaction')) {
+            const inventorySlotNumber = Number(this.battleScene.interactionState.split('inventoryaction')[1]);
+
+            this.battleUIScene.message.setVisible(false);
+            this.battleUIScene.confirmSelectedAbilityOrItemFrame.setVisible(false);
+            this.battleUIScene.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+            this.battleUIScene.selectedItemAndAbilityIcon.setVisible(false);
+            this.battleUIScene.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+            this.battleUIScene.selectedItemAndAbilityCommandText.setVisible(false);
+
+            for (const item of this.battleUIScene.inventoryButtons) {
+                item.deselect();
+                item.setVisible(false);
+                item.buttonText.setVisible(false);
+            }
+
+            eventsCenter.emit('actionSelect', {
+                action: this.inventory[inventorySlotNumber].name,
+                target: this,
+                actionType: 'item'
             });
         }
     }

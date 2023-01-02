@@ -1,5 +1,4 @@
 import BattleScene from '../scenes/BattleScene';
-import BattleUIScene from '../scenes/BattleUIScene';
 import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
@@ -18,6 +17,7 @@ export default class BotCharacter extends Unit {
     };
     public stats!: Stats;
     public key!: string;
+    private invisibleBotButton!: Phaser.GameObjects.Rectangle;
 
     constructor(
         scene: BattleScene,
@@ -35,7 +35,6 @@ export default class BotCharacter extends Unit {
             frame,
             name
         );
-        const battleUIScene = <BattleUIScene>scene.scene.get('BattleUI');
 
         // TODO: there needs to be a logical way of figuring
         //  out which bot this list is meant to reflect.
@@ -43,61 +42,19 @@ export default class BotCharacter extends Unit {
         this.stats = this.gameScene.bots[0].stats;
         this.name = this.gameScene.bots[0].name;
 
-
-        // setup pointerdown listeners for healing, items...
-        this.setInteractive();
-        this.on('pointerdown', () => {
-            if (scene.interactionState.startsWith('abilityaction')) {
-                const abilitySlotNumber = Number(scene.interactionState.split('abilityaction')[1]);
-
-                battleUIScene.message.setVisible(false);
-                battleUIScene.confirmSelectedAbilityOrItemFrame.setVisible(false);
-                battleUIScene.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-                battleUIScene.selectedItemAndAbilityIcon.setVisible(false);
-                battleUIScene.selectedItemAndAbilityIcon.buttonText.setVisible(false);
-                battleUIScene.selectedItemAndAbilityCommandText.setVisible(false);
-
-                for (const abilityButton of battleUIScene.abilityButtons) {
-                    abilityButton.deselect();
-                    abilityButton.setVisible(false);
-                    abilityButton.buttonText.setVisible(false);
-                }
-
-                const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
-                    return ability.levelAttained <= this.battleScene.gameScene.player.level;
-                });
-
-                eventsCenter.emit('actionSelect', {
-                    action: availableAbilities[abilitySlotNumber].name, // action name
-                    target: this,
-                    actionType: 'ability'
-                });
-
-            }
-            else if (scene.interactionState.startsWith('inventoryaction')) {
-                const inventorySlotNumber = Number(scene.interactionState.split('inventoryaction')[1]);
-
-                battleUIScene.message.setVisible(false);
-                battleUIScene.confirmSelectedAbilityOrItemFrame.setVisible(false);
-                battleUIScene.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-                battleUIScene.selectedItemAndAbilityIcon.setVisible(false);
-                battleUIScene.selectedItemAndAbilityIcon.buttonText.setVisible(false);
-                battleUIScene.selectedItemAndAbilityCommandText.setVisible(false);
-
-                for (const item of battleUIScene.inventoryButtons) {
-                    item.deselect();
-                    item.setVisible(false);
-                    item.buttonText.setVisible(false);
-                }
-
-                eventsCenter.emit('actionSelect', {
-                    action: this.gameScene.player.inventory[inventorySlotNumber].name,
-                    target: this,
-                    actionType: 'item'
-                });
-            }
-
-        });
+        this.invisibleBotButton = this.scene.add.rectangle(
+            x - 34,
+            y - 14,
+            229,
+            113,
+            0xFF0000,
+            0
+        )
+            .setOrigin(0, 0.5)
+            .setInteractive()
+            .on('pointerdown', () => {
+                this.botButtonCallback();
+            });
     }
 
     public applyHPChange(hpChangeAmount: number): number {
@@ -183,4 +140,57 @@ export default class BotCharacter extends Unit {
         );
     }
 
+    private botButtonCallback() {
+
+        if (this.battleScene.interactionState.startsWith('abilityaction')) {
+            const abilitySlotNumber = Number(this.battleScene.interactionState.split('abilityaction')[1]);
+
+            this.battleUIScene.message.setVisible(false);
+            this.battleUIScene.confirmSelectedAbilityOrItemFrame.setVisible(false);
+            this.battleUIScene.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+            this.battleUIScene.selectedItemAndAbilityIcon.setVisible(false);
+            this.battleUIScene.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+            this.battleUIScene.selectedItemAndAbilityCommandText.setVisible(false);
+
+            for (const abilityButton of this.battleUIScene.abilityButtons) {
+                abilityButton.deselect();
+                abilityButton.setVisible(false);
+                abilityButton.buttonText.setVisible(false);
+            }
+
+            const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
+                return ability.levelAttained <= this.battleScene.gameScene.player.level;
+            });
+
+            eventsCenter.emit('actionSelect', {
+                action: availableAbilities[abilitySlotNumber].name, // action name
+                target: this,
+                actionType: 'ability'
+            });
+
+        }
+        else if (this.battleScene.interactionState.startsWith('inventoryaction')) {
+            const inventorySlotNumber = Number(this.battleScene.interactionState.split('inventoryaction')[1]);
+
+            this.battleUIScene.message.setVisible(false);
+            this.battleUIScene.confirmSelectedAbilityOrItemFrame.setVisible(false);
+            this.battleUIScene.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+            this.battleUIScene.selectedItemAndAbilityIcon.setVisible(false);
+            this.battleUIScene.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+            this.battleUIScene.selectedItemAndAbilityCommandText.setVisible(false);
+
+            for (const item of this.battleUIScene.inventoryButtons) {
+                item.deselect();
+                item.setVisible(false);
+                item.buttonText.setVisible(false);
+            }
+
+            eventsCenter.emit('actionSelect', {
+                action: this.gameScene.player.inventory[inventorySlotNumber].name,
+                target: this,
+                actionType: 'item'
+            });
+        }
+
+    }
 }

@@ -285,7 +285,7 @@ export default class extends NPC {
         if (string === undefined || string === '') {
             string = 'Red Bot';
         }
-        // TODO: rename the robot if needed
+        // rename the robot if needed
         this.gameScene.bots[0].name = string;
     }
 }

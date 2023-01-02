@@ -1,4 +1,3 @@
-// TODO: Add Ability button functionality
 
 import {abilities, IAbility} from '../abilities/abilities';
 import BotCharacter from '../classes/BotCharacter';
@@ -25,7 +24,7 @@ export default class BattleScene extends Phaser.Scene {
     }[] = [];
     public enemies!: Enemy[];
     gameScene!: GameScene;
-    public heroes!: (PlayerCharacter | BotCharacter)[];
+    public heroes!: (PlayerCharacter | BotCharacter | Enemy)[];
     public interactionState!: string;
     public player1HPText!: Phaser.GameObjects.Text;
     public player2HPText!: Phaser.GameObjects.Text;
@@ -66,7 +65,6 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     create(): void {
-
         this.gameScene = <GameScene>this.scene.get('Game');
         this.uiScene = <UIScene>this.scene.get('UI');
         this.musicScene = <MusicScene>this.scene.get('Music');
@@ -75,7 +73,6 @@ export default class BattleScene extends Phaser.Scene {
         this.startBattle();
 
         this.sys.events.on('wake', this.startBattle, this);
-
     }
 
     private checkForPlayer1LevelUp(): { levelUp: boolean, newLevel: number } {
