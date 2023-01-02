@@ -5,6 +5,7 @@ import BattleUIScene from '../scenes/BattleUIScene';
 import GameScene from '../scenes/GameScene';
 import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
+import eventsCenter from '../utils/EventsCenter';
 import Item from './Item';
 
 
@@ -50,6 +51,26 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
     abstract getInitiative(): number;
 
     abstract updateSceneOnReceivingDamage(): void;
+
+    protected selectAbilityOrItem(actionIndex: number, actionType: 'ability' | 'item'): void {
+        this.battleUIScene.hideAbilitySelectionUI();
+
+        let availableActions: string[];
+        if (actionType === 'ability') {
+            availableActions = this.battleScene.gameScene.player.type.skills
+                .filter(ability => ability.levelAttained <= this.battleScene.gameScene.player.level)
+                .map(ability => ability.name);
+        }
+        else {
+            availableActions = this.gameScene.player.inventory.map(item => item.name);
+        }
+
+        eventsCenter.emit('actionSelect', {
+            action: availableActions[actionIndex],
+            target: this,
+            actionType
+        });
+    }
 
 
     public getCombinedStat(stat: keyof typeof this.stats): number {

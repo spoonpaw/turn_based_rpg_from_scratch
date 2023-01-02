@@ -893,4 +893,19 @@ export default class BattleUIScene extends Phaser.Scene {
         this.inventoryAndAbilityDetailText.setVisible(false);
         this.inventoryAndAbilityDetailText.setResolution(3);
     }
+
+    public hideAbilitySelectionUI() {
+        this.message.setVisible(false);
+        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+        this.selectedItemAndAbilityIcon.setVisible(false);
+        this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+        this.selectedItemAndAbilityCommandText.setVisible(false);
+
+        for (const abilityButton of this.abilityButtons) {
+            abilityButton.deselect();
+            abilityButton.setVisible(false);
+            abilityButton.buttonText.setVisible(false);
+        }
+    }
 }
