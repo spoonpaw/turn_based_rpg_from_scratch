@@ -154,7 +154,7 @@ export default class BattleUIScene extends Phaser.Scene {
 
 
 
-        // TODO: SPAWN THE ABILITY BUTTONS
+        // SPAWN THE ABILITY BUTTONS
         for (const [index, ability] of availableAbilities.entries()) {
             const abilityButton = new UIActionButton(
                 this,

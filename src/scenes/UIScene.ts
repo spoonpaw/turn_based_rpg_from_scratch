@@ -1,4 +1,4 @@
-import {cloneDeep} from 'lodash';
+import {clone} from 'lodash';
 
 import Bot from '../classes/Bot';
 import GameMessage from '../classes/GameMessage';
@@ -1051,7 +1051,10 @@ export default class UIScene extends Phaser.Scene {
                     //  refresh the equipment view!
 
                     const slotToUnequip = this.interactionState.split('equipment')[1];
-                    const itemToUnequip = cloneDeep(this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment]) as Item;
+                    // const itemToUnequip = cloneDeep(this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment]) as Item;
+                    const itemToUnequip = clone(this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment]) as Item;
+                    const itemToUnequipStats = clone(this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment]!.stats);
+                    itemToUnequip.stats = itemToUnequipStats;
 
                     this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment] = undefined;
                     this.gameScene.player.inventory.push(itemToUnequip);

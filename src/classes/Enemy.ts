@@ -41,13 +41,28 @@ export class Enemy extends Unit {
 
         this.battleScene = <BattleScene>this.scene.scene.get('Battle');
 
-        const enemy = _.cloneDeep(
+        const enemy = _.clone(
             enemies.find(obj => {
                 return obj.key === this.texture.key;
             })
         );
+        const stats = _.clone(
+            enemies.find(obj => {
+                return obj.key === this.texture.key;
+            })!.stats
+        );
 
-        this.stats = enemy?.stats ?? new Stats(
+        // const enemy = _.cloneDeep(
+        //     enemies.find(obj => {
+        //         return obj.key === this.texture.key;
+        //     })
+        // );
+
+        console.log('enemy was just cloned!');
+        console.log({clonedEnemy: enemy});
+        console.log({clonedStats: stats});
+
+        this.stats = stats ?? new Stats(
             0,
             0,
             0,
