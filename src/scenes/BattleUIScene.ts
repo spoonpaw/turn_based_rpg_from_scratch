@@ -161,8 +161,8 @@ export default class BattleUIScene extends Phaser.Scene {
 
                 564,
                 216 + (index * 50),
-                'bagbutton',
-                'bagbuttonactive',
+                ability.key,
+                ability.activeKey,
                 ability.name,
                 () => {
                     // display text here describing the selected ability
@@ -737,8 +737,8 @@ export default class BattleUIScene extends Phaser.Scene {
                     this,
                     265,
                     465,
-                    'bagbutton',
-                    'bagbutton',
+                    selectedAbility.key,
+                    selectedAbility.activeKey,
                     selectedAbility.name,
                     () => {
                         return;

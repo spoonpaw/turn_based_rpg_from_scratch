@@ -4,7 +4,9 @@ export const abilities: IAbility[] = [
         description: 'Protects ally or self from single target attacks. Reduces damage from all single target attacks when used on self.',
         type: 'passive',
         targets: ['self', 'ally'],
-        turnDuration: 1
+        turnDuration: 1,
+        key: 'shieldbutton',
+        activeKey: 'shieldbuttonactive'
     },
 
     // more abilities go here
@@ -16,4 +18,6 @@ export interface IAbility {
     type: string;
     targets: string|string[];
     turnDuration?: number;
+    key: string;
+    activeKey: string;
 }

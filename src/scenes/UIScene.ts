@@ -27,8 +27,8 @@ export default class UIScene extends Phaser.Scene {
     public defenseString!: Phaser.GameObjects.Text;
     public gameScene!: GameScene;
     public goldFrame!: Phaser.GameObjects.Image;
-    public goldIcon!: Phaser.GameObjects.Image;
-    public goldText!: Phaser.GameObjects.Text;
+    public coinIcon!: Phaser.GameObjects.Image;
+    public coinText!: Phaser.GameObjects.Text;
     public heartIcon!: Phaser.GameObjects.Image;
     public hpText!: Phaser.GameObjects.Text;
     public interactButton!: UIActionButton;
@@ -395,8 +395,8 @@ export default class UIScene extends Phaser.Scene {
         this.subInventoryAndAbilityMenuFrame.setVisible(false);
         this.inventoryAndAbilityMenuFrame.setVisible(false);
         this.goldFrame.setVisible(false);
-        this.goldIcon.setVisible(false);
-        this.goldText.setVisible(false);
+        this.coinIcon.setVisible(false);
+        this.coinText.setVisible(false);
         this.inventoryAndAbilityDetailFrame.setVisible(false);
         this.useItemButton.setVisible(false);
         this.useItemButton.buttonText.setVisible(false);
@@ -493,8 +493,8 @@ export default class UIScene extends Phaser.Scene {
 
     public setupEvents() {
 
-        eventsCenter.removeListener('updateMP');
-        eventsCenter.on('updateMP', this.updateMP, this);
+        eventsCenter.removeListener('updateResource');
+        eventsCenter.on('updateResource', this.updateResource, this);
 
     }
 
@@ -557,25 +557,19 @@ export default class UIScene extends Phaser.Scene {
     }
 
     public updateGold() {
-        this.goldText.setText(`${this.gameScene.player.gold} gp`);
+        this.coinText.setText(`${this.gameScene.player.gold} gp`);
     }
 
     public updateHP(hp: number, maxHp: number) {
-        this.hpText.setText(`HP: ${hp} / ${maxHp}`);
+        this.hpText.setText(`HP: ${hp}/${maxHp}`);
     }
 
-    public updateMP(currentMP: number, maxMP: number) {
-        // this.goldText.text = `Gold: ${gold}`;
-        if (this.gameScene.player.type.name.endsWith('Soldier')) {
-            currentMP = 0;
-            maxMP = 0;
-        }
-
-        this.manaText.text = `MP: ${currentMP} / ${maxMP}`;
+    public updateResource(currentResource: number, maxResource: number) {
+        this.manaText.text = `VIM: ${currentResource}/${maxResource}`;
     }
 
     public updatePlayer2HP(hp: number, maxHP: number) {
-        this.player2hpText.setText(`HP: ${hp} / ${maxHP}`);
+        this.player2hpText.setText(`HP: ${hp}/${maxHP}`);
     }
 
     private calculateTilNextLevel(playerOrBot: Player|Bot): number {
@@ -834,8 +828,8 @@ export default class UIScene extends Phaser.Scene {
                 eventsCenter.emit('no');
 
                 this.goldFrame.setVisible(false);
-                this.goldIcon.setVisible(false);
-                this.goldText.setVisible(false);
+                this.coinIcon.setVisible(false);
+                this.coinText.setVisible(false);
                 this.leftSideDialogFrame.setVisible(false);
                 this.leftSideDialogText.setText('');
                 this.leftSideDialogText.setVisible(false);
@@ -987,8 +981,8 @@ export default class UIScene extends Phaser.Scene {
                 this.interactionState = this.interactionState.split('selecting')[1];
 
                 this.goldFrame.setVisible(false);
-                this.goldIcon.setVisible(false);
-                this.goldText.setVisible(false);
+                this.coinIcon.setVisible(false);
+                this.coinText.setVisible(false);
                 this.inventoryAndAbilityMenuFrame.setVisible(false);
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
                 this.subInventoryAndAbilityMenuFrame.setVisible(false);
@@ -1463,41 +1457,28 @@ export default class UIScene extends Phaser.Scene {
         this.player2ManaIcon = this.add.image(330, 663, 'mana');
         this.player2ManaIcon.setVisible(false);
 
-        let currentMP;
-        let maxMP;
+        let currentResource;
+        let maxResource;
 
-        if (this.gameScene.player.type.name === 'PlayerSoldier') {
-            currentMP = 0;
-            maxMP = 0;
-        }
-        else {
-            currentMP = this.gameScene.player.stats.currentMP;
-            maxMP = this.gameScene.player.stats.maxMP;
-        }
+        currentResource = this.gameScene.player.stats.currentResource;
+        maxResource = this.gameScene.player.stats.maxResource;
 
         // player 1 mana text
         this.manaText = this.add.text(
             115,
             647,
-            `MP: ${currentMP} / ${maxMP}`,
+            `VIM: ${currentResource}/${maxResource}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(3);
 
-
-        if (this.gameScene.bots[0]?.type.name === 'MonsterSoldier') {
-            currentMP = 0;
-            maxMP = 0;
-        }
-        else {
-            currentMP = this.gameScene.bots[0]?.stats.currentMP ?? 0;
-            maxMP = this.gameScene.bots[0]?.stats.maxMP ?? 0;
-        }
+        currentResource = this.gameScene.bots[0]?.stats.currentResource;
+        maxResource = this.gameScene.bots[0]?.stats.maxResource;
 
         this.player2ManaText = this.add.text(
             345,
             647,
-            `MP: ${currentMP} / ${maxMP}`,
+            `VIM: ${currentResource}/${maxResource}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(3);
@@ -1508,7 +1489,7 @@ export default class UIScene extends Phaser.Scene {
         this.hpText = this.add.text(
             115,
             620,
-            `HP: ${this.gameScene.player.stats.currentHP} / ${this.gameScene.player.stats.maxHP}`,
+            `HP: ${this.gameScene.player.stats.currentHP}/${this.gameScene.player.stats.maxHP}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(3);
@@ -1516,7 +1497,7 @@ export default class UIScene extends Phaser.Scene {
         this.player2hpText = this.add.text(
             345,
             620,
-            `HP: ${this.gameScene.bots[0]?.stats.currentHP ?? '0'} / ${this.gameScene.bots[0]?.stats.maxHP ?? '0'}`,
+            `HP: ${this.gameScene.bots[0]?.stats.currentHP ?? '0'}/${this.gameScene.bots[0]?.stats.maxHP ?? '0'}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'}
         )
             .setStroke('#000000', 2)
@@ -1531,9 +1512,9 @@ export default class UIScene extends Phaser.Scene {
             .setScale(1.25);
         this.player2HeartIcon.setVisible(false);
 
-        this.goldIcon = this.add.image(563, 142, 'coin')
-            .setScale(1.25);
-        this.goldIcon.setVisible(false);
+        this.coinIcon = this.add.image(563, 142, 'coinbutton')
+            .setScale(2);
+        this.coinIcon.setVisible(false);
 
         this.inventoryButton = new UIActionButton(
             this,
@@ -1579,8 +1560,8 @@ export default class UIScene extends Phaser.Scene {
 
                 this.updateGold();
                 this.goldFrame.setVisible(true);
-                this.goldIcon.setVisible(true);
-                this.goldText.setVisible(true);
+                this.coinIcon.setVisible(true);
+                this.coinText.setVisible(true);
 
                 this.inventoryAndAbilityMenuFrame.setVisible(true);
                 for (const inventoryButton of this.inventoryButtons) {
@@ -1865,7 +1846,7 @@ export default class UIScene extends Phaser.Scene {
         this.shrinkTextByPixel(this.nameText, 375);
         this.nameText.setVisible(false);
 
-        this.goldText = this.add.text(584, 112, '0 gp', {
+        this.coinText = this.add.text(584, 117, '0 gp', {
             color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {
                 width: 610,
                 useAdvancedWrap: true
@@ -1873,7 +1854,7 @@ export default class UIScene extends Phaser.Scene {
         })
             .setResolution(3)
             .setFontSize(50);
-        this.goldText.setVisible(false);
+        this.coinText.setVisible(false);
 
         this.rightSideDialogText = this.add.text(225, 380, '', {
             color: '#ffffff', align: 'left', fontFamily: 'CustomFont', wordWrap: {

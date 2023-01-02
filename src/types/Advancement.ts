@@ -18,9 +18,11 @@ export interface IBaseStatBlock {
 }
 
 export interface IAbilityAttainment {
-    name: string,
-    description: string,
-    type: string,
-    targets: string|string[],
-    levelAttained: number
+    name: string;
+    description: string;
+    type: string;
+    targets: string|string[];
+    levelAttained: number;
+    key: string;
+    activeKey: string;
 }

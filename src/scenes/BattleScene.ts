@@ -15,20 +15,20 @@ import SFXScene from './SFXScene';
 import UIScene from './UIScene';
 
 export default class BattleScene extends Phaser.Scene {
-    private _idCounter = 0;
+    public enemies!: Enemy[];
+    gameScene!: GameScene;
+    public heroes!: (PlayerCharacter | BotCharacter | Enemy)[];
+    public interactionState!: string;
     public passiveEffects: {
         actor: PlayerCharacter|BotCharacter|Enemy,
         target: PlayerCharacter|BotCharacter|Enemy,
         ability: IAbility,
         turnDurationRemaining: number
     }[] = [];
-    public enemies!: Enemy[];
-    gameScene!: GameScene;
-    public heroes!: (PlayerCharacter | BotCharacter | Enemy)[];
-    public interactionState!: string;
     public player1HPText!: Phaser.GameObjects.Text;
     public player2HPText!: Phaser.GameObjects.Text;
     public sfxScene!: SFXScene;
+    private _idCounter = 0;
     private background!: Phaser.GameObjects.Image;
     private battleUIScene!: BattleUIScene;
     private index!: number;
@@ -73,6 +73,11 @@ export default class BattleScene extends Phaser.Scene {
         this.startBattle();
 
         this.sys.events.on('wake', this.startBattle, this);
+    }
+
+    public generateID(): number {
+        return this._idCounter++;
+
     }
 
     private checkForPlayer1LevelUp(): { levelUp: boolean, newLevel: number } {
@@ -121,11 +126,6 @@ export default class BattleScene extends Phaser.Scene {
         return victory;
     }
 
-    public generateID(): number {
-        return this._idCounter++;
-
-    }
-
     private endBattle(): void {
 
         this.battleUIScene.disableAllActionButtons();
@@ -164,7 +164,7 @@ export default class BattleScene extends Phaser.Scene {
         // cut gold in half, set hit points to full, cut to game over screen, respawn
         eventsCenter.emit('Message', 'Thou art vanquished!');
         this.gameScene.player.gold = Math.floor(this.gameScene.player.gold / 2);
-        eventsCenter.emit('updateMP', this.gameScene.player.stats.currentMP, this.gameScene.player.stats.maxMP);
+        eventsCenter.emit('updateResource', this.gameScene.player.stats.currentResource, this.gameScene.player.stats.maxResource);
         this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
         this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
 
@@ -357,7 +357,7 @@ export default class BattleScene extends Phaser.Scene {
 
                 player.gold += goldAmount;
 
-                eventsCenter.emit('updateMP', player.stats.currentMP, player.stats.maxMP);
+                eventsCenter.emit('updateResource', player.stats.currentResource, player.stats.maxResource);
 
                 const currentLevel = player.level;
 
@@ -375,8 +375,8 @@ export default class BattleScene extends Phaser.Scene {
                         luck: player.stats.luck + this.getStatIncrease('luck', newLevel),
                         currentHP: unit.stats.currentHP, // getting the stat from the battle
                         maxHP: player.stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
-                        currentMP: unit.stats.currentMP, // getting the stat from the battle
-                        maxMP: player.stats.maxMP + this.getStatIncrease('intellect', newLevel) * 2,
+                        currentResource: unit.stats.currentResource, // getting the stat from the battle
+                        maxResource: player.stats.maxResource + this.getStatIncrease('intellect', newLevel) * 2,
                         attack: player.stats.attack + this.getStatIncrease('strength', newLevel),
                         defense: player.stats.defense + this.getStatIncrease('agility', newLevel) / 2
                     };
@@ -425,8 +425,8 @@ export default class BattleScene extends Phaser.Scene {
                         luck: bot.stats.luck + this.getStatIncrease('luck', newLevel),
                         currentHP: unit.stats.currentHP,
                         maxHP: bot.stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
-                        currentMP: unit.stats.currentMP,
-                        maxMP: bot.stats.maxMP + this.getStatIncrease('intellect', newLevel) * 2,
+                        currentResource: unit.stats.currentResource,
+                        maxResource: bot.stats.maxResource + this.getStatIncrease('intellect', newLevel) * 2,
                         attack: bot.stats.attack + this.getStatIncrease('strength', newLevel),
                         defense: bot.stats.defense + this.getStatIncrease('agility', newLevel) / 2
                     };
@@ -440,15 +440,6 @@ export default class BattleScene extends Phaser.Scene {
     private shortenTextByPixel(phasertext: Phaser.GameObjects.Text, maxpixel: number): Phaser.GameObjects.Text {
         while (phasertext.width > maxpixel) {
             phasertext.text = phasertext.text.substring(0, phasertext.text.length - 1);
-        }
-        return phasertext;
-    }
-
-    private shrinkTextByPixel(phasertext: Phaser.GameObjects.Text, maxpixel: number): Phaser.GameObjects.Text {
-        let fontSize = phasertext.height;
-        while (phasertext.width > maxpixel) {
-            fontSize--;
-            phasertext.setStyle({ fontSize: fontSize + 'px' });
         }
         return phasertext;
     }
@@ -467,6 +458,15 @@ export default class BattleScene extends Phaser.Scene {
         }
 
         eventsCenter.emit('Message', `You receive ${goldAmount} gold pieces.\nYou receive ${experienceAmount} experience points.`);
+    }
+
+    private shrinkTextByPixel(phasertext: Phaser.GameObjects.Text, maxpixel: number): Phaser.GameObjects.Text {
+        let fontSize = phasertext.height;
+        while (phasertext.width > maxpixel) {
+            fontSize--;
+            phasertext.setStyle({ fontSize: fontSize + 'px' });
+        }
+        return phasertext;
     }
 
     private startBattle(): void {
@@ -549,24 +549,14 @@ export default class BattleScene extends Phaser.Scene {
                 })
                 .setResolution(3);
 
-            let currentMP;
-            let maxMP;
-
-            if (this.gameScene.player.type.name === 'PlayerSoldier') {
-                currentMP = 0;
-                maxMP = 0;
-            }
-            else {
-                currentMP = this.gameScene.player.stats.currentMP;
-                maxMP = this.gameScene.player.stats.maxMP;
-            }
-            this.player1MPText = this.add.text(534, 670, `MP: ${currentMP}/${maxMP}`, {
+            const currentResource = this.gameScene.player.stats.currentResource;
+            const maxResource = this.gameScene.player.stats.maxResource;
+            this.player1MPText = this.add.text(534, 670, `VIM: ${currentResource}/${maxResource}`, {
                 fontSize: '35px',
                 color: '#fff',
                 fontFamily: 'CustomFont'
             })
                 .setResolution(3);
-
         }
 
         // instantiate the warrior player (player 1)
@@ -605,18 +595,10 @@ export default class BattleScene extends Phaser.Scene {
             })
             .setResolution(3);
 
-        let currentMP;
-        let maxMP;
 
-        if (this.gameScene.player.type.name === 'PlayerSoldier') {
-            currentMP = 0;
-            maxMP = 0;
-        }
-        else {
-            currentMP = this.gameScene.player.stats.currentMP;
-            maxMP = this.gameScene.player.stats.maxMP;
-        }
-        this.player1MPText = this.add.text(300, 670, `MP: ${currentMP}/${maxMP}`, {
+        const currentResource = this.gameScene.player.stats.currentResource;
+        const maxResource = this.gameScene.player.stats.maxResource;
+        this.player1MPText = this.add.text(300, 670, `VIM: ${currentResource}/${maxResource}`, {
             fontSize: '35px',
             color: '#fff',
             fontFamily: 'CustomFont'

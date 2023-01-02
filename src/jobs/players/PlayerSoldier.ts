@@ -59,7 +59,9 @@ const skills: IAbilityAttainment[] = [
         description: guardSkill!.description,
         levelAttained: 1,
         type: guardSkill!.type,
-        targets: guardSkill!.targets
+        targets: guardSkill!.targets,
+        key: guardSkill!.key,
+        activeKey: guardSkill!.activeKey
     }
 ];
 

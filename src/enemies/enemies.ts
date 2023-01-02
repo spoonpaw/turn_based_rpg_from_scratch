@@ -15,8 +15,8 @@ export const enemies: enemyArray = [
             luck: 0,
             currentHP: 8,
             maxHP: 8,
-            currentMP: 0,
-            maxMP: 0,
+            currentResource: 0,
+            maxResource: 0,
             attack: 7,
             defense: 3
         }
@@ -35,8 +35,8 @@ export const enemies: enemyArray = [
             luck: 0,
             currentHP: 10,
             maxHP: 10,
-            currentMP: 0,
-            maxMP: 0,
+            currentResource: 0,
+            maxResource: 0,
             attack: 10,
             defense: 6
         }
@@ -55,8 +55,8 @@ export const enemies: enemyArray = [
             luck: 0,
             currentHP: 10,
             maxHP: 10,
-            currentMP: 0,
-            maxMP: 0,
+            currentResource: 0,
+            maxResource: 0,
             attack: 12,
             defense: 8
         }

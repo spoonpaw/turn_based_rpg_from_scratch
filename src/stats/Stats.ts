@@ -7,8 +7,8 @@ export default class Stats {
         public luck: number,
         public currentHP: number,
         public maxHP: number,
-        public currentMP: number,
-        public maxMP: number,
+        public currentResource: number,
+        public maxResource: number,
         public attack: number,
         public defense: number
     ) {

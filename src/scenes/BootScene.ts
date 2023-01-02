@@ -98,16 +98,16 @@ export default class BootScene extends Phaser.Scene {
 
         this.load.image('armorbutton', 'assets/images/ui/armorButton.png');
         this.load.image('armorbuttonactive', 'assets/images/ui/armorButtonActive.png');
-        this.load.image('attackbutton', 'assets/images/ui/attackButton2.png');
-        this.load.image('attackbuttonactive', 'assets/images/ui/attackButtonActive2.png');
+        this.load.image('attackbutton', 'assets/images/ui/attackButton3.png');
+        this.load.image('attackbuttonactive', 'assets/images/ui/attackButtonActive3.png');
         this.load.image('bagbutton', 'assets/images/ui/bagButton.png');
         this.load.image('bagbuttonactive', 'assets/images/ui/bagButtonActive.png');
         this.load.image('bookbutton', 'assets/images/ui/bookButton.png');
         this.load.image('bookbuttonactive', 'assets/images/ui/bookButtonActive.png');
         this.load.image('cancelbutton', 'assets/images/ui/cancelButton.png');
         this.load.image('checkbutton', 'assets/images/ui/checkButton.png');
-        this.load.image('coinbutton', 'assets/images/ui/coinButton.png');
-        this.load.image('coinbuttonactive', 'assets/images/ui/coinButtonActive.png');
+        this.load.image('coinbutton', 'assets/images/ui/coinButton2.png');
+        this.load.image('coinbuttonactive', 'assets/images/ui/coinButtonActive2.png');
         this.load.image('crossbutton', 'assets/images/ui/crossButton.png');
         this.load.image('facebutton', 'assets/images/ui/faceButton.png');
         this.load.image('facebuttonactive', 'assets/images/ui/faceButtonActive.png');
@@ -121,6 +121,8 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('sfxinactivebutton', 'assets/images/ui/sfxInactiveButton.png');
         this.load.image('staffbutton', 'assets/images/ui/staffButton.png');
         this.load.image('staffbuttonactive', 'assets/images/ui/staffButtonActive.png');
+        this.load.image('shieldbutton', 'assets/images/ui/shieldButton.png');
+        this.load.image('shieldbuttonactive', 'assets/images/ui/shieldButtonActive.png');
 
         this.load.image('chromaticsword', 'assets/images/ui/chromaticSword.png');
         this.load.image('chromaticswordactive', 'assets/images/ui/chromaticSwordActive.png');
@@ -182,7 +184,7 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('title', 'assets/images/afterlife-title-screen4.png');
 
         this.load.image('tiles', 'assets/images/basictiles4.png');
-        this.load.image('heart', 'assets/images/heart.png');
+        this.load.image('heart', 'assets/images/heart2.png');
 
         this.load.image('dragonblue', 'assets/images/dragonblue.png');
         this.load.image('dragonorange', 'assets/images/dragonorange.png');
@@ -193,7 +195,7 @@ export default class BootScene extends Phaser.Scene {
 
         this.load.image('sword', 'assets/images/icons/sword.png');
         this.load.image('coin', 'assets/images/icons/coin.png');
-        this.load.image('mana', 'assets/images/icons/mana.png');
+        this.load.image('mana', 'assets/images/icons/mana2.png');
 
         this.load.image('overworldbackground', 'assets/images/overworldCombatBackground2.png');
     }
