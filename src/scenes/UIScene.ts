@@ -2083,7 +2083,7 @@ export default class UIScene extends Phaser.Scene {
     private player1ButtonCallback() {
         console.log({
             playerExperience: this.gameScene.player.experience,
-            botExperience: this.gameScene.bots[0].experience
+            botExperience: this.gameScene.bots[0]?.experience
         });
         // uncomment to log interaction state by clicking player portrait
         if (this.interactionState.startsWith('inventoryaction')) {
