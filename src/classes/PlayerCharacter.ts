@@ -217,10 +217,23 @@ export default class PlayerCharacter extends Unit {
     }
 
     private playerButtonCallback() {
-        // if (false) {
-        //
-        // }
-        // else
+        if (this.battleScene.interactionState.startsWith('abilityaction')) {
+            // const abilitySlotNumber = Number(this.battleScene.interactionState.split('abilityaction')[1]);
+
+            this.battleUIScene.message.setVisible(false);
+            this.battleUIScene.confirmSelectedAbilityOrItemFrame.setVisible(false);
+            this.battleUIScene.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+            this.battleUIScene.selectedItemAndAbilityIcon.setVisible(false);
+            this.battleUIScene.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+            this.battleUIScene.selectedItemAndAbilityCommandText.setVisible(false);
+
+            for (const abilityButton of this.battleUIScene.abilityButtons) {
+                abilityButton.deselect();
+                abilityButton.setVisible(false);
+                abilityButton.buttonText.setVisible(false);
+            }
+        }
+        else
         if (this.battleScene.interactionState.startsWith('inventoryaction')) {
             const inventorySlotNumber = Number(this.battleScene.interactionState.split('inventoryaction')[1]);
 

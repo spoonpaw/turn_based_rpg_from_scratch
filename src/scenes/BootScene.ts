@@ -98,8 +98,8 @@ export default class BootScene extends Phaser.Scene {
 
         this.load.image('armorbutton', 'assets/images/ui/armorButton.png');
         this.load.image('armorbuttonactive', 'assets/images/ui/armorButtonActive.png');
-        this.load.image('attackbutton', 'assets/images/ui/attackButton.png');
-        this.load.image('attackbuttonactive', 'assets/images/ui/attackButtonActive.png');
+        this.load.image('attackbutton', 'assets/images/ui/attackButton2.png');
+        this.load.image('attackbuttonactive', 'assets/images/ui/attackButtonActive2.png');
         this.load.image('bagbutton', 'assets/images/ui/bagButton.png');
         this.load.image('bagbuttonactive', 'assets/images/ui/bagButtonActive.png');
         this.load.image('bookbutton', 'assets/images/ui/bookButton.png');
