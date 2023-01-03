@@ -49,7 +49,7 @@ export default class PlayerCharacter extends Unit {
             .setOrigin(0, 0.5)
             .setInteractive()
             .on('pointerdown', () => {
-                this.playerButtonCallback();
+                this.unitButtonCallback();
             });
     }
 
@@ -206,31 +206,4 @@ export default class PlayerCharacter extends Unit {
         return runtimeInMS;
     }
 
-    public updateSceneOnReceivingDamage(): void {
-        // take care of flashing the enemy sprite if it gets damaged or hiding it if it dies.
-        if (this.stats.currentHP <= 0) {
-            this.setVisible(false);
-        }
-        else {
-            this.damageTween = this.scene.tweens.add({
-                targets: this,
-                duration: 100,
-                repeat: 3,
-                alpha: 0,
-                yoyo: true
-            });
-        }
-    }
-
-    private playerButtonCallback() {
-
-        if (this.battleScene.interactionState.startsWith('abilityaction')) {
-            const abilitySlotNumber = Number(this.battleScene.interactionState.split('abilityaction')[1]);
-            this.selectAbilityOrItem(abilitySlotNumber, 'ability');
-        }
-        else if (this.battleScene.interactionState.startsWith('inventoryaction')) {
-            const inventorySlotNumber = Number(this.battleScene.interactionState.split('inventoryaction')[1]);
-            this.selectAbilityOrItem(inventorySlotNumber, 'item');
-        }
-    }
 }

@@ -221,24 +221,6 @@ export class Enemy extends Unit {
                 runtimeInMS += 2000;
             }
         }
-
         return runtimeInMS;
     }
-
-    updateSceneOnReceivingDamage(): void {
-        // take care of flashing the enemy sprite if it gets damaged or hiding it if it dies.
-        if (this.stats.currentHP <= 0) {
-            this.setVisible(false);
-        }
-        else {
-            this.damageTween = this.scene.tweens.add({
-                targets: this,
-                duration: 100,
-                repeat: 3,
-                alpha: 0,
-                yoyo: true
-            });
-        }
-    }
-
 }

@@ -14,6 +14,11 @@ export default class Message extends Phaser.GameObjects.Container {
             this.scene, 475, 465, '', {
                 color: '#ffffff',
                 fontFamily: 'CustomFont',
+                metrics: {
+                    ascent: 41,
+                    descent: 10,
+                    fontSize: 51
+                },
                 wordWrap: {
                     width: 665,
                     useAdvancedWrap: true

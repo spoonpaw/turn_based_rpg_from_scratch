@@ -53,7 +53,7 @@ export default class BotCharacter extends Unit {
             .setOrigin(0, 0.5)
             .setInteractive()
             .on('pointerdown', () => {
-                this.botButtonCallback();
+                this.unitButtonCallback();
             });
     }
 
@@ -90,24 +90,8 @@ export default class BotCharacter extends Unit {
         return runtimeInMS;
     }
 
-    getInitiative(): number {
+    public getInitiative(): number {
         return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
-    }
-
-    updateSceneOnReceivingDamage(): void {
-        // take care of flashing the enemy sprite if it gets damaged or hiding it if it dies.
-        if (this.stats.currentHP <= 0) {
-            this.setVisible(false);
-        }
-        else {
-            this.damageTween = this.scene.tweens.add({
-                targets: this,
-                duration: 100,
-                repeat: 3,
-                alpha: 0,
-                yoyo: true
-            });
-        }
     }
 
     public calculateAttackDamage(target: (PlayerCharacter | Enemy | BotCharacter)): number {
@@ -138,16 +122,5 @@ export default class BotCharacter extends Unit {
                 this.stats.strength * (Phaser.Math.Between(54, 64) / 64)
             )
         );
-    }
-
-    private botButtonCallback() {
-        if (this.battleScene.interactionState.startsWith('abilityaction')) {
-            const abilitySlotNumber = Number(this.battleScene.interactionState.split('abilityaction')[1]);
-            this.selectAbilityOrItem(abilitySlotNumber, 'ability');
-        }
-        else if (this.battleScene.interactionState.startsWith('inventoryaction')) {
-            const inventorySlotNumber = Number(this.battleScene.interactionState.split('inventoryaction')[1]);
-            this.selectAbilityOrItem(inventorySlotNumber, 'item');
-        }
     }
 }
