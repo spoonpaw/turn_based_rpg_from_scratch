@@ -39,6 +39,9 @@ export default class BattleScene extends Phaser.Scene {
     private turnUnits!: (PlayerCharacter | BotCharacter | Enemy)[];
     private uiScene!: UIScene;
     private units!: (PlayerCharacter | BotCharacter | Enemy)[];
+    private actionMenuFrame!: Phaser.GameObjects.Image;
+    private player1MenuFrame!: Phaser.GameObjects.Image;
+    private player2MenuFrame!: Phaser.GameObjects.Image;
 
     public constructor() {
         super('Battle');
@@ -133,6 +136,18 @@ export default class BattleScene extends Phaser.Scene {
 
         this.sendPlayerInfoToGameScene();
 
+        this.clearStateAndRemoveSprites();
+
+        // sleep the ui
+        this.scene.sleep('BattleUI');
+
+        this.gameScene.input.keyboard!.enabled = true;
+
+        // return to game scene and sleep current battle scene
+        this.scene.switch('Game');
+    }
+
+    private clearStateAndRemoveSprites() {
         // clear state, remove sprites
         this.heroes.length = 0;
         this.enemies.length = 0;
@@ -147,14 +162,6 @@ export default class BattleScene extends Phaser.Scene {
         }
 
         this.interactionState = 'init';
-
-        // sleep the ui
-        this.scene.sleep('BattleUI');
-
-        this.gameScene.input.keyboard!.enabled = true;
-
-        // return to game scene and sleep current battle scene
-        this.scene.switch('Game');
     }
 
     private endBattleGameOver(): void {
@@ -180,22 +187,15 @@ export default class BattleScene extends Phaser.Scene {
         });
 
         this.cameras.main.once('camerafadeoutcomplete', () => {
-            // clear state, remove sprites
-            this.heroes.length = 0;
-            this.enemies.length = 0;
-            for (let i = 0; i < this.units.length; i++) {
-                // link item
-                this.units[i].destroy();
-            }
-            this.units.length = 0;
 
-            // sleep the ui
+            this.clearStateAndRemoveSprites();
+
+            // // sleep the ui
             this.scene.sleep('BattleUI');
-
+            //
             this.battleUIScene.disableAllActionButtons();
             this.battleUIScene.cameras.main.fadeIn(0);
-
-            this.interactionState = 'init';
+            //
             this.cameras.main.fadeIn(0);
 
             // return to game scene and sleep current battle scene
@@ -470,6 +470,18 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private startBattle(): void {
+        console.log('starting the battle');
+        console.log(`Total number of game objects created: ${this.children.length}`);
+        let count = 0;
+        this.children.each(gameObject => {
+            if (gameObject.active) {
+                console.log('active game object found in start of the battle! it didn\'t get destroyed or what?');
+                console.log({gameObject});
+                count++;
+            }
+        });
+        console.log(`Number of active game objects: ${count}`);
+
         this._idCounter = 0;
         this.passiveEffects = [];
         this.musicScene.scene.bringToTop();
@@ -497,16 +509,16 @@ export default class BattleScene extends Phaser.Scene {
 
         this.interactionState = 'init';
 
-        this.add.image(2, 430, 'actionMenuFrame')
+        this.actionMenuFrame = this.add.image(2, 430, 'actionMenuFrame')
             .setOrigin(0, 0);
 
-        this.add.image(236, 606, 'heroMenuFrame')
+        this.player1MenuFrame = this.add.image(236, 606, 'heroMenuFrame')
             .setOrigin(0, 0);
 
         // if there is a player 2 (i.e. bots) generate everything for them
         if (this.gameScene.bots.length > 0) {
             if (this.gameScene.bots[0]) {
-                this.add.image(470, 606, 'heroMenuFrame')
+                this.player2MenuFrame = this.add.image(470, 606, 'heroMenuFrame')
                     .setOrigin(0, 0);
             }
             this.player2 = new BotCharacter(

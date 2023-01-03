@@ -50,7 +50,7 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
     abstract getInitiative(): number;
 
-    abstract updateSceneOnReceivingDamage(): void;
+    // abstract updateSceneOnReceivingDamage(): void;
 
     protected selectAbilityOrItem(actionIndex: number, actionType: 'ability' | 'item'): void {
         this.battleUIScene.hideAbilitySelectionUI();
@@ -72,6 +72,22 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         });
     }
 
+
+    public updateSceneOnReceivingDamage(): void {
+        // take care of flashing the enemy sprite if it gets damaged or hiding it if it dies.
+        if (this.stats.currentHP <= 0) {
+            this.setVisible(false);
+        }
+        else {
+            this.damageTween = this.scene.tweens.add({
+                targets: this,
+                duration: 100,
+                repeat: 3,
+                alpha: 0,
+                yoyo: true
+            });
+        }
+    }
 
     public getCombinedStat(stat: keyof typeof this.stats): number {
         const baseStat = this.stats[stat];
@@ -130,5 +146,16 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
         // return actual hp change
         return this.stats.currentHP - initialCharacterHP;
+    }
+
+    protected unitButtonCallback() {
+        if (this.battleScene.interactionState.startsWith('abilityaction')) {
+            const abilitySlotNumber = Number(this.battleScene.interactionState.split('abilityaction')[1]);
+            this.selectAbilityOrItem(abilitySlotNumber, 'ability');
+        }
+        else if (this.battleScene.interactionState.startsWith('inventoryaction')) {
+            const inventorySlotNumber = Number(this.battleScene.interactionState.split('inventoryaction')[1]);
+            this.selectAbilityOrItem(inventorySlotNumber, 'item');
+        }
     }
 }
