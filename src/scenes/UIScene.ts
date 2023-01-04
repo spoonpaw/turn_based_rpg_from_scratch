@@ -405,10 +405,8 @@ export default class UIScene extends Phaser.Scene {
         this.equipButton.setVisible(false);
         this.equipButton.buttonText.setVisible(false);
         this.inventoryAndAbilityDetailText.setVisible(false);
-        // this.message.setVisible(false);
         this.confirmSelectedAbilityOrItemFrame.setVisible(false);
         this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-        // this.message.text.setVisible(false);
         this.selectedItemAndAbilityIcon.setVisible(false);
         this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
         this.leftSideDialogFrame.setVisible(false);
@@ -511,7 +509,6 @@ export default class UIScene extends Phaser.Scene {
     public update() {
         if (Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
             eventsCenter.emit('space');
-            // this.gameScene.spaceDown = true;
             if (
                 this.interactionState === 'cancelmouse' ||
                 this.interactionState === 'mainselectnodialog'
@@ -535,7 +532,6 @@ export default class UIScene extends Phaser.Scene {
                 }
             }
             else if (
-                // this.interactionState === 'inventory' ||
                 this.interactionState === 'ability' ||
                 this.interactionState.startsWith('charactersheet') ||
                 this.interactionState.startsWith('selectinginventoryaction') ||
@@ -821,7 +817,6 @@ export default class UIScene extends Phaser.Scene {
                 this.interactionState = 'cancelmouse';
 
                 if (this.gameScene.operatingSystem !== 'desktop') {
-                    // this.scene.launch('GamePad');
                     this.gameScene.gamePadScene?.scene.restart();
                 }
                 eventsCenter.removeListener('space');
@@ -1045,7 +1040,6 @@ export default class UIScene extends Phaser.Scene {
                     //  refresh the equipment view!
 
                     const slotToUnequip = this.interactionState.split('equipment')[1];
-                    // const itemToUnequip = cloneDeep(this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment]) as Item;
                     const itemToUnequip = clone(this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment]) as Item;
                     const itemToUnequipStats = clone(this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment]!.stats);
                     itemToUnequip.stats = itemToUnequipStats;

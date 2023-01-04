@@ -5,6 +5,7 @@ import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import BotCharacter from './BotCharacter';
 import {Enemy} from './Enemy';
+import {PlayerJob} from './Jobs/PlayerJob';
 // import Item from './Item';
 import Unit from './Unit';
 
@@ -14,7 +15,6 @@ export default class PlayerCharacter extends Unit {
     // public inventory!: Item[];
     public stats!: Stats;
     public key!: string;
-
     private invisiblePlayerButton!: Phaser.GameObjects.Rectangle;
 
     constructor(
@@ -23,7 +23,8 @@ export default class PlayerCharacter extends Unit {
         y: number,
         texture: string | Phaser.Textures.Texture,
         frame: string | number | undefined,
-        name: string
+        name: string,
+        job: PlayerJob
     ) {
         super(
             scene,
@@ -31,9 +32,12 @@ export default class PlayerCharacter extends Unit {
             y,
             texture,
             frame,
-            name
+            name,
+            job
         );
+        console.log('making a new player character');
         this.stats = this.gameScene.player.stats;
+        console.log(({playerCharacterConstrucorStats: this.stats}));
         this.equipment = this.gameScene.player.equipment;
         this.inventory = this.gameScene.player.inventory;
         this.key = 'PlayerSoldier';

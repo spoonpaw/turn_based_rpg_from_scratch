@@ -7,6 +7,8 @@ import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import Item from './Item';
+import {MonsterJob} from './Jobs/MonsterJob';
+import {PlayerJob} from './Jobs/PlayerJob';
 
 
 export default abstract class Unit extends Phaser.GameObjects.Sprite {
@@ -32,7 +34,8 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         y: number,
         texture: string | Phaser.Textures.Texture,
         frame: string | number | undefined,
-        public name: string
+        public name: string,
+        public job: PlayerJob | MonsterJob
     ) {
         super(scene, x, y, texture, frame);
 

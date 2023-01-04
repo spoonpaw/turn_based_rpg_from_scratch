@@ -3,14 +3,12 @@ import UIScene from '../scenes/UIScene';
 import Stats from '../stats/Stats';
 import {Direction} from '../types/Direction';
 import {Equipment} from '../types/Equipment';
-// import { getCombinedStat } from '../utils/getCombinedStat';
 import GameActor from './GameActor';
 import Item from './Item';
 import {PlayerJob} from './Jobs/PlayerJob';
 
 export default class Player extends GameActor{
     public LEVELING_RATE = 0.3;
-    // public stats: Stats;
     private uiScene!: UIScene;
     constructor(
         name: string,
@@ -19,7 +17,6 @@ export default class Player extends GameActor{
         public gold: number,
         experience: number,
         species: string,
-        // public type: string,
         public type: PlayerJob,
         public inventory: Item[],
         public equipment: Equipment,

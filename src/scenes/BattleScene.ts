@@ -4,6 +4,7 @@ import BotCharacter from '../classes/BotCharacter';
 import {Enemy} from '../classes/Enemy';
 import PlayerCharacter from '../classes/PlayerCharacter';
 import {enemies} from '../enemies/enemies';
+import MonsterSoldier from '../jobs/monsters/MonsterSoldier';
 import soldier from '../jobs/players/PlayerSoldier';
 import {levels} from '../levels/Levels';
 import { IStatIncreases } from '../types/Advancement';
@@ -99,22 +100,53 @@ export default class BattleScene extends Phaser.Scene {
         return {levelUp: newLevel > currentLevel, newLevel};
     }
 
-    private checkForPlayer2LevelUp(): { levelUp: boolean, newLevel: number } {
+    private checkForPlayer2LevelUp(player1LevelData: {
+        levelUp: boolean,
+        newLevel: number
+    }): {
+        levelUp: boolean,
+        newLevel: number
+    } {
+        // Initialize the `experienceAmount` variable to 0
         let experienceAmount = 0;
 
+        // Loop through the `enemies` array
         for (const enemy of this.enemies) {
+            // Find the enemy data for the current enemy
             const enemyData = enemies.find(obj => {
+                // Return the enemy data if the `key` property matches the enemy's texture key
                 return obj.key === enemy.texture.key;
             });
+
+            // Add the enemy's experience to the `experienceAmount` variable
             experienceAmount += enemyData?.experience ?? 0;
         }
 
+        // Get the bot player from the game scene
         const bot = this.gameScene.bots[0];
+
+        // Get the bot's current level
         const currentLevel = bot.level;
 
-        const newLevel = Math.max(1, Math.ceil(bot.LEVELING_RATE * Math.sqrt(this.gameScene.bots[0].experience + experienceAmount)));
+        // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
+        let newLevel = Math.max(
+            1,
+            Math.ceil(
+                bot.LEVELING_RATE * Math.sqrt(
+                    this.gameScene.bots[0].experience + experienceAmount
+                )
+            )
+        );
 
-        return {levelUp: newLevel > currentLevel, newLevel};
+        // Check if the new level exceeds the player's current level
+        if (newLevel > player1LevelData.newLevel) {
+            // If the new level exceeds the player's current level, set the new level to the player's current level
+            newLevel = player1LevelData.newLevel;
+        }
+
+        // Return an object containing a boolean `levelUp` that indicates whether
+        // the player leveled up, and a number `newLevel` representing the new level of the player.
+        return { levelUp: newLevel > currentLevel, newLevel };
     }
 
     private checkForVictory(): boolean {
@@ -190,12 +222,12 @@ export default class BattleScene extends Phaser.Scene {
 
             this.clearStateAndRemoveSprites();
 
-            // // sleep the ui
+            // sleep the ui
             this.scene.sleep('BattleUI');
-            //
+
             this.battleUIScene.disableAllActionButtons();
             this.battleUIScene.cameras.main.fadeIn(0);
-            //
+
             this.cameras.main.fadeIn(0);
 
             // return to game scene and sleep current battle scene
@@ -367,6 +399,15 @@ export default class BattleScene extends Phaser.Scene {
 
                 if (currentLevel < newLevel) {
 
+                    // soldiers have a flat vim amount
+                    let maxResourceIncrease;
+                    if (unit.job.properName === 'Soldier') {
+                        maxResourceIncrease = 0;
+                    }
+                    else {
+                        maxResourceIncrease = this.getStatIncrease('intellect', newLevel) * 2;
+                    }
+
                     player.stats = {
                         strength: player.stats.strength + this.getStatIncrease('strength', newLevel),
                         agility: player.stats.agility + this.getStatIncrease('agility', newLevel),
@@ -376,7 +417,7 @@ export default class BattleScene extends Phaser.Scene {
                         currentHP: unit.stats.currentHP, // getting the stat from the battle
                         maxHP: player.stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
                         currentResource: unit.stats.currentResource, // getting the stat from the battle
-                        maxResource: player.stats.maxResource + this.getStatIncrease('intellect', newLevel) * 2,
+                        maxResource: player.stats.maxResource + maxResourceIncrease,
                         attack: player.stats.attack + this.getStatIncrease('strength', newLevel),
                         defense: player.stats.defense + this.getStatIncrease('agility', newLevel) / 2
                     };
@@ -407,15 +448,57 @@ export default class BattleScene extends Phaser.Scene {
                     experienceAmount += enemyData?.experience ?? 0;
                 }
 
+                // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
+                let newLevel = Math.max(
+                    1,
+                    Math.ceil(
+                        bot.LEVELING_RATE * Math.sqrt(
+                            bot.experience + experienceAmount
+                        )
+                    )
+                );
+
+                while (newLevel > this.gameScene.player.level) {
+                    // find the maximum whole number amount of gold that can be
+                    //  received by the bot without exceeding amount required to get to
+                    //  a level exceeding that of the player
+                    experienceAmount -= 1;
+                    newLevel = Math.max(
+                        1,
+                        Math.ceil(
+                            bot.LEVELING_RATE * Math.sqrt(
+                                bot.experience + experienceAmount
+                            )
+                        )
+                    );
+                    if (experienceAmount === 0) break;
+                }
+
                 if (this.interactionState === 'handlingrunselect') {
                     experienceAmount = 0;
                 }
 
                 bot.experience += experienceAmount;
 
-                const newLevel = Math.max(1, Math.ceil(bot.LEVELING_RATE * Math.sqrt(bot.experience)));
+                newLevel = Math.max(
+                    1,
+                    Math.ceil(
+                        bot.LEVELING_RATE * Math.sqrt(
+                            bot.experience
+                        )
+                    )
+                );
 
                 if (currentLevel < newLevel) {
+
+                    // soldiers have a flat vim amount
+                    let maxResourceIncrease;
+                    if (unit.job.properName === 'Soldier') {
+                        maxResourceIncrease = 0;
+                    }
+                    else {
+                        maxResourceIncrease = this.getStatIncrease('intellect', newLevel) * 2;
+                    }
 
                     bot.stats = {
                         strength: bot.stats.strength + this.getStatIncrease('strength', newLevel),
@@ -426,7 +509,7 @@ export default class BattleScene extends Phaser.Scene {
                         currentHP: unit.stats.currentHP,
                         maxHP: bot.stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
                         currentResource: unit.stats.currentResource,
-                        maxResource: bot.stats.maxResource + this.getStatIncrease('intellect', newLevel) * 2,
+                        maxResource: bot.stats.maxResource + maxResourceIncrease,
                         attack: bot.stats.attack + this.getStatIncrease('strength', newLevel),
                         defense: bot.stats.defense + this.getStatIncrease('agility', newLevel) / 2
                     };
@@ -527,7 +610,8 @@ export default class BattleScene extends Phaser.Scene {
                 675,
                 this.gameScene.bots[0].sprite.texture,
                 0,
-                this.gameScene.bots[0].name
+                this.gameScene.bots[0].name,
+                this.gameScene.bots[0].type
             );
             this.add.existing(this.player2);
 
@@ -578,7 +662,8 @@ export default class BattleScene extends Phaser.Scene {
             675,
             'hero',
             0,
-            this.gameScene.player.name
+            this.gameScene.player.name,
+            this.gameScene.player.type
         );
 
         this.add.existing(soldier);
@@ -629,7 +714,8 @@ export default class BattleScene extends Phaser.Scene {
             undefined,
             enemies.find((obj) => {
                 return obj.key === selectedEnemyKey;
-            })!.name
+            })!.name,
+            MonsterSoldier
         );
 
         this.add.existing(enemy);
@@ -684,7 +770,7 @@ export default class BattleScene extends Phaser.Scene {
 
             let player2LevelUpData = {levelUp: false, newLevel: 0};
             if (this.gameScene.bots.length > 0) {
-                player2LevelUpData = this.checkForPlayer2LevelUp();
+                player2LevelUpData = this.checkForPlayer2LevelUp(levelUpData);
                 if (player2LevelUpData.levelUp) {
                     levelUpDelay += 2000;
                 }
@@ -722,7 +808,6 @@ export default class BattleScene extends Phaser.Scene {
                     }
                 });
             }
-
 
             console.log({player2LevelUpData});
             if (this.gameScene.bots.length > 0 && player2LevelUpData?.levelUp) {

@@ -114,7 +114,11 @@ export default class BattleUIScene extends Phaser.Scene {
             }
             if (event.code === 'Space') {
                 console.log('space pressed on the battle ui scene!');
-                console.log({battleSceneInteractionState: this.battleScene.interactionState});
+                console.log({
+                    battleSceneInteractionState: this.battleScene.interactionState,
+                    playerVim: this.battleScene.gameScene.player.stats.maxResource,
+                    botVim: this.battleScene.gameScene.bots[0]?.stats.maxResource
+                });
             }
         });
 
