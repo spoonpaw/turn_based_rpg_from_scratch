@@ -1,4 +1,3 @@
-import MonsterSoldier from '../jobs/monsters/MonsterSoldier';
 import PlayerSoldier from '../jobs/players/PlayerSoldier';
 import Stats from '../stats/Stats';
 import {Direction} from '../types/Direction';
@@ -20,7 +19,7 @@ export default class GameActor {
 
     }
     protected createStats(job: Job) {
-        if (job.name === 'PlayerSoldier') {
+        if (job.properName === 'Soldier') {
             return new Stats(
                 PlayerSoldier.baseStats.strength,
                 PlayerSoldier.baseStats.agility,
@@ -33,21 +32,6 @@ export default class GameActor {
                 100,
                 PlayerSoldier.baseStats.strength,
                 PlayerSoldier.baseStats.agility / 2
-            );
-        }
-        else if (job.name === 'MonsterSoldier') {
-            return new Stats(
-                MonsterSoldier.baseStats.strength,
-                MonsterSoldier.baseStats.agility,
-                MonsterSoldier.baseStats.vitality,
-                MonsterSoldier.baseStats.intellect,
-                MonsterSoldier.baseStats.luck,
-                MonsterSoldier.baseStats.vitality * 2,
-                MonsterSoldier.baseStats.vitality * 2,
-                100,
-                100,
-                MonsterSoldier.baseStats.strength,
-                MonsterSoldier.baseStats.agility / 2
             );
         }
         else {

@@ -7,6 +7,7 @@ import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import BotCharacter from './BotCharacter';
 import Item from './Item';
+import {MonsterJob} from './Jobs/MonsterJob';
 import PlayerCharacter from './PlayerCharacter';
 import Unit from './Unit';
 
@@ -28,7 +29,8 @@ export class Enemy extends Unit {
         y: number,
         texture: string | Phaser.Textures.Texture,
         frame: string | number | undefined,
-        name: string
+        name: string,
+        job: MonsterJob
     ) {
         super(
             scene,
@@ -36,7 +38,8 @@ export class Enemy extends Unit {
             y,
             texture,
             frame,
-            name
+            name,
+            job
         );
 
         this.battleScene = <BattleScene>this.scene.scene.get('Battle');
@@ -51,12 +54,6 @@ export class Enemy extends Unit {
                 return obj.key === this.texture.key;
             })!.stats
         );
-
-        // const enemy = _.cloneDeep(
-        //     enemies.find(obj => {
-        //         return obj.key === this.texture.key;
-        //     })
-        // );
 
         console.log('enemy was just cloned!');
         console.log({clonedEnemy: enemy});

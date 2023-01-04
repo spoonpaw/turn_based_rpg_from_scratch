@@ -3,6 +3,7 @@ import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import {Enemy} from './Enemy';
+import {PlayerJob} from './Jobs/PlayerJob';
 import PlayerCharacter from './PlayerCharacter';
 import Unit from './Unit';
 
@@ -25,7 +26,8 @@ export default class BotCharacter extends Unit {
         y: number,
         texture: string | Phaser.Textures.Texture,
         frame: string | number | undefined,
-        name: string
+        name: string,
+        job: PlayerJob
     ) {
         super(
             scene,
@@ -33,7 +35,8 @@ export default class BotCharacter extends Unit {
             y,
             texture,
             frame,
-            name
+            name,
+            job
         );
 
         // TODO: there needs to be a logical way of figuring
