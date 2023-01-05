@@ -2,7 +2,6 @@ import {IAbilityAttainment, IBaseStatBlock, IStatIncreases} from '../../types/Ad
 import { Job } from './Job';
 
 export class MonsterJob extends Job {
-
     constructor(
         name: string,
         properName: string,

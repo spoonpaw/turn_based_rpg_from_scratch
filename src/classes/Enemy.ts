@@ -1,5 +1,6 @@
 import _, {clone} from 'lodash';
 
+import {IAbility} from '../abilities/abilities';
 import {enemies} from '../enemies/enemies';
 import BattleScene from '../scenes/BattleScene';
 import Stats from '../stats/Stats';
@@ -30,7 +31,8 @@ export class Enemy extends Unit {
         texture: string | Phaser.Textures.Texture,
         frame: string | number | undefined,
         name: string,
-        job: MonsterJob
+        job: MonsterJob,
+        private skills: IAbility[] = []
     ) {
         super(
             scene,
@@ -136,88 +138,187 @@ export class Enemy extends Unit {
 
     public runTurn(): number {
         console.log('beginning to run the enemy\'s turn');
-
-        // just attack player 1
-        let target = this.battleScene.heroes.filter(
-            (obj) => {
-                return obj.living;
-            }
-        )[
-            Phaser.Math.RND.between(
-                0,
-                Math.max(0, this.battleScene.heroes.length - 1)
-            )
-        ];
-
-        console.log({initialTarget: target});
-        if (!target) return 0;
         let runtimeInMS = 0;
 
-        let damage = 0;
+        // if there are enough targets to justify it and enough resources to spend, execute the
+        //  a powerful aoe attack
 
-        // check to see if a guard is active on the player. if so, change the target to the
-        //  unit that used Guard
-        let guardOnTarget = false;
-        const initialTarget = clone(target);
-        for (const passiveEffect of this.battleScene.passiveEffects) {
-            if (passiveEffect.ability.name === 'Guard' &&
-                passiveEffect.target.id === target.id &&
-                passiveEffect.actor.living
-            ) {
 
-                target = this.battleScene.heroes.find((obj) => {
-                    return obj.id === passiveEffect.actor.id;
-                }) as PlayerCharacter | BotCharacter | Enemy;
-                guardOnTarget = true;
+        const livingHeroes = this.battleScene.heroes.filter(unit => unit.living);
+        const moreThanOneLivingHero = livingHeroes.length > 1;
 
-            }
-        }
+        if (this.hasAoEAbility() && moreThanOneLivingHero) {
+            // do aoe damage to the player's party!
+            const aoeAbility = this.getAOEAbility();
+            eventsCenter.emit('Message', aoeAbility.useTemplate.replace('${abilityUser}', this.name));
+            runtimeInMS += 2000 + (2000 * this.battleScene.heroes.length);
 
-        console.log({guardOnTarget});
-        console.log({targetAfterCheckingForGuard: target});
-        console.log({initialTargetAfterCheckingForGuard: initialTarget});
 
-        if (guardOnTarget) {
-            if (this.evadeTest()) {
-                this.battleScene.sfxScene.playSound('dodge');
-                eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted and dodged the attack!`);
-                runtimeInMS += 2000;
-                return runtimeInMS;
-            }
-            else {
-                this.battleScene.sfxScene.playSound('attack');
-                damage = this.calculateAttackDamage(target);        // Check if the IDs of the unit using the Guard ability and the unit being guarded match
-                if (initialTarget.id === target.id) {
-                    // If the IDs match, reduce the damage taken by 15%
-                    damage *= 0.85;
-                    damage = Math.floor(damage);
-                    eventsCenter.emit('Message', `${this.name} attacked ${target.name}, who fought defensively and took ${damage} damage.`);
-                }
-                else {
-                    eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted the attack taking ${damage} damage.`);
+            this.scene.time.addEvent({
+                delay: 2000,
+                callback: () => {
+                    // Iterate through the targets and apply damage
+                    for (const [index, target] of this.battleScene.heroes.entries()) {
+                        if (this.evadeTest()) {
+                            this.scene.time.addEvent(
+                                {
+                                    delay: 2000 * (index),
+                                    callback: () => {
+                                        this.battleScene.sfxScene.playSound('dodge');
+                                        eventsCenter.emit('Message', aoeAbility.dodgeTemplate.replace('${abilityTarget}', target.name));
+                                    }
+                                }
+                            );
+                        }
+                        else {
+                            this.scene.time.addEvent(
+                                {
+                                    delay: 2000 * (index),
+                                    callback: () => {
+                                        this.battleScene.sfxScene.playSound('attack');
+                                        const damage = this.calculateAttackDamage(target);
+                                        eventsCenter.emit('Message', aoeAbility.targetTemplate.replace('${abilityTarget}', target.name).replace('${damage}', String(damage)));
+                                        console.log({ damage });
+                                        target.applyHPChange(damage);
+                                    }
+                                }
+                            );
+                        }
+                    }
+                },
+                callbackScope: this
+            });
 
-                }
-                console.log({damage});
-                target.applyHPChange(damage);
-                runtimeInMS += 2000;
-            }
+            // for (const target of this.battleScene.heroes) {
+            //     if (this.evadeTest()) {
+            //         this.battleScene.sfxScene.playSound('dodge');
+            //         eventsCenter.emit('Message', aoeAbility.dodgeTemplate.replace('${abilityTarget}', target.name));
+            //         runtimeInMS += 2000;
+            //         return runtimeInMS;
+            //     }
+            //     else {
+            //         this.battleScene.sfxScene.playSound('attack');
+            //         const damage = this.calculateAttackDamage(target);
+            //         eventsCenter.emit('Message', aoeAbility.targetTemplate.replace('${abilityTarget}', target.name).replace('${damage}', String(damage)));
+            //         console.log({damage});
+            //         target.applyHPChange(damage);
+            //         runtimeInMS += 2000;
+            //     }
+            // }
+            return runtimeInMS;
         }
         else {
-            if (this.evadeTest()) {
-                this.battleScene.sfxScene.playSound('dodge');
-                eventsCenter.emit('Message', `${this.name} attacked ${target.name}. ${target.name} dodged the attack!`);
-                runtimeInMS += 2000;
-                return runtimeInMS;
+            // attain random target!
+            let target = this.battleScene.heroes.filter(
+                (obj) => {
+                    return obj.living;
+                }
+            )[
+                Phaser.Math.RND.between(
+                    0,
+                    Math.max(0, this.battleScene.heroes.length - 1)
+                )
+            ];
+
+            console.log({initialTarget: target});
+            if (!target) return 0;
+
+            let damage = 0;
+
+            // check to see if a guard is active on the player. if so, change the target to the
+            //  unit that used Guard
+            let guardOnTarget = false;
+            const initialTarget = clone(target);
+            for (const passiveEffect of this.battleScene.passiveEffects) {
+                if (passiveEffect.ability.name === 'Guard' &&
+                    passiveEffect.target.id === target.id &&
+                    passiveEffect.actor.living
+                ) {
+                    target = this.battleScene.heroes.find((obj) => {
+                        return obj.id === passiveEffect.actor.id;
+                    }) as PlayerCharacter | BotCharacter | Enemy;
+                    guardOnTarget = true;
+
+                }
+            }
+
+            console.log({guardOnTarget});
+            console.log({targetAfterCheckingForGuard: target});
+            console.log({initialTargetAfterCheckingForGuard: initialTarget});
+
+            if (guardOnTarget) {
+                if (this.evadeTest()) {
+                    this.battleScene.sfxScene.playSound('dodge');
+                    eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted and dodged the attack!`);
+                    runtimeInMS += 2000;
+                    return runtimeInMS;
+                }
+                else {
+                    this.battleScene.sfxScene.playSound('attack');
+                    damage = this.calculateAttackDamage(target);        // Check if the IDs of the unit using the Guard ability and the unit being guarded match
+                    if (initialTarget.id === target.id) {
+                        // If the IDs match, reduce the damage taken by 15%
+                        damage *= 0.85;
+                        damage = Math.floor(damage);
+                        eventsCenter.emit('Message', `${this.name} attacked ${target.name}, who fought defensively and took ${damage} damage.`);
+                    }
+                    else {
+                        eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted the attack taking ${damage} damage.`);
+
+                    }
+                    console.log({damage});
+                    target.applyHPChange(damage);
+                    runtimeInMS += 2000;
+                }
             }
             else {
-                this.battleScene.sfxScene.playSound('attack');
-                damage = this.calculateAttackDamage(target);
-                eventsCenter.emit('Message', `${this.name} attacked ${target.name} for ${damage} HP!`);
-                console.log({damage});
-                target.applyHPChange(damage);
-                runtimeInMS += 2000;
+                if (this.evadeTest()) {
+                    this.battleScene.sfxScene.playSound('dodge');
+                    eventsCenter.emit('Message', `${this.name} attacked ${target.name}. ${target.name} dodged the attack!`);
+                    runtimeInMS += 2000;
+                    return runtimeInMS;
+                }
+                else {
+                    this.battleScene.sfxScene.playSound('attack');
+                    damage = this.calculateAttackDamage(target);
+                    eventsCenter.emit('Message', `${this.name} attacked ${target.name} for ${damage} HP!`);
+                    console.log({damage});
+                    target.applyHPChange(damage);
+                    runtimeInMS += 2000;
+                }
             }
+            return runtimeInMS;
         }
-        return runtimeInMS;
     }
+
+    private getAOEAbility(): IAbility {
+        return this.skills.find((ability: IAbility) => {
+            return (
+                ability.targets === 'enemies' ||
+                (
+                    Array.isArray(
+                        ability.targets
+                    ) &&
+                    ability.targets.includes('enemies')
+                ) &&
+                ability.resourceCost < this.stats.currentResource
+            );
+        }) as IAbility;
+    }
+
+    private hasAoEAbility(): boolean {
+        return this.skills.some((ability: IAbility) => {
+            return (
+                ability.targets === 'enemies' ||
+                (
+                    Array.isArray(
+                        ability.targets
+                    ) &&
+                    ability.targets.includes('enemies')
+                ) &&
+                    ability.resourceCost < this.stats.currentResource
+            );
+        });
+    }
+
 }

@@ -715,7 +715,10 @@ export default class BattleScene extends Phaser.Scene {
             enemies.find((obj) => {
                 return obj.key === selectedEnemyKey;
             })!.name,
-            MonsterSoldier
+            MonsterSoldier,
+            enemies.find((obj) => {
+                return obj.key === selectedEnemyKey;
+            })!.skills!
         );
 
         this.add.existing(enemy);
