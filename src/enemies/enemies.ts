@@ -1,3 +1,6 @@
+import {abilities, IAbility} from '../abilities/abilities';
+import {MonsterJob} from '../classes/Jobs/MonsterJob';
+import MonsterSoldier from '../jobs/monsters/MonsterSoldier';
 import Stats from '../stats/Stats';
 
 export const enemies: enemyArray = [
@@ -15,11 +18,17 @@ export const enemies: enemyArray = [
             luck: 0,
             currentHP: 8,
             maxHP: 8,
-            currentResource: 0,
-            maxResource: 0,
+            currentResource: 100,
+            maxResource: 100,
             attack: 7,
             defense: 3
-        }
+        },
+        job: MonsterSoldier,
+        skills: [
+            abilities.find((obj) => {
+                return obj.name === 'Spiky Seeds';
+            }) as IAbility
+        ]
     },
     {
         name: 'Sentient Rock',
@@ -35,11 +44,12 @@ export const enemies: enemyArray = [
             luck: 0,
             currentHP: 10,
             maxHP: 10,
-            currentResource: 0,
-            maxResource: 0,
+            currentResource: 100,
+            maxResource: 100,
             attack: 10,
             defense: 6
-        }
+        },
+        job: MonsterSoldier
     },
     {
         name: 'Deadly Flower',
@@ -55,11 +65,12 @@ export const enemies: enemyArray = [
             luck: 0,
             currentHP: 10,
             maxHP: 10,
-            currentResource: 0,
-            maxResource: 0,
+            currentResource: 100,
+            maxResource: 100,
             attack: 12,
             defense: 8
-        }
+        },
+        job: MonsterSoldier
     }
 ];
 
@@ -69,5 +80,7 @@ type enemyArray = {
     level: number,
     experience: number,
     gold: number,
-    stats: Stats
+    stats: Stats,
+    job: MonsterJob
+    skills?: IAbility[]
 }[];

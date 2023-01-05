@@ -7,9 +7,6 @@
 
 // TODO: add a sign that can be read
 
-// TODO: try to remove deepclones to improve performance
-
-
 import {clone} from 'lodash';
 
 import Bot from '../classes/Bot';
