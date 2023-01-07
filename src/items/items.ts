@@ -103,7 +103,27 @@ export const items: itemArray = [
             luck: 0,
             defense: 12
         }
+    },
+    {
+        name: 'Oaksteel Shield',
+        description: 'A sturdy shield crafted from the tough skin of a long dead tree lord.',
+        key: 'shieldbutton',
+        activekey: 'shieldbuttonactive',
+        type: 'offhand',
+        cost: 5,
+        sellPrice: 3,
+        classes: 'PlayerSoldier',
+        minimumLevel: 1,
+        stats: {
+            strength: 0,
+            agility: 0,
+            vitality: 0,
+            intellect: 0,
+            luck: 0,
+            defense: 2
+        }
     }
+
 ];
 
 type itemArray = ItemInterface[];
@@ -126,6 +146,6 @@ export interface ItemInterface {
         luck: number;
         defense: number;
     };
-    type: string;
+    type: 'consumable' | 'weapon' | 'bodyarmor' | 'offhand';
 
 }
