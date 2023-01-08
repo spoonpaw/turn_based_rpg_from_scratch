@@ -75,5 +75,4 @@ const playerSoldierJob = new PlayerJob(
     skills
 );
 
-
 export default playerSoldierJob;

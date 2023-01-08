@@ -47,7 +47,6 @@ export default class Merchant extends NPC {
         this.uiScene.coinText.setVisible(true);
         this.uiScene.subInventoryAndAbilityMenuFrame.setVisible(true);
 
-
         this.uiScene.buyButton.select();
         this.uiScene.buyButton.setVisible(true);
         this.uiScene.buyButton.buttonText.setText('Buy');
@@ -100,7 +99,6 @@ export default class Merchant extends NPC {
                 merchantButton.setVisible(false);
                 merchantButton.buttonText.setVisible(false);
             }
-
 
             for (const inventoryToSellButton of this.uiScene.inventoryToSellButtons) {
                 if (inventoryToSellButton.visible) {

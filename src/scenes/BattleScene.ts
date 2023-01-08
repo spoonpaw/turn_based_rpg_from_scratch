@@ -236,7 +236,10 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private gameOverTest() {
-        return !this.heroes[0].living;
+        // check if all the heroes are dead (players and bots)
+        return this.heroes.every((value) => {
+            return !value.living;
+        });
     }
 
     private getStatIncrease(stat: keyof IStatIncreases, level: number): number {
@@ -301,7 +304,7 @@ export default class BattleScene extends Phaser.Scene {
                 this.turnUnits = this.units.filter(value => {
                     return !(value instanceof PlayerCharacter || value instanceof BotCharacter);
                 });
-                eventsCenter.emit('Message', `${this.gameScene.player.name} has failed to retreat!`);
+                eventsCenter.emit('Message', `${this.gameScene.player.name} fails to retreat!`);
                 this.time.addEvent({
                     delay: 2000,
                     callback: this.parseNextUnitTurn,
@@ -370,6 +373,10 @@ export default class BattleScene extends Phaser.Scene {
             if (unit instanceof PlayerCharacter) {
                 const player = this.gameScene.player;
                 player.stats.currentHP = unit.stats.currentHP;
+
+                if (player.stats.currentHP <= 0) {
+                    player.stats.currentHP = 1;
+                }
 
                 let goldAmount = 0;
                 let experienceAmount = 0;
@@ -647,7 +654,7 @@ export default class BattleScene extends Phaser.Scene {
 
             const currentResource = this.gameScene.player.stats.currentResource;
             const maxResource = this.gameScene.player.stats.maxResource;
-            this.player1MPText = this.add.text(534, 670, `VIM: ${currentResource}/${maxResource}`, {
+            this.player1MPText = this.add.text(534, 670, `Vim: ${currentResource}/${maxResource}`, {
                 fontSize: '35px',
                 color: '#fff',
                 fontFamily: 'CustomFont'
@@ -692,10 +699,9 @@ export default class BattleScene extends Phaser.Scene {
             })
             .setResolution(3);
 
-
         const currentResource = this.gameScene.player.stats.currentResource;
         const maxResource = this.gameScene.player.stats.maxResource;
-        this.player1MPText = this.add.text(300, 670, `VIM: ${currentResource}/${maxResource}`, {
+        this.player1MPText = this.add.text(300, 670, `Vim: ${currentResource}/${maxResource}`, {
             fontSize: '35px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -704,7 +710,6 @@ export default class BattleScene extends Phaser.Scene {
 
         // const selectedEnemy: string = Phaser.Math.RND.pick(levels[this.gameScene.currentMap as keyof typeof levels].enemies ?? []);
         const selectedEnemyKey: string = Phaser.Math.RND.pick(levels[this.gameScene.currentMap as keyof typeof levels].enemies ?? []);
-
 
         const enemy = new Enemy(
             this,
@@ -798,7 +803,7 @@ export default class BattleScene extends Phaser.Scene {
                     callback: () => {
                         eventsCenter.emit(
                             'Message',
-                            `${this.heroes[0].name} has reached level ${levelUpData.newLevel}!`
+                            `${this.heroes[0].name} reaches level ${levelUpData.newLevel}!`
                         );
                         // at the same time that this happens, update the battle scene max hp
 
@@ -819,7 +824,7 @@ export default class BattleScene extends Phaser.Scene {
                     callback: () => {
                         eventsCenter.emit(
                             'Message',
-                            `${this.gameScene.bots[0].name} has reached level ${player2LevelUpData.newLevel}!`
+                            `${this.gameScene.bots[0].name} reaches level ${player2LevelUpData.newLevel}!`
                         );
 
                         this.player2HPText.setText(
@@ -842,7 +847,14 @@ export default class BattleScene extends Phaser.Scene {
 
         this.battleUIScene.disableAllActionButtons();
         this.battleUIScene.showCommandAndHotkeyFrames();
+
         this.interactionState = 'mainselect';
 
+        if (!this.heroes[0].living) {
+            eventsCenter.emit('actionSelect', {
+                action: 'pass',
+                target: this.heroes[0]
+            });
+        }
     }
 }

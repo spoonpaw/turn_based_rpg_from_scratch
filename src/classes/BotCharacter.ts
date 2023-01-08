@@ -78,14 +78,14 @@ export default class BotCharacter extends Unit {
             damage = this.calculateAttackDamage(target);
             target.applyHPChange(damage);
             runtimeInMS += 2000;
-            eventsCenter.emit('Message', `${this.name} attacked ${target.name} for ${damage} HP!`);
+            eventsCenter.emit('Message', `${this.name} attacks ${target.name} for ${damage} HP!`);
 
         }
 
         else {
             // target dodged
             this.battleScene.sfxScene.playSound('dodge');
-            eventsCenter.emit('Message', `${this.name} attacked ${target.name}. ${target.name} dodged the attack!`);
+            eventsCenter.emit('Message', `${this.name} attacks ${target.name}. ${target.name} dodges the attack!`);
             runtimeInMS += 2000;
             return runtimeInMS;
         }
@@ -116,7 +116,6 @@ export default class BotCharacter extends Unit {
     criticalStrikeTest(): boolean {
         return Phaser.Math.Between(1, 64) === 1;
     }
-
 
     public calculateCriticalStrikeDamage() {
         return Math.max(

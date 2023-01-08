@@ -13,7 +13,6 @@ export default class Bot extends GameActor{
     private gameScene: GameScene;
     public path: Phaser.Math.Vector2[] = [];
 
-
     constructor(
         name: string,
         sprite: Phaser.GameObjects.Sprite,
@@ -72,7 +71,6 @@ export default class Bot extends GameActor{
         this.sprite.anims.play(animationKey);
     }
 
-
     public getTilePos(): Phaser.Math.Vector2 {
         return this.tilePos.clone();
     }
@@ -123,7 +121,6 @@ export default class Bot extends GameActor{
         const threshold = 0.1;
         return Math.abs(dx) <= threshold && Math.abs(dy) <= threshold;
     }
-
 
     private calculateDirection(coordinate: Phaser.Math.Vector2): Direction {
         // Calculate the direction based on the difference between the current position and the target coordinate

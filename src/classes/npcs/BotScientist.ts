@@ -19,6 +19,7 @@ export default class extends NPC {
     }
 
     public listenForInteractEvent() {
+        console.log('bot scientist is listening for the interact event!!!!!!!!');
         // innkeeper heard player press the space bar somewhere!
         // check if player is facing innkeeper
         if (this.testForInteractionReadyState()) {
@@ -69,7 +70,6 @@ export default class extends NPC {
                 this.uiScene.cancelButton.setVisible(false);
                 this.uiScene.cancelButton.buttonText.setVisible(false);
                 this.uiScene.cancelMenuFrame.setVisible(false);
-
 
                 this.gameScene.input.keyboard!.enabled = true;
 
@@ -156,8 +156,7 @@ export default class extends NPC {
             const currentResource = redBot.stats.currentResource;
             const maxResource = redBot.stats.maxResource;
 
-            this.uiScene.player2ManaText.setText(`VIM: ${currentResource}/${maxResource}`);
-
+            this.uiScene.player2ManaText.setText(`Vim: ${currentResource}/${maxResource}`);
 
             this.uiScene.player2Button.setVisible(true);
             this.uiScene.player2hpText.setVisible(true);
@@ -222,7 +221,6 @@ export default class extends NPC {
                         }
                     }
                 );
-
 
                 eventsCenter.on(
                     'keyboardreject',
