@@ -6,7 +6,7 @@ export const items: itemArray = [
         activekey: 'healthpotionactive',
         type: 'consumable',
         hpchange: 30,
-        cost: 8,
+        cost: 10,
         sellPrice: 6
     },
     {
@@ -15,8 +15,8 @@ export const items: itemArray = [
         key: 'staffbutton',
         activekey: 'staffbuttonactive',
         type: 'weapon',
-        cost: 12,
-        sellPrice: 7,
+        cost: 20,
+        sellPrice: 12,
         classes: 'All',
         minimumLevel: 1,
         stats: {
@@ -36,7 +36,7 @@ export const items: itemArray = [
         type: 'weapon',
         cost: 250,
         sellPrice: 130,
-        classes: 'All',
+        classes: 'Soldier',
         minimumLevel: 1,
         stats: {
             strength: 5,
@@ -53,8 +53,8 @@ export const items: itemArray = [
         key: 'synthjutetunic',
         activekey: 'synthjutetunicactive',
         type: 'bodyarmor',
-        cost: 6,
-        sellPrice: 4,
+        cost: 35,
+        sellPrice: 18,
         classes: 'All',
         minimumLevel: 1,
         stats: {
@@ -110,8 +110,8 @@ export const items: itemArray = [
         key: 'shieldbutton1',
         activekey: 'shieldbuttonactive1',
         type: 'offhand',
-        cost: 5,
-        sellPrice: 3,
+        cost: 40,
+        sellPrice: 22,
         classes: 'Soldier',
         minimumLevel: 1,
         stats: {
@@ -129,8 +129,27 @@ export const items: itemArray = [
         key: 'monoclebutton',
         activekey: 'monoclebuttonactive',
         type: 'helmet',
-        cost: 10,
-        sellPrice: 6,
+        cost: 30,
+        sellPrice: 18,
+        classes: 'All',
+        minimumLevel: 1,
+        stats: {
+            strength: 0,
+            agility: 0,
+            vitality: 0,
+            intellect: 0,
+            luck: 0,
+            defense: 1
+        }
+    },
+    {
+        name: 'Faded Armband',
+        description: 'A fashionable piece of clothing that offers little in the way of actual benefit.',
+        key: 'armbandbutton',
+        activekey: 'armbandbuttonactive',
+        type: 'offhand',
+        cost: 15,
+        sellPrice: 8,
         classes: 'All',
         minimumLevel: 1,
         stats: {

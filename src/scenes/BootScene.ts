@@ -58,7 +58,6 @@ export default class BootScene extends Phaser.Scene {
             percentText.destroy();
         });
 
-
         // load images
         this.loadImages();
 
@@ -127,6 +126,8 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('shieldbuttonactive1', 'assets/images/ui/shieldButtonActive1.png');
         this.load.image('monoclebutton', 'assets/images/ui/monocleButton.png');
         this.load.image('monoclebuttonactive', 'assets/images/ui/monocleButtonActive.png');
+        this.load.image('armbandbutton', 'assets/images/ui/armbandButton.png');
+        this.load.image('armbandbuttonactive', 'assets/images/ui/armbandButtonActive.png');
 
         this.load.image('chromaticsword', 'assets/images/ui/chromaticSword.png');
         this.load.image('chromaticswordactive', 'assets/images/ui/chromaticSwordActive.png');

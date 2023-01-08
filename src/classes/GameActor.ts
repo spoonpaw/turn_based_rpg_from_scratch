@@ -55,7 +55,6 @@ export default class GameActor {
         return getCombinedStat(this.stats, this.equipment, stat);
     }
 
-
     public stopAnimation(direction: Direction) {
         if (!this.sprite.anims) return;
         const animationManager = this.sprite.anims.animationManager;

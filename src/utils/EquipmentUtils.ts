@@ -13,8 +13,6 @@ export function getCombinedStat(stats: Stats, equipment: Equipment, stat: keyof 
     return baseStat + totalEquipmentBonus;
 }
 
-
-
 export function getTotalEquipmentBonus(equipment: Equipment, stat: keyof Stats): number {
     let totalBonus = 0;
     for (const key in equipment) {
@@ -25,7 +23,6 @@ export function getTotalEquipmentBonus(equipment: Equipment, stat: keyof Stats):
     }
     return totalBonus;
 }
-
 
 export function getEquipmentStat(equipment: Item, stat: keyof typeof equipment.stats): number {
     if (!equipment || !equipment.stats) {

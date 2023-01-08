@@ -143,16 +143,17 @@ export class Enemy extends Unit {
         // if there are enough targets to justify it and enough resources to spend, execute the
         //  a powerful aoe attack
 
-
         const livingHeroes = this.battleScene.heroes.filter(unit => unit.living);
         const moreThanOneLivingHero = livingHeroes.length > 1;
 
         if (this.hasAoEAbility() && moreThanOneLivingHero) {
             // do aoe damage to the player's party!
             const aoeAbility = this.getAOEAbility();
+            console.log('subtracting aoe ability resource cost from current resource');
+            this.stats.currentResource -= aoeAbility.resourceCost;
+            console.log({resourceCost: aoeAbility.resourceCost, enemyResourceAfterSubtractingResourceCost: this.stats.currentResource});
             eventsCenter.emit('Message', aoeAbility.useTemplate.replace('${abilityUser}', this.name));
             runtimeInMS += 2000 + (2000 * this.battleScene.heroes.length);
-
 
             this.scene.time.addEvent({
                 delay: 2000,
@@ -188,23 +189,6 @@ export class Enemy extends Unit {
                 },
                 callbackScope: this
             });
-
-            // for (const target of this.battleScene.heroes) {
-            //     if (this.evadeTest()) {
-            //         this.battleScene.sfxScene.playSound('dodge');
-            //         eventsCenter.emit('Message', aoeAbility.dodgeTemplate.replace('${abilityTarget}', target.name));
-            //         runtimeInMS += 2000;
-            //         return runtimeInMS;
-            //     }
-            //     else {
-            //         this.battleScene.sfxScene.playSound('attack');
-            //         const damage = this.calculateAttackDamage(target);
-            //         eventsCenter.emit('Message', aoeAbility.targetTemplate.replace('${abilityTarget}', target.name).replace('${damage}', String(damage)));
-            //         console.log({damage});
-            //         target.applyHPChange(damage);
-            //         runtimeInMS += 2000;
-            //     }
-            // }
             return runtimeInMS;
         }
         else {
@@ -249,7 +233,7 @@ export class Enemy extends Unit {
             if (guardOnTarget) {
                 if (this.evadeTest()) {
                     this.battleScene.sfxScene.playSound('dodge');
-                    eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted and dodged the attack!`);
+                    eventsCenter.emit('Message', `${this.name} attacks ${initialTarget.name}. ${target.name} intercepts and dodges the attack!`);
                     runtimeInMS += 2000;
                     return runtimeInMS;
                 }
@@ -260,10 +244,10 @@ export class Enemy extends Unit {
                         // If the IDs match, reduce the damage taken by 15%
                         damage *= 0.85;
                         damage = Math.floor(damage);
-                        eventsCenter.emit('Message', `${this.name} attacked ${target.name}, who fought defensively and took ${damage} damage.`);
+                        eventsCenter.emit('Message', `${this.name} attacks ${target.name}, who fought defensively and took ${damage} damage.`);
                     }
                     else {
-                        eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted the attack taking ${damage} damage.`);
+                        eventsCenter.emit('Message', `${this.name} attacks ${initialTarget.name}. ${target.name} intercepts the attack taking ${damage} damage.`);
 
                     }
                     console.log({damage});
@@ -274,14 +258,14 @@ export class Enemy extends Unit {
             else {
                 if (this.evadeTest()) {
                     this.battleScene.sfxScene.playSound('dodge');
-                    eventsCenter.emit('Message', `${this.name} attacked ${target.name}. ${target.name} dodged the attack!`);
+                    eventsCenter.emit('Message', `${this.name} attacks ${target.name}. ${target.name} dodges the attack!`);
                     runtimeInMS += 2000;
                     return runtimeInMS;
                 }
                 else {
                     this.battleScene.sfxScene.playSound('attack');
                     damage = this.calculateAttackDamage(target);
-                    eventsCenter.emit('Message', `${this.name} attacked ${target.name} for ${damage} HP!`);
+                    eventsCenter.emit('Message', `${this.name} attacks ${target.name} for ${damage} HP!`);
                     console.log({damage});
                     target.applyHPChange(damage);
                     runtimeInMS += 2000;
@@ -309,14 +293,14 @@ export class Enemy extends Unit {
     private hasAoEAbility(): boolean {
         return this.skills.some((ability: IAbility) => {
             return (
-                ability.targets === 'enemies' ||
                 (
+                    ability.targets === 'enemies' ||
                     Array.isArray(
                         ability.targets
                     ) &&
                     ability.targets.includes('enemies')
                 ) &&
-                    ability.resourceCost < this.stats.currentResource
+                ability.resourceCost <= this.stats.currentResource
             );
         });
     }

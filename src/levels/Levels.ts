@@ -63,6 +63,9 @@ export const levels: ILevelDataContainer = {
                         return obj.name === 'Chitinous Vest';
                     }) as ItemInterface,
                     items.find(obj => {
+                        return obj.name === 'Faded Armband';
+                    }) as ItemInterface,
+                    items.find(obj => {
                         return obj.name === 'Oaksteel Shield';
                     }) as ItemInterface,
                     items.find(obj => {

@@ -420,7 +420,6 @@ export default class UIScene extends Phaser.Scene {
     }
 
     public selectCancel() {
-
         if (this.gameScene.operatingSystem !== 'desktop') {
             this.gameScene.gamePadScene?.scene.restart();
         }
@@ -603,7 +602,7 @@ export default class UIScene extends Phaser.Scene {
     }
 
     public updateResource(currentResource: number, maxResource: number) {
-        this.manaText.text = `VIM: ${currentResource}/${maxResource}`;
+        this.manaText.text = `Vim: ${currentResource}/${maxResource}`;
     }
 
     public updatePlayer2HP(hp: number, maxHP: number) {
@@ -836,7 +835,6 @@ export default class UIScene extends Phaser.Scene {
         this.interactButton.setVisible(false);
         this.interactButton.buttonText.setVisible(false);
 
-
         this.yesButton = new UIActionButton(
             this,
             710,
@@ -916,7 +914,6 @@ export default class UIScene extends Phaser.Scene {
         );
         this.selectedItemAndAbilityIcon.setVisible(false);
         this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
-
 
         this.sellItemButton = new UIActionButton(
             this,
@@ -1476,7 +1473,6 @@ export default class UIScene extends Phaser.Scene {
         this.player3CharacterButton.setVisible(false);
         this.player3CharacterButton.buttonText.setVisible(false);
 
-
         // END SUBCHARACTER SHEET BUTTONS SECTION
         // END BUTTON SECTION
 
@@ -1531,7 +1527,7 @@ export default class UIScene extends Phaser.Scene {
         this.manaText = this.add.text(
             115,
             647,
-            `VIM: ${currentResource}/${maxResource}`,
+            `Vim: ${currentResource}/${maxResource}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(3);
@@ -1542,12 +1538,11 @@ export default class UIScene extends Phaser.Scene {
         this.player2ManaText = this.add.text(
             345,
             647,
-            `VIM: ${currentResource}/${maxResource}`,
+            `Vim: ${currentResource}/${maxResource}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(3);
         this.player2ManaText.setVisible(false);
-
 
         // create the hp text game object (player 1)
         this.hpText = this.add.text(
@@ -1970,7 +1965,6 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.selectedItemAndAbilityCommandText.setVisible(false);
 
-
         // START EQUIPMENT STRING SECTION
 
         this.headString = this.add.text(540, 180, 'Head:', {
@@ -2147,7 +2141,8 @@ export default class UIScene extends Phaser.Scene {
     private player1ButtonCallback() {
         console.log({
             playerExperience: this.gameScene.player.experience,
-            botExperience: this.gameScene.bots[0]?.experience
+            botExperience: this.gameScene.bots[0]?.experience,
+            npcs: this.gameScene.npcs
         });
         // uncomment to log interaction state by clicking player portrait
         if (this.interactionState.startsWith('inventoryaction')) {
@@ -2239,7 +2234,6 @@ export default class UIScene extends Phaser.Scene {
 
             this.generateInventoryButtons();
             this.gameScene.input.keyboard!.resetKeys();
-
 
             this.time.addEvent({
                 delay: 2000,

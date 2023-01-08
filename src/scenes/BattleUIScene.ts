@@ -63,7 +63,6 @@ export default class BattleUIScene extends Phaser.Scene {
         this.useAbilityButton.setVisible(false);
         this.useAbilityButton.buttonText.setVisible(false);
 
-
         this.inventoryAndAbilityMenuFrame.setVisible(false);
         this.subInventoryAndAbilityMenuFrame.setVisible(false);
     }
@@ -84,7 +83,6 @@ export default class BattleUIScene extends Phaser.Scene {
         this.inventoryAndAbilityMenuFrame.setVisible(false);
         this.subInventoryAndAbilityMenuFrame.setVisible(false);
     }
-
 
     create() {
         this.musicScene = <MusicScene>this.scene.get('Music');
@@ -122,7 +120,6 @@ export default class BattleUIScene extends Phaser.Scene {
             }
         });
 
-
         this.initiateBattleUI();
 
         this.sys.events.on('wake', this.initiateBattleUI, this);
@@ -155,8 +152,6 @@ export default class BattleUIScene extends Phaser.Scene {
         const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
             return ability.levelAttained <= this.battleScene.gameScene.player.level;
         });
-
-
 
         // SPAWN THE ABILITY BUTTONS
         for (const [index, ability] of availableAbilities.entries()) {
@@ -257,7 +252,6 @@ export default class BattleUIScene extends Phaser.Scene {
             element.setVisible(false);
         }
     }
-
 
     public showCommandAndHotkeyFrames() {
         this.commandMenuFrame.setVisible(true);
@@ -456,7 +450,6 @@ export default class BattleUIScene extends Phaser.Scene {
 
         this.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
-
         this.battleScene.interactionState = 'inventory';
 
         // query the items here!!!
@@ -528,7 +521,6 @@ export default class BattleUIScene extends Phaser.Scene {
             'bookbuttonactive',
             'Ability',
             () => {
-
 
                 if (
                     this.battleScene.interactionState === 'mainselect' ||
@@ -708,7 +700,6 @@ export default class BattleUIScene extends Phaser.Scene {
 
                 this.updateAndShowCancelButton(698, 430, 'Cancel', true);
 
-
                 this.inventoryAndAbilityMenuFrame.setVisible(false);
                 for (const abilityButton of this.abilityButtons) {
                     abilityButton.setVisible(false);
@@ -725,11 +716,8 @@ export default class BattleUIScene extends Phaser.Scene {
                 this.selectedItemAndAbilityIcon.destroy();
                 this.selectedItemAndAbilityIcon.buttonText.destroy();
 
-
                 // get the selected ability!!!
                 const selectedAbilityIndex = Number(this.battleScene.interactionState.split('abilityaction')[1]);
-
-
 
                 const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
                     return ability.levelAttained <= this.battleScene.gameScene.player.level;
@@ -754,7 +742,6 @@ export default class BattleUIScene extends Phaser.Scene {
 
                 this.selectedItemAndAbilityCommandText.setText('Choose A Target');
                 this.selectedItemAndAbilityCommandText.setVisible(true);
-
 
             }
         );
@@ -809,7 +796,6 @@ export default class BattleUIScene extends Phaser.Scene {
                         return;
                     }
                 );
-
 
                 this.selectedItemAndAbilityIcon.setVisible(true);
                 this.selectedItemAndAbilityIcon.buttonText.setVisible(true);

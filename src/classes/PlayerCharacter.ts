@@ -1,4 +1,5 @@
 import {abilities, IAbility} from '../abilities/abilities';
+import {items} from '../items/items';
 import BattleScene from '../scenes/BattleScene';
 import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
@@ -112,26 +113,25 @@ export default class PlayerCharacter extends Unit {
                 if (!this.criticalStrikeTest()) {
                     this.battleScene.sfxScene.playSound('attack');
                     damage += this.calculateAttackDamage(target);
-                    eventsCenter.emit('Message', `${this.name} attacked ${target.name} for ${damage} HP!`);
+                    eventsCenter.emit('Message', `${this.name} attacks ${target.name} for ${damage} HP!`);
                 }
                 else {
                     this.battleScene.sfxScene.playSound('criticalattack');
                     damage += this.calculateCriticalStrikeDamage();
-                    eventsCenter.emit('Message', `${this.name} attacked ${target.name} for ${damage} HP! A critical strike!`);
+                    eventsCenter.emit('Message', `${this.name} attacks ${target.name} for ${damage} HP! A critical strike!`);
                 }
                 runtimeInMS += 2000;
                 target.applyHPChange(damage);
             }
             else {
                 this.battleScene.sfxScene.playSound('dodge');
-                eventsCenter.emit('Message', `${this.name} attacked ${target.name}. ${target.name} dodged the attack!`);
+                eventsCenter.emit('Message', `${this.name} attacks ${target.name}. ${target.name} dodges the attack!`);
                 runtimeInMS += 2000;
                 return runtimeInMS;
             }
         }
 
         else if (data.action === 'Guard') {
-
 
             for (const abilityButton of this.battleUIScene.abilityButtons) {
                 abilityButton.destroy();
@@ -162,7 +162,6 @@ export default class PlayerCharacter extends Unit {
                 };
                 this.battleScene.passiveEffects.push(passiveGuardEffect);
 
-
                 if (data.target.id === this.id) {
                     eventsCenter.emit('Message', `${this.name} takes a defensive stance.`);
                 }
@@ -172,15 +171,6 @@ export default class PlayerCharacter extends Unit {
             }
         }
 
-
-
-        // TODO: DON'T HARDCODE ITEMS BY NAME!
-        //  categorize, like not just cypressium staff does this. you need to check if an item is being used.
-        //  if it is some inert object like most equipment then run this branch
-        else if (data.action === 'Cypressium Staff') {
-            runtimeInMS += 2000;
-            eventsCenter.emit('Message', `${this.name} uses a ${this.name} on ${target.name}; it has no effect.`);
-        }
         else if (data.action === 'Health Potion') {
             // get the selected inventory slot index from the battle ui scene delete it from the player's inventory
             //  and regenerate the inventory list
@@ -205,6 +195,15 @@ export default class PlayerCharacter extends Unit {
                 this.battleScene.sfxScene.playSound('potion');
                 eventsCenter.emit('Message', `${this.name} uses a health potion on ${target.name}, healing them for ${amountHealed} HP.`);
             }
+        }
+
+        // default branch. player is using an item without an effect.
+        else if (items.some((value) => {
+            return value.name === data.action;
+        })) {
+
+            runtimeInMS += 2000;
+            eventsCenter.emit('Message', `${this.name} uses a ${data.action} on ${target.name}; it has no effect.`);
         }
 
         return runtimeInMS;

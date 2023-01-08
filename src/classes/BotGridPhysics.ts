@@ -39,7 +39,6 @@ export default class BotGridPhysics extends GridPhysics {
         this.updateTilePos();
     }
 
-
     public moveActor(direction: Direction): void {
         this.move(direction);
     }

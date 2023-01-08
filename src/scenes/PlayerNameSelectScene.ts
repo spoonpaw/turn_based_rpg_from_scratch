@@ -20,7 +20,6 @@ export default class PlayerNameSelectScene extends Phaser.Scene {
         this.backgroundRectangle = this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0xbcbcbc)
             .setOrigin(0, 0);
 
-
         this.commandFrame = this.add.image(
             40, 610, 'keyboardInputFrame'
         )
@@ -67,7 +66,6 @@ export default class PlayerNameSelectScene extends Phaser.Scene {
                 );
             }
         );
-
 
     }
 }
