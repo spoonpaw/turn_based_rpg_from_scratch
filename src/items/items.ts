@@ -93,7 +93,7 @@ export const items: itemArray = [
         type: 'bodyarmor',
         cost: 150,
         sellPrice: 80,
-        classes: 'PlayerSoldier/Healer',
+        classes: 'Soldier/Healer',
         minimumLevel: 1,
         stats: {
             strength: 0,
@@ -106,13 +106,13 @@ export const items: itemArray = [
     },
     {
         name: 'Oaksteel Shield',
-        description: 'A sturdy shield crafted from the tough skin of a long dead tree lord.',
-        key: 'shieldbutton',
-        activekey: 'shieldbuttonactive',
+        description: 'A sturdy shield crafted from the tough exterior of a long dead tree lord.',
+        key: 'shieldbutton1',
+        activekey: 'shieldbuttonactive1',
         type: 'offhand',
         cost: 5,
         sellPrice: 3,
-        classes: 'PlayerSoldier',
+        classes: 'Soldier',
         minimumLevel: 1,
         stats: {
             strength: 0,
@@ -122,8 +122,26 @@ export const items: itemArray = [
             luck: 0,
             defense: 2
         }
+    },
+    {
+        name: 'Hi-Tek Monocle',
+        description: 'A sleek, high-tech monocle that adds a touch of sophistication to any outfit.',
+        key: 'monoclebutton',
+        activekey: 'monoclebuttonactive',
+        type: 'helmet',
+        cost: 10,
+        sellPrice: 6,
+        classes: 'All',
+        minimumLevel: 1,
+        stats: {
+            strength: 0,
+            agility: 0,
+            vitality: 0,
+            intellect: 0,
+            luck: 0,
+            defense: 1
+        }
     }
-
 ];
 
 type itemArray = ItemInterface[];
@@ -146,6 +164,6 @@ export interface ItemInterface {
         luck: number;
         defense: number;
     };
-    type: 'consumable' | 'weapon' | 'bodyarmor' | 'offhand';
+    type: 'consumable' | 'weapon' | 'bodyarmor' | 'offhand' | 'helmet';
 
 }
