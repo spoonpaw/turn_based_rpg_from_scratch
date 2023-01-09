@@ -1,6 +1,6 @@
 import _, {clone} from 'lodash';
 
-import {IAbility} from '../abilities/abilities';
+import {abilities, IAbility} from '../abilities/abilities';
 import {enemies} from '../enemies/enemies';
 import BattleScene from '../scenes/BattleScene';
 import Stats from '../stats/Stats';
@@ -82,13 +82,36 @@ export class Enemy extends Unit {
 
         this.on('pointerdown', () => {
             // check if the battle scene is ready for player interaction at all
-            if (scene.interactionState !== 'attack') {
-                return;
-            }
+            if (scene.interactionState.startsWith('abilityaction')) {
+                console.log(`ability potentially used on ${this.name}`);
+                const selectedAbilityAttainment = this.battleUIScene.getSelectedAbilityAttainment();
 
-            eventsCenter.emit('actionSelect', {
-                action: 'attack', target: this
-            });
+                const selectedAbility = abilities.find((obj) => {
+                    return obj.name === selectedAbilityAttainment.name;
+                }) as IAbility;
+
+                if (
+                    selectedAbility.targets !== 'enemy' &&
+                    !(
+                        Array.isArray(selectedAbility.targets) &&
+                        selectedAbility.targets.includes('enemy')
+                    )
+                ) {
+                    return;
+                }
+                this.battleUIScene.hideAbilitySelectionUI();
+
+                eventsCenter.emit('actionSelect', {
+                    action: selectedAbilityAttainment.name,
+                    target: this,
+                    actionType: 'ability'
+                });
+            }
+            else if (scene.interactionState === 'attack') {
+                eventsCenter.emit('actionSelect', {
+                    action: 'attack', target: this
+                });
+            }
         });
     }
 
@@ -193,17 +216,14 @@ export class Enemy extends Unit {
         }
         else {
             // attain random target!
-            let target = this.battleScene.heroes.filter(
+            const listOfLivingTargets = this.battleScene.heroes.filter(
                 (obj) => {
                     return obj.living;
                 }
-            )[
-                Phaser.Math.RND.between(
-                    0,
-                    Math.max(0, this.battleScene.heroes.length - 1)
-                )
-            ];
+            );
+            const randomIndex = Phaser.Math.RND.between(0, listOfLivingTargets.length - 1);
 
+            let target = listOfLivingTargets[randomIndex];
             console.log({initialTarget: target});
             if (!target) return 0;
 

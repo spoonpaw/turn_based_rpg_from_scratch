@@ -59,6 +59,8 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
         let availableActions: string[];
         if (actionType === 'ability') {
+
+            // gets a list of all the abilities that the player character has learned and is currently able to use, based on their level
             availableActions = this.battleScene.gameScene.player.type.skills
                 .filter(ability => ability.levelAttained <= this.battleScene.gameScene.player.level)
                 .map(ability => ability.name);

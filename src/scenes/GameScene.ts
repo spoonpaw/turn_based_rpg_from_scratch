@@ -419,6 +419,7 @@ export default class GameScene extends Phaser.Scene {
 
     public preload() {
         // TODO: is there a way to load this locally without depending on this guys repo
+        //  i commented it out and everything is still working so consider deleting this line
         // this.scene.scene.load.scenePlugin('rexgesturesplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexgesturesplugin.min.js', 'rexGestures', 'rexGestures');
         if (this.sys.game.device.os.desktop) {
             this.operatingSystem = 'desktop';

@@ -102,6 +102,7 @@ export default class PlayerCharacter extends Unit {
         }
     ): number {
         const target = data.target;
+        // TODO: REDIRECT THE PLAYER'S ATTACK IF THEIR INTENDED TARGET IS NOT ALIVE AND THERE IS STILL > 0 ENEMIES LIVING
         if (!target.living) return 0;
         let runtimeInMS = 0;
 
@@ -131,6 +132,88 @@ export default class PlayerCharacter extends Unit {
             }
         }
 
+        else if (data.action === 'Power Strike') {
+
+            for (const abilityButton of this.battleUIScene.abilityButtons) {
+                abilityButton.destroy();
+                abilityButton.buttonText.destroy();
+            }
+            this.battleUIScene.abilityButtons = [];
+
+            this.battleUIScene.destroyAbilityButtons();
+            this.battleUIScene.generateAbilityButtons();
+
+            let damage = 0;
+            const powerStrikeAbility = abilities.find((obj) => {
+                return obj.name === data.action;
+            }) as IAbility;
+
+            if (!this.evadeTest()) {
+                if (!this.criticalStrikeTest()) {
+                    this.battleScene.sfxScene.playSound('attack');
+                    damage += this.calculateAttackDamage(target);
+                    damage = Math.floor(damage + powerStrikeAbility.power);
+                    eventsCenter.emit(
+                        'Message',
+                        powerStrikeAbility.targetTemplate
+                            .replace(
+                                '${abilityUser}',
+                                this.name
+                            )
+                            .replace(
+                                '${abilityTarget}',
+                                target.name
+                            )
+                            .replace(
+                                '${damage}',
+                                String(damage)
+                            )
+                    );
+                }
+                else {
+                    this.battleScene.sfxScene.playSound('criticalattack');
+                    damage += this.calculateCriticalStrikeDamage();
+                    damage = Math.floor(damage + powerStrikeAbility.power);
+                    eventsCenter.emit(
+                        'Message',
+                        powerStrikeAbility.targetCriticalHitTemplate
+                            .replace(
+                                '${abilityUser}',
+                                this.name
+                            )
+                            .replace(
+                                '${abilityTarget}',
+                                target.name
+                            )
+                            .replace(
+                                '${damage}',
+                                String(damage)
+                            )
+                    );
+                }
+                runtimeInMS += 2000;
+                target.applyHPChange(damage);
+            }
+            else {
+                this.battleScene.sfxScene.playSound('dodge');
+                eventsCenter.emit(
+                    'Message',
+                    powerStrikeAbility.dodgeTemplate
+                        .replace(
+                            '${abilityUser}',
+                            this.name
+                        )
+                        .replace(
+                            '${abilityTarget}',
+                            target.name
+                        )
+                );
+                runtimeInMS += 2000;
+                return runtimeInMS;
+            }
+
+        }
+
         else if (data.action === 'Guard') {
 
             for (const abilityButton of this.battleUIScene.abilityButtons) {
@@ -143,7 +226,6 @@ export default class PlayerCharacter extends Unit {
             this.battleUIScene.generateAbilityButtons();
 
             if (data.target.living) {
-                // calculate the exact amount healed, announce it in a message
                 // battle scene needs to store an array of passive effects. it needs to know the actor and the
                 //  target for each effect as well as the ability itself. each passive effect must have a number of
                 //  active turns before it expires at the top of each round, the passive effects are iterated over,
@@ -163,10 +245,19 @@ export default class PlayerCharacter extends Unit {
                 this.battleScene.passiveEffects.push(passiveGuardEffect);
 
                 if (data.target.id === this.id) {
-                    eventsCenter.emit('Message', `${this.name} takes a defensive stance.`);
+                    eventsCenter.emit(
+                        'Message',
+                        guardAbility.useSelfTemplate
+                            .replace('${abilityUser}', this.name)
+                    );
                 }
                 else {
-                    eventsCenter.emit('Message', `${this.name} steps forward to defend ${target.name}.`);
+                    eventsCenter.emit(
+                        'Message',
+                        guardAbility.useTemplate
+                            .replace('${abilityUser}', this.name)
+                            .replace('${abilityTarget}', data.target.name)
+                    );
                 }
             }
         }
