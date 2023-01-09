@@ -1,5 +1,6 @@
 import Message from '../classes/Message';
 import UIActionButton from '../classes/UIActionButton';
+import {IAbilityAttainment} from '../types/Advancement';
 import eventsCenter from '../utils/EventsCenter';
 import {updateCancelButton} from '../utils/updateCancelButton';
 import BattleScene from './BattleScene';
@@ -103,22 +104,6 @@ export default class BattleUIScene extends Phaser.Scene {
         eventsCenter.removeListener('MessageClose');
         eventsCenter.on('MessageClose', this.messageCloseHandler, this);
 
-        this.input.keyboard!.on('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Digit1') {
-                if (this.battleScene.interactionState !== 'mainselect') {
-                    return;
-                }
-                this.selectAttack();
-            }
-            if (event.code === 'Space') {
-                console.log('space pressed on the battle ui scene!');
-                console.log({
-                    battleSceneInteractionState: this.battleScene.interactionState,
-                    playerVim: this.battleScene.gameScene.player.stats.maxResource,
-                    botVim: this.battleScene.gameScene.bots[0]?.stats.maxResource
-                });
-            }
-        });
 
         this.initiateBattleUI();
 
@@ -716,22 +701,15 @@ export default class BattleUIScene extends Phaser.Scene {
                 this.selectedItemAndAbilityIcon.destroy();
                 this.selectedItemAndAbilityIcon.buttonText.destroy();
 
-                // get the selected ability!!!
-                const selectedAbilityIndex = Number(this.battleScene.interactionState.split('abilityaction')[1]);
-
-                const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
-                    return ability.levelAttained <= this.battleScene.gameScene.player.level;
-                });
-
-                const selectedAbility = availableAbilities[selectedAbilityIndex];
+                const selectedAbilityAttainment = this.getSelectedAbilityAttainment();
 
                 this.selectedItemAndAbilityIcon = new UIActionButton(
                     this,
                     265,
                     465,
-                    selectedAbility.key,
-                    selectedAbility.activeKey,
-                    selectedAbility.name,
+                    selectedAbilityAttainment.key,
+                    selectedAbilityAttainment.activeKey,
+                    selectedAbilityAttainment.name,
                     () => {
                         return;
                     }
@@ -897,5 +875,46 @@ export default class BattleUIScene extends Phaser.Scene {
             abilityButton.setVisible(false);
             abilityButton.buttonText.setVisible(false);
         }
+    }
+
+    public getSelectedAbilityAttainment(): IAbilityAttainment {
+        // get the selected ability!!!
+        const selectedAbilityIndex = Number(this.battleScene.interactionState.split('abilityaction')[1]);
+
+        const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
+            return ability.levelAttained <= this.battleScene.gameScene.player.level;
+        });
+
+        const selectedAbility = availableAbilities[selectedAbilityIndex];
+        return selectedAbility;
+    }
+
+    public update() {
+        if (Phaser.Input.Keyboard.JustDown(
+            this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ONE)
+        )) {
+            if (this.battleScene.interactionState !== 'mainselect') {
+                return;
+            }
+            this.selectAttack();
+
+        }
+
+
+
+        if (Phaser.Input.Keyboard.JustDown(
+            this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+        )) {
+            console.log('space bar pressed on battle ui scene!');
+            console.log({
+                interactionState: this.battleScene.interactionState,
+            });
+        }
+
+
+
+
+
+
     }
 }

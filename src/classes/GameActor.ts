@@ -1,4 +1,3 @@
-import PlayerSoldier from '../jobs/players/PlayerSoldier';
 import Stats from '../stats/Stats';
 import {Direction} from '../types/Direction';
 import {Equipment} from '../types/Equipment';
@@ -8,8 +7,6 @@ import {Job} from './Jobs/Job';
 export default class GameActor {
     public equipment!: Equipment;
     public stats!: Stats;
-    // public sprite!: Phaser.GameObjects.Sprite;
-    // public experience!: number;
     constructor(
         public name: string,
         public sprite: Phaser.GameObjects.Sprite,
@@ -21,17 +18,17 @@ export default class GameActor {
     protected createStats(job: Job) {
         if (job.properName === 'Soldier') {
             return new Stats(
-                PlayerSoldier.baseStats.strength,
-                PlayerSoldier.baseStats.agility,
-                PlayerSoldier.baseStats.vitality,
-                PlayerSoldier.baseStats.intellect,
-                PlayerSoldier.baseStats.luck,
-                PlayerSoldier.baseStats.vitality * 2,
-                PlayerSoldier.baseStats.vitality * 2,
+                job.baseStats.strength,
+                job.baseStats.agility,
+                job.baseStats.vitality,
+                job.baseStats.intellect,
+                job.baseStats.luck,
+                job.baseStats.vitality * 2,
+                job.baseStats.vitality * 2,
                 100,
                 100,
-                PlayerSoldier.baseStats.strength,
-                PlayerSoldier.baseStats.agility / 2
+                job.baseStats.strength,
+                job.baseStats.agility / 2
             );
         }
         else {

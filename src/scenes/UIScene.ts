@@ -2031,7 +2031,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.hitPointString.setVisible(false);
 
-        this.manaPointString = this.add.text(540, 293, 'Mana Points: 0/0', {
+        this.manaPointString = this.add.text(540, 293, 'Vim: 100/100', {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2118,7 +2118,7 @@ export default class UIScene extends Phaser.Scene {
         this.classString.setText(`${classIdentifier}: ${className}`);
         this.levelString.setText(`Level: ${playerOrBot.level}`);
         this.hitPointString.setText(`Hit Points: ${playerOrBot.stats.currentHP}/${playerOrBot.stats.maxHP}`);
-        this.manaPointString.setText('Mana Points: 0/0');
+        this.manaPointString.setText(`Vim: ${playerOrBot.stats.currentResource}/${playerOrBot.stats.maxResource}`);
         this.strengthString.setText(`Strength: ${Math.floor(playerOrBot.getCombinedStat('strength'))}`);
         this.agilityString.setText(`Agility: ${Math.floor(playerOrBot.stats.agility)}`);
         this.vitalityString.setText(`Vitality: ${Math.floor(playerOrBot.stats.vitality)}`);
