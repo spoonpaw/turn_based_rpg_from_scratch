@@ -34,6 +34,7 @@ export default class GridPhysics {
     }
 
     public move(direction: Direction) {
+        console.log(`trying to start moving ${this.playerOrNPC.name}!`);
         this.lastMovementIntent = direction;
         if (this.isMoving()) return;
         if (this.isBlockingDirection(direction)) {
@@ -87,6 +88,7 @@ export default class GridPhysics {
     }
 
     protected startMoving(direction: Direction): void {
+        console.log('START MOVING THE PLAYER');
         this.playerOrNPC.startAnimation(direction);
         this.movementDirection = direction;
         this.updateTilePos();

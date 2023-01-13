@@ -10,7 +10,7 @@ export default class Bot extends GameActor{
     public LEVELING_RATE = 0.4;
     public tilePos!: Phaser.Math.Vector2;
     private uiScene: UIScene;
-    private gameScene: GameScene;
+    public gameScene: GameScene;
     public path: Phaser.Math.Vector2[] = [];
 
     constructor(
@@ -96,31 +96,49 @@ export default class Bot extends GameActor{
             }
             // If the bot has reached its destination, remove it from the path
             if (this.hasReachedDestination()) {
+                console.log('bot has reached its destination!!!');
+                console.log(`removing path element: ${this.path[0].x}, ${this.path[0].y}`);
                 // destination reached, removing first vector
                 this.path.shift();
             }
         }
-
     }
+
 
     public hasReachedDestination(): boolean {
         if (this.path.length === 0) return true;
         const destination = this.path[0];
-
-        // Check if the player is occupying the destination square
-        const playerTilePos = this.gameScene.player.getTilePos();
-        if (destination.x === playerTilePos.x && destination.y === playerTilePos.y) {
-            return false;
+        // Check if the bot is occupying the destination square
+        if (destination.x === this.tilePos.x && destination.y === this.tilePos.y) {
+            console.log('it appears that the bot has reached its destination');
+            console.log(`destination.x = ${destination.x}`);
+            console.log(`destination.y = ${destination.y}`);
+            console.log(`bot tile position x = ${this.getTilePos().x}`);
+            console.log(`bot tile position y = ${this.getTilePos().y}`);
+            return true;
         }
-
-        // Calculate the distance between the current position and the destination
-        const dx = this.tilePos.x - destination.x;
-        const dy = this.tilePos.y - destination.y;
-
-        // If the distance is within a certain threshold, consider the destination reached
-        const threshold = 0.1;
-        return Math.abs(dx) <= threshold && Math.abs(dy) <= threshold;
+        return false;
     }
+
+
+    // public hasReachedDestination(): boolean {
+    //     if (this.path.length === 0) return true;
+    //     const destination = this.path[0];
+    //
+    //     // Check if the player is occupying the destination square
+    //     const playerTilePos = this.gameScene.player.getTilePos();
+    //     if (destination.x === playerTilePos.x && destination.y === playerTilePos.y) {
+    //         return false;
+    //     }
+    //
+    //     // Calculate the distance between the current position and the destination
+    //     const dx = this.tilePos.x - destination.x;
+    //     const dy = this.tilePos.y - destination.y;
+    //
+    //     // If the distance is within a certain threshold, consider the destination reached
+    //     const threshold = 0.1;
+    //     return Math.abs(dx) <= threshold && Math.abs(dy) <= threshold;
+    // }
 
     private calculateDirection(coordinate: Phaser.Math.Vector2): Direction {
         // Calculate the direction based on the difference between the current position and the target coordinate

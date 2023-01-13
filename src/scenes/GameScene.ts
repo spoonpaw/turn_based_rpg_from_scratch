@@ -61,7 +61,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     checkForRandomEncounter(): boolean {
-        const randNum = Phaser.Math.RND.between(0, 4);
+        const randNum = Phaser.Math.RND.between(0, 8);
         return randNum === 0;
     }
 

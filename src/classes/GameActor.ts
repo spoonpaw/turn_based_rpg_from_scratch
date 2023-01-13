@@ -53,6 +53,7 @@ export default class GameActor {
     }
 
     public stopAnimation(direction: Direction) {
+        console.log(`stopping animation on ${this.name}`);
         if (!this.sprite.anims) return;
         const animationManager = this.sprite.anims.animationManager;
         const standingFrame = animationManager.get(direction).frames[1].frame.name;

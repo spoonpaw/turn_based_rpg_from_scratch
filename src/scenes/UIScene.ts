@@ -2142,7 +2142,9 @@ export default class UIScene extends Phaser.Scene {
         console.log({
             playerExperience: this.gameScene.player.experience,
             botExperience: this.gameScene.bots[0]?.experience,
-            npcs: this.gameScene.npcs
+            npcs: this.gameScene.npcs,
+            playerTilePosition: this.gameScene.player.getTilePos(),
+            botPath: this.gameScene.bots[0].path
         });
         // uncomment to log interaction state by clicking player portrait
         if (this.interactionState.startsWith('inventoryaction')) {
