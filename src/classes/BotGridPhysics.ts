@@ -4,7 +4,8 @@ import Bot from './Bot';
 import Vector2 = Phaser.Math.Vector2;
 
 export default class BotGridPhysics{
-    protected lastMovementCommand = Direction.NONE;
+    private lastMovementCommandTimestamp = 0;
+    public lastMovementCommand = Direction.NONE;
     protected movementDirectionVectors: {
         [key in Direction]?: Vector2;
     } = {
@@ -28,7 +29,10 @@ export default class BotGridPhysics{
     }
 
     public move(direction: Direction) {
+        console.log('starting to move');
+        console.log(`setting last movement command to ${direction}`);
         this.lastMovementCommand = direction;
+        this.lastMovementCommandTimestamp = Date.now();
         if (this.isMoving()) return;
         this.movementDirection = direction;
         this.startMoving(direction);
@@ -44,6 +48,10 @@ export default class BotGridPhysics{
         // Update bot position and velocity based on physics rules
         if (this.isMoving()) {
             this.updatePosition(delta);
+        }
+
+        if (this.lastMovementCommand !== Direction.NONE) {
+            console.log('setting last movement command back to NONE from the bot grid physics update method');
         }
         this.lastMovementCommand = Direction.NONE;
     }
@@ -79,12 +87,25 @@ export default class BotGridPhysics{
     }
 
     protected shouldContinueMoving(): boolean {
-        return (
-            this.movementDirection == this.lastMovementCommand
-        );
+        const playerPos = this.bot.gameScene.player.getTilePos();
+        const botPos = this.bot.getTilePos();
+        switch(this.movementDirection) {
+        case Direction.UP:
+            return botPos.y - playerPos.y === 2;
+        case Direction.DOWN:
+            return playerPos.y - botPos.y === 2;
+        case Direction.LEFT:
+            return botPos.x - playerPos.x === 2;
+        case Direction.RIGHT:
+            return playerPos.x - botPos.x === 2;
+        default:
+            return false;
+        }
     }
 
+
     protected stopMoving(): void {
+        console.log('stopping bot movement!!');
         this.bot.startedMoving = false;
         this.bot.stopAnimation(this.movementDirection);
         this.movementDirection = Direction.NONE;
@@ -101,10 +122,12 @@ export default class BotGridPhysics{
             this.updateTilePos();
         }
         else {
+            console.log('it has been determined that the bot should stop moving!!!');
+            console.log(`movement direction: ${this.movementDirection}`);
+            console.log(`last movement command ${this.lastMovementCommand}`);
             this.moveBotSprite(GameScene.TILE_SIZE - this.tileSizePixelsWalked);
             this.stopMoving();
         }
-
     }
 
     protected willCrossTileBorderThisUpdate(
