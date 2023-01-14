@@ -12,8 +12,10 @@ export const abilities: IAbility[] = [
         accuracy: 100,
         resourceCost: 0,
         useTemplate: '${abilityUser} steps forward to defend ${abilityTarget}.',
+        useSelfTemplate: '${abilityUser} takes a defensive stance',
         targetTemplate: '',
-        dodgeTemplate: ''
+        dodgeTemplate: '',
+        targetCriticalHitTemplate: ''
     },
     {
         name: 'Spiky Seeds',
@@ -28,10 +30,30 @@ export const abilities: IAbility[] = [
         accuracy: 90,
         resourceCost: 50,
         useTemplate: '${abilityUser} shoots out a burst of spiky seeds at its enemies!',
+        useSelfTemplate: '',
         targetTemplate: '${abilityTarget} is hit by the spiky seeds and takes ${damage} damage!',
-        dodgeTemplate: '${abilityTarget} manages to dodge the spiky seeds and avoids taking any damage!'
+        dodgeTemplate: '${abilityTarget} manages to dodge the spiky seeds and avoids taking any damage!',
+        targetCriticalHitTemplate: ''
 
     },
+    {
+        name: 'Power Strike',
+        description: 'A fierce attack that deals extra damage to a single target.',
+        type: 'active',
+        targets: 'enemy',
+        turnDuration: 1,
+        key: 'powerstrikebutton',
+        activeKey: 'powerstrikebuttonactive',
+        element: 'physical',
+        power: 2,
+        accuracy: 100,
+        resourceCost: 40,
+        useTemplate: '',
+        useSelfTemplate: '',
+        targetTemplate: '${abilityUser} lashes out with a Power Strike against ${abilityTarget} dealing ${damage} damage!',
+        targetCriticalHitTemplate: '${abilityUser} lands a critical Power Strike on ${abilityTarget}, dealing ${damage} damage!',
+        dodgeTemplate: '${abilityUser} uses Power Strike against ${abilityTarget}, but ${abilityTarget} manages to dodge and avoid taking any damage!',
+    }
 ];
 
 export interface IAbility {
@@ -49,4 +71,6 @@ export interface IAbility {
     useTemplate: string;
     targetTemplate: string;
     dodgeTemplate: string;
+    useSelfTemplate: string;
+    targetCriticalHitTemplate: string;
 }

@@ -14,7 +14,6 @@ export default class GamePadScene extends Phaser.Scene {
         super('GamePad');
     }
 
-
     create() {
         this.gameScene = <GameScene>this.scene.get('Game');
         this.musicScene = <MusicScene>this.scene.get('Music');

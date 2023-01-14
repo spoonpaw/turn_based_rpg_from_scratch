@@ -37,7 +37,7 @@ export default class TitleScene extends Phaser.Scene {
                 color: '#fff',
                 fontFamily: 'CustomFont'
             })
-                .setStroke('#000000', 2);
+                .setStroke('#000000', 6);
 
             this.titleText.setOrigin(0.5);
 

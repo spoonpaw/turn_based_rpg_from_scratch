@@ -10,7 +10,6 @@ import Item from './Item';
 import {MonsterJob} from './Jobs/MonsterJob';
 import {PlayerJob} from './Jobs/PlayerJob';
 
-
 export default abstract class Unit extends Phaser.GameObjects.Sprite {
     public id: number;
     abstract damageTween: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
@@ -60,6 +59,8 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
         let availableActions: string[];
         if (actionType === 'ability') {
+
+            // gets a list of all the abilities that the player character has learned and is currently able to use, based on their level
             availableActions = this.battleScene.gameScene.player.type.skills
                 .filter(ability => ability.levelAttained <= this.battleScene.gameScene.player.level)
                 .map(ability => ability.name);
@@ -74,7 +75,6 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
             actionType
         });
     }
-
 
     public updateSceneOnReceivingDamage(): void {
         // take care of flashing the enemy sprite if it gets damaged or hiding it if it dies.
@@ -122,7 +122,6 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
         return baseStat + totalEquipmentBonus;
     }
-
 
     applyHPChange(hpChangeAmount: number, hpText: Phaser.GameObjects.Text) {
         const initialCharacterHP = this.stats.currentHP;

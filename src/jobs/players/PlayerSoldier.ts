@@ -53,6 +53,10 @@ const guardSkill = abilities.find((obj) => {
     return obj.name === 'Guard';
 });
 
+const powerStrikeSkill = abilities.find((obj) => {
+    return obj.name === 'Power Strike';
+});
+
 const skills: IAbilityAttainment[] = [
     {
         name: guardSkill!.name,
@@ -62,6 +66,15 @@ const skills: IAbilityAttainment[] = [
         targets: guardSkill!.targets,
         key: guardSkill!.key,
         activeKey: guardSkill!.activeKey
+    },
+    {
+        name: powerStrikeSkill!.name,
+        description: powerStrikeSkill!.description,
+        levelAttained: 2,
+        type: powerStrikeSkill!.type,
+        targets: powerStrikeSkill!.targets,
+        key: powerStrikeSkill!.key,
+        activeKey: powerStrikeSkill!.activeKey
     }
 ];
 
@@ -74,6 +87,5 @@ const playerSoldierJob = new PlayerJob(
     playerSoldierStatIncreases,
     skills
 );
-
 
 export default playerSoldierJob;

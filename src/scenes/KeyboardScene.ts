@@ -256,7 +256,6 @@ export default class KeyboardScene extends Phaser.Scene {
         }
     }
 
-
     private inputLetter(char: string) {
         let adjustedChar = char;
         if (this.capsLock) {

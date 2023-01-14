@@ -26,7 +26,7 @@ export default class GameOverScene extends Phaser.Scene {
             color: '#fff',
             fontFamily: 'CustomFont'
         })
-            .setStroke('#000000', 2);
+            .setStroke('#000000', 6);
         this.gameOverText.setOrigin(0.5);
 
         const pressAnyKeyText = this.add.text(this.scale.width / 2, this.scale.height * 0.65, 'Continue?', {
@@ -65,7 +65,6 @@ export default class GameOverScene extends Phaser.Scene {
         this.time.addEvent({
             delay: 3000,
             callback: () => {
-                // this.scene.wake('Game');
                 this.gameScene.scene.restart();
                 this.scene.stop();
                 return;
