@@ -8,8 +8,8 @@ type Vector2 = Phaser.Math.Vector2;
 
 export default class GridPhysics {
     public facingDirection = Direction.NONE;
-    protected lastMovementIntent = Direction.NONE;
     protected gameScene!: GameScene;
+    protected lastMovementIntent = Direction.NONE;
     protected movementDirection: Direction = Direction.NONE;
     protected movementDirectionVectors: {
         [key in Direction]?: Vector2;
@@ -29,11 +29,12 @@ export default class GridPhysics {
         this.gameScene = <GameScene>this.playerOrNPC.sprite.scene.scene.get('Game');
     }
 
-    public moveActor(direction: Direction): void {
-        this.move(direction);
+    public isMoving(): boolean {
+        return this.movementDirection != Direction.NONE;
     }
 
     public move(direction: Direction) {
+        console.log(`trying to start moving ${this.playerOrNPC.name}!`);
         this.lastMovementIntent = direction;
         if (this.isMoving()) return;
         if (this.isBlockingDirection(direction)) {
@@ -58,12 +59,16 @@ export default class GridPhysics {
         return this.speedPixelsPerSecond * deltaInSeconds;
     }
 
-    protected isBlockingDirection(direction: Direction): boolean {
-        return this.hasBlockingTile(this.tilePosInDirection(direction));
+    protected hasBlockingTile(pos: Vector2): boolean {
+        if (this.hasNoTile(pos)) return true;
+        return this.tileMap.layers.some((layer) => {
+            const tile = this.tileMap.getTileAt(pos.x, pos.y, false, layer.name);
+            return tile && tile.properties.collides;
+        });
     }
 
-    public isMoving(): boolean {
-        return this.movementDirection != Direction.NONE;
+    protected isBlockingDirection(direction: Direction): boolean {
+        return this.hasBlockingTile(this.tilePosInDirection(direction));
     }
 
     protected moveActorSprite(pixelsToMove: number) {
@@ -87,6 +92,7 @@ export default class GridPhysics {
     }
 
     protected startMoving(direction: Direction): void {
+        console.log('START MOVING THE PLAYER');
         this.playerOrNPC.startAnimation(direction);
         this.movementDirection = direction;
         this.updateTilePos();
@@ -95,36 +101,6 @@ export default class GridPhysics {
     protected stopMoving(): void {
         this.playerOrNPC.stopAnimation(this.movementDirection);
         this.movementDirection = Direction.NONE;
-    }
-
-    protected updateTilePos(): void {
-        this.playerOrNPC.setTilePos(
-            this.playerOrNPC
-                .getTilePos()
-                .add(this.movementDirectionVectors[this.movementDirection] ?? new Vector2())
-        );
-    }
-
-    protected willCrossTileBorderThisUpdate(
-        pixelsToWalkThisUpdate: number
-    ): boolean {
-        return (
-            this.tileSizePixelsWalked + pixelsToWalkThisUpdate >= GameScene.TILE_SIZE
-        );
-    }
-
-    protected hasBlockingTile(pos: Vector2): boolean {
-        if (this.hasNoTile(pos)) return true;
-        return this.tileMap.layers.some((layer) => {
-            const tile = this.tileMap.getTileAt(pos.x, pos.y, false, layer.name);
-            return tile && tile.properties.collides;
-        });
-    }
-
-    private hasNoTile(pos: Vector2): boolean {
-        return !this.tileMap.layers.some((layer) =>
-            this.tileMap.hasTileAt(pos.x, pos.y, layer.name)
-        );
     }
 
     protected tilePosInDirection(direction: Direction): Vector2 {
@@ -146,5 +122,27 @@ export default class GridPhysics {
             this.moveActorSprite(GameScene.TILE_SIZE - this.tileSizePixelsWalked);
             this.stopMoving();
         }
+    }
+
+    protected updateTilePos(): void {
+        this.playerOrNPC.setTilePos(
+            this.playerOrNPC
+                .getTilePos()
+                .add(this.movementDirectionVectors[this.movementDirection] ?? new Vector2())
+        );
+    }
+
+    protected willCrossTileBorderThisUpdate(
+        pixelsToWalkThisUpdate: number
+    ): boolean {
+        return (
+            this.tileSizePixelsWalked + pixelsToWalkThisUpdate >= GameScene.TILE_SIZE
+        );
+    }
+
+    private hasNoTile(pos: Vector2): boolean {
+        return !this.tileMap.layers.some((layer) =>
+            this.tileMap.hasTileAt(pos.x, pos.y, layer.name)
+        );
     }
 }

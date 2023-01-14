@@ -2139,11 +2139,14 @@ export default class UIScene extends Phaser.Scene {
     }
 
     private player1ButtonCallback() {
-        console.log({
-            playerExperience: this.gameScene.player.experience,
-            botExperience: this.gameScene.bots[0]?.experience,
-            npcs: this.gameScene.npcs
-        });
+        // console.log({
+        //     playerExperience: this.gameScene.player.experience,
+        //     botExperience: this.gameScene.bots[0]?.experience,
+        //     npcs: this.gameScene.npcs,
+        //     playerTilePosition: this.gameScene.player.getTilePos(),
+        //     botPath: this.gameScene.bots[0]?.path,
+        //     botCoords: this.gameScene.bots[0]?.getTilePos(),
+        // });
         // uncomment to log interaction state by clicking player portrait
         if (this.interactionState.startsWith('inventoryaction')) {
             const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);

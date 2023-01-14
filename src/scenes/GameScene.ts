@@ -1,3 +1,4 @@
+
 // TODO: add an npc who walks in a predescribed pattern and will stop and speak when interacted with
 
 // TODO: add an npc questgiver
@@ -54,6 +55,7 @@ export default class GameScene extends Phaser.Scene {
     private nonHostileSpace!: boolean;
     botGridPhysics!: BotGridPhysics;
     private lastPlayerDirection!: Direction;
+    // private botGridControls!: BotGridControls;
     private encounter_counter = 0;
 
     public constructor() {
@@ -61,7 +63,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     checkForRandomEncounter(): boolean {
-        const randNum = Phaser.Math.RND.between(0, 4);
+        const randNum = Phaser.Math.RND.between(0, 8);
         return randNum === 0;
     }
 
@@ -73,9 +75,6 @@ export default class GameScene extends Phaser.Scene {
     ) {
         this.encounter_counter = 0;
 
-        console.log('creating game scene!!');
-        console.log({data});
-        console.log(Object.keys(data));
         this.input.keyboard!.enabled = true;
 
         this.gamePadScene?.scene.restart();
@@ -317,7 +316,6 @@ export default class GameScene extends Phaser.Scene {
                     botClone.type,
                     botCloneStats
                 );
-                console.log({newBot: bot});
                 this.bots[0] = bot;
 
                 this.setupBotGridPhysics();
@@ -418,9 +416,6 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public preload() {
-        // TODO: is there a way to load this locally without depending on this guys repo
-        //  i commented it out and everything is still working so consider deleting this line
-        // this.scene.scene.load.scenePlugin('rexgesturesplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexgesturesplugin.min.js', 'rexGestures', 'rexGestures');
         if (this.sys.game.device.os.desktop) {
             this.operatingSystem = 'desktop';
         }
@@ -544,7 +539,6 @@ export default class GameScene extends Phaser.Scene {
         //  otherwise, hide the interact button
         let readyNPCFound = false;
         for (const npc of this.npcs) {
-            // console.log('there\'s npcs  here');
             if (
                 (
                     this.uiScene.interactionState.startsWith('mainselect') ||

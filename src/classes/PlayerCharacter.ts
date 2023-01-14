@@ -36,9 +36,7 @@ export default class PlayerCharacter extends Unit {
             name,
             job
         );
-        console.log('making a new player character');
         this.stats = this.gameScene.player.stats;
-        console.log(({playerCharacterConstrucorStats: this.stats}));
         this.equipment = this.gameScene.player.equipment;
         this.inventory = this.gameScene.player.inventory;
         this.key = 'PlayerSoldier';

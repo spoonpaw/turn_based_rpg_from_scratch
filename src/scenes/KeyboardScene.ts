@@ -98,7 +98,6 @@ export default class KeyboardScene extends Phaser.Scene {
             }
         );
 
-        console.log({data});
         if (data.purpose === 'playernameselect') {
             this.rejectButton.setVisible(false);
             this.rejectButton.buttonText.setVisible(false);

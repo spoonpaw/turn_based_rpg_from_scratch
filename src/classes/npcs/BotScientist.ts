@@ -147,8 +147,6 @@ export default class extends NPC {
                 'Red Bot',
                 monsterSoldierJob
             );
-            console.log({redBotStats: redBot.stats});
-
             // set all the player2 ui elements to visible with red bot's stats
 
             this.uiScene.player2hpText.setText(`HP: ${redBot.stats.currentHP ?? '0'}/${redBot.stats.maxHP ?? '0'}`);

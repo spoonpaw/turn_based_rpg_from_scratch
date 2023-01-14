@@ -1,6 +1,7 @@
 import eventsCenter from '../utils/EventsCenter';
 import KeyboardScene from './KeyboardScene';
 import MusicScene from './MusicScene';
+import SaveAndLoadScene from './SaveAndLoadScene';
 import SFXScene from './SFXScene';
 
 export default class PlayerNameSelectScene extends Phaser.Scene {
@@ -10,6 +11,7 @@ export default class PlayerNameSelectScene extends Phaser.Scene {
     private backgroundRectangle!: Phaser.GameObjects.Rectangle;
     private musicScene!: MusicScene;
     private sfxScene!: SFXScene;
+    private saveAndLoadScene!: SaveAndLoadScene;
     constructor() {
         super('PlayerNameSelect');
     }
@@ -20,6 +22,7 @@ export default class PlayerNameSelectScene extends Phaser.Scene {
         this.backgroundRectangle = this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0xbcbcbc)
             .setOrigin(0, 0);
 
+
         this.commandFrame = this.add.image(
             40, 610, 'keyboardInputFrame'
         )
@@ -27,6 +30,7 @@ export default class PlayerNameSelectScene extends Phaser.Scene {
 
         this.scene.launch('Keyboard', {purpose: 'playernameselect'});
         this.keyBoardScene = <KeyboardScene>this.scene.get('Keyboard');
+        this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
         this.musicScene = <MusicScene>this.scene.get('Music');
         this.sfxScene = <SFXScene>this.scene.get('SFX');
         this.keyBoardScene.scene.bringToTop();
@@ -58,6 +62,7 @@ export default class PlayerNameSelectScene extends Phaser.Scene {
                 eventsCenter.removeListener('keyboardreject');
                 eventsCenter.removeListener('keyboardaccept');
                 string = String(string);
+                this.saveAndLoadScene.createNewPlayer(string);
                 this.scene.start(
                     'Game',
                     {
@@ -66,6 +71,5 @@ export default class PlayerNameSelectScene extends Phaser.Scene {
                 );
             }
         );
-
     }
 }
