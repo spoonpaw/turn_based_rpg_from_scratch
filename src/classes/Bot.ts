@@ -2,9 +2,9 @@ import GameScene from '../scenes/GameScene';
 import UIScene from '../scenes/UIScene';
 import Stats from '../stats/Stats';
 import {Direction} from '../types/Direction';
-import Vector2 = Phaser.Math.Vector2;
 import GameActor from './GameActor';
 import {MonsterJob} from './Jobs/MonsterJob';
+import Vector2 = Phaser.Math.Vector2;
 
 export default class Bot extends GameActor{
     public LEVELING_RATE = 0.4;
@@ -97,36 +97,17 @@ export default class Bot extends GameActor{
         }
     }
 
-
     public hasReachedDestination(): boolean {
-        if (this.path.length === 0) return true;
         const destination = this.path[0];
         // Check if the bot is occupying the destination square
-        if (destination.x === this.tilePos.x && destination.y === this.tilePos.y) {
+        if (
+            this.path.length === 0 ||
+            destination.x === this.tilePos.x && destination.y === this.tilePos.y
+        ) {
             return true;
         }
         return false;
     }
-
-
-    // public hasReachedDestination(): boolean {
-    //     if (this.path.length === 0) return true;
-    //     const destination = this.path[0];
-    //
-    //     // Check if the player is occupying the destination square
-    //     const playerTilePos = this.gameScene.player.getTilePos();
-    //     if (destination.x === playerTilePos.x && destination.y === playerTilePos.y) {
-    //         return false;
-    //     }
-    //
-    //     // Calculate the distance between the current position and the destination
-    //     const dx = this.tilePos.x - destination.x;
-    //     const dy = this.tilePos.y - destination.y;
-    //
-    //     // If the distance is within a certain threshold, consider the destination reached
-    //     const threshold = 0.1;
-    //     return Math.abs(dx) <= threshold && Math.abs(dy) <= threshold;
-    // }
 
     private calculateDirection(coordinate: Phaser.Math.Vector2): Direction {
         // Calculate the direction based on the difference between the current position and the target coordinate

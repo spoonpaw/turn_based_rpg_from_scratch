@@ -49,7 +49,6 @@ export default class NPC {
     }
 
     public testForInteractionReadyState() {
-        // console.log('testing for the interaction ready state!!!!!');
         if (
             (
                 this.gameScene.player.getTilePos().x === this.tilePos.x - 1 &&

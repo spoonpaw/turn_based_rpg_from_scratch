@@ -9,7 +9,7 @@ type Vector2 = Phaser.Math.Vector2;
 export default class PlayerGridPhysics extends GridPhysics{
     public facingDirection = Direction.NONE;
     protected lastMovementIntent = Direction.NONE;
-    protected movementDirection: Direction = Direction.NONE;
+    public movementDirection: Direction = Direction.NONE;
     protected movementDirectionVectors: {
         [key in Direction]?: Vector2;
     } = {

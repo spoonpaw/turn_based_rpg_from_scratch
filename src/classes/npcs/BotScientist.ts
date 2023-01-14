@@ -19,7 +19,6 @@ export default class extends NPC {
     }
 
     public listenForInteractEvent() {
-        console.log('bot scientist is listening for the interact event!!!!!!!!');
         // innkeeper heard player press the space bar somewhere!
         // check if player is facing innkeeper
         if (this.testForInteractionReadyState()) {
