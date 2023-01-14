@@ -28,7 +28,6 @@ export default class Player extends GameActor{
             species,
             experience
         );
-        console.log({playerType: this.type});
         this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
 
         const offsetX = GameScene.TILE_SIZE / 2;

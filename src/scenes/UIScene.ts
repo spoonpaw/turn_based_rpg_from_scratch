@@ -100,9 +100,9 @@ export default class UIScene extends Phaser.Scene {
     private unequipButton!: UIActionButton;
     private vitalityString!: Phaser.GameObjects.Text;
     private dropButton!: UIActionButton;
-    private player1CharacterSheetButton!: UIActionButton;
-    private player2CharacterSheetButton!: UIActionButton;
-    private player3CharacterSheetButton!: UIActionButton;
+    private player1CharacterButton!: UIActionButton;
+    private player2CharacterButton!: UIActionButton;
+    private player3CharacterButton!: UIActionButton;
     private nameText!: Phaser.GameObjects.Text;
     private invisiblePlayer1Button!: Phaser.GameObjects.Rectangle;
     private invisiblePlayer2Button!: Phaser.GameObjects.Rectangle;
@@ -177,7 +177,28 @@ export default class UIScene extends Phaser.Scene {
                 this.gameScene.player.equipment.head.name,
 
                 () => {
-                    return;
+                    this.interactionState = 'equipmenthead';
+                    this.headItemButton.select();
+                    this.offHandItemButton.deselect();
+                    this.mainHandItemButton.deselect();
+                    this.bodyItemButton.deselect();
+                    const helmet = this.gameScene.player.equipment.head;
+
+                    this.cancelMenuFrame.setVisible(false);
+                    this.cancelButton.setY(392);
+                    this.cancelButton.buttonText.setY(367);
+                    this.inventoryAndAbilityDetailFrame.setVisible(true);
+                    this.inventoryAndAbilityDetailText.setText(
+                        `${helmet?.description}\n\n
+                            Strength: ${helmet?.stats?.strength}, Agility: ${helmet?.stats?.agility},
+                                Vitality: ${helmet?.stats?.vitality}, Intellect: ${helmet?.stats?.intellect},
+                                Luck: ${helmet?.stats?.luck}, Defense: ${helmet?.stats?.defense},
+                                Classes: ${helmet?.classes},
+                                Minimum Level: ${helmet?.minimumLevel}`
+                    );
+                    this.inventoryAndAbilityDetailText.setVisible(true);
+                    this.unequipButton.setVisible(true);
+                    this.unequipButton.buttonText.setVisible(true);
                 }
             );
         }
@@ -310,7 +331,28 @@ export default class UIScene extends Phaser.Scene {
                 this.gameScene.player.equipment.offhand.name,
 
                 () => {
-                    return;
+                    this.interactionState = 'equipmentoffhand';
+                    this.headItemButton.deselect();
+                    this.offHandItemButton.select();
+                    this.mainHandItemButton.deselect();
+                    this.bodyItemButton.deselect();
+                    const offhand = this.gameScene.player.equipment.offhand;
+
+                    this.cancelMenuFrame.setVisible(false);
+                    this.cancelButton.setY(392);
+                    this.cancelButton.buttonText.setY(367);
+                    this.inventoryAndAbilityDetailFrame.setVisible(true);
+                    this.inventoryAndAbilityDetailText.setText(
+                        `${offhand?.description}\n\n
+                            Strength: ${offhand?.stats?.strength}, Agility: ${offhand?.stats?.agility},
+                                Vitality: ${offhand?.stats?.vitality}, Intellect: ${offhand?.stats?.intellect},
+                                Luck: ${offhand?.stats?.luck}, Defense: ${offhand?.stats?.defense},
+                                Classes: ${offhand?.classes},
+                                Minimum Level: ${offhand?.minimumLevel}`);
+
+                    this.inventoryAndAbilityDetailText.setVisible(true);
+                    this.unequipButton.setVisible(true);
+                    this.unequipButton.buttonText.setVisible(true);
                 }
             );
         }
@@ -354,7 +396,7 @@ export default class UIScene extends Phaser.Scene {
                         );
                     }
 
-                    else if (item.type === 'weapon' || item.type === 'bodyarmor') {
+                    else if (item.type === 'weapon' || item.type === 'bodyarmor' || item.type === 'offhand' || item.type === 'helmet') {
                         this.inventoryAndAbilityDetailText.setText(
                             `${item.description}\n\n
                             Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
@@ -378,7 +420,6 @@ export default class UIScene extends Phaser.Scene {
     }
 
     public selectCancel() {
-
         if (this.gameScene.operatingSystem !== 'desktop') {
             this.gameScene.gamePadScene?.scene.restart();
         }
@@ -450,10 +491,10 @@ export default class UIScene extends Phaser.Scene {
             }
         }
 
-        this.player1CharacterSheetButton.setVisible(false);
-        this.player1CharacterSheetButton.buttonText.setVisible(false);
-        this.player2CharacterSheetButton.setVisible(false);
-        this.player2CharacterSheetButton.buttonText.setVisible(false);
+        this.player1CharacterButton.setVisible(false);
+        this.player1CharacterButton.buttonText.setVisible(false);
+        this.player2CharacterButton.setVisible(false);
+        this.player2CharacterButton.buttonText.setVisible(false);
 
         for (const equipmentString of this.equipmentStrings) {
             if (equipmentString.visible) {
@@ -561,7 +602,7 @@ export default class UIScene extends Phaser.Scene {
     }
 
     public updateResource(currentResource: number, maxResource: number) {
-        this.manaText.text = `VIM: ${currentResource}/${maxResource}`;
+        this.manaText.text = `Vim: ${currentResource}/${maxResource}`;
     }
 
     public updatePlayer2HP(hp: number, maxHP: number) {
@@ -630,7 +671,9 @@ export default class UIScene extends Phaser.Scene {
                     }
                     else if (
                         item.type === 'weapon' ||
-                        item.type === 'bodyarmor'
+                        item.type === 'bodyarmor' ||
+                        item.type === 'offhand' ||
+                        item.type === 'helmet'
                     ) {
                         this.inventoryAndAbilityDetailText.setText(
                             `${item.description}\n\n
@@ -687,7 +730,8 @@ export default class UIScene extends Phaser.Scene {
 
                     this.updateAndShowCancelButton(10, 460, 'Cancel', true);
 
-                    if (item.type === 'weapon' || item.type === 'bodyarmor') {
+                    if (item.type === 'weapon' || item.type === 'bodyarmor' || item.type === 'offhand' ||
+                    item.type === 'helmet') {
                         this.inventoryAndAbilityDetailText.setText(
                             `${item.description}\n\n
                             Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
@@ -791,7 +835,6 @@ export default class UIScene extends Phaser.Scene {
         this.interactButton.setVisible(false);
         this.interactButton.buttonText.setVisible(false);
 
-
         this.yesButton = new UIActionButton(
             this,
             710,
@@ -871,7 +914,6 @@ export default class UIScene extends Phaser.Scene {
         );
         this.selectedItemAndAbilityIcon.setVisible(false);
         this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
-
 
         this.sellItemButton = new UIActionButton(
             this,
@@ -1104,6 +1146,31 @@ export default class UIScene extends Phaser.Scene {
                     }
                     this.gameScene.player.equipment.weapon = itemToEquip;
                 }
+
+                else if (itemToEquip.type === 'helmet') {
+                    if (this.gameScene.player.equipment.head) {
+                        this.gameScene.player.inventory.splice(
+                            inventorySlotNumber,
+                            0,
+                            this.gameScene.player.equipment.head
+                        );
+                    }
+                    this.gameScene.player.equipment.head = itemToEquip;
+                }
+
+                else if (itemToEquip.type === 'offhand') {
+                    // check if there's already an offhand equipped
+                    if (this.gameScene.player.equipment.offhand) {
+                        // if there is, add it back to the inventory at the same index as the item being equipped
+                        this.gameScene.player.inventory.splice(
+                            inventorySlotNumber,
+                            0,
+                            this.gameScene.player.equipment.offhand
+                        );
+                    }
+                    this.gameScene.player.equipment.offhand = itemToEquip;
+                }
+
                 else if (itemToEquip.type === 'bodyarmor') {
                     if (this.gameScene.player.equipment.body) {
                         this.gameScene.player.inventory.splice(
@@ -1342,7 +1409,7 @@ export default class UIScene extends Phaser.Scene {
         // END SUBABILITY BUTTONS SECTION
 
         // START SUBCHARACTER SHEET BUTTONS SECTION
-        this.player1CharacterSheetButton = new UIActionButton(
+        this.player1CharacterButton = new UIActionButton(
             this,
             265,
             465,
@@ -1354,17 +1421,17 @@ export default class UIScene extends Phaser.Scene {
                     return;
                 }
                 this.interactionState = 'charactersheet1';
-                this.player1CharacterSheetButton.select();
-                this.player2CharacterSheetButton.deselect();
-                this.player3CharacterSheetButton.deselect();
+                this.player1CharacterButton.select();
+                this.player2CharacterButton.deselect();
+                this.player3CharacterButton.deselect();
 
                 this.updateCharacterSheetStrings(this.gameScene.player);
             }
         );
-        this.player1CharacterSheetButton.setVisible(false);
-        this.player1CharacterSheetButton.buttonText.setVisible(false);
+        this.player1CharacterButton.setVisible(false);
+        this.player1CharacterButton.buttonText.setVisible(false);
 
-        this.player2CharacterSheetButton = new UIActionButton(
+        this.player2CharacterButton = new UIActionButton(
             this,
             265,
             515,
@@ -1376,17 +1443,17 @@ export default class UIScene extends Phaser.Scene {
                     return;
                 }
                 this.interactionState = 'charactersheet2';
-                this.player1CharacterSheetButton.deselect();
-                this.player2CharacterSheetButton.select();
-                this.player3CharacterSheetButton.deselect();
+                this.player1CharacterButton.deselect();
+                this.player2CharacterButton.select();
+                this.player3CharacterButton.deselect();
 
                 this.updateCharacterSheetStrings(this.gameScene.bots[0]);
             }
         );
-        this.player2CharacterSheetButton.setVisible(false);
-        this.player2CharacterSheetButton.buttonText.setVisible(false);
+        this.player2CharacterButton.setVisible(false);
+        this.player2CharacterButton.buttonText.setVisible(false);
 
-        this.player3CharacterSheetButton = new UIActionButton(
+        this.player3CharacterButton = new UIActionButton(
             this,
             265,
             565,
@@ -1398,14 +1465,13 @@ export default class UIScene extends Phaser.Scene {
                     return;
                 }
                 this.interactionState = 'charactersheet3';
-                this.player1CharacterSheetButton.deselect();
-                this.player2CharacterSheetButton.deselect();
-                this.player3CharacterSheetButton.select();
+                this.player1CharacterButton.deselect();
+                this.player2CharacterButton.deselect();
+                this.player3CharacterButton.select();
             }
         );
-        this.player3CharacterSheetButton.setVisible(false);
-        this.player3CharacterSheetButton.buttonText.setVisible(false);
-
+        this.player3CharacterButton.setVisible(false);
+        this.player3CharacterButton.buttonText.setVisible(false);
 
         // END SUBCHARACTER SHEET BUTTONS SECTION
         // END BUTTON SECTION
@@ -1461,7 +1527,7 @@ export default class UIScene extends Phaser.Scene {
         this.manaText = this.add.text(
             115,
             647,
-            `VIM: ${currentResource}/${maxResource}`,
+            `Vim: ${currentResource}/${maxResource}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(3);
@@ -1472,12 +1538,11 @@ export default class UIScene extends Phaser.Scene {
         this.player2ManaText = this.add.text(
             345,
             647,
-            `VIM: ${currentResource}/${maxResource}`,
+            `Vim: ${currentResource}/${maxResource}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(3);
         this.player2ManaText.setVisible(false);
-
 
         // create the hp text game object (player 1)
         this.hpText = this.add.text(
@@ -1699,7 +1764,7 @@ export default class UIScene extends Phaser.Scene {
                 eventsCenter.emit('charactersheet1');
                 if (
                     this.interactionState === 'inventory' ||
-                    this.interactionState === 'equipment' ||
+                    this.interactionState.startsWith('equipment') ||
                     this.interactionState === 'ability' ||
                     this.interactionState.startsWith('selecting') ||
                     this.interactionState.startsWith('inventoryaction') ||
@@ -1727,21 +1792,21 @@ export default class UIScene extends Phaser.Scene {
                 this.inventoryAndAbilityMenuFrame.setVisible(true);
                 this.subInventoryAndAbilityMenuFrame.setVisible(true);
 
-                this.player1CharacterSheetButton.select();
-                this.player1CharacterSheetButton.setVisible(true);
-                this.player1CharacterSheetButton.buttonText.setVisible(true);
+                this.player1CharacterButton.select();
+                this.player1CharacterButton.setVisible(true);
+                this.player1CharacterButton.buttonText.setVisible(true);
 
                 this.goldFrame.setVisible(true);
                 this.nameText.setVisible(true);
 
-                this.player2CharacterSheetButton.deselect();
-                this.player3CharacterSheetButton.deselect();
+                this.player2CharacterButton.deselect();
+                this.player3CharacterButton.deselect();
 
                 // if there are bots, show buttons to show their character sheets.
 
                 if (this.gameScene.bots.length > 0) {
-                    this.player2CharacterSheetButton.setVisible(true);
-                    this.player2CharacterSheetButton.buttonText.setVisible(true);
+                    this.player2CharacterButton.setVisible(true);
+                    this.player2CharacterButton.buttonText.setVisible(true);
                 }
 
                 this.updateAndShowCancelButton(315, 315, 'Cancel', true);
@@ -1900,7 +1965,6 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.selectedItemAndAbilityCommandText.setVisible(false);
 
-
         // START EQUIPMENT STRING SECTION
 
         this.headString = this.add.text(540, 180, 'Head:', {
@@ -1967,7 +2031,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.hitPointString.setVisible(false);
 
-        this.manaPointString = this.add.text(540, 293, 'Mana Points: 0/0', {
+        this.manaPointString = this.add.text(540, 293, 'Vim: 100/100', {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2054,7 +2118,7 @@ export default class UIScene extends Phaser.Scene {
         this.classString.setText(`${classIdentifier}: ${className}`);
         this.levelString.setText(`Level: ${playerOrBot.level}`);
         this.hitPointString.setText(`Hit Points: ${playerOrBot.stats.currentHP}/${playerOrBot.stats.maxHP}`);
-        this.manaPointString.setText('Mana Points: 0/0');
+        this.manaPointString.setText(`Vim: ${playerOrBot.stats.currentResource}/${playerOrBot.stats.maxResource}`);
         this.strengthString.setText(`Strength: ${Math.floor(playerOrBot.getCombinedStat('strength'))}`);
         this.agilityString.setText(`Agility: ${Math.floor(playerOrBot.stats.agility)}`);
         this.vitalityString.setText(`Vitality: ${Math.floor(playerOrBot.stats.vitality)}`);
@@ -2075,10 +2139,14 @@ export default class UIScene extends Phaser.Scene {
     }
 
     private player1ButtonCallback() {
-        console.log({
-            playerExperience: this.gameScene.player.experience,
-            botExperience: this.gameScene.bots[0]?.experience
-        });
+        // console.log({
+        //     playerExperience: this.gameScene.player.experience,
+        //     botExperience: this.gameScene.bots[0]?.experience,
+        //     npcs: this.gameScene.npcs,
+        //     playerTilePosition: this.gameScene.player.getTilePos(),
+        //     botPath: this.gameScene.bots[0]?.path,
+        //     botCoords: this.gameScene.bots[0]?.getTilePos(),
+        // });
         // uncomment to log interaction state by clicking player portrait
         if (this.interactionState.startsWith('inventoryaction')) {
             const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
@@ -2169,7 +2237,6 @@ export default class UIScene extends Phaser.Scene {
 
             this.generateInventoryButtons();
             this.gameScene.input.keyboard!.resetKeys();
-
 
             this.time.addEvent({
                 delay: 2000,

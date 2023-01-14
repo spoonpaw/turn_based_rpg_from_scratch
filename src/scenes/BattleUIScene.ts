@@ -113,12 +113,12 @@ export default class BattleUIScene extends Phaser.Scene {
                 this.selectAttack();
             }
             if (event.code === 'Space') {
-                console.log('space pressed on the battle ui scene!');
-                console.log({
-                    battleSceneInteractionState: this.battleScene.interactionState,
-                    playerVim: this.battleScene.gameScene.player.stats.maxResource,
-                    botVim: this.battleScene.gameScene.bots[0]?.stats.maxResource
-                });
+                // console.log('space pressed on the battle ui scene!');
+                // console.log({
+                //     battleSceneInteractionState: this.battleScene.interactionState,
+                //     playerVim: this.battleScene.gameScene.player.stats.maxResource,
+                //     botVim: this.battleScene.gameScene.bots[0]?.stats.maxResource
+                // });
             }
         });
 
@@ -174,7 +174,6 @@ export default class BattleUIScene extends Phaser.Scene {
                     const selectedAbilityIndex = Number(this.battleScene.interactionState.split('selectingabilityaction')[1]);
                     const selectedAbility = this.battleScene.gameScene.player.type.skills[selectedAbilityIndex];
                     this.inventoryAndAbilityDetailFrame.setVisible(true);
-                    console.log({selectedAbility});
                     this.inventoryAndAbilityDetailText.setText(selectedAbility.description);
                     this.inventoryAndAbilityDetailText.setVisible(true);
                     this.useAbilityButton.setVisible(true);
@@ -692,8 +691,6 @@ export default class BattleUIScene extends Phaser.Scene {
             'checkbutton',
             'Use',
             () => {
-                console.log('using an ability!');
-                console.log({interactionState: this.battleScene.interactionState});
                 this.battleScene.interactionState = this.battleScene.interactionState.split('selecting')[1];
                 this.useAbilityButton.setVisible(false);
                 this.useAbilityButton.buttonText.setVisible(false);

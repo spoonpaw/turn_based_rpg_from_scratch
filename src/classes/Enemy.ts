@@ -57,10 +57,6 @@ export class Enemy extends Unit {
             })!.stats
         );
 
-        console.log('enemy was just cloned!');
-        console.log({clonedEnemy: enemy});
-        console.log({clonedStats: stats});
-
         this.stats = stats ?? new Stats(
             0,
             0,
@@ -137,7 +133,6 @@ export class Enemy extends Unit {
     }
 
     public runTurn(): number {
-        console.log('beginning to run the enemy\'s turn');
         let runtimeInMS = 0;
 
         // if there are enough targets to justify it and enough resources to spend, execute the
@@ -178,7 +173,6 @@ export class Enemy extends Unit {
                                         this.battleScene.sfxScene.playSound('attack');
                                         const damage = this.calculateAttackDamage(target);
                                         eventsCenter.emit('Message', aoeAbility.targetTemplate.replace('${abilityTarget}', target.name).replace('${damage}', String(damage)));
-                                        console.log({ damage });
                                         target.applyHPChange(damage);
                                     }
                                 }
@@ -189,22 +183,6 @@ export class Enemy extends Unit {
                 callbackScope: this
             });
 
-            // for (const target of this.battleScene.heroes) {
-            //     if (this.evadeTest()) {
-            //         this.battleScene.sfxScene.playSound('dodge');
-            //         eventsCenter.emit('Message', aoeAbility.dodgeTemplate.replace('${abilityTarget}', target.name));
-            //         runtimeInMS += 2000;
-            //         return runtimeInMS;
-            //     }
-            //     else {
-            //         this.battleScene.sfxScene.playSound('attack');
-            //         const damage = this.calculateAttackDamage(target);
-            //         eventsCenter.emit('Message', aoeAbility.targetTemplate.replace('${abilityTarget}', target.name).replace('${damage}', String(damage)));
-            //         console.log({damage});
-            //         target.applyHPChange(damage);
-            //         runtimeInMS += 2000;
-            //     }
-            // }
             return runtimeInMS;
         }
         else {
@@ -220,7 +198,6 @@ export class Enemy extends Unit {
                 )
             ];
 
-            console.log({initialTarget: target});
             if (!target) return 0;
 
             let damage = 0;
@@ -242,10 +219,6 @@ export class Enemy extends Unit {
                 }
             }
 
-            console.log({guardOnTarget});
-            console.log({targetAfterCheckingForGuard: target});
-            console.log({initialTargetAfterCheckingForGuard: initialTarget});
-
             if (guardOnTarget) {
                 if (this.evadeTest()) {
                     this.battleScene.sfxScene.playSound('dodge');
@@ -266,7 +239,6 @@ export class Enemy extends Unit {
                         eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted the attack taking ${damage} damage.`);
 
                     }
-                    console.log({damage});
                     target.applyHPChange(damage);
                     runtimeInMS += 2000;
                 }
@@ -282,7 +254,6 @@ export class Enemy extends Unit {
                     this.battleScene.sfxScene.playSound('attack');
                     damage = this.calculateAttackDamage(target);
                     eventsCenter.emit('Message', `${this.name} attacked ${target.name} for ${damage} HP!`);
-                    console.log({damage});
                     target.applyHPChange(damage);
                     runtimeInMS += 2000;
                 }

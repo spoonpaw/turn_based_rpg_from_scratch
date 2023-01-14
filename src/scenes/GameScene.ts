@@ -29,16 +29,16 @@ import UIScene from './UIScene';
 
 export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
-    public armorMerchant!: Merchant;
-    public botScientist!: BotScientist;
+    public armorMerchant!: Merchant | undefined;
+    public botScientist!: BotScientist | undefined;
     public bots: Bot[] = [];
     public currentMap!: string;
     public cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     public gamePadScene?: GamePadScene;
     public gridControls!: GridControls;
     public gridPhysics!: PlayerGridPhysics;
-    public innKeeper!: Innkeeper;
-    public itemMerchant!: Merchant;
+    public innKeeper!: Innkeeper | undefined;
+    public itemMerchant!: Merchant | undefined;
     public musicScene!: MusicScene;
     public npcs: (Innkeeper | Merchant | BotScientist)[] = [];
     public operatingSystem!: string;
@@ -48,7 +48,7 @@ export default class GameScene extends Phaser.Scene {
     public readyToInteractObject: Innkeeper | Merchant | BotScientist | undefined;
     public spaceDown!: boolean;
     public uiScene!: UIScene;
-    public weaponMerchant!: Merchant;
+    public weaponMerchant!: Merchant | undefined;
     private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private exitingCurrentLevel!: boolean;
     private movedFromSpawn!: boolean;
@@ -63,7 +63,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     checkForRandomEncounter(): boolean {
-        const randNum = Phaser.Math.RND.between(0, 4);
+        const randNum = Phaser.Math.RND.between(0, 8);
         return randNum === 0;
     }
 
@@ -75,9 +75,6 @@ export default class GameScene extends Phaser.Scene {
     ) {
         this.encounter_counter = 0;
 
-        console.log('creating game scene!!');
-        console.log({data});
-        console.log(Object.keys(data));
         this.input.keyboard!.enabled = true;
 
         this.gamePadScene?.scene.restart();
@@ -166,6 +163,12 @@ export default class GameScene extends Phaser.Scene {
             this.sys.events.on('wake', this.wake, this);
 
             this.npcs = [];
+
+            this.innKeeper = undefined;
+            this.weaponMerchant = undefined;
+            this.armorMerchant = undefined;
+            this.itemMerchant = undefined;
+            this.botScientist = undefined;
 
             for (const npc of levels.town.npcs) {
                 // place npc sprites
@@ -258,6 +261,12 @@ export default class GameScene extends Phaser.Scene {
 
             this.npcs = [];
 
+            this.innKeeper = undefined;
+            this.weaponMerchant = undefined;
+            this.armorMerchant = undefined;
+            this.itemMerchant = undefined;
+            this.botScientist = undefined;
+
             this.uiScene.musicScene.changeSong(data.levelData.music);
 
             // spawn the character in the correct position based on data passed to the restart method
@@ -307,7 +316,6 @@ export default class GameScene extends Phaser.Scene {
                     botClone.type,
                     botCloneStats
                 );
-                console.log({newBot: bot});
                 this.bots[0] = bot;
 
                 this.setupBotGridPhysics();
@@ -408,7 +416,6 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public preload() {
-        this.scene.scene.load.scenePlugin('rexgesturesplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexgesturesplugin.min.js', 'rexGestures', 'rexGestures');
         if (this.sys.game.device.os.desktop) {
             this.operatingSystem = 'desktop';
         }
@@ -427,7 +434,6 @@ export default class GameScene extends Phaser.Scene {
         // Check if the player's position has changed
         const xPositionChanged = this.playerTileX !== this.player.getTilePos().x;
         const yPositionChanged = this.playerTileY !== this.player.getTilePos().y;
-
 
         // Get the player's current position
 
@@ -451,7 +457,6 @@ export default class GameScene extends Phaser.Scene {
             // Update the last player direction
             this.lastPlayerDirection = this.playerTileY < this.player.getTilePos().y ? Direction.DOWN : Direction.UP;
         }
-
 
         let checkForAFight = false;
 

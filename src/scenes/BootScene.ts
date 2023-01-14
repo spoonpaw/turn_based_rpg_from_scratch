@@ -6,6 +6,10 @@ export default class BootScene extends Phaser.Scene {
         super('Boot');
     }
 
+    public init() {
+        // this.scene.launch('SaveAndLoad');
+    }
+
     public create() {
         this.scene.start('Title');
     }

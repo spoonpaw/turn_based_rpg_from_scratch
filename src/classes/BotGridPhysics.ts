@@ -1,26 +1,124 @@
 import GameScene from '../scenes/GameScene';
 import {Direction} from '../types/Direction';
 import Bot from './Bot';
-import GridPhysics from './GridPhysics';
 import Vector2 = Phaser.Math.Vector2;
 
-export default class BotGridPhysics extends GridPhysics {
-    // Constructor
-    constructor(bot: Bot, tileMap: Phaser.Tilemaps.Tilemap) {
-        super(bot, tileMap);
+export default class BotGridPhysics{
+    protected lastMovementCommand = Direction.NONE;
+    protected movementDirectionVectors: {
+        [key in Direction]?: Vector2;
+    } = {
+            [Direction.UP]: Vector2.UP,
+            [Direction.DOWN]: Vector2.DOWN,
+            [Direction.LEFT]: Vector2.LEFT,
+            [Direction.RIGHT]: Vector2.RIGHT,
+        };
+    protected readonly speedPixelsPerSecond: number = GameScene.TILE_SIZE * 4;
+    protected tileSizePixelsWalked = 0;
+    private movementDirection: Direction = Direction.NONE;
+
+    constructor(
+        private bot: Bot,
+        private tileMap: Phaser.Tilemaps.Tilemap
+    ) {
     }
 
-    // Override update method to apply physics to the bot
-    public update(delta: number): void {
+    public isMoving(): boolean {
+        return this.movementDirection != Direction.NONE;
+    }
+
+    public move(direction: Direction) {
+        this.lastMovementCommand = direction;
+        if (this.isMoving()) return;
+        this.movementDirection = direction;
+        this.startMoving(direction);
+    }
+
+    protected tilePosInDirection(direction: Direction): Vector2 {
+        return this.bot
+            .getTilePos()
+            .add(this.movementDirectionVectors[direction] ?? new Vector2());
+    }
+
+    public update(delta: number) {
         // Update bot position and velocity based on physics rules
-        // ...
         if (this.isMoving()) {
             this.updatePosition(delta);
         }
-        this.lastMovementIntent = Direction.NONE;
+        this.lastMovementCommand = Direction.NONE;
     }
 
-    protected startMoving(direction: Direction): void {
+    public updateTilePos(): void {
+        this.bot.setTilePos(
+            this.bot
+                .getTilePos()
+                .add(
+                    this.movementDirectionVectors[
+                        this.movementDirection
+                    ] ?? new Vector2()
+                )
+        );
+    }
+
+    protected getPixelsToWalkThisUpdate(delta: number): number {
+        const deltaInSeconds = delta / 1000;
+        return this.speedPixelsPerSecond * deltaInSeconds;
+    }
+
+    protected moveBotSprite(pixelsToMove: number) {
+        const directionVec = this.movementDirectionVectors[
+            this.movementDirection
+        ]?.clone();
+        const movementDistance = directionVec?.multiply(
+            new Vector2(pixelsToMove)
+        );
+        const newBotPos = this.bot.getPosition().add(movementDistance ?? new Vector2());
+        this.bot.setPosition(newBotPos);
+        this.tileSizePixelsWalked += pixelsToMove;
+        this.tileSizePixelsWalked %= GameScene.TILE_SIZE;
+    }
+
+    protected shouldContinueMoving(): boolean {
+        return (
+            this.movementDirection == this.lastMovementCommand
+        );
+    }
+
+    protected stopMoving(): void {
+        this.bot.startedMoving = false;
+        this.bot.stopAnimation(this.movementDirection);
+        this.movementDirection = Direction.NONE;
+    }
+
+    //
+    protected updatePosition(delta: number) {
+        const pixelsToWalkThisUpdate = this.getPixelsToWalkThisUpdate(delta);
+        if (!this.willCrossTileBorderThisUpdate(pixelsToWalkThisUpdate)) {
+            this.moveBotSprite(pixelsToWalkThisUpdate);
+        }
+        else if (this.shouldContinueMoving()) {
+            this.moveBotSprite(pixelsToWalkThisUpdate);
+            this.updateTilePos();
+        }
+        else {
+            this.moveBotSprite(GameScene.TILE_SIZE - this.tileSizePixelsWalked);
+            this.stopMoving();
+        }
+
+    }
+
+    protected willCrossTileBorderThisUpdate(
+        pixelsToWalkThisUpdate: number
+    ): boolean {
+        return (
+            this.tileSizePixelsWalked + pixelsToWalkThisUpdate >= GameScene.TILE_SIZE
+        );
+    }
+
+    private startMoving(direction: Direction): void {
+        // start moving the bot in the given direction
+        if (this.bot.startedMoving) return;
+        this.bot.startedMoving = true;
         let animationKey = '';
         if (direction === Direction.UP) {
             animationKey = 'redbot_up';
@@ -34,34 +132,7 @@ export default class BotGridPhysics extends GridPhysics {
         else if (direction === Direction.LEFT) {
             animationKey = 'redbot_left';
         }
-        this.playerOrNPC.startAnimation(animationKey);
-        this.movementDirection = direction;
+        if (!this.bot.sprite.anims.isPlaying) this.bot.startAnimation(animationKey);
         this.updateTilePos();
-    }
-
-
-    public moveActor(direction: Direction): void {
-        this.move(direction);
-    }
-
-    protected moveActorSprite(pixelsToMove: number) {
-        const directionVec = this.movementDirectionVectors[
-            this.movementDirection
-        ]?.clone();
-        const movementDistance = directionVec?.multiply(
-            new Vector2(pixelsToMove)
-        );
-        const newBotPos = this.playerOrNPC.getPosition().add(movementDistance ?? new Vector2());
-        this.playerOrNPC.setPosition(newBotPos);
-        this.tileSizePixelsWalked += pixelsToMove;
-        this.tileSizePixelsWalked %= GameScene.TILE_SIZE;
-    }
-
-    public updateTilePos(): void {
-        this.playerOrNPC.setTilePos(
-            this.playerOrNPC
-                .getTilePos()
-                .add(this.movementDirectionVectors[this.movementDirection] ?? new Vector2())
-        );
     }
 }

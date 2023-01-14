@@ -26,4 +26,5 @@ export default class PlayerGridPhysics extends GridPhysics{
     ) {
         super(playerOrNPC, tileMap);
     }
+
 }

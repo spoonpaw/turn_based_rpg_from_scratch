@@ -162,7 +162,6 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private endBattle(): void {
-
         this.battleUIScene.disableAllActionButtons();
         // send the player info to the game scene ui
 
@@ -253,8 +252,6 @@ export default class BattleScene extends Phaser.Scene {
             actionType: string
         }
     ): void {
-        console.log({actionType: data.actionType});
-        console.log({action: data.action});
         let passiveAbilitySelected = false;
         let selectedAbility;
         if (data.actionType === 'ability') {
@@ -429,7 +426,6 @@ export default class BattleScene extends Phaser.Scene {
             }
 
             else {
-                console.log('setting the bots hp on the game scene!!');
                 const bot = this.gameScene.bots[0];
                 // unit must be a bot character at this point
                 bot.stats.currentHP = unit.stats.currentHP;
@@ -553,17 +549,12 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private startBattle(): void {
-        console.log('starting the battle');
-        console.log(`Total number of game objects created: ${this.children.length}`);
-        let count = 0;
-        this.children.each(gameObject => {
-            if (gameObject.active) {
-                console.log('active game object found in start of the battle! it didn\'t get destroyed or what?');
-                console.log({gameObject});
-                count++;
-            }
-        });
-        console.log(`Number of active game objects: ${count}`);
+        // let count = 0;
+        // this.children.each(gameObject => {
+        //     if (gameObject.active) {
+        //         count++;
+        //     }
+        // });
 
         this._idCounter = 0;
         this.passiveEffects = [];
@@ -705,7 +696,6 @@ export default class BattleScene extends Phaser.Scene {
         // const selectedEnemy: string = Phaser.Math.RND.pick(levels[this.gameScene.currentMap as keyof typeof levels].enemies ?? []);
         const selectedEnemyKey: string = Phaser.Math.RND.pick(levels[this.gameScene.currentMap as keyof typeof levels].enemies ?? []);
 
-
         const enemy = new Enemy(
             this,
             Number(this.game.config.width) / 2,
@@ -788,8 +778,6 @@ export default class BattleScene extends Phaser.Scene {
                 args: [this.enemies]
             });
 
-            console.log('battle won');
-            console.log({player1LevelUpData: levelUpData});
             let cumulativeLevelUpMessageDelay = 0;
             if (levelUpData.levelUp) {
                 cumulativeLevelUpMessageDelay += 2000;
@@ -812,7 +800,6 @@ export default class BattleScene extends Phaser.Scene {
                 });
             }
 
-            console.log({player2LevelUpData});
             if (this.gameScene.bots.length > 0 && player2LevelUpData?.levelUp) {
                 this.time.addEvent({
                     delay: 4000 + cumulativeLevelUpMessageDelay,
