@@ -134,17 +134,40 @@ export default class TitleStoryScene extends Phaser.Scene{
         });
     }
 
+    // update() {
+    //     if (this.slideUpTitle) {
+    //         this.storyText.setY(this.storyText.y - 0.3);
+    //
+    //         if (
+    //             this.titleText.y > this.titleTextYFinalDestination
+    //         ) {
+    //             this.titleText.setY(this.titleText.y - 1);
+    //         }
+    //     }
+    //     if (this.storyText.y <= -this.storyText.height + 165 && !this.showTitleMenuScene) {
+    //         this.showTitleMenuScene = true;
+    //         this.pressKeyToSkip.setVisible(false);
+    //         this.scene.launch('TitleMenu');
+    //     }
+    // }
+
     update() {
         if (this.slideUpTitle) {
-            this.storyText.setY(this.storyText.y - 0.3);
+            //create a vector with x and y values of 0
+            const storyVelocity = new Phaser.Math.Vector2(0, -0.3);
+            //update the position of the story text by the velocity vector
+            this.storyText.setPosition(this.storyText.x + storyVelocity.x, this.storyText.y + storyVelocity.y);
 
             if (
                 this.titleText.y > this.titleTextYFinalDestination
             ) {
-                this.titleText.setY(this.titleText.y - 1);
+                const titleVelocity = new Phaser.Math.Vector2(0, -0.8);
+                this.titleText.setPosition(this.titleText.x + titleVelocity.x, this.titleText.y + titleVelocity.y);
             }
         }
         if (this.storyText.y <= -this.storyText.height + 165 && !this.showTitleMenuScene) {
+            this.input.keyboard!.removeListener('keydown');
+            this.input.removeListener('pointerdown');
             this.showTitleMenuScene = true;
             this.pressKeyToSkip.setVisible(false);
             this.scene.launch('TitleMenu');
