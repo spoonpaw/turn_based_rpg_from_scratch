@@ -1,62 +1,48 @@
-import {DBSchema, IDBPDatabase, openDB} from 'idb';
+import GameDatabase from '../classes/GameDatabase';
 
-interface GameDB extends DBSchema{
-
-    player: {
-        value: {
-            name: string;
-            id?: number
-        };
-        key: number;
-    };
-}
-
-export default class SaveAndLoadScene extends Phaser.Scene{
-    private playerStoreNameExists = false;
-    private entriesFoundInPlayerStore = false;
+export default class SaveAndLoadScene extends Phaser.Scene {
+    private db!: GameDatabase;
     constructor() {
         super('SaveAndLoad');
     }
 
+
     create() {
-        this.getDBAndAddPlayerObjectStore();
+        this.db = new GameDatabase();
+        this.openDB();
     }
 
-    async getDBAndAddPlayerObjectStore() {
-        // open a database
-        const db = await openDB<GameDB>(
-            'game-db',
-            1,
-            {
-                upgrade(db: IDBPDatabase<GameDB>) {
-                    db.createObjectStore('player', {
-                        keyPath: 'id',
-                        autoIncrement: true
-                    });
-                }
-            }
-        );
-
-        this.playerStoreNameExists = db.objectStoreNames.contains('player');
-        const tx = db.transaction('player', 'readwrite');
-        const store = tx.objectStore('player');
-        const val = (await store.get(0));
-        this.entriesFoundInPlayerStore = !!val;
-
+    upsertPlayer(name: string) {
+        this.db.open().then(db => {
+            const player = {id: 0, name};
+            db.table('players').put(player);
+        }).catch(err => {
+            console.log(`error occurred: ${err}`);
+        });
     }
 
-    async createNewPlayer(name: string) {
-
-        const db = await openDB<GameDB>(
-            'game-db',
-            1
-        );
-        await db.add(
-            'player',
-            {
-                name
-            }
-        );
-
+    private openDB() {
+        this.db.open();
     }
+
+    public async getPlayers() {
+        try {
+            const db = await this.db.open();
+            return db.table('players').toArray();
+        }
+        catch (err) {
+            console.log(`error occurred: ${err}`);
+        }
+    }
+    public async getPlayerByIndex(index: number) {
+        try {
+            const db = await this.db.open();
+            const players = await db.table('players').toArray();
+            return players[index];
+        }
+        catch (err) {
+            console.log(`Error occurred: ${err}`);
+        }
+    }
+
 }

@@ -95,9 +95,11 @@ export default class GameScene extends Phaser.Scene {
             this.musicScene = <MusicScene>this.scene.get('Music');
             this.musicScene.scene.bringToTop();
 
+            this.musicScene.changeSong('town');
             if (this.musicScene.gameOverSong.isPlaying) {
                 this.musicScene.changeSong('overworld');
             }
+
 
             this.nonHostileSpace = true;
             this.currentMap = levels.town.name;
@@ -149,7 +151,7 @@ export default class GameScene extends Phaser.Scene {
                     12,
                     14
                 ),
-                this.player?.gold ?? 500,
+                this.player?.gold ?? 0,
                 this.player?.experience ?? 0,
                 'Human',
                 playerSoldierJob,
@@ -267,6 +269,7 @@ export default class GameScene extends Phaser.Scene {
             this.itemMerchant = undefined;
             this.botScientist = undefined;
 
+            console.log(`changing song to ${data.levelData.music}`);
             this.uiScene.musicScene.changeSong(data.levelData.music);
 
             // spawn the character in the correct position based on data passed to the restart method
