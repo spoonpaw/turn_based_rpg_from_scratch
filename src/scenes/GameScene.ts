@@ -100,7 +100,6 @@ export default class GameScene extends Phaser.Scene {
                 this.musicScene.changeSong('overworld');
             }
 
-
             this.nonHostileSpace = true;
             this.currentMap = levels.town.name;
             this.exitingCurrentLevel = false;
