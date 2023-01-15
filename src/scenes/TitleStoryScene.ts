@@ -111,6 +111,7 @@ export default class TitleStoryScene extends Phaser.Scene{
                 this.input.removeListener('pointerdown');
                 // Set the storytext y to -this.storyText.height + 165
                 this.storyText.y = -this.storyText.height + 165;
+                this.storyText.setVisible(false);
                 // Launch the 'TitleMenu' scene
                 this.showTitleMenuScene = true;
                 this.pressKeyToSkip.setVisible(false);
@@ -150,20 +151,24 @@ export default class TitleStoryScene extends Phaser.Scene{
     //         this.scene.launch('TitleMenu');
     //     }
     // }
-
     update() {
         if (this.slideUpTitle) {
-            //create a vector with x and y values of 0
-            const storyVelocity = new Phaser.Math.Vector2(0, -0.3);
-            //update the position of the story text by the velocity vector
-            this.storyText.setPosition(this.storyText.x + storyVelocity.x, this.storyText.y + storyVelocity.y);
+            this.slideUpTitle = false;
+            // Create a tween to move the story text up
+            this.tweens.add({
+                targets: this.storyText,
+                y: -this.storyText.height + 165,
+                duration: 45000, // Adjust this value to change the duration of the tween
+                ease: 'Linear'
+            });
 
-            if (
-                this.titleText.y > this.titleTextYFinalDestination
-            ) {
-                const titleVelocity = new Phaser.Math.Vector2(0, -0.8);
-                this.titleText.setPosition(this.titleText.x + titleVelocity.x, this.titleText.y + titleVelocity.y);
-            }
+            // You could also use a tween to move the title text
+            this.tweens.add({
+                targets: this.titleText,
+                y: this.titleTextYFinalDestination,
+                duration: 2500,
+                ease: 'Linear'
+            });
         }
         if (this.storyText.y <= -this.storyText.height + 165 && !this.showTitleMenuScene) {
             this.input.keyboard!.removeListener('keydown');
@@ -173,4 +178,5 @@ export default class TitleStoryScene extends Phaser.Scene{
             this.scene.launch('TitleMenu');
         }
     }
+
 }
