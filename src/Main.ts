@@ -29,7 +29,7 @@ const config: Phaser.Types.Core.GameConfig = {
         arcade: {
             debug: false,
             gravity: {y: 0},
-            fixedStep: false
+            fixedStep: true
         }
     },
     antialias: false,

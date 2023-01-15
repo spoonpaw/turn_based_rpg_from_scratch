@@ -134,14 +134,14 @@ export default class TitleStoryScene extends Phaser.Scene{
         });
     }
 
-    update(time: number, delta: number) {
+    update() {
         if (this.slideUpTitle) {
-            this.storyText.setY(this.storyText.y - 0.04 * delta);
+            this.storyText.setY(this.storyText.y - 0.3);
 
             if (
                 this.titleText.y > this.titleTextYFinalDestination
             ) {
-                this.titleText.setY(this.titleText.y - 0.1 * delta);
+                this.titleText.setY(this.titleText.y - 1);
             }
         }
         if (this.storyText.y <= -this.storyText.height + 165 && !this.showTitleMenuScene) {
