@@ -64,9 +64,19 @@ export default class BotGridPhysics{
     }
 
     protected getPixelsToWalkThisUpdate(delta: number): number {
+        const playerProgress = this.bot.gameScene.gridPhysics.tileSizePixelsWalked / GameScene.TILE_SIZE;
         const deltaInSeconds = delta / 1000;
-        return this.speedPixelsPerSecond * deltaInSeconds;
+        return Math.max(
+            this.speedPixelsPerSecond * deltaInSeconds,
+            (playerProgress * GameScene.TILE_SIZE) - this.tileSizePixelsWalked
+        );
     }
+
+
+    // protected getPixelsToWalkThisUpdate(delta: number): number {
+    //     const deltaInSeconds = delta / 1000;
+    //     return this.speedPixelsPerSecond * deltaInSeconds;
+    // }
 
     protected moveBotSprite(pixelsToMove: number) {
         const directionVec = this.movementDirectionVectors[
