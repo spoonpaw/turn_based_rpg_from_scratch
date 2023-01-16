@@ -84,7 +84,6 @@ export default class GameScene extends Phaser.Scene {
         this.uiScene = <UIScene>this.scene.get('UI');
         this.musicScene = <MusicScene>this.scene.get('Music');
         if (data.loadFromSave) {
-            console.log('loading from save in the init method!');
             // TODO: load the game similarly to the above branch.
             //  except get the info from dexie
             this.uiScene.scene.bringToTop();
@@ -97,10 +96,7 @@ export default class GameScene extends Phaser.Scene {
             this.itemMerchant = undefined;
             this.botScientist = undefined;
 
-            console.log('bout to access the player db!');
-
             this.saveAndLoadScene.getPlayerByIndex(data.saveIndex).then(player => {
-                console.log('inside the player query\'s then method');
                 const levelData = levels[player.currentTilemap];
                 this.nonHostileSpace = !levelData.hostile;
                 this.musicScene.changeSong(levelData.music);
@@ -121,7 +117,6 @@ export default class GameScene extends Phaser.Scene {
                 const playerSprite = this.add.sprite(0, 0, player.texture);
                 playerSprite.setDepth(2);
                 this.cameras.main.startFollow(playerSprite);
-                console.log('bout to set the player!!!');
                 this.player = new Player(
                     player.name,
                     playerSprite,
@@ -470,7 +465,6 @@ export default class GameScene extends Phaser.Scene {
             this.itemMerchant = undefined;
             this.botScientist = undefined;
 
-            console.log(`changing song to ${data.levelData.music}`);
             this.musicScene.changeSong(data.levelData.music);
 
             // spawn the character in the correct position based on data passed to the restart method
@@ -630,10 +624,6 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public update(_time: number, delta: number) {
-        if (!this.firstUpdateRun) {
-            console.log('running the first update call');
-            this.firstUpdateRun = true;
-        }
 
         if (!this.gridControls) {
             return;
@@ -864,7 +854,6 @@ export default class GameScene extends Phaser.Scene {
     }
 
     private setupPlayerGridPhysics() {
-        console.log('setting up player grid physics!!');
         this.gridPhysics = new PlayerGridPhysics(this.player, this.currentTilemap);
         this.gridControls = new GridControls(this.input, this.gridPhysics);
 

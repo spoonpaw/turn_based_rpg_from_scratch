@@ -36,8 +36,6 @@ export default class TitleMenuScene extends Phaser.Scene{
             'checkbutton',
             'File 1',
             () => {
-                console.log('save file 1 clicked');
-
                 this.scene.stop('TitleStory');
                 this.saveAndLoadScene.getPlayerByIndex(0).then(() => {
                     this.scene.start(
@@ -64,7 +62,7 @@ export default class TitleMenuScene extends Phaser.Scene{
             'checkbutton',
             'File 2',
             () => {
-                console.log('save file 2 clicked');
+                return;
             }
         );
 
@@ -80,7 +78,7 @@ export default class TitleMenuScene extends Phaser.Scene{
             'checkbutton',
             'File 3',
             () => {
-                console.log('save file 2 clicked');
+                return;
             }
         );
 
@@ -96,7 +94,6 @@ export default class TitleMenuScene extends Phaser.Scene{
             'crossbutton',
             'Cancel',
             () => {
-                console.log('cancelbutton clicked');
                 for (const saveFileButton of this.saveFileButtons) {
                     saveFileButton.setVisible(false);
                     saveFileButton.buttonText.setVisible(false);
@@ -120,7 +117,6 @@ export default class TitleMenuScene extends Phaser.Scene{
             'checkbutton',
             'New Game',
             () => {
-                console.log('new game button clicked!');
                 this.scene.stop('TitleStory');
                 this.scene.start('PlayerNameSelect');
             }
@@ -134,14 +130,12 @@ export default class TitleMenuScene extends Phaser.Scene{
             'checkbutton',
             'Load Game',
             () => {
-                console.log('load game button clicked');
                 this.newGameButton.setVisible(false);
                 this.newGameButton.buttonText.setVisible(false);
                 this.loadGameButton.setVisible(false);
                 this.loadGameButton.buttonText.setVisible(false);
                 this.saveAndLoadScene.getPlayers().then(players => {
                     for (const [index, player] of players!.entries()) {
-                        console.log(player.name);
                         this.saveFileButtons[index].buttonText.setText(player.name);
                         this.shrinkTextByPixel(this.saveFileButtons[index].buttonText, 430);
                         this.saveFileButtons[index].setVisible(true);
@@ -156,8 +150,6 @@ export default class TitleMenuScene extends Phaser.Scene{
         this.loadGameButton.buttonText.setVisible(false);
 
         this.saveAndLoadScene.getPlayers().then(players => {
-            console.log(players && players.length > 0);
-            console.log('checking for saved players from title menu scene!');
             if (players && players.length > 0) {
                 this.loadGameButton.setVisible(true);
                 this.loadGameButton.buttonText.setVisible(true);
