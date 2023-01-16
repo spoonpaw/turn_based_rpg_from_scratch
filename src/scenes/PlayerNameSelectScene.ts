@@ -68,11 +68,11 @@ export default class PlayerNameSelectScene extends Phaser.Scene {
                 eventsCenter.removeListener('keyboardreject');
                 eventsCenter.removeListener('keyboardaccept');
                 string = String(string);
-                this.saveAndLoadScene.upsertPlayer(string);
                 this.scene.start(
                     'Game',
                     {
-                        nameData: string
+                        nameData: string,
+                        saveIndex: 0
                     }
                 );
             }

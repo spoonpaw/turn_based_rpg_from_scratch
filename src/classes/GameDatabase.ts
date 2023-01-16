@@ -1,22 +1,82 @@
 import Dexie from 'dexie';
 
-export default class GameDatabase extends Dexie {
-    // Declare implicit table properties.
-    // (just to inform Typescript. Instantiated by Dexie in stores() method)
-    contacts!: Dexie.Table<IPlayer, number>; // number = type of the primkey
-    //...other tables goes here...
+import {IAbility} from '../abilities/abilities';
+import Stats from '../stats/Stats';
+import {Direction} from '../types/Direction';
+import Item from './Item';
 
-    constructor () {
-        super('GameDatabase');
-        this.version(1).stores({
-            players: 'id, name',
-            //...other tables goes here...
-        });
-    }
+interface Unit {
+    name: string,
+    id: number,
+    key: string,
+    stats: Stats,
+    equipment: {
+        body: Item,
+        head: Item,
+        offhand: Item,
+        weapon: Item
+    },
+    inventory: Item[],
+    living: boolean,
+    actorType: string
 }
 
-interface IPlayer {
+export interface IPlayer {
     id?: number,
     name: string,
-    gold: number
+    gold: number,
+    experience: number,
+    stats: Stats,
+    bots: Array<{
+        name: string,
+        experience: number,
+        stats: Stats,
+        texture: string,
+        position: Phaser.Math.Vector2,
+        facing: Direction,
+        inCombat: boolean,
+        species: string,
+        equipment: {
+            body: Item | undefined,
+            head: Item | undefined,
+            offhand: Item | undefined,
+            weapon: Item | undefined
+        },
+        inventory: Item[],
+        living: boolean
+    }>,
+    equipment: {
+        body: Item | undefined,
+        head: Item | undefined,
+        offhand: Item | undefined,
+        weapon: Item | undefined
+    },
+    inventory: Item[],
+    texture: string,
+    position: Phaser.Math.Vector2,
+    facing: Direction,
+    inCombat: boolean,
+    combatState: {
+        enemies: Unit[],
+        heroes: Unit[],
+        passiveEffects: {
+            actor: Unit,
+            target: Unit,
+            ability: IAbility,
+            turnDurationRemaining: number
+        }[],
+        turnUnits: Unit[]
+    },
+    currentTilemap: string
+}
+
+export default class GameDatabase extends Dexie {
+    players!: Dexie.Table<IPlayer, number>;
+
+    constructor() {
+        super('GameDatabase');
+        this.version(2).stores({
+            players: 'id, name, gold, experience, stats, bots, equipment, inventory, texture, position, facing, inCombat, combatState, currentTilemap'
+        });
+    }
 }

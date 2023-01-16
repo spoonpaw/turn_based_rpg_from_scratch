@@ -15,7 +15,8 @@ export const levels: ILevelDataContainer = {
         ],
         npcs: [],
         enemies: ['seedspiker', 'sentientrock', 'deadlyflower'],
-        music: 'overworld'
+        music: 'overworld',
+        hostile: true
     },
     town: {
         name: 'town',
@@ -90,6 +91,7 @@ export const levels: ILevelDataContainer = {
             }
         ],
         music: 'town',
+        hostile: false,
         containers: [],
     }
 };
@@ -117,6 +119,7 @@ export interface ILevelData {
     tilesetKey: string;
     tilesetName: string;
     music: string;
+    hostile: boolean;
 }
 
 export interface ILevelDataContainer {

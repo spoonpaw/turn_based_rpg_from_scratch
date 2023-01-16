@@ -128,6 +128,7 @@ export default class TitleStoryScene extends Phaser.Scene{
                     this.pressKeyToSkip.setVisible(false);
                     // Set the storytext y to -this.storyText.height + 165
                     this.storyText.y = -this.storyText.height + 165;
+                    this.storyText.setVisible(false);
                     // Launch the 'TitleMenu' scene
                     this.scene.launch('TitleMenu');
                 }
@@ -135,22 +136,6 @@ export default class TitleStoryScene extends Phaser.Scene{
         });
     }
 
-    // update() {
-    //     if (this.slideUpTitle) {
-    //         this.storyText.setY(this.storyText.y - 0.3);
-    //
-    //         if (
-    //             this.titleText.y > this.titleTextYFinalDestination
-    //         ) {
-    //             this.titleText.setY(this.titleText.y - 1);
-    //         }
-    //     }
-    //     if (this.storyText.y <= -this.storyText.height + 165 && !this.showTitleMenuScene) {
-    //         this.showTitleMenuScene = true;
-    //         this.pressKeyToSkip.setVisible(false);
-    //         this.scene.launch('TitleMenu');
-    //     }
-    // }
     update() {
         if (this.slideUpTitle) {
             this.slideUpTitle = false;
@@ -178,5 +163,4 @@ export default class TitleStoryScene extends Phaser.Scene{
             this.scene.launch('TitleMenu');
         }
     }
-
 }

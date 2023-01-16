@@ -39,11 +39,12 @@ export default class TitleMenuScene extends Phaser.Scene{
                 console.log('save file 1 clicked');
 
                 this.scene.stop('TitleStory');
-                this.saveAndLoadScene.getPlayerByIndex(0).then(player => {
+                this.saveAndLoadScene.getPlayerByIndex(0).then(() => {
                     this.scene.start(
                         'Game',
                         {
-                            nameData: player.name
+                            saveIndex: 0,
+                            loadFromSave: true
                         }
                     );
                 });

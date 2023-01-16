@@ -1,6 +1,8 @@
 import monsterSoldierJob from '../../jobs/monsters/MonsterSoldier';
 import GameScene from '../../scenes/GameScene';
+import SaveAndLoadScene from '../../scenes/SaveAndLoadScene';
 import UIScene from '../../scenes/UIScene';
+import {Direction} from '../../types/Direction';
 import eventsCenter from '../../utils/EventsCenter';
 import Bot from '../Bot';
 import NPC from './NPC';
@@ -8,6 +10,7 @@ import NPC from './NPC';
 export default class extends NPC {
     protected gameScene: GameScene;
     private uiScene: UIScene;
+    private saveAndLoadScene: SaveAndLoadScene;
 
     constructor(
         public sprite: Phaser.GameObjects.Sprite,
@@ -15,7 +18,8 @@ export default class extends NPC {
     ) {
         super(sprite, tilePos);
         this.gameScene = <GameScene>this.sprite.scene;
-        this.uiScene = <UIScene>this.gameScene.scene.get('UI');
+        this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
+        this.saveAndLoadScene = <SaveAndLoadScene>this.sprite.scene.scene.get('SaveAndLoad');
     }
 
     public listenForInteractEvent() {
@@ -24,10 +28,6 @@ export default class extends NPC {
         if (this.testForInteractionReadyState()) {
             this.runDialog();
         }
-    }
-
-    private checkIfPlayerHasBot() {
-        return this.gameScene.bots.length > 0;
     }
 
     public runDialog() {
@@ -161,6 +161,29 @@ export default class extends NPC {
             this.uiScene.player2ManaText.setVisible(true);
             this.uiScene.player2ManaIcon.setVisible(true);
 
+
+            const newBot = {
+                name: 'Red Bot',
+                species: 'Red Bot',
+                experience: 0,
+                stats: redBot.stats,
+                texture: 'redbot',
+                position: this.gameScene.player.getTilePos(),
+                facing: Direction.DOWN,
+                inCombat: false,
+                equipment: {
+                    body: undefined,
+                    head: undefined,
+                    offhand: undefined,
+                    weapon: undefined
+                },
+                inventory: [],
+                living: true
+            };
+
+            this.saveAndLoadScene.db.players.where('id')
+                .equals(this.gameScene.saveIndex)
+                .modify(x => x.bots.push(newBot));
             this.gameScene.bots.push(
                 redBot
             );
@@ -258,6 +281,10 @@ export default class extends NPC {
         });
     }
 
+    private checkIfPlayerHasBot() {
+        return this.gameScene.bots.length > 0;
+    }
+
     private rejectInput() {
         eventsCenter.removeListener('keyboardreject');
         eventsCenter.removeListener('keyboardaccept');
@@ -273,6 +300,9 @@ export default class extends NPC {
             string = 'Red Bot';
         }
         // rename the robot if needed
+
+        this.saveAndLoadScene.db.players.where('id').equals(this.gameScene.saveIndex).modify(x => x.bots[0].name = String(string));
+
         this.gameScene.bots[0].name = string;
     }
 }

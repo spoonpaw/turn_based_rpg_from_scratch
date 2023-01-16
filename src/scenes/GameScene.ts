@@ -19,13 +19,16 @@ import Merchant from '../classes/npcs/Merchant';
 import Player from '../classes/Player';
 import PlayerGridPhysics from '../classes/PlayerGridPhysics';
 import {items} from '../items/items';
+import MonsterSoldier from '../jobs/monsters/MonsterSoldier';
 import playerSoldierJob from '../jobs/players/PlayerSoldier';
 import {ILevelData, levels} from '../levels/Levels';
 import {Direction} from '../types/Direction';
 import {Equipment} from '../types/Equipment';
 import GamePadScene from './GamePadScene';
 import MusicScene from './MusicScene';
+import SaveAndLoadScene from './SaveAndLoadScene';
 import UIScene from './UIScene';
+import Vector2 = Phaser.Math.Vector2;
 
 export default class GameScene extends Phaser.Scene {
     static readonly TILE_SIZE = 48;
@@ -49,14 +52,17 @@ export default class GameScene extends Phaser.Scene {
     public spaceDown!: boolean;
     public uiScene!: UIScene;
     public weaponMerchant!: Merchant | undefined;
+    botGridPhysics!: BotGridPhysics;
+    public saveIndex!: number;
     private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private exitingCurrentLevel!: boolean;
     private movedFromSpawn!: boolean;
     private nonHostileSpace!: boolean;
-    botGridPhysics!: BotGridPhysics;
     private lastPlayerDirection!: Direction;
     // private botGridControls!: BotGridControls;
     private encounter_counter = 0;
+    private saveAndLoadScene!: SaveAndLoadScene;
+    private firstUpdateRun = false;
 
     public constructor() {
         super('Game');
@@ -67,12 +73,185 @@ export default class GameScene extends Phaser.Scene {
         return randNum === 0;
     }
 
+    public init(
+        data: {
+            nameData?: string;
+            saveIndex: number;
+            levelData?: ILevelData;
+            loadFromSave?: boolean;
+        }) {
+        this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
+        this.uiScene = <UIScene>this.scene.get('UI');
+        this.musicScene = <MusicScene>this.scene.get('Music');
+        if (data.loadFromSave) {
+            console.log('loading from save in the init method!');
+            // TODO: load the game similarly to the above branch.
+            //  except get the info from dexie
+            this.uiScene.scene.bringToTop();
+
+            this.npcs = [];
+
+            this.innKeeper = undefined;
+            this.weaponMerchant = undefined;
+            this.armorMerchant = undefined;
+            this.itemMerchant = undefined;
+            this.botScientist = undefined;
+
+            console.log('bout to access the player db!');
+
+            this.saveAndLoadScene.getPlayerByIndex(data.saveIndex).then(player => {
+                console.log('inside the player query\'s then method');
+                const levelData = levels[player.currentTilemap];
+                this.nonHostileSpace = !levelData.hostile;
+                this.musicScene.changeSong(levelData.music);
+
+                this.currentMap = player.currentTilemap;
+                this.exitingCurrentLevel = false;
+
+                this.currentTilemap = this.make.tilemap(
+                    {key: levels.town.tilemapKey}
+                );
+                this.currentTilemap.addTilesetImage(levelData.tilesetName, levelData.tilesetKey);
+                for (let i = 0; i < this.currentTilemap.layers.length; i++) {
+                    const layer = this.currentTilemap
+                        .createLayer(i, levelData.tilesetName, 0, 0);
+                    layer?.setDepth(i);
+                }
+
+                const playerSprite = this.add.sprite(0, 0, player.texture);
+                playerSprite.setDepth(2);
+                this.cameras.main.startFollow(playerSprite);
+                console.log('bout to set the player!!!');
+                this.player = new Player(
+                    player.name,
+                    playerSprite,
+                    new Phaser.Math.Vector2(
+                        player.position.x,
+                        player.position.y
+                    ),
+                    player.gold,
+                    player.experience,
+                    'Human',
+                    playerSoldierJob,
+                    player.inventory,
+                    player.equipment,
+                    player.stats
+                );
+                this.scene.launch('UI');
+
+                this.bots = [];
+                for (const bot of player.bots) {
+                    const botClone = clone(bot);
+                    const botStats = clone(bot.stats);
+                    const botSprite = this.add.sprite(0, 0, botClone.texture);
+                    botSprite.setDepth(1);
+                    this.bots.push(new Bot(bot.name, botSprite, bot.experience, 'Red Bot', MonsterSoldier, botStats));
+                    this.setupBotGridPhysics();
+                }
+                this.setupPlayerGridPhysics();
+
+                this.sys.events.removeListener('wake');
+                this.sys.events.on('wake', this.wake, this);
+
+                // iterate over the levels npcs and implement their functions
+                for (const npc of levelData.npcs) {
+                    // place npc sprites
+                    if (npc.name === 'botscientist') {
+                        const botScientistSprite = this.add.sprite(0, 0, 'npc5');
+                        botScientistSprite.setDepth(2);
+                        this.botScientist = new BotScientist(
+                            botScientistSprite,
+                            new Phaser.Math.Vector2(
+                                npc.x,
+                                npc.y
+                            )
+                        );
+                        this.npcs.push(this.botScientist);
+                    }
+                    else if (npc.name === 'itemmerchant') {
+                        const itemMerchantSprite = this.add.sprite(0, 0, 'npc4');
+                        itemMerchantSprite.setDepth(2);
+
+                        if (npc.inventory) {
+                            this.itemMerchant = new Merchant(
+                                itemMerchantSprite,
+                                new Phaser.Math.Vector2(
+                                    npc.x,
+                                    npc.y
+                                ),
+                                npc.inventory
+                            );
+                            this.npcs.push(this.itemMerchant);
+                        }
+                    }
+
+                    else if (npc.name === 'armormerchant') {
+                        const armorMerchantSprite = this.add.sprite(0, 0, 'npc3');
+                        armorMerchantSprite.setDepth(2);
+
+                        if (npc.inventory) {
+                            this.armorMerchant = new Merchant(
+                                armorMerchantSprite,
+                                new Phaser.Math.Vector2(
+                                    npc.x,
+                                    npc.y
+                                ),
+                                npc.inventory
+                            );
+                            this.npcs.push(this.armorMerchant);
+                        }
+                    }
+
+                    else if (npc.name === 'weaponmerchant') {
+                        const weaponMerchantSprite = this.add.sprite(0, 0, 'npc2');
+                        weaponMerchantSprite.setDepth(2);
+
+                        if (npc.inventory) {
+                            this.weaponMerchant = new Merchant(
+                                weaponMerchantSprite,
+                                new Phaser.Math.Vector2(
+                                    npc.x,
+                                    npc.y
+                                ),
+                                npc.inventory
+                            );
+                            this.npcs.push(this.weaponMerchant);
+                        }
+                    }
+
+                    else if (npc.name === 'innkeeper') {
+                        // spawning an innkeeper
+                        const innKeeperSprite = this.add.sprite(0, 0, 'npc1');
+                        innKeeperSprite.setDepth(2);
+
+                        this.innKeeper = new Innkeeper(
+                            innKeeperSprite,
+                            new Phaser.Math.Vector2(
+                                npc.x,
+                                npc.y
+                            )
+                        );
+                        this.npcs.push(this.innKeeper);
+                    }
+                }
+
+                this.playerTileX = this.player.getTilePos().x;
+                this.playerTileY = this.player.getTilePos().y;
+                this.movedFromSpawn = false;
+            });
+        }
+
+    }
+
     public create(
         data: {
             nameData?: string;
-            levelData?: ILevelData
+            saveIndex: number;
+            levelData?: ILevelData;
+            loadFromSave?: boolean;
         }
     ) {
+        this.saveIndex = data.saveIndex;
         this.encounter_counter = 0;
 
         this.input.keyboard!.enabled = true;
@@ -86,13 +265,13 @@ export default class GameScene extends Phaser.Scene {
         }
         // if data is empty then the game just started so load the player in the spawn location
         if (data.nameData) {
+            // new player created! welcome to Caelor!
+            // just got the player's namedata on the initial spawn
 
             // create the game scene when the level 1 player initially spawns.
             // create the map
             this.scene.launch('UI');
-            this.uiScene = <UIScene>this.scene.get('UI');
             this.uiScene.scene.bringToTop();
-            this.musicScene = <MusicScene>this.scene.get('Music');
             this.musicScene.scene.bringToTop();
 
             this.musicScene.changeSong('town');
@@ -143,6 +322,7 @@ export default class GameScene extends Phaser.Scene {
                 weapon: undefined
             };
 
+
             this.player = new Player(
                 data.nameData,
                 playerSprite,
@@ -157,6 +337,28 @@ export default class GameScene extends Phaser.Scene {
                 aBunchOfPotions,
                 emptyEquipment
             );
+
+            //upload the player interface to the client database
+            this.saveAndLoadScene.upsertPlayer({
+                id: data.saveIndex,
+                bots: [],
+                combatState: {enemies: [], heroes: [], passiveEffects: [], turnUnits: []},
+                currentTilemap: 'town',
+                equipment: {body: undefined, head: undefined, offhand: undefined, weapon: undefined},
+                experience: 0,
+                facing: Direction.DOWN,
+                gold: 0,
+                inCombat: false,
+                inventory: this.player.inventory,
+                name: data.nameData,
+                position: new Phaser.Math.Vector2(
+                    12,
+                    14
+                ),
+                stats: this.player.stats,
+                texture: this.player.sprite.texture.key
+
+            });
 
             this.setupPlayerGridPhysics();
 
@@ -269,7 +471,7 @@ export default class GameScene extends Phaser.Scene {
             this.botScientist = undefined;
 
             console.log(`changing song to ${data.levelData.music}`);
-            this.uiScene.musicScene.changeSong(data.levelData.music);
+            this.musicScene.changeSong(data.levelData.music);
 
             // spawn the character in the correct position based on data passed to the restart method
             // create the map
@@ -301,6 +503,7 @@ export default class GameScene extends Phaser.Scene {
                 this.player.equipment,
                 this.player.stats
             );
+            this.setupPlayerGridPhysics();
 
             // Spawn the bots if there are any
             if (this.bots.length > 0) {
@@ -309,7 +512,7 @@ export default class GameScene extends Phaser.Scene {
                 const botCloneStats = clone(this.bots[0].stats);
 
                 const botSprite = this.add.sprite(0, 0, botClone.sprite.texture);
-                botSprite.depth = 1;
+                botSprite.setDepth(1);
                 const bot = new Bot(
                     botClone.name,
                     botSprite,
@@ -322,8 +525,6 @@ export default class GameScene extends Phaser.Scene {
 
                 this.setupBotGridPhysics();
             }
-
-            this.setupPlayerGridPhysics();
 
             this.sys.events.removeListener('wake');
             this.sys.events.on('wake', this.wake, this);
@@ -414,7 +615,6 @@ export default class GameScene extends Phaser.Scene {
             this.playerTileY = this.player.getTilePos().y;
             this.movedFromSpawn = false;
         }
-
     }
 
     public preload() {
@@ -430,6 +630,15 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public update(_time: number, delta: number) {
+        if (!this.firstUpdateRun) {
+            console.log('running the first update call');
+            this.firstUpdateRun = true;
+        }
+
+        if (!this.gridControls) {
+            return;
+        }
+
         this.gridControls.update();
         this.gridPhysics.update(delta);
 
@@ -466,6 +675,14 @@ export default class GameScene extends Phaser.Scene {
 
         if (xPositionChanged || yPositionChanged) {
             this.movedFromSpawn = true;
+            this.saveAndLoadScene.db.players.update(
+                this.saveIndex,
+                {
+                    position: new Vector2(
+                        this.player.getTilePos()
+                    )
+                }
+            );
         }
 
         if (
@@ -600,7 +817,7 @@ export default class GameScene extends Phaser.Scene {
 
     public wake() {
         this.encounter_counter = 0;
-        this.uiScene.musicScene.changeSong('overworld');
+        this.musicScene.changeSong('overworld');
         this.uiScene.scene.bringToTop();
         this.gamePadScene?.scene.restart();
 
@@ -609,6 +826,15 @@ export default class GameScene extends Phaser.Scene {
         this.cursors.right.reset();
         this.cursors.up.reset();
         this.cursors.down.reset();
+    }
+
+    public setupBotGridPhysics() {
+        this.bots[0].path.push(this.player.getTilePos());
+        this.botGridPhysics = new BotGridPhysics(this.bots[0], this.currentTilemap);
+        this.createBotAnimation('redbot_up', 6, 7);
+        this.createBotAnimation('redbot_right', 4, 5);
+        this.createBotAnimation('redbot_down', 0, 1);
+        this.createBotAnimation('redbot_left', 2, 3);
     }
 
     private createBotAnimation(name: string, startFrame: number, endFrame: number) {
@@ -622,15 +848,6 @@ export default class GameScene extends Phaser.Scene {
             repeat: -1,
             yoyo: true
         });
-    }
-
-    public setupBotGridPhysics() {
-        this.bots[0].path.push(this.player.getTilePos());
-        this.botGridPhysics = new BotGridPhysics(this.bots[0], this.currentTilemap);
-        this.createBotAnimation('redbot_up', 6, 7);
-        this.createBotAnimation('redbot_right', 4, 5);
-        this.createBotAnimation('redbot_down', 0, 1);
-        this.createBotAnimation('redbot_left', 2, 3);
     }
 
     private createPlayerAnimation(name: string, startFrame: number, endFrame: number) {
@@ -647,6 +864,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     private setupPlayerGridPhysics() {
+        console.log('setting up player grid physics!!');
         this.gridPhysics = new PlayerGridPhysics(this.player, this.currentTilemap);
         this.gridControls = new GridControls(this.input, this.gridPhysics);
 

@@ -1,7 +1,7 @@
-import GameDatabase from '../classes/GameDatabase';
+import GameDatabase, {IPlayer} from '../classes/GameDatabase';
 
 export default class SaveAndLoadScene extends Phaser.Scene {
-    private db!: GameDatabase;
+    public db!: GameDatabase;
     constructor() {
         super('SaveAndLoad');
     }
@@ -12,9 +12,8 @@ export default class SaveAndLoadScene extends Phaser.Scene {
         this.openDB();
     }
 
-    upsertPlayer(name: string) {
+    upsertPlayer(player: IPlayer) {
         this.db.open().then(db => {
-            const player = {id: 0, name};
             db.table('players').put(player);
         }).catch(err => {
             console.log(`error occurred: ${err}`);
@@ -44,5 +43,4 @@ export default class SaveAndLoadScene extends Phaser.Scene {
             console.log(`Error occurred: ${err}`);
         }
     }
-
 }
