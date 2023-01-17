@@ -173,7 +173,7 @@ export default class extends NPC {
                     weapon: undefined
                 },
                 inventory: [],
-                living: true
+                // living: true
             };
 
             this.saveAndLoadScene.db.players.where('id')

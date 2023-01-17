@@ -101,7 +101,7 @@ export default class PlayerCharacter extends Unit {
     ): number {
         const target = data.target;
         // TODO: REDIRECT THE PLAYER'S ATTACK IF THEIR INTENDED TARGET IS NOT ALIVE AND THERE IS STILL > 0 ENEMIES LIVING
-        if (!target.living) return 0;
+        if (!target.isLiving()) return 0;
         let runtimeInMS = 0;
 
         if (data.action === 'attack') {
@@ -221,7 +221,7 @@ export default class PlayerCharacter extends Unit {
             this.battleUIScene.destroyAbilityButtons();
             this.battleUIScene.generateAbilityButtons();
 
-            if (data.target.living) {
+            if (data.target.isLiving()) {
                 // battle scene needs to store an array of passive effects. it needs to know the actor and the
                 //  target for each effect as well as the ability itself. each passive effect must have a number of
                 //  active turns before it expires at the top of each round, the passive effects are iterated over,
@@ -273,7 +273,7 @@ export default class PlayerCharacter extends Unit {
             this.battleUIScene.destroyInventoryButtons();
             this.battleUIScene.generateInventoryButtons();
 
-            if (data.target.living) {
+            if (data.target.isLiving()) {
 
                 // calculate the exact amount healed, announce it in a message
                 runtimeInMS += 2000;

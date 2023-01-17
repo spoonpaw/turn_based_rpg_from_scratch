@@ -17,7 +17,7 @@ interface Unit {
         weapon: Item
     },
     inventory: Item[],
-    living: boolean,
+    // living: boolean,
     actorType: string
 }
 
@@ -43,7 +43,7 @@ export interface IPlayer {
             weapon: Item | undefined
         },
         inventory: Item[],
-        living: boolean
+        // living: boolean
     }>,
     equipment: {
         body: Item | undefined,

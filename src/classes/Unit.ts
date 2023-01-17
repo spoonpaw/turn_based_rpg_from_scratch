@@ -20,7 +20,7 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         weapon: undefined
     };
     public inventory: Item[] = [];
-    public living: boolean;
+    // public living: boolean;
     abstract stats: Stats;
     abstract key: string;
     protected battleScene: BattleScene;
@@ -43,7 +43,7 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         this.battleScene = <BattleScene>this.scene.scene.get('Battle');
         this.battleUIScene = <BattleUIScene>this.scene.scene.get('BattleUI');
 
-        this.living = true;
+        // this.living = true;
 
         this.id = this.battleScene.generateID();
     }
@@ -140,7 +140,7 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
         if (this.stats.currentHP <= 0) {
             this.stats.currentHP = 0;
-            this.living = false;
+            // this.living = false;
         }
 
         // setting up the ui hp
@@ -159,5 +159,9 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
             const inventorySlotNumber = Number(this.battleScene.interactionState.split('inventoryaction')[1]);
             this.selectAbilityOrItem(inventorySlotNumber, 'item');
         }
+    }
+
+    public isLiving(): boolean {
+        return this.stats.currentHP > 0;
     }
 }

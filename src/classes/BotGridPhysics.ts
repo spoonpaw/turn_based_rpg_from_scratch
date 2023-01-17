@@ -72,12 +72,6 @@ export default class BotGridPhysics{
         );
     }
 
-
-    // protected getPixelsToWalkThisUpdate(delta: number): number {
-    //     const deltaInSeconds = delta / 1000;
-    //     return this.speedPixelsPerSecond * deltaInSeconds;
-    // }
-
     protected moveBotSprite(pixelsToMove: number) {
         const directionVec = this.movementDirectionVectors[
             this.movementDirection

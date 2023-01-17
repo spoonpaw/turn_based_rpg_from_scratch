@@ -65,9 +65,9 @@ export default class BotCharacter extends Unit {
     }
 
     public runTurn(): number {
-        // just attack player 1
+        // just attack enemy 1
         const target = this.battleScene.enemies[0];
-        if (!target.living) return 0;
+        if (!target.isLiving()) return 0;
         let runtimeInMS = 0;
 
         let damage = 0;

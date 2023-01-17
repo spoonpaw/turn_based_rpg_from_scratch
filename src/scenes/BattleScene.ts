@@ -53,7 +53,6 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private static sortUnits(units: (PlayerCharacter | BotCharacter | Enemy)[]): (PlayerCharacter | BotCharacter | Enemy)[] {
-
         return units.sort((a, b) => {
             // randomize the turn order every round based on agility
             const aInitiative = a.getInitiative();
@@ -153,7 +152,7 @@ export default class BattleScene extends Phaser.Scene {
         let victory = true;
         // if all enemies are dead we have victory
         for (let i = 0; i < this.enemies.length; i++) {
-            if (this.enemies[i].living) {
+            if (this.enemies[i].isLiving()) {
                 victory = false;
             }
         }
@@ -241,7 +240,7 @@ export default class BattleScene extends Phaser.Scene {
     private gameOverTest() {
         // check if all the heroes are dead (players and bots)
         return this.heroes.every((value) => {
-            return !value.living;
+            return !value.isLiving();
         });
     }
 
@@ -332,13 +331,13 @@ export default class BattleScene extends Phaser.Scene {
         const currentUnit = this.turnUnits[this.turnIndex];
         if (currentUnit instanceof Enemy) {
             // the enemy is going to use an ability (default physical attack)
-            if (currentUnit.living) {
+            if (currentUnit.isLiving()) {
                 turnRunTime += currentUnit.runTurn();
             }
         }
         // current unit must be a player character or bot if not an enemy
         else {
-            if (currentUnit.living) {
+            if (currentUnit.isLiving()) {
                 turnRunTime += currentUnit.runTurn(data);
             }
         }
@@ -842,7 +841,7 @@ export default class BattleScene extends Phaser.Scene {
 
         this.interactionState = 'mainselect';
 
-        if (!this.heroes[0].living) {
+        if (!this.heroes[0].isLiving()) {
             eventsCenter.emit('actionSelect', {
                 action: 'pass',
                 target: this.heroes[0]

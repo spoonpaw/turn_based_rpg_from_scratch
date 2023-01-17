@@ -93,7 +93,7 @@ export class Enemy extends Unit {
         this.stats.currentHP -= hpChangeAmount;
         if (this.stats.currentHP <= 0) {
             this.stats.currentHP = 0;
-            this.living = false;
+            // this.living = false;
         }
         this.updateSceneOnReceivingDamage();
         return 0;
@@ -133,21 +133,28 @@ export class Enemy extends Unit {
     }
 
     public runTurn(): number {
+
+        console.log('running the bot\'s turn!!!!');
+
         let runtimeInMS = 0;
 
-        // if there are enough targets to justify it and enough resources to spend, execute the
+        // if there are enough targets to justify it and enough resources to spend, execute
         //  a powerful aoe attack
 
-
-        const livingHeroes = this.battleScene.heroes.filter(unit => unit.living);
+        const livingHeroes = this.battleScene.heroes.filter(unit => unit.isLiving());
         const moreThanOneLivingHero = livingHeroes.length > 1;
 
         if (this.hasAoEAbility() && moreThanOneLivingHero) {
             // do aoe damage to the player's party!
             const aoeAbility = this.getAOEAbility();
-            eventsCenter.emit('Message', aoeAbility.useTemplate.replace('${abilityUser}', this.name));
+            eventsCenter.emit(
+                'Message',
+                aoeAbility.useTemplate.replace(
+                    '${abilityUser}',
+                    this.name
+                )
+            );
             runtimeInMS += 2000 + (2000 * this.battleScene.heroes.length);
-
 
             this.scene.time.addEvent({
                 delay: 2000,
@@ -187,17 +194,23 @@ export class Enemy extends Unit {
         }
         else {
             // attain random target!
-            let target = this.battleScene.heroes.filter(
+            console.log({battleSceneHeroes: this.battleScene.heroes});
+            const listOfLivingTargets = this.battleScene.heroes.filter(
                 (obj) => {
-                    return obj.living;
+                    return obj.isLiving();
                 }
-            )[
-                Phaser.Math.RND.between(
-                    0,
-                    Math.max(0, this.battleScene.heroes.length - 1)
-                )
-            ];
+            );
+            console.log({listOfLivingTargets});
 
+            const randomHeroIndex = Phaser.Math.RND.between(
+                0,
+                Math.max(0, listOfLivingTargets.length - 1)
+            );
+            console.log({randomHeroIndex});
+
+            let target = listOfLivingTargets[randomHeroIndex];
+
+            console.log({target});
             if (!target) return 0;
 
             let damage = 0;
@@ -209,7 +222,7 @@ export class Enemy extends Unit {
             for (const passiveEffect of this.battleScene.passiveEffects) {
                 if (passiveEffect.ability.name === 'Guard' &&
                     passiveEffect.target.id === target.id &&
-                    passiveEffect.actor.living
+                    passiveEffect.actor.isLiving()
                 ) {
                     target = this.battleScene.heroes.find((obj) => {
                         return obj.id === passiveEffect.actor.id;
@@ -291,5 +304,4 @@ export class Enemy extends Unit {
             );
         });
     }
-
 }
