@@ -76,10 +76,11 @@ export default class GameScene extends Phaser.Scene {
     public init(
         data: {
             nameData?: string;
-            saveIndex: number;
+            saveIndex?: number;
             levelData?: ILevelData;
             loadFromSave?: boolean;
         }) {
+        this.saveIndex = data.saveIndex ?? 0;
         this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
         this.uiScene = <UIScene>this.scene.get('UI');
         this.musicScene = <MusicScene>this.scene.get('Music');
@@ -96,7 +97,7 @@ export default class GameScene extends Phaser.Scene {
             this.itemMerchant = undefined;
             this.botScientist = undefined;
 
-            this.saveAndLoadScene.getPlayerByIndex(data.saveIndex).then(player => {
+            this.saveAndLoadScene.getPlayerByIndex(data.saveIndex ?? 0).then(player => {
                 const levelData = levels[player.currentTilemap];
                 this.nonHostileSpace = !levelData.hostile;
                 this.musicScene.changeSong(levelData.music);
@@ -241,12 +242,11 @@ export default class GameScene extends Phaser.Scene {
     public create(
         data: {
             nameData?: string;
-            saveIndex: number;
+            saveIndex?: number;
             levelData?: ILevelData;
             loadFromSave?: boolean;
         }
     ) {
-        this.saveIndex = data.saveIndex;
         this.encounter_counter = 0;
 
         this.input.keyboard!.enabled = true;
@@ -665,7 +665,7 @@ export default class GameScene extends Phaser.Scene {
 
         if (xPositionChanged || yPositionChanged) {
             this.movedFromSpawn = true;
-            this.saveAndLoadScene.db.players.update(
+            if (this.saveIndex) this.saveAndLoadScene.db.players.update(
                 this.saveIndex,
                 {
                     position: new Vector2(

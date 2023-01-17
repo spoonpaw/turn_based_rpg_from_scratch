@@ -206,6 +206,7 @@ export default class BattleScene extends Phaser.Scene {
         this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
         if (this.gameScene.bots.length > 0) {
             this.gameScene.bots[0].stats.currentHP = this.gameScene.bots[0].stats.maxHP;
+            this.uiScene.player2hpText.setText(`HP: ${this.gameScene.bots[0].stats.currentHP}/${this.gameScene.bots[0].stats.maxHP}`);
         }
         this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
 

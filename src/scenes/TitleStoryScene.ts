@@ -143,7 +143,7 @@ export default class TitleStoryScene extends Phaser.Scene{
             this.tweens.add({
                 targets: this.storyText,
                 y: -this.storyText.height + 165,
-                duration: 45000, // Adjust this value to change the duration of the tween
+                duration: 60000, // Adjust this value to change the duration of the tween
                 ease: 'Linear'
             });
 

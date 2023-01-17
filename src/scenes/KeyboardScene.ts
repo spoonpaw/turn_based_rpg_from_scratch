@@ -227,7 +227,10 @@ export default class KeyboardScene extends Phaser.Scene {
                         color: '#fff',
                         fontFamily: 'CustomFont'
                     })
-                    .setOrigin(0.5, 0.5)
+                    .setOrigin(0.5, 0.5);
+
+                this.add.rectangle(62 + (60 * colIndex) + (16 * rowIndex), 413 + (55 * rowIndex), 40, 50)
+                    .setAlpha(0)
                     .setInteractive()
                     .on(
                         'pointerdown',

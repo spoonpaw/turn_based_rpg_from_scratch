@@ -41,7 +41,7 @@ export default class GameOverScene extends Phaser.Scene {
         this.scene.scene.tweens.add({
             targets: pressAnyKeyText,
             duration: 1500,
-            repeat: true,
+            repeat: -1,
             loop: true,
             alpha: 0,
             yoyo: true
