@@ -66,8 +66,8 @@ export default class extends NPC {
                 this.uiScene.leftSideDialogText.setText('');
                 this.uiScene.leftSideDialogText.setVisible(false);
                 this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
-                this.uiScene.cancelButton.setVisible(false);
-                this.uiScene.cancelButton.buttonText.setVisible(false);
+                this.uiScene.cancelButton.hideActionButton();
+
                 this.uiScene.cancelMenuFrame.setVisible(false);
 
                 this.gameScene.input.keyboard!.enabled = true;
@@ -85,14 +85,12 @@ export default class extends NPC {
 
         if (!this.checkIfPlayerHasBot()){
             this.uiScene.rightSideDialogOptionsFrame.setVisible(true);
-            this.uiScene.yesButton.setVisible(true);
-            this.uiScene.yesButton.buttonText.setVisible(true);
-            this.uiScene.noButton.setVisible(true);
-            this.uiScene.noButton.buttonText.setVisible(true);
+            this.uiScene.yesButton.showActionButton();
+
+            this.uiScene.noButton.showActionButton();
 
             this.uiScene.interactFrame.setVisible(false);
-            this.uiScene.interactButton.setVisible(false);
-            this.uiScene.interactButton.buttonText.setVisible(false);
+            this.uiScene.interactButton.hideActionButton();
 
             eventsCenter.on('space', () => {
                 this.gameScene.gamePadScene?.scene.restart();
@@ -104,16 +102,13 @@ export default class extends NPC {
                 this.uiScene.leftSideDialogText.setText('');
                 this.uiScene.leftSideDialogText.setVisible(false);
                 this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
-                this.uiScene.yesButton.setVisible(false);
-                this.uiScene.yesButton.buttonText.setVisible(false);
-                this.uiScene.noButton.setVisible(false);
-                this.uiScene.noButton.buttonText.setVisible(false);
+                this.uiScene.yesButton.hideActionButton();
+                this.uiScene.noButton.hideActionButton();
                 this.uiScene.characterDetailDisplayFrame.setVisible(false);
                 this.uiScene.characterDetailDisplay.setVisible(false);
 
                 this.uiScene.cancelMenuFrame.setVisible(false);
-                this.uiScene.cancelButton.setVisible(false);
-                this.uiScene.cancelButton.buttonText.setVisible(false);
+                this.uiScene.cancelButton.hideActionButton();
 
                 this.gameScene.input.keyboard!.enabled = true;
 
@@ -215,10 +210,8 @@ export default class extends NPC {
                 this.uiScene.leftSideDialogFrame.setVisible(false);
                 this.uiScene.leftSideDialogText.setVisible(false);
                 this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
-                this.uiScene.yesButton.setVisible(false);
-                this.uiScene.yesButton.buttonText.setVisible(false);
-                this.uiScene.noButton.setVisible(false);
-                this.uiScene.noButton.buttonText.setVisible(false);
+                this.uiScene.yesButton.hideActionButton();
+                this.uiScene.noButton.hideActionButton();
 
                 this.uiScene.characterDetailDisplayFrame.setX(335);
                 this.uiScene.characterDetailDisplayFrame.setY(175);

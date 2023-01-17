@@ -758,8 +758,7 @@ export default class GameScene extends Phaser.Scene {
                 this.readyToInteractObject = npc;
                 if (!this.uiScene.interactFrame.visible) {
                     this.uiScene.interactFrame.setVisible(true);
-                    this.uiScene.interactButton.setVisible(true);
-                    this.uiScene.interactButton.buttonText.setVisible(true);
+                    this.uiScene.interactButton.showActionButton();
                     // break out of the loop because we found the guy
                     break;
                 }
@@ -770,8 +769,7 @@ export default class GameScene extends Phaser.Scene {
             // if I'm not facing the guy, hide the interact button
             if (this.uiScene.interactFrame.visible) {
                 this.uiScene.interactFrame.setVisible(false);
-                this.uiScene.interactButton.setVisible(false);
-                this.uiScene.interactButton.buttonText.setVisible(false);
+                this.uiScene.interactButton.hideActionButton();
             }
         }
 

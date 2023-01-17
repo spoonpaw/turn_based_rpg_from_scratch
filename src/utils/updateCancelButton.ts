@@ -17,8 +17,15 @@ export function updateCancelButton(
     cancelButton.buttonText.setX(x + 52);
     cancelButton.buttonText.setY(y + 10);
     cancelButton.buttonText.setText(text);
-    cancelButton.setVisible(true);
-    cancelButton.buttonText.setVisible(true);
+
+    cancelButton.invisibleButton.setX(cancelButton.buttonText.x);
+    cancelButton.invisibleButton.setY(cancelButton.buttonText.y);
+    cancelButton.invisibleButton.setSize(
+        cancelButton.buttonText.width,
+        cancelButton.buttonText.height
+    );
+
+    cancelButton.showActionButton();
 
     // use the show parameter to control the visibility of the cancel frame and its components
     cancelFrame.setVisible(show);

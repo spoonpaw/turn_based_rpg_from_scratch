@@ -133,8 +133,7 @@ export default class PlayerCharacter extends Unit {
         else if (data.action === 'Power Strike') {
 
             for (const abilityButton of this.battleUIScene.abilityButtons) {
-                abilityButton.destroy();
-                abilityButton.buttonText.destroy();
+                abilityButton.destroyUIActionButton();
             }
             this.battleUIScene.abilityButtons = [];
 
@@ -215,8 +214,7 @@ export default class PlayerCharacter extends Unit {
         else if (data.action === 'Guard') {
 
             for (const abilityButton of this.battleUIScene.abilityButtons) {
-                abilityButton.destroy();
-                abilityButton.buttonText.destroy();
+                abilityButton.destroyUIActionButton();
             }
             this.battleUIScene.abilityButtons = [];
 
@@ -268,8 +266,7 @@ export default class PlayerCharacter extends Unit {
             this.inventory.splice(inventoryIndex, 1);
 
             for (const inventoryButton of this.battleUIScene.inventoryButtons) {
-                inventoryButton.destroy();
-                inventoryButton.buttonText.destroy();
+                inventoryButton.destroyUIActionButton();
             }
             this.battleUIScene.inventoryButtons = [];
 

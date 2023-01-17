@@ -50,8 +50,7 @@ export default class TitleMenuScene extends Phaser.Scene{
             }
         );
 
-        this.saveFile1Button.setVisible(false);
-        this.saveFile1Button.buttonText.setVisible(false);
+        this.saveFile1Button.hideActionButton();
         this.saveFileButtons.push(this.saveFile1Button);
 
         this.saveFile2Button = new UIActionButton(
@@ -66,8 +65,7 @@ export default class TitleMenuScene extends Phaser.Scene{
             }
         );
 
-        this.saveFile2Button.setVisible(false);
-        this.saveFile2Button.buttonText.setVisible(false);
+        this.saveFile2Button.hideActionButton();
         this.saveFileButtons.push(this.saveFile2Button);
 
         this.saveFile3Button = new UIActionButton(
@@ -82,8 +80,7 @@ export default class TitleMenuScene extends Phaser.Scene{
             }
         );
 
-        this.saveFile3Button.setVisible(false);
-        this.saveFile3Button.buttonText.setVisible(false);
+        this.saveFile3Button.hideActionButton();
         this.saveFileButtons.push(this.saveFile3Button);
 
         this.cancelButton = new UIActionButton(
@@ -95,19 +92,14 @@ export default class TitleMenuScene extends Phaser.Scene{
             'Cancel',
             () => {
                 for (const saveFileButton of this.saveFileButtons) {
-                    saveFileButton.setVisible(false);
-                    saveFileButton.buttonText.setVisible(false);
+                    saveFileButton.hideActionButton();
                 }
-                this.newGameButton.setVisible(true);
-                this.newGameButton.buttonText.setVisible(true);
-                this.loadGameButton.setVisible(true);
-                this.loadGameButton.buttonText.setVisible(true);
-                this.cancelButton.setVisible(false);
-                this.cancelButton.buttonText.setVisible(false);
+                this.newGameButton.showActionButton();
+                this.loadGameButton.showActionButton();
+                this.cancelButton.hideActionButton();
             }
         );
-        this.cancelButton.setVisible(false);
-        this.cancelButton.buttonText.setVisible(false);
+        this.cancelButton.hideActionButton();
 
         this.newGameButton = new UIActionButton(
             this,
@@ -130,29 +122,23 @@ export default class TitleMenuScene extends Phaser.Scene{
             'checkbutton',
             'Load Game',
             () => {
-                this.newGameButton.setVisible(false);
-                this.newGameButton.buttonText.setVisible(false);
-                this.loadGameButton.setVisible(false);
-                this.loadGameButton.buttonText.setVisible(false);
+                this.newGameButton.hideActionButton();
+                this.loadGameButton.hideActionButton();
                 this.saveAndLoadScene.getPlayers().then(players => {
                     for (const [index, player] of players!.entries()) {
                         this.saveFileButtons[index].buttonText.setText(player.name);
                         this.shrinkTextByPixel(this.saveFileButtons[index].buttonText, 430);
-                        this.saveFileButtons[index].setVisible(true);
-                        this.saveFileButtons[index].buttonText.setVisible(true);
+                        this.saveFileButtons[index].showActionButton();
                     }
-                    this.cancelButton.setVisible(true);
-                    this.cancelButton.buttonText.setVisible(true);
+                    this.cancelButton.showActionButton();
                 });
             }
         );
-        this.loadGameButton.setVisible(false);
-        this.loadGameButton.buttonText.setVisible(false);
+        this.loadGameButton.hideActionButton();
 
         this.saveAndLoadScene.getPlayers().then(players => {
             if (players && players.length > 0) {
-                this.loadGameButton.setVisible(true);
-                this.loadGameButton.buttonText.setVisible(true);
+                this.loadGameButton.showActionButton();
             }
         });
     }

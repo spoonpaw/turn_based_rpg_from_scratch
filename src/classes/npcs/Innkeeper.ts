@@ -38,14 +38,11 @@ export default class Innkeeper extends NPC {
             this.uiScene.leftSideDialogText.setText('Innkeeper:\nGood day! It costs three gold to rest hither. Dost thou wish to stay?');
             this.uiScene.leftSideDialogText.setVisible(true);
             this.uiScene.rightSideDialogOptionsFrame.setVisible(true);
-            this.uiScene.yesButton.setVisible(true);
-            this.uiScene.yesButton.buttonText.setVisible(true);
-            this.uiScene.noButton.setVisible(true);
-            this.uiScene.noButton.buttonText.setVisible(true);
+            this.uiScene.yesButton.showActionButton();
+            this.uiScene.noButton.showActionButton();
 
             this.uiScene.interactFrame.setVisible(false);
-            this.uiScene.interactButton.setVisible(false);
-            this.uiScene.interactButton.buttonText.setVisible(false);
+            this.uiScene.interactButton.hideActionButton();
 
             eventsCenter.removeListener('space');
 
@@ -62,14 +59,11 @@ export default class Innkeeper extends NPC {
                 this.uiScene.leftSideDialogText.setText('');
                 this.uiScene.leftSideDialogText.setVisible(false);
                 this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
-                this.uiScene.yesButton.setVisible(false);
-                this.uiScene.yesButton.buttonText.setVisible(false);
-                this.uiScene.noButton.setVisible(false);
-                this.uiScene.noButton.buttonText.setVisible(false);
+                this.uiScene.yesButton.hideActionButton();
+                this.uiScene.noButton.hideActionButton();
 
                 this.uiScene.cancelMenuFrame.setVisible(false);
-                this.uiScene.cancelButton.setVisible(false);
-                this.uiScene.cancelButton.buttonText.setVisible(false);
+                this.uiScene.cancelButton.hideActionButton();
 
                 this.gameScene.input.keyboard!.enabled = true;
 
@@ -90,11 +84,9 @@ export default class Innkeeper extends NPC {
                 // eventsCenter.removeListener('no');
                 eventsCenter.removeListener('yes');
                 this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
-                this.uiScene.yesButton.setVisible(false);
-                this.uiScene.yesButton.buttonText.setVisible(false);
-                this.uiScene.noButton.setVisible(false);
-                this.uiScene.noButton.buttonText.setVisible(false);
-                
+                this.uiScene.yesButton.hideActionButton();
+                this.uiScene.noButton.hideActionButton();
+
                 this.uiScene.updateAndShowCancelButton(670, 380, 'Farewell', true);
 
                 // if the player doesn't have enough gold, tell him so
