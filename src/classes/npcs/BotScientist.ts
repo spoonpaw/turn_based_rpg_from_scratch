@@ -177,7 +177,7 @@ export default class extends NPC {
             };
 
             this.saveAndLoadScene.db.players.where('id')
-                .equals(this.gameScene.saveIndex)
+                .equals(0)
                 .modify(x => x.bots.push(newBot));
             this.gameScene.bots.push(
                 redBot
@@ -294,7 +294,10 @@ export default class extends NPC {
         }
         // rename the robot if needed
 
-        this.saveAndLoadScene.db.players.where('id').equals(this.gameScene.saveIndex).modify(x => x.bots[0].name = String(string));
+        this.saveAndLoadScene.db.players
+            .where('id')
+            .equals(0)
+            .modify(x => x.bots[0].name = String(string));
 
         this.gameScene.bots[0].name = string;
     }

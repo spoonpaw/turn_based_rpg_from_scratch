@@ -1,3 +1,5 @@
+// TODO: FIX THIS BUG! BOT IS HITTING WAY HARDER THAN THE PLAYER
+//  ADD CONSOLE LOGS TO SEE IF DAMAGE IS GETTING CALCULATED CORRECTLY!
 
 import {abilities, IAbility} from '../abilities/abilities';
 import BotCharacter from '../classes/BotCharacter';

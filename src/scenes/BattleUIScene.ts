@@ -636,11 +636,6 @@ export default class BattleUIScene extends Phaser.Scene {
                 }
             });
 
-        console.log('just made the cancel button on the battle ui scene!');
-        console.log({cancelButtonIsVisible: this.cancelButton.button.visible});
-        console.log({cancelButtonKey: this.cancelButton.button.texture.key});
-        console.log({cancelButton: this.cancelButton.button.texture.key});
-
         this.cancelButton.hideActionButton();
         this.actionButtons.push(this.cancelButton);
 

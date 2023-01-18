@@ -1,3 +1,4 @@
+// TODO: FIX THIS -> player keeps spawning in the house even when loading the game!!!
 
 // TODO: add an npc who walks in a predescribed pattern and will stop and speak when interacted with
 
@@ -80,7 +81,7 @@ export default class GameScene extends Phaser.Scene {
             levelData?: ILevelData;
             loadFromSave?: boolean;
         }) {
-        this.saveIndex = data.saveIndex ?? 0;
+        this.saveIndex = 0;
         this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
         this.uiScene = <UIScene>this.scene.get('UI');
         this.musicScene = <MusicScene>this.scene.get('Music');
@@ -97,7 +98,7 @@ export default class GameScene extends Phaser.Scene {
             this.itemMerchant = undefined;
             this.botScientist = undefined;
 
-            this.saveAndLoadScene.getPlayerByIndex(data.saveIndex ?? 0).then(player => {
+            this.saveAndLoadScene.getPlayerByIndex(0).then(player => {
                 const levelData = levels[player.currentTilemap];
                 this.nonHostileSpace = !levelData.hostile;
                 this.musicScene.changeSong(levelData.music);
@@ -247,6 +248,7 @@ export default class GameScene extends Phaser.Scene {
             loadFromSave?: boolean;
         }
     ) {
+        this.saveIndex = 0;
         this.encounter_counter = 0;
 
         this.input.keyboard!.enabled = true;
@@ -335,7 +337,7 @@ export default class GameScene extends Phaser.Scene {
 
             //upload the player interface to the client database
             this.saveAndLoadScene.upsertPlayer({
-                id: data.saveIndex,
+                id: 0,
                 bots: [],
                 combatState: {enemies: [], heroes: [], passiveEffects: [], turnUnits: []},
                 currentTilemap: 'town',
@@ -665,8 +667,8 @@ export default class GameScene extends Phaser.Scene {
 
         if (xPositionChanged || yPositionChanged) {
             this.movedFromSpawn = true;
-            if (this.saveIndex) this.saveAndLoadScene.db.players.update(
-                this.saveIndex,
+            this.saveAndLoadScene.db.players.update(
+                0,
                 {
                     position: new Vector2(
                         this.player.getTilePos()
