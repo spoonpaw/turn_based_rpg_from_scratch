@@ -126,7 +126,7 @@ export default class TitleMenuScene extends Phaser.Scene{
                 this.loadGameButton.hideActionButton();
                 this.saveAndLoadScene.getPlayers().then(players => {
                     for (const [index, player] of players!.entries()) {
-                        this.saveFileButtons[index].buttonText.setText(player.name);
+                        this.saveFileButtons[index].changeButtonText(player.name);
                         this.shrinkTextByPixel(this.saveFileButtons[index].buttonText, 430);
                         this.saveFileButtons[index].showActionButton();
                     }

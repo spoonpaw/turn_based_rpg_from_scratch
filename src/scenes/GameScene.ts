@@ -1,4 +1,12 @@
-// TODO: FIX THIS -> player keeps spawning in the house even when loading the game!!!
+// TODO: FIX THIS -> when the player enters a new level, they must store the
+//  player's tile coordinates as being the same as the new levels spawn coordinates...
+//  or something... the issue is this: if i close the game one step east and one step south
+//  of the town, when i open the game again, i am on the overworld but up out of bounds on
+//  top of a mountain. seems really tough to reproduce this error, not sure if it's fixed
+//  or if i'm still missing something.
+
+// TODO: STORE THE CURRENT TILE MAP WHEN IT CHANGES
+// TODO: STORE EXPERIENCE POINTS STATS AND GOLD WHEN THEY CHANGE!!
 
 // TODO: add an npc who walks in a predescribed pattern and will stop and speak when interacted with
 
@@ -81,11 +89,13 @@ export default class GameScene extends Phaser.Scene {
             levelData?: ILevelData;
             loadFromSave?: boolean;
         }) {
+        console.log('entering game scene init method');
         this.saveIndex = 0;
         this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
         this.uiScene = <UIScene>this.scene.get('UI');
         this.musicScene = <MusicScene>this.scene.get('Music');
         if (data.loadFromSave) {
+            console.log('entering game scene init method\'s if(loadfromsave) branch');
             // TODO: load the game similarly to the above branch.
             //  except get the info from dexie
             this.uiScene.scene.bringToTop();
@@ -99,15 +109,25 @@ export default class GameScene extends Phaser.Scene {
             this.botScientist = undefined;
 
             this.saveAndLoadScene.getPlayerByIndex(0).then(player => {
+                console.log('loading the player data from the database');
+                console.log({storedTilemap: player.currentTilemap});
                 const levelData = levels[player.currentTilemap];
                 this.nonHostileSpace = !levelData.hostile;
                 this.musicScene.changeSong(levelData.music);
+
+                // store the current map in the database!!!
+                this.saveAndLoadScene.db.players.update(
+                    0,
+                    {
+                        currentTilemap: player.currentTilemap
+                    }
+                );
 
                 this.currentMap = player.currentTilemap;
                 this.exitingCurrentLevel = false;
 
                 this.currentTilemap = this.make.tilemap(
-                    {key: levels.town.tilemapKey}
+                    {key: levelData.tilemapKey}
                 );
                 this.currentTilemap.addTilesetImage(levelData.tilesetName, levelData.tilesetKey);
                 for (let i = 0; i < this.currentTilemap.layers.length; i++) {
@@ -248,6 +268,7 @@ export default class GameScene extends Phaser.Scene {
             loadFromSave?: boolean;
         }
     ) {
+        console.log('entering the game scene\'s create method');
         this.saveIndex = 0;
         this.encounter_counter = 0;
 
@@ -262,6 +283,7 @@ export default class GameScene extends Phaser.Scene {
         }
         // if data is empty then the game just started so load the player in the spawn location
         if (data.nameData) {
+            console.log('entering the game scene\'s create method\'s if (namedata) branch');
             // new player created! welcome to Caelor!
             // just got the player's namedata on the initial spawn
 
@@ -277,6 +299,15 @@ export default class GameScene extends Phaser.Scene {
             }
 
             this.nonHostileSpace = true;
+
+            // store the current map in the database!!!
+            this.saveAndLoadScene.db.players.update(
+                0,
+                {
+                    currentTilemap: levels.town.name
+                }
+            );
+
             this.currentMap = levels.town.name;
             this.exitingCurrentLevel = false;
             this.currentTilemap = this.make.tilemap(
@@ -456,6 +487,10 @@ export default class GameScene extends Phaser.Scene {
 
         }
         else if (data.levelData) {
+            console.log('entering the game scene\'s create method\'s else if (leveldata) branch');
+
+            // todo: store new level info in db
+
 
             this.uiScene.scene.bringToTop();
 
@@ -470,6 +505,21 @@ export default class GameScene extends Phaser.Scene {
             this.musicScene.changeSong(data.levelData.music);
 
             // spawn the character in the correct position based on data passed to the restart method
+
+
+
+            // store the current map in the database!!!
+            this.saveAndLoadScene.db.players.update(
+                0,
+                {
+                    currentTilemap: data.levelData.name,
+                    position: new Phaser.Math.Vector2(
+                        data.levelData.spawnCoords[0].x,
+                        data.levelData.spawnCoords[0].y
+                    ),
+                }
+            );
+
             // create the map
             this.currentMap = data.levelData.name;
             this.exitingCurrentLevel = false;
@@ -637,15 +687,20 @@ export default class GameScene extends Phaser.Scene {
         // Check if the player's position has changed
         const xPositionChanged = this.playerTileX !== this.player.getTilePos().x;
         const yPositionChanged = this.playerTileY !== this.player.getTilePos().y;
+        const xOrYPositionChanged = yPositionChanged || xPositionChanged;
+
+        let playerPos = undefined;
+        if (xOrYPositionChanged) {
+            // Get the player's current position
+            playerPos = this.player.getTilePos();
+        }
 
         // Get the player's current position
 
         // If the bot exists and the player has moved, update the bot's position
         if (this.bots.length > 0 && this.bots[0]) {
             this.botGridPhysics.update(delta);
-            if ((xPositionChanged || yPositionChanged)) {
-                // Get the player's current position
-                const playerPos = this.player.getTilePos();
+            if (xOrYPositionChanged && playerPos) {
                 // Add the player's position to the path
                 this.bots[0].path.push(playerPos);
             }
@@ -665,7 +720,8 @@ export default class GameScene extends Phaser.Scene {
 
         // determine if the player is in hostile territory
 
-        if (xPositionChanged || yPositionChanged) {
+        if (xOrYPositionChanged) {
+            console.log({x: playerPos?.x, y: playerPos?.y});
             this.movedFromSpawn = true;
             this.saveAndLoadScene.db.players.update(
                 0,
@@ -678,7 +734,7 @@ export default class GameScene extends Phaser.Scene {
         }
 
         if (
-            (xPositionChanged || yPositionChanged) &&
+            (xOrYPositionChanged) &&
             !this.exitingCurrentLevel &&
             !this.nonHostileSpace
         ) {

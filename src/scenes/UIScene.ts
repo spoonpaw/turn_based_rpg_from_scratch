@@ -12,6 +12,7 @@ import eventsCenter from '../utils/EventsCenter';
 import {updateCancelButton} from '../utils/updateCancelButton';
 import GameScene from './GameScene';
 import MusicScene from './MusicScene';
+import SaveAndLoadScene from './SaveAndLoadScene';
 import SFXScene from './SFXScene';
 
 export default class UIScene extends Phaser.Scene {
@@ -106,6 +107,7 @@ export default class UIScene extends Phaser.Scene {
     private nameText!: Phaser.GameObjects.Text;
     private invisiblePlayer1Button!: Phaser.GameObjects.Rectangle;
     private invisiblePlayer2Button!: Phaser.GameObjects.Rectangle;
+    private saveAndLoadScene!: SaveAndLoadScene;
 
     public constructor() {
         super('UI');
@@ -114,6 +116,8 @@ export default class UIScene extends Phaser.Scene {
     public create() {
         this.musicScene = <MusicScene>this.scene.get('Music');
         this.sfxScene = <SFXScene>this.scene.get('SFX');
+
+        this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
 
         this.cursors = this.input.keyboard!.createCursorKeys();
         this.setupFrames();
@@ -373,7 +377,7 @@ export default class UIScene extends Phaser.Scene {
                         }
                     }
                     this.inventoryAndAbilityDetailFrame.setVisible(true);
-                    this.purchaseItemButton.buttonText.setText(`Purchase for ${item.cost} gold`);
+                    this.purchaseItemButton.changeButtonText(`Purchase for ${item.cost} gold`);
                     this.purchaseItemButton.showActionButton();
 
                     this.updateAndShowCancelButton(10, 460, 'Cancel', true);
@@ -687,7 +691,7 @@ export default class UIScene extends Phaser.Scene {
                     }
 
                     this.inventoryAndAbilityDetailFrame.setVisible(true);
-                    this.sellItemButton.buttonText.setText(`Sell for ${item.sellPrice} gold`);
+                    this.sellItemButton.changeButtonText(`Sell for ${item.sellPrice} gold`);
                     this.sellItemButton.showActionButton();
 
                     this.updateAndShowCancelButton(10, 460, 'Cancel', true);
@@ -875,7 +879,16 @@ export default class UIScene extends Phaser.Scene {
                     const itemToSell = this.gameScene.player.inventory[Number(itemIndex)];
                     const sellPrice = itemToSell.sellPrice;
                     this.gameScene.player.inventory.splice(Number(itemIndex), 1);
-                    this.gameScene.player.gold += sellPrice;
+
+                    const newGoldAmount = this.gameScene.player.gold + sellPrice;
+
+                    this.saveAndLoadScene.db.players.update(
+                        0, {
+                            gold: newGoldAmount
+                        }
+                    );
+
+                    this.gameScene.player.gold = newGoldAmount;
 
                     this.hideMerchantFrames();
                     this.leftSideDialogFrame.setVisible(true);
@@ -917,7 +930,17 @@ export default class UIScene extends Phaser.Scene {
                         this.showMerchantRejection('You haven\'t enough coin!');
                     }
                     else {
-                        this.gameScene.player.gold -= selectedItem.cost;
+                        // buy the item!
+                        const newGoldAmount = this.gameScene.player.gold - selectedItem.cost;
+
+                        this.saveAndLoadScene.db.players.update(
+                            0,
+                            {
+                                gold: newGoldAmount
+                            }
+                        );
+
+                        this.gameScene.player.gold = newGoldAmount;
                         this.gameScene.player.inventory.push(
                             new Item(
                                 selectedItem.key,
@@ -1530,7 +1553,7 @@ export default class UIScene extends Phaser.Scene {
                 }
 
                 this.subInventoryAndAbilityMenuFrame.setVisible(true);
-                this.subInventoryBagButton.buttonText.setText('Inventory');
+                this.subInventoryBagButton.changeButtonText('Inventory');
 
                 for (const subInventoryButton of this.subInventoryButtons) {
                     subInventoryButton.showActionButton();

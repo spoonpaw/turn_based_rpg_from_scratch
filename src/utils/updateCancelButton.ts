@@ -16,7 +16,7 @@ export function updateCancelButton(
     cancelButton.setY(y + 35);
     cancelButton.buttonText.setX(x + 52);
     cancelButton.buttonText.setY(y + 10);
-    cancelButton.buttonText.setText(text);
+    cancelButton.changeButtonText(text);
 
     cancelButton.invisibleButton.setX(cancelButton.buttonText.x);
     cancelButton.invisibleButton.setY(cancelButton.buttonText.y);

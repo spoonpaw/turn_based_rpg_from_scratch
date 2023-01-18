@@ -48,7 +48,7 @@ export default class Merchant extends NPC {
         this.uiScene.subInventoryAndAbilityMenuFrame.setVisible(true);
 
         this.uiScene.buyButton.select();
-        this.uiScene.buyButton.buttonText.setText('Buy');
+        this.uiScene.buyButton.changeButtonText('Buy');
         this.uiScene.buyButton.showActionButton();
 
         this.uiScene.sellButton.deselect();

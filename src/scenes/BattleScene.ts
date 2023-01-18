@@ -14,6 +14,7 @@ import eventsCenter from '../utils/EventsCenter';
 import BattleUIScene from './BattleUIScene';
 import GameScene from './GameScene';
 import MusicScene from './MusicScene';
+import SaveAndLoadScene from './SaveAndLoadScene';
 import SFXScene from './SFXScene';
 import UIScene from './UIScene';
 
@@ -45,6 +46,7 @@ export default class BattleScene extends Phaser.Scene {
     private actionMenuFrame!: Phaser.GameObjects.Image;
     private player1MenuFrame!: Phaser.GameObjects.Image;
     private player2MenuFrame!: Phaser.GameObjects.Image;
+    private saveAndLoadScene!: SaveAndLoadScene;
 
     public constructor() {
         super('Battle');
@@ -74,6 +76,7 @@ export default class BattleScene extends Phaser.Scene {
         this.uiScene = <UIScene>this.scene.get('UI');
         this.musicScene = <MusicScene>this.scene.get('Music');
         this.sfxScene = <SFXScene>this.scene.get('SFX');
+        this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
 
         this.startBattle();
 
@@ -202,7 +205,14 @@ export default class BattleScene extends Phaser.Scene {
 
         // cut gold in half, set hit points to full, cut to game over screen, respawn
         eventsCenter.emit('Message', 'Thou art vanquished!');
-        this.gameScene.player.gold = Math.floor(this.gameScene.player.gold / 2);
+        const newGoldAmount = Math.floor(this.gameScene.player.gold / 2);
+        this.saveAndLoadScene.db.players.update(
+            0,
+            {
+                gold: newGoldAmount
+            }
+        );
+        this.gameScene.player.gold = newGoldAmount;
         eventsCenter.emit('updateResource', this.gameScene.player.stats.currentResource, this.gameScene.player.stats.maxResource);
         this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
         if (this.gameScene.bots.length > 0) {
@@ -396,7 +406,15 @@ export default class BattleScene extends Phaser.Scene {
                     experienceAmount = 0;
                 }
 
-                player.gold += goldAmount;
+                const newGoldAmount = player.gold + goldAmount;
+
+                this.saveAndLoadScene.db.players.update(
+                    0, {
+                        gold: newGoldAmount
+                    }
+                );
+
+                player.gold = newGoldAmount;
 
                 eventsCenter.emit('updateResource', player.stats.currentResource, player.stats.maxResource);
 

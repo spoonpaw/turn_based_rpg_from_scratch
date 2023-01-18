@@ -1,4 +1,5 @@
 import GameScene from '../../scenes/GameScene';
+import SaveAndLoadScene from '../../scenes/SaveAndLoadScene';
 import UIScene from '../../scenes/UIScene';
 import eventsCenter from '../../utils/EventsCenter';
 import NPC from './NPC';
@@ -6,6 +7,7 @@ import NPC from './NPC';
 export default class Innkeeper extends NPC {
     protected gameScene: GameScene;
     private uiScene: UIScene;
+    private saveAndLoadScene: SaveAndLoadScene;
 
     constructor(
         public sprite: Phaser.GameObjects.Sprite,
@@ -13,7 +15,8 @@ export default class Innkeeper extends NPC {
     ) {
         super(sprite, tilePos);
         this.gameScene = <GameScene>this.sprite.scene;
-        this.uiScene = <UIScene>this.gameScene.scene.get('UI');
+        this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
+        this.saveAndLoadScene = <SaveAndLoadScene>this.sprite.scene.scene.get('SaveAndLoad');
     }
 
     public runDialog() {
@@ -97,7 +100,14 @@ export default class Innkeeper extends NPC {
                 }
                 else {
                     this.uiScene.leftSideDialogText.setText('Innkeeper:\nThank thee! Thou appeareth well rested.');
-                    this.gameScene.player.gold -= 3;
+                    const newGoldAmount = this.gameScene.player.gold - 3;
+
+                    this.saveAndLoadScene.db.players.update(
+                        0, {
+                            gold: newGoldAmount
+                        }
+                    );
+                    this.gameScene.player.gold = newGoldAmount;
                     this.uiScene.coinText.setText(`${this.gameScene.player.gold} gp`);
                     this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
                     if (this.gameScene.bots.length > 0) {

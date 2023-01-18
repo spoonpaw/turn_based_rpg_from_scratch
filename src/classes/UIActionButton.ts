@@ -101,4 +101,9 @@ export default class UIActionButton extends Phaser.GameObjects.Container {
         this.buttonText.destroy();
         this.invisibleButton.destroy();
     }
+
+    public changeButtonText(text: string) {
+        this.buttonText.setText(text);
+        this.invisibleButton.setSize(this.buttonText.width, this.buttonText.height - 5);
+    }
 }
