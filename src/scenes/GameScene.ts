@@ -3,7 +3,11 @@
 //  or something... the issue is this: if i close the game one step east and one step south
 //  of the town, when i open the game again, i am on the overworld but up out of bounds on
 //  top of a mountain. seems really tough to reproduce this error, not sure if it's fixed
-//  or if i'm still missing something.
+//  or if i'm still missing something. haven't seen this glitch in a while. not sure
+//  if it's fixed or not
+
+// TODO: i saw a glitch where the font wasn't getting applied to the loading string at the
+//  beginning of the game. haven't seen it reoccur for a moment, not sure if it's fixed or not
 
 // TODO: STORE EXPERIENCE POINTS, STATS, EQUIPMENT, AND INVENTORY WHEN THEY CHANGE!!
 

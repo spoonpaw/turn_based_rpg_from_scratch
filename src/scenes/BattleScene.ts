@@ -417,12 +417,27 @@ export default class BattleScene extends Phaser.Scene {
 
                 const currentLevel = player.level;
 
-                player.experience += experienceAmount;
+                const newExperienceAmount = player.experience + experienceAmount;
 
-                const newLevel = Math.max(1, Math.ceil(player.LEVELING_RATE * Math.sqrt(player.experience)));
+                this.saveAndLoadScene.db.players.update(
+                    0,
+                    {
+                        experience: newExperienceAmount
+                    }
+                );
+
+                player.experience = newExperienceAmount;
+
+                const newLevel = Math.max(
+                    1,
+                    Math.ceil(
+                        player.LEVELING_RATE * Math.sqrt(
+                            player.experience
+                        )
+                    )
+                );
 
                 if (currentLevel < newLevel) {
-
                     // soldiers have a flat vim amount
                     let maxResourceIncrease;
                     if (unit.job.properName === 'Soldier') {
@@ -445,7 +460,6 @@ export default class BattleScene extends Phaser.Scene {
                         attack: player.stats.attack + this.getStatIncrease('strength', newLevel),
                         defense: player.stats.defense + this.getStatIncrease('agility', newLevel) / 2
                     };
-
                 }
                 this.uiScene.updateHP(player.stats.currentHP, player.stats.maxHP);
 
