@@ -5,8 +5,7 @@
 //  top of a mountain. seems really tough to reproduce this error, not sure if it's fixed
 //  or if i'm still missing something.
 
-// TODO: STORE THE CURRENT TILE MAP WHEN IT CHANGES
-// TODO: STORE EXPERIENCE POINTS STATS AND GOLD WHEN THEY CHANGE!!
+// TODO: STORE EXPERIENCE POINTS, STATS, EQUIPMENT, AND INVENTORY WHEN THEY CHANGE!!
 
 // TODO: add an npc who walks in a predescribed pattern and will stop and speak when interacted with
 
@@ -96,8 +95,7 @@ export default class GameScene extends Phaser.Scene {
         this.musicScene = <MusicScene>this.scene.get('Music');
         if (data.loadFromSave) {
             console.log('entering game scene init method\'s if(loadfromsave) branch');
-            // TODO: load the game similarly to the above branch.
-            //  except get the info from dexie
+            // load the game info from dexie
             this.uiScene.scene.bringToTop();
 
             this.npcs = [];
@@ -489,9 +487,6 @@ export default class GameScene extends Phaser.Scene {
         else if (data.levelData) {
             console.log('entering the game scene\'s create method\'s else if (leveldata) branch');
 
-            // todo: store new level info in db
-
-
             this.uiScene.scene.bringToTop();
 
             this.npcs = [];
@@ -503,10 +498,6 @@ export default class GameScene extends Phaser.Scene {
             this.botScientist = undefined;
 
             this.musicScene.changeSong(data.levelData.music);
-
-            // spawn the character in the correct position based on data passed to the restart method
-
-
 
             // store the current map in the database!!!
             this.saveAndLoadScene.db.players.update(
@@ -520,6 +511,7 @@ export default class GameScene extends Phaser.Scene {
                 }
             );
 
+            // spawn the character in the correct position based on data passed to the restart method
             // create the map
             this.currentMap = data.levelData.name;
             this.exitingCurrentLevel = false;

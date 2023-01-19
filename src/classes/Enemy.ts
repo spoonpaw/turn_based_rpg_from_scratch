@@ -111,6 +111,7 @@ export class Enemy extends Unit {
         );
     }
 
+
     public calculateCriticalStrikeDamage() {
         return Math.max(
             1,

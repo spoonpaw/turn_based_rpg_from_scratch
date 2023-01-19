@@ -81,7 +81,7 @@ export default class TitleStoryScene extends Phaser.Scene{
         this.storyText.setMask(mask);
 
         eventsCenter.once('gamestart', ()=> {
-            // TODO: fade in the floral frame
+            // fade in the floral frame
 
             this.floralFrame.setAlpha(0);
             this.floralFrame.setVisible(true);
@@ -103,7 +103,7 @@ export default class TitleStoryScene extends Phaser.Scene{
                 yoyo: true
             });
 
-            // TODO: if the player presses a button or clicks the scene,
+            // if the player presses a button or clicks the scene,
             //  set the storytext y to -this.storyText.height + 165 and
             //  launch the 'TitleMenu' scene
             this.input.once('pointerdown', () => {

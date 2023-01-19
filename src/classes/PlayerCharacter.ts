@@ -61,15 +61,20 @@ export default class PlayerCharacter extends Unit {
     }
 
     public calculateAttackDamage(target: (PlayerCharacter | Enemy | BotCharacter)): number {
-        return Math.max(
+        console.log(`calculating ${this.name}'s damage.`);
+        console.log('formula: Math.max(1, Math.floor(actorStrength - (defenderDefense / 2) * randomModifier))');
+        const actorStrength = this.getCombinedStat('strength');
+        const defenderDefense = target.stats.defense;
+        const damageAfterDefense = actorStrength - (defenderDefense / 2);
+        const randomModifier = Phaser.Math.FloatBetween(0.34, 0.52);
+        const finalAttackDamage = Math.max(
             1,
             Math.floor(
-                (this.getCombinedStat('strength') - (target.stats.defense / 2)) * Phaser.Math.FloatBetween(
-                    0.34,
-                    0.52
-                )
+                damageAfterDefense * randomModifier
             )
         );
+        console.log({actorStrength, defenderDefense, damageAfterDefense, randomModifier, finalAttackDamage});
+        return finalAttackDamage;
     }
 
     public calculateCriticalStrikeDamage() {

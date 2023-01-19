@@ -98,16 +98,22 @@ export default class BotCharacter extends Unit {
     }
 
     public calculateAttackDamage(target: (PlayerCharacter | Enemy | BotCharacter)): number {
-        return Math.max(
+        console.log(`calculating ${this.name}'s damage.`);
+        console.log('formula: Math.max(1, Math.floor(actorStrength - (defenderDefense / 2) * randomModifier))');
+        const actorStrength = this.getCombinedStat('strength');
+        const defenderDefense = target.stats.defense;
+        const damageAfterDefense = actorStrength - (defenderDefense / 2);
+        const randomModifier = Phaser.Math.FloatBetween(0.34, 0.52);
+        const finalAttackDamage = Math.max(
             1,
             Math.floor(
-                (this.stats.strength - (target.getCombinedStat('defense') / 2)) *
-                Phaser.Math.FloatBetween(
-                    0.39, 0.59
-                )
+                damageAfterDefense * randomModifier
             )
         );
+        console.log({actorStrength, defenderDefense, damageAfterDefense, randomModifier, finalAttackDamage});
+        return finalAttackDamage;
     }
+
 
     evadeTest(): boolean {
         return Phaser.Math.Between(1, 64) === 1;
