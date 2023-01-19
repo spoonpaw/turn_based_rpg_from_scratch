@@ -1,6 +1,7 @@
 import {abilities, IAbility} from '../abilities/abilities';
 import BotCharacter from '../classes/BotCharacter';
 import {Enemy} from '../classes/Enemy';
+import {IPlayer} from '../classes/GameDatabase';
 import PlayerCharacter from '../classes/PlayerCharacter';
 import {enemies} from '../enemies/enemies';
 import MonsterSoldier from '../jobs/monsters/MonsterSoldier';
@@ -447,7 +448,7 @@ export default class BattleScene extends Phaser.Scene {
                         maxResourceIncrease = this.getStatIncrease('intellect', newLevel) * 2;
                     }
 
-                    player.stats = {
+                    const newStats = {
                         strength: player.stats.strength + this.getStatIncrease('strength', newLevel),
                         agility: player.stats.agility + this.getStatIncrease('agility', newLevel),
                         vitality: player.stats.vitality + this.getStatIncrease('vitality', newLevel),
@@ -460,6 +461,15 @@ export default class BattleScene extends Phaser.Scene {
                         attack: player.stats.attack + this.getStatIncrease('strength', newLevel),
                         defense: player.stats.defense + this.getStatIncrease('agility', newLevel) / 2
                     };
+
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        {
+                            stats: newStats
+                        }
+                    );
+
+                    player.stats = newStats;
                 }
                 this.uiScene.updateHP(player.stats.currentHP, player.stats.maxHP);
 
@@ -515,7 +525,17 @@ export default class BattleScene extends Phaser.Scene {
                     experienceAmount = 0;
                 }
 
-                bot.experience += experienceAmount;
+                const newExperienceAmount = bot.experience + experienceAmount;
+
+                this.saveAndLoadScene.db.players.update(
+                    0,
+                    (player: IPlayer) => {
+                        player.bots[0].experience = newExperienceAmount;
+                        return player;
+                    }
+                );
+
+                bot.experience = newExperienceAmount;
 
                 newLevel = Math.max(
                     1,
@@ -537,7 +557,7 @@ export default class BattleScene extends Phaser.Scene {
                         maxResourceIncrease = this.getStatIncrease('intellect', newLevel) * 2;
                     }
 
-                    bot.stats = {
+                    const newStats = {
                         strength: bot.stats.strength + this.getStatIncrease('strength', newLevel),
                         agility: bot.stats.agility + this.getStatIncrease('agility', newLevel),
                         vitality: bot.stats.vitality + this.getStatIncrease('vitality', newLevel),
@@ -550,6 +570,16 @@ export default class BattleScene extends Phaser.Scene {
                         attack: bot.stats.attack + this.getStatIncrease('strength', newLevel),
                         defense: bot.stats.defense + this.getStatIncrease('agility', newLevel) / 2
                     };
+
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.bots[0].stats = newStats;
+                            return player;
+                        }
+                    );
+
+                    bot.stats = newStats;
 
                 }
                 this.uiScene.updatePlayer2HP(bot.stats.currentHP, bot.stats.maxHP);
