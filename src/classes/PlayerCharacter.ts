@@ -6,6 +6,7 @@ import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import BotCharacter from './BotCharacter';
 import {Enemy} from './Enemy';
+import {IPlayer} from './GameDatabase';
 import {PlayerJob} from './Jobs/PlayerJob';
 // import Item from './Item';
 import Unit from './Unit';
@@ -57,6 +58,22 @@ export default class PlayerCharacter extends Unit {
     }
 
     public applyHPChange(hpChangeAmount: number): number {
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                if (hpChangeAmount < 0) {
+                    player.stats.currentHP = Math.min(this.stats.maxHP, this.stats.currentHP - hpChangeAmount);
+                }
+                else {
+                    player.stats.currentHP -= hpChangeAmount;
+                }
+                if (player.stats.currentHP <= 0) {
+                    player.stats.currentHP = 0;
+                }
+                return player;
+            }
+        );
+
         return super.applyHPChange(hpChangeAmount, this.battleScene.player1HPText);
     }
 

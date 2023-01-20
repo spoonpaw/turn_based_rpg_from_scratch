@@ -1,6 +1,7 @@
 import {clone} from 'lodash';
 
 import Bot from '../classes/Bot';
+import {IPlayer} from '../classes/GameDatabase';
 import GameMessage from '../classes/GameMessage';
 import Item from '../classes/Item';
 import Innkeeper from '../classes/npcs/Innkeeper';
@@ -756,6 +757,16 @@ export default class UIScene extends Phaser.Scene {
                 // setting the interaction state from the use button
                 // get inventory slot number from interaction state
                 const selectedItemIndex = Number(this.interactionState.split('selectinginventoryaction')[1]);
+
+                this.saveAndLoadScene.db.players.update(
+                    0,
+                    (player: IPlayer) => {
+                        player.inventory.splice(selectedItemIndex, 1);
+                        return player;
+                    }
+                );
+
+
                 this.gameScene.player.inventory.splice(selectedItemIndex, 1);
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
                 this.inventoryAndAbilityDetailText.setVisible(false);
@@ -878,12 +889,27 @@ export default class UIScene extends Phaser.Scene {
                     const itemIndex = this.interactionState.split('merchantsellitem')[1];
                     const itemToSell = this.gameScene.player.inventory[Number(itemIndex)];
                     const sellPrice = itemToSell.sellPrice;
+
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.inventory.splice(
+                                Number(
+                                    itemIndex
+                                ),
+                                1
+                            );
+                            return player;
+                        }
+                    );
+
                     this.gameScene.player.inventory.splice(Number(itemIndex), 1);
 
                     const newGoldAmount = this.gameScene.player.gold + sellPrice;
 
                     this.saveAndLoadScene.db.players.update(
-                        0, {
+                        0,
+                        {
                             gold: newGoldAmount
                         }
                     );
@@ -933,6 +959,20 @@ export default class UIScene extends Phaser.Scene {
                         // buy the item!
                         const newGoldAmount = this.gameScene.player.gold - selectedItem.cost;
 
+                        const purchasedItem = new Item(
+                            selectedItem.key,
+                            selectedItem.activekey,
+                            selectedItem.name,
+                            selectedItem.type,
+                            selectedItem.cost,
+                            selectedItem.sellPrice,
+                            selectedItem.description,
+                            undefined,
+                            selectedItem.classes,
+                            selectedItem.minimumLevel,
+                            selectedItem.stats
+                        );
+
                         this.saveAndLoadScene.db.players.update(
                             0,
                             {
@@ -941,20 +981,16 @@ export default class UIScene extends Phaser.Scene {
                         );
 
                         this.gameScene.player.gold = newGoldAmount;
-                        this.gameScene.player.inventory.push(
-                            new Item(
-                                selectedItem.key,
-                                selectedItem.activekey,
-                                selectedItem.name,
-                                selectedItem.type,
-                                selectedItem.cost,
-                                selectedItem.sellPrice,
-                                selectedItem.description,
-                                undefined,
-                                selectedItem.classes,
-                                selectedItem.minimumLevel,
-                                selectedItem.stats
-                            ));
+
+                        this.saveAndLoadScene.db.players.update(
+                            0,
+                            (player: IPlayer) => {
+                                player.inventory.push(purchasedItem);
+                                return player;
+                            }
+                        );
+
+                        this.gameScene.player.inventory.push(purchasedItem);
 
                         // hide all the merchant related frames
                         this.hideMerchantFrames();
@@ -1042,6 +1078,15 @@ export default class UIScene extends Phaser.Scene {
                     const itemToUnequipStats = clone(this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment]!.stats);
                     itemToUnequip.stats = itemToUnequipStats;
 
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.equipment[slotToUnequip as keyof typeof player.equipment] = undefined;
+                            player.inventory.push(itemToUnequip);
+                            return player;
+                        }
+                    );
+
                     this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment] = undefined;
                     this.gameScene.player.inventory.push(itemToUnequip);
                     this.destroyEquipmentButtons();
@@ -1083,35 +1128,99 @@ export default class UIScene extends Phaser.Scene {
                 this.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
                 const itemToEquip = this.gameScene.player.inventory[inventorySlotNumber];
+
+                this.saveAndLoadScene.db.players.update(
+                    0,
+                    (player: IPlayer) => {
+                        player.inventory.splice(
+                            inventorySlotNumber,
+                            1
+                        );
+                        return player;
+                    }
+                );
+
                 this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
 
                 if (itemToEquip.type === 'weapon') {
                     // check if there's already a weapon equipped
                     if (this.gameScene.player.equipment.weapon) {
                         // if there is, add it back to the inventory at the same index as the item being equipped
+                        this.saveAndLoadScene.db.players.update(
+                            0,
+                            (player: IPlayer) => {
+                                player.inventory.splice(
+                                    inventorySlotNumber,
+                                    0,
+                                    this.gameScene.player.equipment.weapon as Item
+                                );
+                                return player;
+                            }
+                        );
                         this.gameScene.player.inventory.splice(
                             inventorySlotNumber,
                             0,
                             this.gameScene.player.equipment.weapon
                         );
                     }
+
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.equipment.weapon = itemToEquip;
+                            return player;
+                        }
+                    );
                     this.gameScene.player.equipment.weapon = itemToEquip;
                 }
 
                 else if (itemToEquip.type === 'helmet') {
                     if (this.gameScene.player.equipment.head) {
+
+                        this.saveAndLoadScene.db.players.update(
+                            0,
+                            (player: IPlayer) => {
+                                player.inventory.splice(
+                                    inventorySlotNumber,
+                                    0,
+                                    this.gameScene.player.equipment.head as Item
+                                );
+                                return player;
+                            }
+                        );
+
                         this.gameScene.player.inventory.splice(
                             inventorySlotNumber,
                             0,
                             this.gameScene.player.equipment.head
                         );
                     }
+
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.equipment.head = itemToEquip;
+                            return player;
+                        }
+                    );
                     this.gameScene.player.equipment.head = itemToEquip;
                 }
 
                 else if (itemToEquip.type === 'offhand') {
                     // check if there's already an offhand equipped
                     if (this.gameScene.player.equipment.offhand) {
+
+                        this.saveAndLoadScene.db.players.update(
+                            0,
+                            (player: IPlayer) => {
+                                player.inventory.splice(
+                                    inventorySlotNumber,
+                                    0,
+                                    this.gameScene.player.equipment.offhand as Item
+                                );
+                                return player;
+                            }
+                        );
                         // if there is, add it back to the inventory at the same index as the item being equipped
                         this.gameScene.player.inventory.splice(
                             inventorySlotNumber,
@@ -1119,17 +1228,43 @@ export default class UIScene extends Phaser.Scene {
                             this.gameScene.player.equipment.offhand
                         );
                     }
+
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.equipment.offhand = itemToEquip;
+                            return player;
+                        }
+                    );
+
                     this.gameScene.player.equipment.offhand = itemToEquip;
                 }
 
                 else if (itemToEquip.type === 'bodyarmor') {
                     if (this.gameScene.player.equipment.body) {
+                        this.saveAndLoadScene.db.players.update(
+                            0,
+                            (player: IPlayer) => {
+                                player.inventory.splice(
+                                    inventorySlotNumber,
+                                    0,
+                                    this.gameScene.player.equipment.body as Item
+                                );
+                                return player;
+                            }
+                        );
                         this.gameScene.player.inventory.splice(
                             inventorySlotNumber,
                             0,
                             this.gameScene.player.equipment.body
                         );
                     }
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.equipment.body = itemToEquip;
+                        }
+                    );
                     this.gameScene.player.equipment.body = itemToEquip;
                 }
 
@@ -1622,6 +1757,23 @@ export default class UIScene extends Phaser.Scene {
                 this.player2ButtonCallback();
             });
 
+
+        if (this.gameScene.bots.length > 0) {
+            this.player2hpText.setText(`HP: ${this.gameScene.bots[0].stats.currentHP ?? '0'}/${this.gameScene.bots[0].stats.maxHP ?? '0'}`);
+
+            const currentResource = this.gameScene.bots[0].stats.currentResource;
+            const maxResource = this.gameScene.bots[0].stats.maxResource;
+
+            this.player2ManaText.setText(`Vim: ${currentResource}/${maxResource}`);
+
+            this.player2Button.setVisible(true);
+            this.player2hpText.setVisible(true);
+            this.player2HeartIcon.setVisible(true);
+            this.player2ManaText.setVisible(true);
+            this.player2ManaIcon.setVisible(true);
+        }
+
+
         this.abilityButton = new UIActionButton(
             this,
             800,
@@ -2085,6 +2237,14 @@ export default class UIScene extends Phaser.Scene {
             this.inventoryButton.deselect();
             this.interactionState = 'handlinghealthpotionselect';
 
+            this.saveAndLoadScene.db.players.update(
+                0,
+                (player: IPlayer) => {
+                    player.inventory.splice(inventorySlotNumber, 1);
+                    return player;
+                }
+            );
+
             this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
 
             // finish using the item -> affect the target, delete item from bag
@@ -2134,6 +2294,12 @@ export default class UIScene extends Phaser.Scene {
             this.inventoryButton.deselect();
             this.interactionState = 'handlinghealthpotionselect';
 
+            this.saveAndLoadScene.db.players.update(
+                0,
+                (player: IPlayer) => {
+                    player.inventory.splice(inventorySlotNumber, 1);
+                }
+            );
             this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
 
             // finish using the item -> affect the target, delete item from bag

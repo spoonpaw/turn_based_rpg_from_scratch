@@ -385,6 +385,13 @@ export default class BattleScene extends Phaser.Scene {
                 player.stats.currentHP = unit.stats.currentHP;
 
                 if (player.stats.currentHP <= 0) {
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.stats.currentHP = 1;
+                            return player;
+                        }
+                    );
                     player.stats.currentHP = 1;
                 }
 
@@ -481,6 +488,13 @@ export default class BattleScene extends Phaser.Scene {
                 // unit must be a bot character at this point
                 bot.stats.currentHP = unit.stats.currentHP;
                 if (bot.stats.currentHP <= 0) {
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.stats.currentHP = 1;
+                            return player;
+                        }
+                    );
                     bot.stats.currentHP = 1;
                 }
 

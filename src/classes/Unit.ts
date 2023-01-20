@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import BattleScene from '../scenes/BattleScene';
 import BattleUIScene from '../scenes/BattleUIScene';
 import GameScene from '../scenes/GameScene';
+import SaveAndLoadScene from '../scenes/SaveAndLoadScene';
 import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
@@ -26,6 +27,7 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
     protected battleScene: BattleScene;
     protected battleUIScene: BattleUIScene;
     protected gameScene: GameScene;
+    protected saveAndLoadScene!: SaveAndLoadScene;
 
     protected constructor(
         public scene: Phaser.Scene,
@@ -42,6 +44,7 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         this.gameScene = <GameScene>this.scene.scene.get('Game');
         this.battleScene = <BattleScene>this.scene.scene.get('Battle');
         this.battleUIScene = <BattleUIScene>this.scene.scene.get('BattleUI');
+        this.saveAndLoadScene = <SaveAndLoadScene>this.scene.scene.get('SaveAndLoad');
 
         // this.living = true;
 
@@ -140,7 +143,6 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
         if (this.stats.currentHP <= 0) {
             this.stats.currentHP = 0;
-            // this.living = false;
         }
 
         // setting up the ui hp
