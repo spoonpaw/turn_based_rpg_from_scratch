@@ -74,7 +74,7 @@ export default class BattleScene extends Phaser.Scene {
         });
     }
 
-    create(data?: {
+    public create(data?: {
         loadBattleData: boolean,
         savedCombatState: {
             enemies: DBUnit[],
@@ -94,7 +94,6 @@ export default class BattleScene extends Phaser.Scene {
             actionType: string
             escaped: boolean | undefined
         }
-
     }): void {
         this.gameScene = <GameScene>this.scene.get('Game');
         this.uiScene = <UIScene>this.scene.get('UI');
@@ -102,8 +101,10 @@ export default class BattleScene extends Phaser.Scene {
         this.sfxScene = <SFXScene>this.scene.get('SFX');
         this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
 
+        console.log('determining whether or not to start the battle!');
+        console.log({data});
         if (data?.loadBattleData) this.loadBattle(data.savedCombatState);
-        else if (!data?.loadBattleData) this.startBattle();
+        else if (!data?.loadBattleData || !data) this.startBattle();
 
         this.sys.events.on('wake', this.startBattle, this);
     }
@@ -1041,6 +1042,7 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private startBattle(): void {
+        console.log('starting the battle!!');
         // let count = 0;
         // this.children.each(gameObject => {
         //     if (gameObject.active) {

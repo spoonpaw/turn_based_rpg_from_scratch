@@ -37,7 +37,7 @@ export default class MusicScene extends Phaser.Scene {
         });
 
         this.townSong = this.sound.add('townsong', {
-            volume: 0.80,
+            volume: 0.60,
             loop: true
         });
 

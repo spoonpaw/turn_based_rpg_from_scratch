@@ -135,9 +135,6 @@ export default class BattleUIScene extends Phaser.Scene {
         this.key1 = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
         this.spaceKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
-        eventsCenter.removeListener('MessageClose');
-        eventsCenter.on('MessageClose', this.messageCloseHandler, this);
-
         this.initiateBattleUI();
 
         this.sys.events.on('wake', this.initiateBattleUI, this);
@@ -316,6 +313,10 @@ export default class BattleUIScene extends Phaser.Scene {
 
     private initiateBattleUI() {
         this.hideUIFrames();
+
+        eventsCenter.removeListener('MessageClose');
+        eventsCenter.on('MessageClose', this.messageCloseHandler, this);
+
         eventsCenter.emit('Message', `A ${this.battleScene.enemies[0].name} approaches.`);
     }
 
