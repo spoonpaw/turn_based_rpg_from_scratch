@@ -7,6 +7,7 @@ import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import BotCharacter from './BotCharacter';
+import {IPlayer} from './GameDatabase';
 import Item from './Item';
 import {MonsterJob} from './Jobs/MonsterJob';
 import PlayerCharacter from './PlayerCharacter';
@@ -32,7 +33,8 @@ export class Enemy extends Unit {
         frame: string | number | undefined,
         name: string,
         job: MonsterJob,
-        private skills: IAbility[] = []
+        public skills: IAbility[] = [],
+        id?: number
     ) {
         super(
             scene,
@@ -41,7 +43,8 @@ export class Enemy extends Unit {
             texture,
             frame,
             name,
-            job
+            job,
+            id
         );
 
         this.battleScene = <BattleScene>this.scene.scene.get('Battle');
@@ -89,6 +92,29 @@ export class Enemy extends Unit {
     }
 
     applyHPChange(hpChangeAmount: number): number {
+
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                const unitToUpdate = player.combatState.enemies.find(unit => unit.id === this.id);
+
+                if (unitToUpdate !== undefined) {
+                    if (hpChangeAmount < 0) {
+                        unitToUpdate.stats.currentHP = Math.min(unitToUpdate.stats.maxHP, unitToUpdate.stats.currentHP - hpChangeAmount);
+                    }
+                    else {
+                        unitToUpdate.stats.currentHP -= hpChangeAmount;
+                    }
+                    if (unitToUpdate.stats.currentHP <= 0) {
+                        unitToUpdate.stats.currentHP = 0;
+                    }
+                }
+
+                return player;
+            }
+        );
+
+
         // handle the math of taking damage,
         this.stats.currentHP -= hpChangeAmount;
         if (this.stats.currentHP <= 0) {
@@ -121,15 +147,15 @@ export class Enemy extends Unit {
         );
     }
 
-    criticalStrikeTest(): boolean {
+    public criticalStrikeTest(): boolean {
         return Phaser.Math.Between(1, 64) === 1;
     }
 
-    evadeTest(): boolean {
+    public evadeTest(): boolean {
         return Phaser.Math.Between(1, 64) === 1;
     }
 
-    getInitiative(): number {
+    public getInitiative(): number {
         return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
     }
 
@@ -144,8 +170,9 @@ export class Enemy extends Unit {
 
         const livingHeroes = this.battleScene.heroes.filter(unit => unit.isLiving());
         const moreThanOneLivingHero = livingHeroes.length > 1;
+        const enableAOEAttacks = false;
 
-        if (this.hasAoEAbility() && moreThanOneLivingHero) {
+        if (this.hasAoEAbility() && moreThanOneLivingHero && enableAOEAttacks) {
             // do aoe damage to the player's party!
             const aoeAbility = this.getAOEAbility();
             eventsCenter.emit(

@@ -1,3 +1,5 @@
+import {IAbility} from '../abilities/abilities';
+import {DBUnit} from '../classes/GameDatabase';
 import Message from '../classes/Message';
 import UIActionButton from '../classes/UIActionButton';
 import eventsCenter from '../utils/EventsCenter';
@@ -41,6 +43,10 @@ export default class BattleUIScene extends Phaser.Scene {
     private tacticsButton!: UIActionButton;
     private useAbilityButton!: UIActionButton;
     private useItemButton!: UIActionButton;
+    private key1!: Phaser.Input.Keyboard.Key;
+    private spaceKey!: Phaser.Input.Keyboard.Key;
+    private loadingBattleMidFight = false;
+    private saveData?: { enemies: DBUnit[]; heroes: DBUnit[]; passiveEffects: { actor: DBUnit; target: DBUnit; ability: IAbility; turnDurationRemaining: number }[]; units: DBUnit[]; roundUnits: DBUnit[]; turnIndex: number; roundIndex: number; action: string; target: DBUnit | undefined; actionType: string; escaped: boolean | undefined } | undefined;
 
     public constructor() {
         super('BattleUI');
@@ -55,7 +61,6 @@ export default class BattleUIScene extends Phaser.Scene {
         for (const abilityButton of this.abilityButtons) {
             abilityButton.deselect();
             abilityButton.hideActionButton();
-
         }
 
         this.useAbilityButton.hideActionButton();
@@ -81,7 +86,37 @@ export default class BattleUIScene extends Phaser.Scene {
     }
 
 
-    create() {
+    public create(
+        data?: {
+            loadFromSave?: boolean,
+            savedCombatState?: {
+                enemies: DBUnit[],
+                heroes: DBUnit[],
+                passiveEffects: {
+                    actor: DBUnit,
+                    target: DBUnit,
+                    ability: IAbility,
+                    turnDurationRemaining: number
+                }[],
+                units: DBUnit[],
+                roundUnits: DBUnit[],
+                turnIndex: number,
+                roundIndex: number,
+                action: string,
+                target: DBUnit | undefined,
+                actionType: string,
+                escaped: boolean | undefined
+            }
+        }
+    ) {
+        if (data?.savedCombatState) {
+            this.saveData = data.savedCombatState;
+            if (data.savedCombatState.turnIndex >= data.savedCombatState.roundUnits.length) {
+                data.savedCombatState.turnIndex = 0;
+                data.savedCombatState.roundIndex++;
+            }
+            this.loadingBattleMidFight = data.savedCombatState.turnIndex > 0;
+        }
         this.musicScene = <MusicScene>this.scene.get('Music');
         this.battleScene = <BattleScene>this.scene.get('Battle');
 
@@ -97,30 +132,35 @@ export default class BattleUIScene extends Phaser.Scene {
         // setup buttons and badges
         this.setupButtonsAndBadges();
 
+        this.key1 = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+        this.spaceKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
         eventsCenter.removeListener('MessageClose');
         eventsCenter.on('MessageClose', this.messageCloseHandler, this);
-
-        this.input.keyboard!.on('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Digit1') {
-                if (this.battleScene.interactionState !== 'mainselect') {
-                    return;
-                }
-                this.selectAttack();
-            }
-            if (event.code === 'Space') {
-                // console.log('space pressed on the battle ui scene!');
-                // console.log({
-                //     battleSceneInteractionState: this.battleScene.interactionState,
-                //     playerVim: this.battleScene.gameScene.player.stats.maxResource,
-                //     botVim: this.battleScene.gameScene.bots[0]?.stats.maxResource
-                // });
-            }
-        });
-
 
         this.initiateBattleUI();
 
         this.sys.events.on('wake', this.initiateBattleUI, this);
+    }
+
+    public update() {
+        if (Phaser.Input.Keyboard.JustDown(this.key1)) {
+            if (this.battleScene.interactionState === 'mainselect') {
+                this.selectAttack();
+            }
+        }
+        if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+            console.log('space pressed on the battle ui scene!');
+            console.log({
+                battleSceneInteractionState: this.battleScene.interactionState,
+                units: this.battleScene.units,
+                heroes: this.battleScene.heroes,
+                enemies: this.battleScene.enemies,
+                roundUnits: this.battleScene.roundUnits,
+                enemyCurrentHP: this.battleScene.enemies[0].stats.currentHP,
+                maxCurrentHP: this.battleScene.enemies[0].stats.maxHP
+            });
+        }
     }
 
     public destroyInventoryButtons() {
@@ -247,7 +287,6 @@ export default class BattleUIScene extends Phaser.Scene {
         }
     }
 
-
     public showCommandAndHotkeyFrames() {
         this.commandMenuFrame.setVisible(true);
         this.commandMenuText.setVisible(true);
@@ -262,15 +301,56 @@ export default class BattleUIScene extends Phaser.Scene {
         updateCancelButton(this.cancelButton, this.cancelMenuFrame, x, y, text, show);
     }
 
+    public hideAbilitySelectionUI() {
+        this.message.setVisible(false);
+        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
+        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
+        this.selectedItemAndAbilityIcon.hideActionButton();
+        this.selectedItemAndAbilityCommandText.setVisible(false);
+
+        for (const abilityButton of this.abilityButtons) {
+            abilityButton.deselect();
+            abilityButton.hideActionButton();
+        }
+    }
+
     private initiateBattleUI() {
         this.hideUIFrames();
         eventsCenter.emit('Message', `A ${this.battleScene.enemies[0].name} approaches.`);
     }
 
     private messageCloseHandler() {
+        eventsCenter.removeListener('MessageClose');
         if (this.battleScene.interactionState === 'init') {
-            this.showCommandAndHotkeyFrames();
-            this.battleScene.interactionState = 'mainselect';
+            if (!this.loadingBattleMidFight) {
+                this.showCommandAndHotkeyFrames();
+                this.battleScene.interactionState = 'mainselect';
+            }
+            else {
+                console.log('looking for the matching target from the battle ui scene!');
+                console.log({
+                    battleSceneUnits: this.battleScene.units,
+                    targetId: this.saveData?.target?.id
+                });
+                const target = this.battleScene.units.find((unit) => {
+                    return unit.id === this.saveData?.target?.id;
+                })!;
+                this.battleScene.roundUnits = this.battleScene.units.sort((a, b) => {
+                    const aIndex = this.saveData!.roundUnits.findIndex(unit => unit.id === a.id);
+                    const bIndex = this.saveData!.roundUnits.findIndex(unit => unit.id === b.id);
+                    return aIndex - bIndex;
+                });
+                console.log('just sorted the roundunits from the messageCloseHandler load data branch');
+                console.log({roundUnits: this.battleScene.roundUnits});
+                console.log({target});
+
+                this.battleScene.parseNextUnitTurn(
+                    {
+                        action: this.saveData!.action!,
+                        target
+                    }
+                );
+            }
         }
     }
 
@@ -849,18 +929,5 @@ export default class BattleUIScene extends Phaser.Scene {
         this.inventoryAndAbilityDetailText.setLineSpacing(-16);
         this.inventoryAndAbilityDetailText.setVisible(false);
         this.inventoryAndAbilityDetailText.setResolution(3);
-    }
-
-    public hideAbilitySelectionUI() {
-        this.message.setVisible(false);
-        this.confirmSelectedAbilityOrItemFrame.setVisible(false);
-        this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-        this.selectedItemAndAbilityIcon.hideActionButton();
-        this.selectedItemAndAbilityCommandText.setVisible(false);
-
-        for (const abilityButton of this.abilityButtons) {
-            abilityButton.deselect();
-            abilityButton.hideActionButton();
-        }
     }
 }

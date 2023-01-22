@@ -36,7 +36,8 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         texture: string | Phaser.Textures.Texture,
         frame: string | number | undefined,
         public name: string,
-        public job: PlayerJob | MonsterJob
+        public job: PlayerJob | MonsterJob,
+        id?: number
     ) {
         super(scene, x, y, texture, frame);
 
@@ -48,15 +49,10 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
         // this.living = true;
 
-        this.id = this.battleScene.generateID();
+        if (id) this.id = id;
+        else this.id = this.battleScene.generateID();
     }
-
-    // abstract applyHPChange(hpChangeAmount: number): number;
-
     abstract getInitiative(): number;
-
-    // abstract updateSceneOnReceivingDamage(): void;
-
     protected selectAbilityOrItem(actionIndex: number, actionType: 'ability' | 'item'): void {
         this.battleUIScene.hideAbilitySelectionUI();
 

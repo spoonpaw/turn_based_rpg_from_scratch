@@ -28,7 +28,8 @@ export default class BotCharacter extends Unit {
         texture: string | Phaser.Textures.Texture,
         frame: string | number | undefined,
         name: string,
-        job: PlayerJob
+        job: PlayerJob,
+        id?: number
     ) {
         super(
             scene,
@@ -37,7 +38,8 @@ export default class BotCharacter extends Unit {
             texture,
             frame,
             name,
-            job
+            job,
+            id
         );
 
         // TODO: there needs to be a logical way of figuring
@@ -66,22 +68,28 @@ export default class BotCharacter extends Unit {
         this.saveAndLoadScene.db.players.update(
             0,
             (player: IPlayer) => {
-                if (hpChangeAmount < 0) {
-                    player.bots[0].stats.currentHP = Math.min(this.stats.maxHP, this.stats.currentHP - hpChangeAmount);
+
+                const unitToUpdate = player.combatState.heroes.find(unit => unit.id === this.id);
+
+                if (unitToUpdate !== undefined) {
+                    if (hpChangeAmount < 0) {
+                        unitToUpdate.stats.currentHP = Math.min(unitToUpdate.stats.maxHP, unitToUpdate.stats.currentHP - hpChangeAmount);
+                    }
+                    else {
+                        unitToUpdate.stats.currentHP -= hpChangeAmount;
+                    }
+                    if (unitToUpdate.stats.currentHP <= 0) {
+                        unitToUpdate.stats.currentHP = 0;
+                    }
                 }
-                else {
-                    player.bots[0].stats.currentHP -= hpChangeAmount;
-                }
-                if (player.bots[0].stats.currentHP <= 0) {
-                    player.bots[0].stats.currentHP = 0;
-                }
+
                 return player;
             }
         );
 
+
         return super.applyHPChange(hpChangeAmount, this.battleScene.player2HPText);
     }
-
     public runTurn(): number {
         // just attack enemy 1
         const target = this.battleScene.enemies[0];

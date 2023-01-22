@@ -1,3 +1,9 @@
+// TODO: if i refresh quickly from game over in combat scene, the player doesn't get teleported to spawn!!
+
+
+// TODO: LOAD THE PLAYER INTO THEIR SAVED BATTLE IF THEY ARE LOADED INTO A COMBAT SCENE!!!!!!!
+
+
 // TODO: FIX THIS -> when the player enters a new level, they must store the
 //  player's tile coordinates as being the same as the new levels spawn coordinates...
 //  or something... the issue is this: if i close the game one step east and one step south
@@ -257,9 +263,18 @@ export default class GameScene extends Phaser.Scene {
                 this.playerTileX = this.player.getTilePos().x;
                 this.playerTileY = this.player.getTilePos().y;
                 this.movedFromSpawn = false;
+
+
+                if (player.inCombat) {
+                    this.scene.launch('Battle', {
+                        loadBattleData: true,
+                        savedCombatState: player.combatState
+                    });
+                    this.scene.sleep('Game');
+                }
+
             });
         }
-
     }
 
     public create(
@@ -372,7 +387,19 @@ export default class GameScene extends Phaser.Scene {
             this.saveAndLoadScene.upsertPlayer({
                 id: 0,
                 bots: [],
-                combatState: {enemies: [], heroes: [], passiveEffects: [], turnUnits: []},
+                combatState: {
+                    enemies: [],
+                    heroes: [],
+                    passiveEffects: [],
+                    units: [],
+                    roundUnits: [],
+                    turnIndex: 0,
+                    roundIndex: 0,
+                    action: '',
+                    target: undefined,
+                    actionType: '',
+                    escaped: undefined
+                },
                 currentTilemap: 'town',
                 equipment: {body: undefined, head: undefined, offhand: undefined, weapon: undefined},
                 experience: 0,
@@ -381,6 +408,7 @@ export default class GameScene extends Phaser.Scene {
                 inCombat: false,
                 inventory: this.player.inventory,
                 name: data.nameData,
+                job: this.player.type,
                 position: new Phaser.Math.Vector2(
                     12,
                     14
@@ -792,9 +820,6 @@ export default class GameScene extends Phaser.Scene {
             if (this.checkForRandomEncounter()) {
                 // start combat
                 this.scene.switch('Battle');
-                // this.time.delayedCall(210, () => {
-                //     this.scene.switch('Battle');
-                // });
             }
         }
 

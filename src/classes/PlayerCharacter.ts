@@ -8,7 +8,6 @@ import BotCharacter from './BotCharacter';
 import {Enemy} from './Enemy';
 import {IPlayer} from './GameDatabase';
 import {PlayerJob} from './Jobs/PlayerJob';
-// import Item from './Item';
 import Unit from './Unit';
 
 export default class PlayerCharacter extends Unit {
@@ -26,7 +25,8 @@ export default class PlayerCharacter extends Unit {
         texture: string | Phaser.Textures.Texture,
         frame: string | number | undefined,
         name: string,
-        job: PlayerJob
+        job: PlayerJob,
+        id?: number
     ) {
         super(
             scene,
@@ -35,7 +35,8 @@ export default class PlayerCharacter extends Unit {
             texture,
             frame,
             name,
-            job
+            job,
+            id
         );
         this.stats = this.gameScene.player.stats;
         this.equipment = this.gameScene.player.equipment;
@@ -61,15 +62,20 @@ export default class PlayerCharacter extends Unit {
         this.saveAndLoadScene.db.players.update(
             0,
             (player: IPlayer) => {
-                if (hpChangeAmount < 0) {
-                    player.stats.currentHP = Math.min(this.stats.maxHP, this.stats.currentHP - hpChangeAmount);
+                const unitToUpdate = player.combatState.heroes.find(unit => unit.id === this.id);
+
+                if (unitToUpdate !== undefined) {
+                    if (hpChangeAmount < 0) {
+                        unitToUpdate.stats.currentHP = Math.min(unitToUpdate.stats.maxHP, unitToUpdate.stats.currentHP - hpChangeAmount);
+                    }
+                    else {
+                        unitToUpdate.stats.currentHP -= hpChangeAmount;
+                    }
+                    if (unitToUpdate.stats.currentHP <= 0) {
+                        unitToUpdate.stats.currentHP = 0;
+                    }
                 }
-                else {
-                    player.stats.currentHP -= hpChangeAmount;
-                }
-                if (player.stats.currentHP <= 0) {
-                    player.stats.currentHP = 0;
-                }
+
                 return player;
             }
         );
@@ -285,6 +291,14 @@ export default class PlayerCharacter extends Unit {
             //  and regenerate the inventory list
 
             const inventoryIndex = this.battleUIScene.inventoryIndex;
+
+            this.saveAndLoadScene.db.players.update(
+                0,
+                (player: IPlayer) => {
+                    player.inventory.splice(inventoryIndex, 1);
+                }
+            );
+
             this.inventory.splice(inventoryIndex, 1);
 
             for (const inventoryButton of this.battleUIScene.inventoryButtons) {

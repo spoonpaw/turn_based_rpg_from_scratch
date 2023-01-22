@@ -1,7 +1,11 @@
+// TODO: fix this glitch: if i close the game on the game over screen
+//  i load the game with zero HP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 import {abilities, IAbility} from '../abilities/abilities';
 import BotCharacter from '../classes/BotCharacter';
 import {Enemy} from '../classes/Enemy';
-import {IPlayer} from '../classes/GameDatabase';
+import {DBUnit, IPlayer} from '../classes/GameDatabase';
 import PlayerCharacter from '../classes/PlayerCharacter';
 import {enemies} from '../enemies/enemies';
 import MonsterSoldier from '../jobs/monsters/MonsterSoldier';
@@ -18,7 +22,7 @@ import UIScene from './UIScene';
 
 export default class BattleScene extends Phaser.Scene {
     public enemies!: Enemy[];
-    gameScene!: GameScene;
+    public gameScene!: GameScene;
     public heroes!: (PlayerCharacter | BotCharacter | Enemy)[];
     public interactionState!: string;
     public passiveEffects: {
@@ -30,6 +34,7 @@ export default class BattleScene extends Phaser.Scene {
     public player1HPText!: Phaser.GameObjects.Text;
     public player2HPText!: Phaser.GameObjects.Text;
     public sfxScene!: SFXScene;
+    public units!: (PlayerCharacter | BotCharacter | Enemy)[];
     private _idCounter = 0;
     private background!: Phaser.GameObjects.Image;
     private battleUIScene!: BattleUIScene;
@@ -38,13 +43,13 @@ export default class BattleScene extends Phaser.Scene {
     private player1MPText!: Phaser.GameObjects.Text;
     private player2?: PlayerCharacter | BotCharacter;
     private turnIndex!: number;
-    private turnUnits!: (PlayerCharacter | BotCharacter | Enemy)[];
+    public roundUnits!: (PlayerCharacter | BotCharacter | Enemy)[];
     private uiScene!: UIScene;
-    private units!: (PlayerCharacter | BotCharacter | Enemy)[];
     private actionMenuFrame!: Phaser.GameObjects.Image;
     private player1MenuFrame!: Phaser.GameObjects.Image;
     private player2MenuFrame!: Phaser.GameObjects.Image;
     private saveAndLoadScene!: SaveAndLoadScene;
+    private player2MPText!: Phaser.GameObjects.Text;
 
     public constructor() {
         super('Battle');
@@ -69,14 +74,36 @@ export default class BattleScene extends Phaser.Scene {
         });
     }
 
-    create(): void {
+    create(data?: {
+        loadBattleData: boolean,
+        savedCombatState: {
+            enemies: DBUnit[],
+            heroes: DBUnit[],
+            passiveEffects: {
+                actor: DBUnit,
+                target: DBUnit,
+                ability: IAbility,
+                turnDurationRemaining: number
+            }[],
+            units: DBUnit[],
+            roundUnits: DBUnit[],
+            turnIndex: number,
+            roundIndex: number,
+            action: string,
+            target: DBUnit | undefined,
+            actionType: string
+            escaped: boolean | undefined
+        }
+
+    }): void {
         this.gameScene = <GameScene>this.scene.get('Game');
         this.uiScene = <UIScene>this.scene.get('UI');
         this.musicScene = <MusicScene>this.scene.get('Music');
         this.sfxScene = <SFXScene>this.scene.get('SFX');
         this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
 
-        this.startBattle();
+        if (data?.loadBattleData) this.loadBattle(data.savedCombatState);
+        else if (!data?.loadBattleData) this.startBattle();
 
         this.sys.events.on('wake', this.startBattle, this);
     }
@@ -164,6 +191,12 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private endBattle(): void {
+
+        this.saveAndLoadScene.db.players.update(
+            0,
+            {inCombat: false}
+        );
+
         this.battleUIScene.disableAllActionButtons();
         // send the player info to the game scene ui
 
@@ -181,6 +214,24 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private clearStateAndRemoveSprites() {
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                player.combatState = {
+                    enemies: [],
+                    heroes: [],
+                    passiveEffects: [],
+                    units: [],
+                    roundUnits: [],
+                    turnIndex: 0,
+                    roundIndex: 0,
+                    action: '',
+                    target: undefined,
+                    actionType: '',
+                    escaped: undefined
+                };
+            }
+        );
         // clear state, remove sprites
         this.heroes.length = 0;
         this.enemies.length = 0;
@@ -198,6 +249,12 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private endBattleGameOver(): void {
+
+        this.saveAndLoadScene.db.players.update(
+            0,
+            {inCombat: false}
+        );
+
         // change to game over music
         this.musicScene.changeSong('gameover');
 
@@ -212,7 +269,16 @@ export default class BattleScene extends Phaser.Scene {
         );
         this.gameScene.player.gold = newGoldAmount;
         eventsCenter.emit('updateResource', this.gameScene.player.stats.currentResource, this.gameScene.player.stats.maxResource);
-        this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
+
+        const newHP = this.gameScene.player.stats.maxHP;
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                player.stats.currentHP = newHP;
+                return player;
+            }
+        );
+        this.gameScene.player.stats.currentHP = newHP;
         if (this.gameScene.bots.length > 0) {
             this.gameScene.bots[0].stats.currentHP = this.gameScene.bots[0].stats.maxHP;
             this.uiScene.player2hpText.setText(`HP: ${this.gameScene.bots[0].stats.currentHP}/${this.gameScene.bots[0].stats.maxHP}`);
@@ -268,6 +334,22 @@ export default class BattleScene extends Phaser.Scene {
             actionType: string
         }
     ): void {
+
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                console.log('getting the target from the action select to store in the db');
+                console.log({playerCombatStateUnits: player.combatState.units, dataTarget: data.target});
+                const saveTarget = player.combatState.units.find(unit => unit.id === data.target.id);
+
+
+                player.combatState.action = data.action;
+                player.combatState.target = saveTarget;
+                player.combatState.actionType = data.actionType;
+                return player;
+            }
+        );
+
         let passiveAbilitySelected = false;
         let selectedAbility;
         if (data.actionType === 'ability') {
@@ -282,14 +364,46 @@ export default class BattleScene extends Phaser.Scene {
 
         this.interactionState = `handling${data.action}select`;
 
-        this.turnUnits = BattleScene.sortUnits(this.units);
+        const sortedUnits = BattleScene.sortUnits(this.units);
+
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                player.combatState.roundUnits = [];
+                sortedUnits.forEach((unit) => {
+                    const match = player.combatState.units.find((playerUnit) => {
+                        return playerUnit.id === unit.id;
+                    });
+                    if (match) player.combatState.roundUnits.push(match);
+                });
+
+                return player;
+
+            }
+        );
+
+        this.roundUnits = sortedUnits;
 
         if (passiveAbilitySelected) {
-            const unitUsingPassiveAbility = this.turnUnits.find((unit) => {
+            const unitUsingPassiveAbility = this.roundUnits.find((unit) => {
                 return unit instanceof PlayerCharacter;
             }) as PlayerCharacter | BotCharacter | Enemy;
-            this.turnUnits.splice(this.turnUnits.indexOf(unitUsingPassiveAbility), 1);
-            this.turnUnits.unshift(unitUsingPassiveAbility);
+
+            this.saveAndLoadScene.db.players.update(
+                0,
+                (player: IPlayer) => {
+
+                    const roundUnitWithSameId = player.combatState.roundUnits.find(roundUnit => roundUnit.id === unitUsingPassiveAbility.id);
+                    if (roundUnitWithSameId) {
+                        player.combatState.roundUnits.splice(player.combatState.roundUnits.indexOf(roundUnitWithSameId), 1);
+                        player.combatState.roundUnits.unshift(roundUnitWithSameId);
+                    }
+                    return player;
+                }
+            );
+
+            this.roundUnits.splice(this.roundUnits.indexOf(unitUsingPassiveAbility), 1);
+            this.roundUnits.unshift(unitUsingPassiveAbility);
         }
 
         this.battleUIScene.hideUIFrames();
@@ -297,6 +411,13 @@ export default class BattleScene extends Phaser.Scene {
 
         if (data.action === 'run') {
             if (BattleScene.escapeTest()) {
+                this.saveAndLoadScene.db.players.update(
+                    0,
+                    (player: IPlayer) => {
+                        player.combatState.escaped = true;
+                        return player;
+                    }
+                );
 
                 // run was successful, exit combat
                 // deliver the successful retreat message and exit the battle
@@ -310,10 +431,27 @@ export default class BattleScene extends Phaser.Scene {
                 return;
             }
             else {
+                this.saveAndLoadScene.db.players.update(
+                    0,
+                    (player: IPlayer) => {
+                        player.combatState.escaped = false;
+                        return player;
+                    }
+                );
                 // announce that the run failed! then let the enemies act!!
-                this.turnUnits = this.units.filter(value => {
+                const roundUnitsWithoutHeroes = this.units.filter(value => {
                     return !(value instanceof PlayerCharacter || value instanceof BotCharacter);
                 });
+                this.saveAndLoadScene.db.players.update(
+                    0,
+                    (player: IPlayer) => {
+                        player.combatState.roundUnits = player.combatState.units.filter( unit => {
+                            return roundUnitsWithoutHeroes.some(value => value.id === unit.id);
+                        });
+                        return player;
+                    }
+                );
+                this.roundUnits = roundUnitsWithoutHeroes;
                 eventsCenter.emit('Message', `${this.gameScene.player.name} fails to retreat!`);
                 this.time.addEvent({
                     delay: 2000,
@@ -329,7 +467,7 @@ export default class BattleScene extends Phaser.Scene {
         this.parseNextUnitTurn(data);
     }
 
-    private parseNextUnitTurn(
+    public parseNextUnitTurn(
         data: {
             action: string;
             target: Enemy | PlayerCharacter | BotCharacter
@@ -337,8 +475,19 @@ export default class BattleScene extends Phaser.Scene {
     ): void {
         this.turnIndex += 1;
 
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                player.combatState.turnIndex = this.turnIndex;
+                return player;
+            }
+        );
+
         let turnRunTime = 0;
-        const currentUnit = this.turnUnits[this.turnIndex];
+        console.log('assigning the value to current unit on the battle scene!');
+        console.log({roundUnits: this.roundUnits, turnIndex: this.turnIndex});
+        const currentUnit = this.roundUnits[this.turnIndex];
+        console.log({currentUnit});
         if (currentUnit instanceof Enemy) {
             // the enemy is going to use an ability (default physical attack)
             if (currentUnit.isLiving()) {
@@ -352,6 +501,41 @@ export default class BattleScene extends Phaser.Scene {
             }
         }
 
+        // TODO: store a snapshot of the combat after each turn is run
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                for (const passiveEffect of this.passiveEffects) {
+                    const targetUnit = player.combatState.units.find(unit => unit.id === passiveEffect.target.id);
+                    if (targetUnit) {
+
+                        player.combatState.passiveEffects.push({
+                            ability: passiveEffect.ability,
+                            target: targetUnit,
+                            turnDurationRemaining: passiveEffect.turnDurationRemaining,
+                            actor: {
+                                name: passiveEffect.actor.name,
+                                job: passiveEffect.actor.job,
+                                id: passiveEffect.actor.id,
+                                key: passiveEffect.actor.key,
+                                stats: passiveEffect.actor.stats,
+                                equipment: {
+                                    body: passiveEffect.actor.equipment.body,
+                                    head: passiveEffect.actor.equipment.head,
+                                    offhand: passiveEffect.actor.equipment.offhand,
+                                    weapon: passiveEffect.actor.equipment.weapon
+                                },
+                                inventory: passiveEffect.actor.inventory,
+                                actorType: passiveEffect.actor.job.name,
+                            }
+                        });
+                    }
+                }
+                player.combatState.turnIndex++;
+                return player;
+            }
+        );
+
         if (this.gameOverTest()) {
             this.time.addEvent({
                 delay: turnRunTime,
@@ -361,10 +545,10 @@ export default class BattleScene extends Phaser.Scene {
         }
 
         // if this is the last turn, then start a new turn after the correct delay!
-        else if (this.turnIndex === this.turnUnits.length - 1) {
+        else if (this.turnIndex === this.roundUnits.length - 1) {
             this.time.addEvent({
                 delay: turnRunTime,
-                callback: this.startNewTurn,
+                callback: this.startNewRound,
                 callbackScope: this
             });
         }
@@ -381,10 +565,17 @@ export default class BattleScene extends Phaser.Scene {
     private sendPlayerInfoToGameScene(): void {
         for (const unit of this.heroes) {
             if (unit instanceof PlayerCharacter) {
-                const player = this.gameScene.player;
-                player.stats.currentHP = unit.stats.currentHP;
+                const gameScenePlayer = this.gameScene.player;
+                this.saveAndLoadScene.db.players.update(
+                    0,
+                    (player: IPlayer) => {
+                        player.stats.currentHP = unit.stats.currentHP;
+                        return player;
+                    }
+                );
+                gameScenePlayer.stats.currentHP = unit.stats.currentHP;
 
-                if (player.stats.currentHP <= 0) {
+                if (gameScenePlayer.stats.currentHP <= 0) {
                     this.saveAndLoadScene.db.players.update(
                         0,
                         (player: IPlayer) => {
@@ -392,7 +583,7 @@ export default class BattleScene extends Phaser.Scene {
                             return player;
                         }
                     );
-                    player.stats.currentHP = 1;
+                    gameScenePlayer.stats.currentHP = 1;
                 }
 
                 let goldAmount = 0;
@@ -411,7 +602,7 @@ export default class BattleScene extends Phaser.Scene {
                     experienceAmount = 0;
                 }
 
-                const newGoldAmount = player.gold + goldAmount;
+                const newGoldAmount = gameScenePlayer.gold + goldAmount;
 
                 this.saveAndLoadScene.db.players.update(
                     0, {
@@ -419,13 +610,13 @@ export default class BattleScene extends Phaser.Scene {
                     }
                 );
 
-                player.gold = newGoldAmount;
+                gameScenePlayer.gold = newGoldAmount;
 
-                eventsCenter.emit('updateResource', player.stats.currentResource, player.stats.maxResource);
+                eventsCenter.emit('updateResource', gameScenePlayer.stats.currentResource, gameScenePlayer.stats.maxResource);
 
-                const currentLevel = player.level;
+                const currentLevel = gameScenePlayer.level;
 
-                const newExperienceAmount = player.experience + experienceAmount;
+                const newExperienceAmount = gameScenePlayer.experience + experienceAmount;
 
                 this.saveAndLoadScene.db.players.update(
                     0,
@@ -434,13 +625,13 @@ export default class BattleScene extends Phaser.Scene {
                     }
                 );
 
-                player.experience = newExperienceAmount;
+                gameScenePlayer.experience = newExperienceAmount;
 
                 const newLevel = Math.max(
                     1,
                     Math.ceil(
-                        player.LEVELING_RATE * Math.sqrt(
-                            player.experience
+                        gameScenePlayer.LEVELING_RATE * Math.sqrt(
+                            gameScenePlayer.experience
                         )
                     )
                 );
@@ -456,17 +647,17 @@ export default class BattleScene extends Phaser.Scene {
                     }
 
                     const newStats = {
-                        strength: player.stats.strength + this.getStatIncrease('strength', newLevel),
-                        agility: player.stats.agility + this.getStatIncrease('agility', newLevel),
-                        vitality: player.stats.vitality + this.getStatIncrease('vitality', newLevel),
-                        intellect: player.stats.intellect + this.getStatIncrease('intellect', newLevel),
-                        luck: player.stats.luck + this.getStatIncrease('luck', newLevel),
+                        strength: gameScenePlayer.stats.strength + this.getStatIncrease('strength', newLevel),
+                        agility: gameScenePlayer.stats.agility + this.getStatIncrease('agility', newLevel),
+                        vitality: gameScenePlayer.stats.vitality + this.getStatIncrease('vitality', newLevel),
+                        intellect: gameScenePlayer.stats.intellect + this.getStatIncrease('intellect', newLevel),
+                        luck: gameScenePlayer.stats.luck + this.getStatIncrease('luck', newLevel),
                         currentHP: unit.stats.currentHP, // getting the stat from the battle
-                        maxHP: player.stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
+                        maxHP: gameScenePlayer.stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
                         currentResource: unit.stats.currentResource, // getting the stat from the battle
-                        maxResource: player.stats.maxResource + maxResourceIncrease,
-                        attack: player.stats.attack + this.getStatIncrease('strength', newLevel),
-                        defense: player.stats.defense + this.getStatIncrease('agility', newLevel) / 2
+                        maxResource: gameScenePlayer.stats.maxResource + maxResourceIncrease,
+                        attack: gameScenePlayer.stats.attack + this.getStatIncrease('strength', newLevel),
+                        defense: gameScenePlayer.stats.defense + this.getStatIncrease('agility', newLevel) / 2
                     };
 
                     this.saveAndLoadScene.db.players.update(
@@ -476,16 +667,23 @@ export default class BattleScene extends Phaser.Scene {
                         }
                     );
 
-                    player.stats = newStats;
+                    gameScenePlayer.stats = newStats;
                 }
-                this.uiScene.updateHP(player.stats.currentHP, player.stats.maxHP);
+                this.uiScene.updateHP(gameScenePlayer.stats.currentHP, gameScenePlayer.stats.maxHP);
 
-                eventsCenter.emit('updateXP', player.experience);
+                eventsCenter.emit('updateXP', gameScenePlayer.experience);
             }
 
             else {
                 const bot = this.gameScene.bots[0];
                 // unit must be a bot character at this point
+                this.saveAndLoadScene.db.players.update(
+                    0,
+                    (player: IPlayer) => {
+                        player.bots[0].stats.currentHP = unit.stats.currentHP;
+                        return player;
+                    }
+                );
                 bot.stats.currentHP = unit.stats.currentHP;
                 if (bot.stats.currentHP <= 0) {
                     this.saveAndLoadScene.db.players.update(
@@ -633,6 +831,215 @@ export default class BattleScene extends Phaser.Scene {
         return phasertext;
     }
 
+    private loadBattle(savedCombatState:  {
+        enemies: DBUnit[],
+            heroes: DBUnit[],
+            passiveEffects: {
+            actor: DBUnit,
+                target: DBUnit,
+                ability: IAbility,
+                turnDurationRemaining: number
+        }[],
+            units: DBUnit[],
+            roundUnits: DBUnit[],
+            turnIndex: number,
+            roundIndex: number,
+            action: string,
+            target: DBUnit | undefined,
+            actionType: string
+        escaped: boolean | undefined
+    }   ): void {
+
+        console.log('loading the battle from a saved state!!!!!');
+
+        this.musicScene.scene.bringToTop();
+
+        this.uiScene.selectCancel();
+        this.gameScene.gamePadScene?.scene.stop();
+        this.uiScene.scene.sendToBack();
+
+        this.turnIndex = savedCombatState.turnIndex - 1;
+
+        this.musicScene.changeSong('battle');
+
+        this.cameras.main.setBackgroundColor('rgb(235, 235, 235)');
+
+        this.background = this.add.image(0, 0, 'overworldbackground')
+            .setOrigin(0, 0);
+        this.background.displayWidth = this.sys.canvas.width;
+        this.background.displayHeight = this.sys.canvas.height - 291;
+        this.battleUIScene = <BattleUIScene>this.scene.get('BattleUI');
+
+        this.gameScene.input.keyboard!.enabled = false;
+
+        this.interactionState = 'init';
+
+        this.actionMenuFrame = this.add.image(2, 430, 'actionMenuFrame')
+            .setOrigin(0, 0);
+
+        this.player1MenuFrame = this.add.image(236, 606, 'heroMenuFrame')
+            .setOrigin(0, 0);
+
+        if (savedCombatState.heroes.length > 1) {
+            this.player2MenuFrame = this.add.image(470, 606, 'heroMenuFrame')
+                .setOrigin(0, 0);
+
+            // TODO: GONNA NEED TO FIND THE BOT IN THE HERO LIST!
+
+            const botHero = savedCombatState.heroes.find( unit => unit.actorType.startsWith('Monster'))!;
+
+            this.player2 = new BotCharacter(
+                this,
+                504,
+                675,
+                this.gameScene.bots[0].sprite.texture,
+                0,
+                this.gameScene.bots[0].name,
+                this.gameScene.bots[0].type,
+                botHero.id
+            );
+            this.player2.stats = botHero.stats;
+            if (this.player2.stats.currentHP <= 0) this.player2.setVisible(false);
+            this.add.existing(this.player2);
+
+            this.shortenTextByPixel(
+                this.add.text(
+                    484,
+                    610,
+                    this.gameScene.bots[0].name,
+                    {
+                        fontSize: '44px',
+                        color: '#fff',
+                        fontFamily: 'CustomFont',
+                        metrics: {
+                            ascent: 37,
+                            descent: 10,
+                            fontSize: 47
+                        }
+
+                    })
+                    .setResolution(3),
+                210
+            );
+
+            this.player2HPText = this.add.text(
+                534,
+                645,
+                `HP: ${this.player2.stats.currentHP}/${this.player2.stats.maxHP}`, {
+                    fontSize: '35px',
+                    color: '#fff',
+                    fontFamily: 'CustomFont'
+                })
+                .setResolution(3);
+
+            const currentResource = botHero.stats.currentResource;
+            const maxResource = botHero.stats.maxResource;
+
+            this.player2MPText = this.add.text(534, 670, `Vim: ${currentResource}/${maxResource}`, {
+                fontSize: '35px',
+                color: '#fff',
+                fontFamily: 'CustomFont'
+            })
+                .setResolution(3);
+
+        }
+
+        const playerHero = savedCombatState.heroes.find( unit => unit.actorType.startsWith('Player'))!;
+        const soldier = new PlayerCharacter(
+            this,
+            270,
+            675,
+            'hero',
+            0,
+            this.gameScene.player.name,
+            this.gameScene.player.type,
+            playerHero.id
+        );
+        soldier.stats = playerHero.stats;
+        if (soldier.stats.currentHP <= 0) soldier.setVisible(false);
+        this.add.existing(soldier);
+
+        this.shortenTextByPixel(
+            this.add.text(
+                250,
+                610,
+                this.gameScene.player.name,
+                {
+                    fontSize: '45px',
+                    color: '#fff',
+                    fontFamily: 'CustomFont'
+                })
+                .setResolution(3),
+            210
+        );
+
+        this.player1HPText = this.add.text(
+            300,
+            645,
+            `HP: ${soldier.stats.currentHP}/${soldier.stats.maxHP}`, {
+                fontSize: '35px',
+                color: '#fff',
+                fontFamily: 'CustomFont'
+            })
+            .setResolution(3);
+
+
+        const currentResource = soldier.stats.currentResource;
+        const maxResource = soldier.stats.maxResource;
+        this.player1MPText = this.add.text(
+            300,
+            670,
+            `Vim: ${currentResource}/${maxResource}`,
+            {
+                fontSize: '35px',
+                color: '#fff',
+                fontFamily: 'CustomFont'
+            })
+            .setResolution(3);
+
+
+        const enemyUnit = savedCombatState.enemies[0];
+        const enemy = new Enemy(
+            this,
+            Number(this.game.config.width) / 2,
+            280,
+            enemyUnit.key,
+            undefined,
+            enemyUnit.name,
+            enemyUnit.job,
+            enemies.find(obj => {
+                return obj.key === enemyUnit.key;
+            })!.skills,
+            enemyUnit.id
+        );
+        this.add.existing(enemy);
+
+        this.heroes = [soldier];
+
+        if (this.player2) {
+            this.heroes.push(this.player2);
+        }
+
+        this.enemies = [enemy];
+
+        this.units = this.heroes.concat(this.enemies);
+
+        this.scene.run('BattleUI', {loadFromSave: true, savedCombatState});
+
+        eventsCenter.removeListener('actionSelect');
+        eventsCenter.on('actionSelect', this.handleActionSelection, this);
+
+
+        for (const passiveEffect of savedCombatState.passiveEffects) {
+            this.passiveEffects.push({
+                ability: passiveEffect.ability,
+                actor: this.units.find(unit => unit.id === passiveEffect.actor.id)!,
+                target: this.units.find(unit => unit.id === passiveEffect.target.id)!,
+                turnDurationRemaining: passiveEffect.turnDurationRemaining
+            });
+        }
+    }
+
     private startBattle(): void {
         // let count = 0;
         // this.children.each(gameObject => {
@@ -640,6 +1047,16 @@ export default class BattleScene extends Phaser.Scene {
         //         count++;
         //     }
         // });
+
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                player.inCombat = true;
+                player.combatState.roundIndex = 0;
+                player.combatState.turnIndex = 0;
+                return player;
+            }
+        );
 
         this._idCounter = 0;
         this.passiveEffects = [];
@@ -721,16 +1138,17 @@ export default class BattleScene extends Phaser.Scene {
                 })
                 .setResolution(3);
 
-            const currentResource = this.gameScene.player.stats.currentResource;
-            const maxResource = this.gameScene.player.stats.maxResource;
-            this.player1MPText = this.add.text(534, 670, `Vim: ${currentResource}/${maxResource}`, {
+            const currentResource = this.gameScene.bots[0].stats.currentResource;
+            const maxResource = this.gameScene.bots[0].stats.maxResource;
+            this.player2MPText = this.add.text(534, 670, `Vim: ${currentResource}/${maxResource}`, {
                 fontSize: '35px',
                 color: '#fff',
                 fontFamily: 'CustomFont'
             })
                 .setResolution(3);
-        }
 
+
+        }
         // instantiate the warrior player (player 1)
         const soldier = new PlayerCharacter(
             this,
@@ -770,15 +1188,21 @@ export default class BattleScene extends Phaser.Scene {
 
         const currentResource = this.gameScene.player.stats.currentResource;
         const maxResource = this.gameScene.player.stats.maxResource;
-        this.player1MPText = this.add.text(300, 670, `Vim: ${currentResource}/${maxResource}`, {
-            fontSize: '35px',
-            color: '#fff',
-            fontFamily: 'CustomFont'
-        })
+        this.player1MPText = this.add.text(
+            300,
+            670,
+            `Vim: ${currentResource}/${maxResource}`,
+            {
+                fontSize: '35px',
+                color: '#fff',
+                fontFamily: 'CustomFont'
+            })
             .setResolution(3);
 
         // const selectedEnemy: string = Phaser.Math.RND.pick(levels[this.gameScene.currentMap as keyof typeof levels].enemies ?? []);
-        const selectedEnemyKey: string = Phaser.Math.RND.pick(levels[this.gameScene.currentMap as keyof typeof levels].enemies ?? []);
+        const selectedEnemyKey: string = Phaser.Math.RND.pick(
+            levels[this.gameScene.currentMap as keyof typeof levels].enemies ?? []
+        );
 
         const enemy = new Enemy(
             this,
@@ -792,10 +1216,75 @@ export default class BattleScene extends Phaser.Scene {
             MonsterSoldier,
             enemies.find((obj) => {
                 return obj.key === selectedEnemyKey;
-            })!.skills!
+            })!.skills
         );
 
         this.add.existing(enemy);
+
+
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+
+                player.combatState.heroes = [{
+                    name: soldier.name,
+                    job: soldier.job,
+                    id: soldier.id,
+                    key: soldier.key,
+                    stats: soldier.stats,
+                    equipment: {
+                        body: soldier.equipment.body,
+                        head: soldier.equipment.head,
+                        offhand: soldier.equipment.offhand,
+                        weapon: soldier.equipment.weapon
+                    },
+                    inventory: soldier.inventory,
+                    // living: boolean,
+                    actorType: soldier.job.name
+                }];
+
+
+                if (this.player2) {
+                    player.combatState.heroes.push({
+                        name: this.player2.name,
+                        job: this.player2.job,
+                        id: this.player2.id,
+                        key: this.player2.key,
+                        stats: this.player2.stats,
+                        equipment: {
+                            body: undefined,
+                            head: undefined,
+                            offhand: undefined,
+                            weapon: undefined
+                        },
+                        inventory: [],
+                        // living: boolean,
+                        actorType: this.player2.job.name
+                    });
+
+                }
+
+                player.combatState.enemies = [{
+                    name: enemy.name,
+                    job: enemy.job,
+                    id: enemy.id,
+                    key: enemy.key,
+                    stats: enemy.stats,
+                    equipment: {
+                        body: undefined,
+                        head: undefined,
+                        offhand: undefined,
+                        weapon: undefined
+                    },
+                    inventory: [],
+                    // living: boolean,
+                    actorType: enemy.job.name
+                }];
+
+                player.combatState.units = player.combatState.heroes.concat(player.combatState.enemies);
+                return player;
+            }
+        );
 
         this.heroes = [soldier];
 
@@ -815,7 +1304,14 @@ export default class BattleScene extends Phaser.Scene {
         eventsCenter.on('actionSelect', this.handleActionSelection, this);
     }
 
-    private startNewTurn(): void {
+    private startNewRound(): void {
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                player.combatState.roundIndex++;
+                return player;
+            }
+        );
 
         for (const [index, passiveEffect] of this.passiveEffects.entries()) {
             passiveEffect.turnDurationRemaining--;
@@ -825,6 +1321,14 @@ export default class BattleScene extends Phaser.Scene {
         }
 
         this.battleUIScene.commandMenuText.setText('Command?');
+
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                player.combatState.turnIndex = 0;
+                return player;
+            }
+        );
 
         this.turnIndex = -1;
         // check for victory or game over state

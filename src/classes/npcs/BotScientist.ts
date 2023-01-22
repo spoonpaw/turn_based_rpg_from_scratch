@@ -1,3 +1,4 @@
+import MonsterSoldier from '../../jobs/monsters/MonsterSoldier';
 import monsterSoldierJob from '../../jobs/monsters/MonsterSoldier';
 import GameScene from '../../scenes/GameScene';
 import SaveAndLoadScene from '../../scenes/SaveAndLoadScene';
@@ -5,6 +6,7 @@ import UIScene from '../../scenes/UIScene';
 import {Direction} from '../../types/Direction';
 import eventsCenter from '../../utils/EventsCenter';
 import Bot from '../Bot';
+import {IPlayer} from '../GameDatabase';
 import NPC from './NPC';
 
 export default class extends NPC {
@@ -127,6 +129,7 @@ export default class extends NPC {
         eventsCenter.removeListener('yes');
         // the player is saying yes, they want the bot (this spawns the bot)
         eventsCenter.on('yes', () => {
+            // glitch occuring here when the bot spawns
             this.uiScene.interactionState = 'botscientistresponse';
             eventsCenter.removeListener('yes');
             this.uiScene.leftSideDialogText.setText('Bot Scientist:\nGood friend, the Red Bot hath joined your party. Art thou inclined to give it a name, or doth thou prefer to leave it nameless?');
@@ -141,6 +144,7 @@ export default class extends NPC {
                 'Red Bot',
                 monsterSoldierJob
             );
+            this.gameScene.bots.push(redBot);
             // set all the player2 ui elements to visible with red bot's stats
 
             this.uiScene.player2hpText.setText(`HP: ${redBot.stats.currentHP ?? '0'}/${redBot.stats.maxHP ?? '0'}`);
@@ -156,9 +160,9 @@ export default class extends NPC {
             this.uiScene.player2ManaText.setVisible(true);
             this.uiScene.player2ManaIcon.setVisible(true);
 
-
             const newBot = {
-                name: 'Red Bot',
+                name: redBot.name,
+                job: MonsterSoldier,
                 species: 'Red Bot',
                 experience: 0,
                 stats: redBot.stats,
@@ -173,14 +177,13 @@ export default class extends NPC {
                     weapon: undefined
                 },
                 inventory: [],
-                // living: true
             };
 
-            this.saveAndLoadScene.db.players.where('id')
-                .equals(0)
-                .modify(x => x.bots.push(newBot));
-            this.gameScene.bots.push(
-                redBot
+            this.saveAndLoadScene.db.players.update(
+                0,
+                (player: IPlayer) => {
+                    player.bots.push(newBot);
+                }
             );
 
             this.gameScene.setupBotGridPhysics();
@@ -294,10 +297,12 @@ export default class extends NPC {
         }
         // rename the robot if needed
 
-        this.saveAndLoadScene.db.players
-            .where('id')
-            .equals(0)
-            .modify(x => x.bots[0].name = String(string));
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                player.bots[0].name = String(string);
+            }
+        );
 
         this.gameScene.bots[0].name = string;
     }

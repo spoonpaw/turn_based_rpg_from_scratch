@@ -4,31 +4,34 @@ import {IAbility} from '../abilities/abilities';
 import Stats from '../stats/Stats';
 import {Direction} from '../types/Direction';
 import Item from './Item';
+import {Job} from './Jobs/Job';
 
-interface Unit {
+export interface DBUnit {
     name: string,
+    job: Job,
     id: number,
     key: string,
     stats: Stats,
     equipment: {
-        body: Item,
-        head: Item,
-        offhand: Item,
-        weapon: Item
+        body: Item | undefined,
+        head: Item | undefined,
+        offhand: Item | undefined,
+        weapon: Item | undefined
     },
     inventory: Item[],
-    // living: boolean,
-    actorType: string
+    actorType: string,
 }
 
 export interface IPlayer {
     id?: number,
     name: string,
+    job: Job,
     gold: number,
     experience: number,
     stats: Stats,
     bots: Array<{
         name: string,
+        job: Job,
         experience: number,
         stats: Stats,
         texture: string,
@@ -57,15 +60,22 @@ export interface IPlayer {
     facing: Direction,
     inCombat: boolean,
     combatState: {
-        enemies: Unit[],
-        heroes: Unit[],
+        enemies: DBUnit[],
+        heroes: DBUnit[],
         passiveEffects: {
-            actor: Unit,
-            target: Unit,
+            actor: DBUnit,
+            target: DBUnit,
             ability: IAbility,
             turnDurationRemaining: number
         }[],
-        turnUnits: Unit[]
+        units: DBUnit[],
+        roundUnits: DBUnit[],
+        turnIndex: number,
+        roundIndex: number,
+        action: string,
+        target: DBUnit | undefined,
+        actionType: string
+        escaped: boolean | undefined
     },
     currentTilemap: string
 }

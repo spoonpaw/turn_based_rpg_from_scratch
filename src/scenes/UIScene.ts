@@ -1263,6 +1263,7 @@ export default class UIScene extends Phaser.Scene {
                         0,
                         (player: IPlayer) => {
                             player.equipment.body = itemToEquip;
+                            return player;
                         }
                     );
                     this.gameScene.player.equipment.body = itemToEquip;
@@ -2298,6 +2299,7 @@ export default class UIScene extends Phaser.Scene {
                 0,
                 (player: IPlayer) => {
                     player.inventory.splice(inventorySlotNumber, 1);
+                    return player;
                 }
             );
             this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
