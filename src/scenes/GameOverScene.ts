@@ -55,8 +55,6 @@ export default class GameOverScene extends Phaser.Scene {
 
         const gameScene = <GameScene>this.scene.get('Game');
 
-
-
         gameScene.player.stats.currentHP = gameScene.player.stats.maxHP;
 
         this.setupKeyListeners();

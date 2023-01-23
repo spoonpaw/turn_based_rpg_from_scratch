@@ -42,7 +42,7 @@ export default class BattleScene extends Phaser.Scene {
     private musicScene!: MusicScene;
     private player1MPText!: Phaser.GameObjects.Text;
     private player2?: PlayerCharacter | BotCharacter;
-    private turnIndex!: number;
+    public turnIndex!: number;
     public roundUnits!: (PlayerCharacter | BotCharacter | Enemy)[];
     private uiScene!: UIScene;
     private actionMenuFrame!: Phaser.GameObjects.Image;
@@ -179,19 +179,11 @@ export default class BattleScene extends Phaser.Scene {
         return { levelUp: newLevel > currentLevel, newLevel };
     }
 
-    private checkForVictory(): boolean {
-        let victory = true;
-        // if all enemies are dead we have victory
-        for (let i = 0; i < this.enemies.length; i++) {
-            if (this.enemies[i].isLiving()) {
-                victory = false;
-            }
-        }
-
-        return victory;
+    public checkForVictory(): boolean {
+        return !this.enemies.some(enemy => enemy.isLiving());
     }
 
-    private endBattle(): void {
+    public endBattle(): void {
 
         this.saveAndLoadScene.db.players.update(
             0,
@@ -276,6 +268,8 @@ export default class BattleScene extends Phaser.Scene {
             0,
             (player: IPlayer) => {
                 player.stats.currentHP = newHP;
+                player.position.x = levels['overworld']['spawnCoords'][0].x;
+                player.position.y = levels['overworld']['spawnCoords'][0].y;
                 return player;
             }
         );
@@ -859,7 +853,14 @@ export default class BattleScene extends Phaser.Scene {
         this.gameScene.gamePadScene?.scene.stop();
         this.uiScene.scene.sendToBack();
 
-        this.turnIndex = savedCombatState.turnIndex - 1;
+        console.log('setting the turn index to the value of saved combat state turn index minus one');
+        console.log({savedTurnIndex: savedCombatState.turnIndex, savedTurnIndexMinusOne: savedCombatState.turnIndex - 1});
+        if (savedCombatState.turnIndex >= savedCombatState.roundUnits.length) {
+            this.turnIndex = -1;
+        }
+        else {
+            this.turnIndex = savedCombatState.turnIndex - 1;
+        }
 
         this.musicScene.changeSong('battle');
 
@@ -885,8 +886,7 @@ export default class BattleScene extends Phaser.Scene {
             this.player2MenuFrame = this.add.image(470, 606, 'heroMenuFrame')
                 .setOrigin(0, 0);
 
-            // TODO: GONNA NEED TO FIND THE BOT IN THE HERO LIST!
-
+            // find the bot in the hero list
             const botHero = savedCombatState.heroes.find( unit => unit.actorType.startsWith('Monster'))!;
 
             this.player2 = new BotCharacter(
@@ -1013,6 +1013,7 @@ export default class BattleScene extends Phaser.Scene {
             })!.skills,
             enemyUnit.id
         );
+        enemy.stats = enemyUnit.stats;
         this.add.existing(enemy);
 
         this.heroes = [soldier];

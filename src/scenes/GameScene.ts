@@ -1,4 +1,5 @@
 // TODO: if i refresh quickly from game over in combat scene, the player doesn't get teleported to spawn!!
+//  to reproduce, just refresh when the screen says thou art vanquished
 
 
 // TODO: LOAD THE PLAYER INTO THEIR SAVED BATTLE IF THEY ARE LOADED INTO A COMBAT SCENE!!!!!!!
@@ -121,7 +122,7 @@ export default class GameScene extends Phaser.Scene {
                 console.log({storedTilemap: player.currentTilemap});
                 const levelData = levels[player.currentTilemap];
                 this.nonHostileSpace = !levelData.hostile;
-                this.musicScene.changeSong(levelData.music);
+                if (!player.inCombat) this.musicScene.changeSong(levelData.music);
 
                 // store the current map in the database!!!
                 this.saveAndLoadScene.db.players.update(

@@ -314,10 +314,15 @@ export default class BattleUIScene extends Phaser.Scene {
     private initiateBattleUI() {
         this.hideUIFrames();
 
-        eventsCenter.removeListener('MessageClose');
-        eventsCenter.on('MessageClose', this.messageCloseHandler, this);
+        if (!this.battleScene.checkForVictory()) {
+            eventsCenter.removeListener('MessageClose');
+            eventsCenter.on('MessageClose', this.messageCloseHandler, this);
 
-        eventsCenter.emit('Message', `A ${this.battleScene.enemies[0].name} approaches.`);
+            eventsCenter.emit('Message', `A ${this.battleScene.enemies[0].name} approaches.`);
+        }
+        else {
+            this.battleScene.endBattle();
+        }
     }
 
     private messageCloseHandler() {
@@ -328,7 +333,7 @@ export default class BattleUIScene extends Phaser.Scene {
                 this.battleScene.interactionState = 'mainselect';
             }
             else {
-                console.log('looking for the matching target from the battle ui scene!');
+                console.log('looking for the target from the battle scene that matches the save data target!');
                 console.log({
                     battleSceneUnits: this.battleScene.units,
                     targetId: this.saveData?.target?.id
@@ -341,9 +346,11 @@ export default class BattleUIScene extends Phaser.Scene {
                     const bIndex = this.saveData!.roundUnits.findIndex(unit => unit.id === b.id);
                     return aIndex - bIndex;
                 });
+
                 console.log('just sorted the roundunits from the messageCloseHandler load data branch');
                 console.log({roundUnits: this.battleScene.roundUnits});
                 console.log({target});
+
 
                 this.battleScene.parseNextUnitTurn(
                     {
