@@ -103,7 +103,9 @@ export default class BattleScene extends Phaser.Scene {
 
         console.log('determining whether or not to start the battle!');
         console.log({data});
-        if (data?.loadBattleData) this.loadBattle(data.savedCombatState);
+        if (data?.loadBattleData) {
+            this.loadBattle(data.savedCombatState);
+        }
         else if (!data?.loadBattleData || !data) this.startBattle();
 
         this.sys.events.on('wake', this.startBattle, this);
@@ -275,8 +277,17 @@ export default class BattleScene extends Phaser.Scene {
         );
         this.gameScene.player.stats.currentHP = newHP;
         if (this.gameScene.bots.length > 0) {
-            this.gameScene.bots[0].stats.currentHP = this.gameScene.bots[0].stats.maxHP;
-            this.uiScene.player2hpText.setText(`HP: ${this.gameScene.bots[0].stats.currentHP}/${this.gameScene.bots[0].stats.maxHP}`);
+            const newBotHP = this.gameScene.bots[0].stats.maxHP;
+            this.saveAndLoadScene.db.players.update(
+                0,
+                (player: IPlayer) => {
+                    if (player.bots.length > 0) {
+                        player.bots[0].stats.currentHP = newBotHP;
+                    }
+                }
+            );
+            this.gameScene.bots[0].stats.currentHP = newBotHP;
+            this.uiScene.player2hpText.setText(`HP: ${newBotHP}/${newBotHP}`);
         }
         this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
 
@@ -844,6 +855,8 @@ export default class BattleScene extends Phaser.Scene {
             actionType: string
         escaped: boolean | undefined
     }   ): void {
+        const enemiesStillLiving = savedCombatState.enemies.some(enemy => enemy.stats.currentHP > 0);
+        const heroesStillLiving = savedCombatState.heroes.some(hero => hero.stats.currentHP > 0);
 
         console.log('loading the battle from a saved state!!!!!');
 
@@ -862,7 +875,7 @@ export default class BattleScene extends Phaser.Scene {
             this.turnIndex = savedCombatState.turnIndex - 1;
         }
 
-        this.musicScene.changeSong('battle');
+        if (enemiesStillLiving && heroesStillLiving) this.musicScene.changeSong('battle');
 
         this.cameras.main.setBackgroundColor('rgb(235, 235, 235)');
 

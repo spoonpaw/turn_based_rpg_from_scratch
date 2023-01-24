@@ -2220,6 +2220,8 @@ export default class UIScene extends Phaser.Scene {
             playerTilePosition: this.gameScene.player.getTilePos(),
             botPath: this.gameScene.bots[0]?.path,
             botCoords: this.gameScene.bots[0]?.getTilePos(),
+            playerCurrentHP: this.gameScene.player.stats.currentHP,
+            playerMaxHP: this.gameScene.player.stats.maxHP
         });
         // uncomment to log interaction state by clicking player portrait
         if (this.interactionState.startsWith('inventoryaction')) {
