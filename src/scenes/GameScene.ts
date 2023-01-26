@@ -434,7 +434,7 @@ export default class GameScene extends Phaser.Scene {
                 this.player?.experience ?? 0,
                 'Human',
                 playerSoldierJob,
-                aBunchOfPotions,
+                [],
                 emptyEquipment
             );
 
