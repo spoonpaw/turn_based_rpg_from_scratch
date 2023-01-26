@@ -130,6 +130,16 @@ export default class Bot extends GameActor{
     }
 
     get level() {
-        return Math.max(1, Math.ceil(this.LEVELING_RATE * Math.sqrt(this.experience)));
+        return Math.min(
+            this.gameScene.MAX_LEVEL,
+            Math.max(
+                1,
+                Math.ceil(
+                    this.LEVELING_RATE * Math.sqrt(
+                        this.experience
+                    )
+                )
+            )
+        );
     }
 }

@@ -585,7 +585,8 @@ export default class UIScene extends Phaser.Scene {
         this.player2hpText.setText(`HP: ${hp}/${maxHP}`);
     }
 
-    private calculateTilNextLevel(playerOrBot: Player|Bot): number {
+    private calculateTilNextLevel(playerOrBot: Player|Bot): number | string {
+        if (playerOrBot.level >= this.gameScene.MAX_LEVEL) return 'MAX';
         const currentExp = playerOrBot.experience;
         let currentLevel = playerOrBot.level;
         const nextLevel = currentLevel + 1;

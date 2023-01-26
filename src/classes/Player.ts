@@ -10,6 +10,7 @@ import {PlayerJob} from './Jobs/PlayerJob';
 export default class Player extends GameActor{
     public LEVELING_RATE = 0.3;
     private uiScene!: UIScene;
+    private gameScene!: GameScene;
     constructor(
         name: string,
         sprite: Phaser.GameObjects.Sprite,
@@ -29,6 +30,7 @@ export default class Player extends GameActor{
             experience
         );
         this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
+        this.gameScene = <GameScene>this.sprite.scene.scene.get('Game');
 
         const offsetX = GameScene.TILE_SIZE / 2;
         const offsetY = GameScene.TILE_SIZE;
@@ -73,7 +75,17 @@ export default class Player extends GameActor{
     }
 
     get level() {
-        return Math.max(1, Math.ceil(this.LEVELING_RATE * Math.sqrt(this.experience)));
+        return Math.min(
+            this.gameScene.MAX_LEVEL,
+            Math.max(
+                1,
+                Math.ceil(
+                    this.LEVELING_RATE * Math.sqrt(
+                        this.experience
+                    )
+                )
+            )
+        );
     }
 
 }
