@@ -72,7 +72,7 @@ export default class GameScene extends Phaser.Scene {
     public spaceDown!: boolean;
     public uiScene!: UIScene;
     public weaponMerchant!: Merchant | undefined;
-    botGridPhysics!: BotGridPhysics;
+    public botGridPhysics!: BotGridPhysics;
     public saveIndex!: number;
     private currentTilemap!: Phaser.Tilemaps.Tilemap;
     private exitingCurrentLevel!: boolean;
@@ -83,6 +83,7 @@ export default class GameScene extends Phaser.Scene {
     private encounter_counter = 0;
     private saveAndLoadScene!: SaveAndLoadScene;
     private firstUpdateRun = false;
+    public MAX_LEVEL = 5;
 
     public constructor() {
         super('Game');
@@ -159,6 +160,8 @@ export default class GameScene extends Phaser.Scene {
                 const someHeroesAreAlive = player.combatState.heroes.some((hero: DBUnit) => hero.stats.currentHP > 0);
                 console.log('checking if the player disconnected while in combat');
                 if (player.inCombat && !someHeroesAreAlive) {
+                    this.musicScene.changeSong(levelData.music);
+
                     console.log('apparently the player disconnected while in combat');
                     console.log('healing the player and the bot');
                     console.log('removing half their gold');
@@ -201,7 +204,7 @@ export default class GameScene extends Phaser.Scene {
                     playerSoldierJob,
                     player.inventory,
                     player.equipment,
-                    player.stats
+                    playerStats
                 );
                 this.scene.launch('UI');
 
