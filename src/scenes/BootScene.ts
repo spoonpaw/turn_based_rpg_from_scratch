@@ -7,7 +7,7 @@ export default class BootScene extends Phaser.Scene {
     }
 
     public init() {
-        // this.scene.launch('SaveAndLoad');
+        this.scene.launch('SaveAndLoad');
     }
 
     public create() {
@@ -77,6 +77,7 @@ export default class BootScene extends Phaser.Scene {
 
     private loadAudio() {
         // load music mp3s
+        this.load.audio('titlesong', 'assets/sounds/songs/zeroLeaf.mp3');
         this.load.audio('battlesong', 'assets/sounds/songs/dontBeAshamed.mp3');
         this.load.audio('overworldsong', 'assets/sounds/songs/ennui.mp3');
         this.load.audio('gameoversong', 'assets/sounds/songs/theGreatGreen.mp3');
@@ -164,16 +165,14 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('prefab4', 'assets/images/ui/prefab4.png');
         this.load.image('prefab5', 'assets/images/ui/prefab5.png');
 
-        this.load.image('sidedialogframe', 'assets/images/ui/leftSideDialogFrame.png');
-        this.load.image('sideoptionsframe', 'assets/images/ui/rightSideDialogOptionsFrame.png');
-
-        this.load.image('gameActionMenuFrame', 'assets/images/ui/gameActionMenuFrame.png');
-
         this.load.image('gameActionMenuCharacterButton', 'assets/images/ui/characterButton.png');
         this.load.image('gameActionMenuCharacterButtonActive', 'assets/images/ui/characterButtonActive.png');
         this.load.image('gameActionMenuRedBotButton', 'assets/images/ui/redBotButton.png');
         this.load.image('gameActionMenuRedBotButtonActive', 'assets/images/ui/redBotButtonActive.png');
 
+        this.load.image('sidedialogframe', 'assets/images/ui/leftSideDialogFrame.png');
+        this.load.image('sideoptionsframe', 'assets/images/ui/rightSideDialogOptionsFrame.png');
+        this.load.image('gameActionMenuFrame', 'assets/images/ui/gameActionMenuFrame.png');
         this.load.image('actionMenuFrame', 'assets/images/ui/actionMenuFrame.png');
         this.load.image('goldFrame', 'assets/images/ui/goldFrame.png');
         this.load.image('heroMenuFrame', 'assets/images/ui/heroMenuFrame.png');
@@ -189,6 +188,8 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('confirmSelectedAbilityOrItemFrameB', 'assets/images/ui/confirmSelectedAbilityOrItemFrameB.png');
         this.load.image('characterDetailDisplayFrame', 'assets/images/ui/characterDetailDisplayFrame.png');
         this.load.image('keyboardInputFrame', 'assets/images/ui/keyboardInputFrame.png');
+        this.load.image('newGameOrLoadFrame', 'assets/images/ui/newGameOrLoadFrame.png');
+        this.load.image('floralFrame', 'assets/images/ui/floralFrame2.png');
 
         this.load.image('pic', 'assets/images/baal-loader.png');
         this.load.image('pic2', 'assets/images/atari-fujilogo.png');

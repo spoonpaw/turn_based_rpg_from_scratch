@@ -1,13 +1,18 @@
+import MonsterSoldier from '../../jobs/monsters/MonsterSoldier';
 import monsterSoldierJob from '../../jobs/monsters/MonsterSoldier';
 import GameScene from '../../scenes/GameScene';
+import SaveAndLoadScene from '../../scenes/SaveAndLoadScene';
 import UIScene from '../../scenes/UIScene';
+import {Direction} from '../../types/Direction';
 import eventsCenter from '../../utils/EventsCenter';
 import Bot from '../Bot';
+import {IPlayer} from '../GameDatabase';
 import NPC from './NPC';
 
 export default class extends NPC {
     protected gameScene: GameScene;
     private uiScene: UIScene;
+    private saveAndLoadScene: SaveAndLoadScene;
 
     constructor(
         public sprite: Phaser.GameObjects.Sprite,
@@ -15,7 +20,8 @@ export default class extends NPC {
     ) {
         super(sprite, tilePos);
         this.gameScene = <GameScene>this.sprite.scene;
-        this.uiScene = <UIScene>this.gameScene.scene.get('UI');
+        this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
+        this.saveAndLoadScene = <SaveAndLoadScene>this.sprite.scene.scene.get('SaveAndLoad');
     }
 
     public listenForInteractEvent() {
@@ -24,10 +30,6 @@ export default class extends NPC {
         if (this.testForInteractionReadyState()) {
             this.runDialog();
         }
-    }
-
-    private checkIfPlayerHasBot() {
-        return this.gameScene.bots.length > 0;
     }
 
     public runDialog() {
@@ -66,8 +68,8 @@ export default class extends NPC {
                 this.uiScene.leftSideDialogText.setText('');
                 this.uiScene.leftSideDialogText.setVisible(false);
                 this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
-                this.uiScene.cancelButton.setVisible(false);
-                this.uiScene.cancelButton.buttonText.setVisible(false);
+                this.uiScene.cancelButton.hideActionButton();
+
                 this.uiScene.cancelMenuFrame.setVisible(false);
 
                 this.gameScene.input.keyboard!.enabled = true;
@@ -85,14 +87,12 @@ export default class extends NPC {
 
         if (!this.checkIfPlayerHasBot()){
             this.uiScene.rightSideDialogOptionsFrame.setVisible(true);
-            this.uiScene.yesButton.setVisible(true);
-            this.uiScene.yesButton.buttonText.setVisible(true);
-            this.uiScene.noButton.setVisible(true);
-            this.uiScene.noButton.buttonText.setVisible(true);
+            this.uiScene.yesButton.showActionButton();
+
+            this.uiScene.noButton.showActionButton();
 
             this.uiScene.interactFrame.setVisible(false);
-            this.uiScene.interactButton.setVisible(false);
-            this.uiScene.interactButton.buttonText.setVisible(false);
+            this.uiScene.interactButton.hideActionButton();
 
             eventsCenter.on('space', () => {
                 this.gameScene.gamePadScene?.scene.restart();
@@ -104,16 +104,13 @@ export default class extends NPC {
                 this.uiScene.leftSideDialogText.setText('');
                 this.uiScene.leftSideDialogText.setVisible(false);
                 this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
-                this.uiScene.yesButton.setVisible(false);
-                this.uiScene.yesButton.buttonText.setVisible(false);
-                this.uiScene.noButton.setVisible(false);
-                this.uiScene.noButton.buttonText.setVisible(false);
+                this.uiScene.yesButton.hideActionButton();
+                this.uiScene.noButton.hideActionButton();
                 this.uiScene.characterDetailDisplayFrame.setVisible(false);
                 this.uiScene.characterDetailDisplay.setVisible(false);
 
                 this.uiScene.cancelMenuFrame.setVisible(false);
-                this.uiScene.cancelButton.setVisible(false);
-                this.uiScene.cancelButton.buttonText.setVisible(false);
+                this.uiScene.cancelButton.hideActionButton();
 
                 this.gameScene.input.keyboard!.enabled = true;
 
@@ -132,6 +129,7 @@ export default class extends NPC {
         eventsCenter.removeListener('yes');
         // the player is saying yes, they want the bot (this spawns the bot)
         eventsCenter.on('yes', () => {
+            // glitch occuring here when the bot spawns
             this.uiScene.interactionState = 'botscientistresponse';
             eventsCenter.removeListener('yes');
             this.uiScene.leftSideDialogText.setText('Bot Scientist:\nGood friend, the Red Bot hath joined your party. Art thou inclined to give it a name, or doth thou prefer to leave it nameless?');
@@ -146,6 +144,7 @@ export default class extends NPC {
                 'Red Bot',
                 monsterSoldierJob
             );
+            this.gameScene.bots.push(redBot);
             // set all the player2 ui elements to visible with red bot's stats
 
             this.uiScene.player2hpText.setText(`HP: ${redBot.stats.currentHP ?? '0'}/${redBot.stats.maxHP ?? '0'}`);
@@ -161,8 +160,30 @@ export default class extends NPC {
             this.uiScene.player2ManaText.setVisible(true);
             this.uiScene.player2ManaIcon.setVisible(true);
 
-            this.gameScene.bots.push(
-                redBot
+            const newBot = {
+                name: redBot.name,
+                job: MonsterSoldier,
+                species: 'Red Bot',
+                experience: 0,
+                stats: redBot.stats,
+                texture: 'redbot',
+                position: this.gameScene.player.getTilePos(),
+                facing: Direction.DOWN,
+                inCombat: false,
+                equipment: {
+                    body: undefined,
+                    head: undefined,
+                    offhand: undefined,
+                    weapon: undefined
+                },
+                inventory: [],
+            };
+
+            this.saveAndLoadScene.db.players.update(
+                0,
+                (player: IPlayer) => {
+                    player.bots.push(newBot);
+                }
             );
 
             this.gameScene.setupBotGridPhysics();
@@ -192,10 +213,8 @@ export default class extends NPC {
                 this.uiScene.leftSideDialogFrame.setVisible(false);
                 this.uiScene.leftSideDialogText.setVisible(false);
                 this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
-                this.uiScene.yesButton.setVisible(false);
-                this.uiScene.yesButton.buttonText.setVisible(false);
-                this.uiScene.noButton.setVisible(false);
-                this.uiScene.noButton.buttonText.setVisible(false);
+                this.uiScene.yesButton.hideActionButton();
+                this.uiScene.noButton.hideActionButton();
 
                 this.uiScene.characterDetailDisplayFrame.setX(335);
                 this.uiScene.characterDetailDisplayFrame.setY(175);
@@ -258,6 +277,10 @@ export default class extends NPC {
         });
     }
 
+    private checkIfPlayerHasBot() {
+        return this.gameScene.bots.length > 0;
+    }
+
     private rejectInput() {
         eventsCenter.removeListener('keyboardreject');
         eventsCenter.removeListener('keyboardaccept');
@@ -273,6 +296,14 @@ export default class extends NPC {
             string = 'Red Bot';
         }
         // rename the robot if needed
+
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                player.bots[0].name = String(string);
+            }
+        );
+
         this.gameScene.bots[0].name = string;
     }
 }

@@ -29,8 +29,6 @@ export default class BotGridPhysics{
     }
 
     public move(direction: Direction) {
-        console.log('starting to move');
-        console.log(`setting last movement command to ${direction}`);
         this.lastMovementCommand = direction;
         this.lastMovementCommandTimestamp = Date.now();
         if (this.isMoving()) return;
@@ -50,9 +48,6 @@ export default class BotGridPhysics{
             this.updatePosition(delta);
         }
 
-        if (this.lastMovementCommand !== Direction.NONE) {
-            console.log('setting last movement command back to NONE from the bot grid physics update method');
-        }
         this.lastMovementCommand = Direction.NONE;
     }
 
@@ -69,8 +64,12 @@ export default class BotGridPhysics{
     }
 
     protected getPixelsToWalkThisUpdate(delta: number): number {
+        const playerProgress = this.bot.gameScene.gridPhysics.tileSizePixelsWalked / GameScene.TILE_SIZE;
         const deltaInSeconds = delta / 1000;
-        return this.speedPixelsPerSecond * deltaInSeconds;
+        return Math.max(
+            this.speedPixelsPerSecond * deltaInSeconds,
+            (playerProgress * GameScene.TILE_SIZE) - this.tileSizePixelsWalked
+        );
     }
 
     protected moveBotSprite(pixelsToMove: number) {
@@ -105,7 +104,6 @@ export default class BotGridPhysics{
 
 
     protected stopMoving(): void {
-        console.log('stopping bot movement!!');
         this.bot.startedMoving = false;
         this.bot.stopAnimation(this.movementDirection);
         this.movementDirection = Direction.NONE;
@@ -122,9 +120,6 @@ export default class BotGridPhysics{
             this.updateTilePos();
         }
         else {
-            console.log('it has been determined that the bot should stop moving!!!');
-            console.log(`movement direction: ${this.movementDirection}`);
-            console.log(`last movement command ${this.lastMovementCommand}`);
             this.moveBotSprite(GameScene.TILE_SIZE - this.tileSizePixelsWalked);
             this.stopMoving();
         }

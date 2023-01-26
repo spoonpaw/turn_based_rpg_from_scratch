@@ -19,7 +19,13 @@ export default class PlayerNameSelectScene extends Phaser.Scene {
     public create() {
 
         // Create a rectangle game object and set its width, height, and color
-        this.backgroundRectangle = this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0xbcbcbc)
+        this.backgroundRectangle = this.add.rectangle(
+            0,
+            0,
+            this.scale.width,
+            this.scale.height,
+            0xbcbcbc
+        )
             .setOrigin(0, 0);
 
 
@@ -62,11 +68,11 @@ export default class PlayerNameSelectScene extends Phaser.Scene {
                 eventsCenter.removeListener('keyboardreject');
                 eventsCenter.removeListener('keyboardaccept');
                 string = String(string);
-                this.saveAndLoadScene.createNewPlayer(string);
                 this.scene.start(
                     'Game',
                     {
-                        nameData: string
+                        nameData: string,
+                        saveIndex: 0
                     }
                 );
             }

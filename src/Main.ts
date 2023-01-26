@@ -5,7 +5,9 @@ import GameOverScene from './scenes/GameOverScene';
 import GameScene from './scenes/GameScene';
 import MusicScene from './scenes/MusicScene';
 import SFXScene from './scenes/SFXScene';
+import TitleMenuScene from './scenes/TitleMenuScene';
 import TitleScene from './scenes/TitleScene';
+import TitleStoryScene from './scenes/TitleStoryScene';
 import UIScene from './scenes/UIScene';
 import ScaleModes = Phaser.Scale.ScaleModes;
 import VirtualJoyStickPlugin from 'phaser3-rex-plugins/plugins/virtualjoystick-plugin';
@@ -27,25 +29,27 @@ const config: Phaser.Types.Core.GameConfig = {
         arcade: {
             debug: false,
             gravity: {y: 0},
-            fixedStep: false
+            fixedStep: true
         }
     },
     antialias: false,
     antialiasGL: false,
     scene: [
-        BootScene,
-        TitleScene,
-        MusicScene,
-        GameScene,
-        UIScene,
+        BootScene, // zeroth idx loads 1st
         BattleScene,
         BattleUIScene,
         GameOverScene,
-        SFXScene,
         GamePadScene,
+        GameScene,
         KeyboardScene,
+        MusicScene,
         PlayerNameSelectScene,
-        SaveAndLoadScene
+        SFXScene,
+        SaveAndLoadScene,
+        TitleScene,
+        TitleMenuScene,
+        TitleStoryScene,
+        UIScene
     ],
     roundPixels: false,
     backgroundColor: '#000000',

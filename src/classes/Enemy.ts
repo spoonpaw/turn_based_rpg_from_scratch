@@ -7,6 +7,7 @@ import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import BotCharacter from './BotCharacter';
+import {IPlayer} from './GameDatabase';
 import Item from './Item';
 import {MonsterJob} from './Jobs/MonsterJob';
 import PlayerCharacter from './PlayerCharacter';
@@ -32,7 +33,8 @@ export class Enemy extends Unit {
         frame: string | number | undefined,
         name: string,
         job: MonsterJob,
-        private skills: IAbility[] = []
+        public skills: IAbility[] = [],
+        id?: number
     ) {
         super(
             scene,
@@ -41,7 +43,8 @@ export class Enemy extends Unit {
             texture,
             frame,
             name,
-            job
+            job,
+            id
         );
 
         this.battleScene = <BattleScene>this.scene.scene.get('Battle');
@@ -89,11 +92,34 @@ export class Enemy extends Unit {
     }
 
     applyHPChange(hpChangeAmount: number): number {
+
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                const unitToUpdate = player.combatState.enemies.find(unit => unit.id === this.id);
+
+                if (unitToUpdate !== undefined) {
+                    if (hpChangeAmount < 0) {
+                        unitToUpdate.stats.currentHP = Math.min(unitToUpdate.stats.maxHP, unitToUpdate.stats.currentHP - hpChangeAmount);
+                    }
+                    else {
+                        unitToUpdate.stats.currentHP -= hpChangeAmount;
+                    }
+                    if (unitToUpdate.stats.currentHP <= 0) {
+                        unitToUpdate.stats.currentHP = 0;
+                    }
+                }
+
+                return player;
+            }
+        );
+
+
         // handle the math of taking damage,
         this.stats.currentHP -= hpChangeAmount;
         if (this.stats.currentHP <= 0) {
             this.stats.currentHP = 0;
-            this.living = false;
+            // this.living = false;
         }
         this.updateSceneOnReceivingDamage();
         return 0;
@@ -111,6 +137,7 @@ export class Enemy extends Unit {
         );
     }
 
+
     public calculateCriticalStrikeDamage() {
         return Math.max(
             1,
@@ -120,34 +147,42 @@ export class Enemy extends Unit {
         );
     }
 
-    criticalStrikeTest(): boolean {
+    public criticalStrikeTest(): boolean {
         return Phaser.Math.Between(1, 64) === 1;
     }
 
-    evadeTest(): boolean {
+    public evadeTest(): boolean {
         return Phaser.Math.Between(1, 64) === 1;
     }
 
-    getInitiative(): number {
+    public getInitiative(): number {
         return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
     }
 
     public runTurn(): number {
+
+        console.log('running the bot\'s turn!!!!');
+
         let runtimeInMS = 0;
 
-        // if there are enough targets to justify it and enough resources to spend, execute the
+        // if there are enough targets to justify it and enough resources to spend, execute
         //  a powerful aoe attack
 
-
-        const livingHeroes = this.battleScene.heroes.filter(unit => unit.living);
+        const livingHeroes = this.battleScene.heroes.filter(unit => unit.isLiving());
         const moreThanOneLivingHero = livingHeroes.length > 1;
+        const enableAOEAttacks = false;
 
-        if (this.hasAoEAbility() && moreThanOneLivingHero) {
+        if (this.hasAoEAbility() && moreThanOneLivingHero && enableAOEAttacks) {
             // do aoe damage to the player's party!
             const aoeAbility = this.getAOEAbility();
-            eventsCenter.emit('Message', aoeAbility.useTemplate.replace('${abilityUser}', this.name));
+            eventsCenter.emit(
+                'Message',
+                aoeAbility.useTemplate.replace(
+                    '${abilityUser}',
+                    this.name
+                )
+            );
             runtimeInMS += 2000 + (2000 * this.battleScene.heroes.length);
-
 
             this.scene.time.addEvent({
                 delay: 2000,
@@ -187,17 +222,23 @@ export class Enemy extends Unit {
         }
         else {
             // attain random target!
-            let target = this.battleScene.heroes.filter(
+            console.log({battleSceneHeroes: this.battleScene.heroes});
+            const listOfLivingTargets = this.battleScene.heroes.filter(
                 (obj) => {
-                    return obj.living;
+                    return obj.isLiving();
                 }
-            )[
-                Phaser.Math.RND.between(
-                    0,
-                    Math.max(0, this.battleScene.heroes.length - 1)
-                )
-            ];
+            );
+            console.log({listOfLivingTargets});
 
+            const randomHeroIndex = Phaser.Math.RND.between(
+                0,
+                Math.max(0, listOfLivingTargets.length - 1)
+            );
+            console.log({randomHeroIndex});
+
+            let target = listOfLivingTargets[randomHeroIndex];
+
+            console.log({target});
             if (!target) return 0;
 
             let damage = 0;
@@ -209,7 +250,7 @@ export class Enemy extends Unit {
             for (const passiveEffect of this.battleScene.passiveEffects) {
                 if (passiveEffect.ability.name === 'Guard' &&
                     passiveEffect.target.id === target.id &&
-                    passiveEffect.actor.living
+                    passiveEffect.actor.isLiving()
                 ) {
                     target = this.battleScene.heroes.find((obj) => {
                         return obj.id === passiveEffect.actor.id;
@@ -291,5 +332,4 @@ export class Enemy extends Unit {
             );
         });
     }
-
 }

@@ -2,6 +2,7 @@ import UIActionButton from '../classes/UIActionButton';
 
 export default class MusicScene extends Phaser.Scene {
 
+    public titleSong!: Phaser.Sound.BaseSound;
     public battleSong!: Phaser.Sound.BaseSound;
     public overworldSong!: Phaser.Sound.BaseSound;
     public gameOverSong!: Phaser.Sound.BaseSound;
@@ -15,6 +16,11 @@ export default class MusicScene extends Phaser.Scene {
     }
 
     public create() {
+        this.titleSong = this.sound.add('titlesong', {
+            volume: 0.1,
+            loop: true
+        });
+
         this.overworldSong = this.sound.add('overworldsong', {
             volume: 0.5,
             loop: true
@@ -31,7 +37,7 @@ export default class MusicScene extends Phaser.Scene {
         });
 
         this.townSong = this.sound.add('townsong', {
-            volume: 0.80,
+            volume: 0.60,
             loop: true
         });
 
@@ -79,6 +85,7 @@ export default class MusicScene extends Phaser.Scene {
     }
 
     private stopAllSongs() {
+        this.titleSong.stop();
         this.overworldSong.stop();
         this.battleSong.stop();
         this.gameOverSong.stop();
@@ -86,8 +93,10 @@ export default class MusicScene extends Phaser.Scene {
     }
 
     private playCurrentSong() {
-        if (this.currentTrack === 'overworld') {
-            // playing the overworld track!
+        if (this.currentTrack === 'title') {
+            this.titleSong.play();
+        }
+        else if (this.currentTrack === 'overworld') {
             this.overworldSong.play();
         }
         else if (this.currentTrack === 'battle') {

@@ -3,6 +3,7 @@ import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import {Enemy} from './Enemy';
+import {IPlayer} from './GameDatabase';
 import {PlayerJob} from './Jobs/PlayerJob';
 import PlayerCharacter from './PlayerCharacter';
 import Unit from './Unit';
@@ -27,7 +28,8 @@ export default class BotCharacter extends Unit {
         texture: string | Phaser.Textures.Texture,
         frame: string | number | undefined,
         name: string,
-        job: PlayerJob
+        job: PlayerJob,
+        id?: number
     ) {
         super(
             scene,
@@ -36,7 +38,8 @@ export default class BotCharacter extends Unit {
             texture,
             frame,
             name,
-            job
+            job,
+            id
         );
 
         // TODO: there needs to be a logical way of figuring
@@ -61,13 +64,36 @@ export default class BotCharacter extends Unit {
     }
 
     public applyHPChange(hpChangeAmount: number): number {
+
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+
+                const unitToUpdate = player.combatState.heroes.find(unit => unit.id === this.id);
+
+                if (unitToUpdate !== undefined) {
+                    if (hpChangeAmount < 0) {
+                        unitToUpdate.stats.currentHP = Math.min(unitToUpdate.stats.maxHP, unitToUpdate.stats.currentHP - hpChangeAmount);
+                    }
+                    else {
+                        unitToUpdate.stats.currentHP -= hpChangeAmount;
+                    }
+                    if (unitToUpdate.stats.currentHP <= 0) {
+                        unitToUpdate.stats.currentHP = 0;
+                    }
+                }
+
+                return player;
+            }
+        );
+
+
         return super.applyHPChange(hpChangeAmount, this.battleScene.player2HPText);
     }
-
     public runTurn(): number {
-        // just attack player 1
+        // just attack enemy 1
         const target = this.battleScene.enemies[0];
-        if (!target.living) return 0;
+        if (!target.isLiving()) return 0;
         let runtimeInMS = 0;
 
         let damage = 0;
@@ -98,16 +124,22 @@ export default class BotCharacter extends Unit {
     }
 
     public calculateAttackDamage(target: (PlayerCharacter | Enemy | BotCharacter)): number {
-        return Math.max(
+        console.log(`calculating ${this.name}'s damage.`);
+        console.log('formula: Math.max(1, Math.floor(actorStrength - (defenderDefense / 2) * randomModifier))');
+        const actorStrength = this.getCombinedStat('strength');
+        const defenderDefense = target.stats.defense;
+        const damageAfterDefense = actorStrength - (defenderDefense / 2);
+        const randomModifier = Phaser.Math.FloatBetween(0.34, 0.52);
+        const finalAttackDamage = Math.max(
             1,
             Math.floor(
-                (this.stats.strength - (target.getCombinedStat('defense') / 2)) *
-                Phaser.Math.FloatBetween(
-                    0.39, 0.59
-                )
+                damageAfterDefense * randomModifier
             )
         );
+        console.log({actorStrength, defenderDefense, damageAfterDefense, randomModifier, finalAttackDamage});
+        return finalAttackDamage;
     }
+
 
     evadeTest(): boolean {
         return Phaser.Math.Between(1, 64) === 1;

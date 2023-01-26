@@ -1,9 +1,14 @@
+import eventsCenter from '../utils/EventsCenter';
 import MusicScene from './MusicScene';
+import SFXScene from './SFXScene';
+import TitleStoryScene from './TitleStoryScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
 
 export default class TitleScene extends Phaser.Scene {
     public titleText!: Phaser.GameObjects.Text;
     private musicScene!: MusicScene;
+    private sfxScene!: SFXScene;
+    private titleStoryScene!: TitleStoryScene;
 
     public constructor() {
         super('Title');
@@ -12,6 +17,9 @@ export default class TitleScene extends Phaser.Scene {
     public create() {
 
         this.musicScene = <MusicScene>this.scene.get('Music');
+        this.sfxScene = <SFXScene>this.scene.get('SFX');
+        this.musicScene.scene.bringToTop();
+        this.sfxScene.scene.bringToTop();
 
         const phaserImage = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'pic');
         phaserImage.displayHeight = this.sys.canvas.height;
@@ -30,16 +38,8 @@ export default class TitleScene extends Phaser.Scene {
             titleImage.displayWidth = this.sys.canvas.width;
 
             camera.fadeIn(1500);
-
-            // create title text
-            this.titleText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Afterlife', {
-                fontSize: '128px',
-                color: '#fff',
-                fontFamily: 'CustomFont'
-            })
-                .setStroke('#000000', 6);
-
-            this.titleText.setOrigin(0.5);
+            this.scene.launch('TitleStory');
+            this.titleStoryScene = <TitleStoryScene>this.scene.get('TitleStory');
 
             const clickToStartText = this.add.text(this.scale.width / 2, this.scale.height * 0.65, 'Click To Start', {
                 fontSize: '40px',
@@ -52,7 +52,7 @@ export default class TitleScene extends Phaser.Scene {
             this.scene.scene.tweens.add({
                 targets: clickToStartText,
                 duration: 1500,
-                repeat: true,
+                repeat: -1,
                 loop: true,
                 alpha: 0,
                 yoyo: true
@@ -68,13 +68,18 @@ export default class TitleScene extends Phaser.Scene {
 
     public handleInput(camera: Camera) {
         // sets the overworld music
-        this.musicScene.changeSong('town');
+        this.musicScene.changeSong('title');
+
+        this.titleStoryScene.slideUpTitle = true;
 
         this.input.keyboard!.enabled = false;
         this.input.enabled = false;
         camera.fadeOut(1500);
         this.cameras.main.once('camerafadeoutcomplete', () => {
-            this.scene.start('PlayerNameSelect');
+            // this.scene.start('PlayerNameSelect');
+            // this.scene.start('TitleMenu');
+            eventsCenter.emit('gamestart');
+            this.scene.stop();
         });
 
     }

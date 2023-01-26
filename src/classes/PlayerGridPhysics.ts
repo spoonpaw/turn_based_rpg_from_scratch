@@ -18,7 +18,7 @@ export default class PlayerGridPhysics extends GridPhysics{
             [Direction.LEFT]: Vector2.LEFT,
             [Direction.RIGHT]: Vector2.RIGHT,
         };
-    protected tileSizePixelsWalked = 0;
+    public tileSizePixelsWalked = 0;
 
     public constructor(
         playerOrNPC: Player | Bot,

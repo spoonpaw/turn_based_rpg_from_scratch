@@ -163,7 +163,7 @@ export const items: itemArray = [
     }
 ];
 
-type itemArray = ItemInterface[];
+export type itemArray = ItemInterface[];
 
 export interface ItemInterface {
     minimumLevel?: number;

@@ -1,11 +1,14 @@
 import GameScene from '../../scenes/GameScene';
+import SaveAndLoadScene from '../../scenes/SaveAndLoadScene';
 import UIScene from '../../scenes/UIScene';
 import eventsCenter from '../../utils/EventsCenter';
+import {IPlayer} from '../GameDatabase';
 import NPC from './NPC';
 
 export default class Innkeeper extends NPC {
     protected gameScene: GameScene;
     private uiScene: UIScene;
+    private saveAndLoadScene: SaveAndLoadScene;
 
     constructor(
         public sprite: Phaser.GameObjects.Sprite,
@@ -13,7 +16,8 @@ export default class Innkeeper extends NPC {
     ) {
         super(sprite, tilePos);
         this.gameScene = <GameScene>this.sprite.scene;
-        this.uiScene = <UIScene>this.gameScene.scene.get('UI');
+        this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
+        this.saveAndLoadScene = <SaveAndLoadScene>this.sprite.scene.scene.get('SaveAndLoad');
     }
 
     public runDialog() {
@@ -38,14 +42,11 @@ export default class Innkeeper extends NPC {
             this.uiScene.leftSideDialogText.setText('Innkeeper:\nGood day! It costs three gold to rest hither. Dost thou wish to stay?');
             this.uiScene.leftSideDialogText.setVisible(true);
             this.uiScene.rightSideDialogOptionsFrame.setVisible(true);
-            this.uiScene.yesButton.setVisible(true);
-            this.uiScene.yesButton.buttonText.setVisible(true);
-            this.uiScene.noButton.setVisible(true);
-            this.uiScene.noButton.buttonText.setVisible(true);
+            this.uiScene.yesButton.showActionButton();
+            this.uiScene.noButton.showActionButton();
 
             this.uiScene.interactFrame.setVisible(false);
-            this.uiScene.interactButton.setVisible(false);
-            this.uiScene.interactButton.buttonText.setVisible(false);
+            this.uiScene.interactButton.hideActionButton();
 
             eventsCenter.removeListener('space');
 
@@ -62,14 +63,11 @@ export default class Innkeeper extends NPC {
                 this.uiScene.leftSideDialogText.setText('');
                 this.uiScene.leftSideDialogText.setVisible(false);
                 this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
-                this.uiScene.yesButton.setVisible(false);
-                this.uiScene.yesButton.buttonText.setVisible(false);
-                this.uiScene.noButton.setVisible(false);
-                this.uiScene.noButton.buttonText.setVisible(false);
+                this.uiScene.yesButton.hideActionButton();
+                this.uiScene.noButton.hideActionButton();
 
                 this.uiScene.cancelMenuFrame.setVisible(false);
-                this.uiScene.cancelButton.setVisible(false);
-                this.uiScene.cancelButton.buttonText.setVisible(false);
+                this.uiScene.cancelButton.hideActionButton();
 
                 this.gameScene.input.keyboard!.enabled = true;
 
@@ -90,11 +88,9 @@ export default class Innkeeper extends NPC {
                 // eventsCenter.removeListener('no');
                 eventsCenter.removeListener('yes');
                 this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
-                this.uiScene.yesButton.setVisible(false);
-                this.uiScene.yesButton.buttonText.setVisible(false);
-                this.uiScene.noButton.setVisible(false);
-                this.uiScene.noButton.buttonText.setVisible(false);
-                
+                this.uiScene.yesButton.hideActionButton();
+                this.uiScene.noButton.hideActionButton();
+
                 this.uiScene.updateAndShowCancelButton(670, 380, 'Farewell', true);
 
                 // if the player doesn't have enough gold, tell him so
@@ -105,11 +101,35 @@ export default class Innkeeper extends NPC {
                 }
                 else {
                     this.uiScene.leftSideDialogText.setText('Innkeeper:\nThank thee! Thou appeareth well rested.');
-                    this.gameScene.player.gold -= 3;
+                    const newGoldAmount = this.gameScene.player.gold - 3;
+
+                    this.saveAndLoadScene.db.players.update(
+                        0, {
+                            gold: newGoldAmount
+                        }
+                    );
+                    this.gameScene.player.gold = newGoldAmount;
                     this.uiScene.coinText.setText(`${this.gameScene.player.gold} gp`);
-                    this.gameScene.player.stats.currentHP = this.gameScene.player.stats.maxHP;
+                    const newHP = this.gameScene.player.stats.maxHP;
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.stats.currentHP = newHP;
+                            return player;
+                        }
+                    );
+                    this.gameScene.player.stats.currentHP = newHP;
                     if (this.gameScene.bots.length > 0) {
-                        this.gameScene.bots[0].stats.currentHP = this.gameScene.bots[0].stats.maxHP;
+                        const newHP = this.gameScene.bots[0].stats.maxHP;
+                        this.saveAndLoadScene.db.players.update(
+                            0,
+                            (player: IPlayer) => {
+                                player.bots[0].stats.currentHP = newHP;
+                                return player;
+                            }
+                        );
+
+                        this.gameScene.bots[0].stats.currentHP = newHP;
                         this.uiScene.updatePlayer2HP(
                             this.gameScene.bots[0].stats.currentHP,
                             this.gameScene.bots[0].stats.maxHP

@@ -6,8 +6,8 @@ import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import BotCharacter from './BotCharacter';
 import {Enemy} from './Enemy';
+import {IPlayer} from './GameDatabase';
 import {PlayerJob} from './Jobs/PlayerJob';
-// import Item from './Item';
 import Unit from './Unit';
 
 export default class PlayerCharacter extends Unit {
@@ -25,7 +25,8 @@ export default class PlayerCharacter extends Unit {
         texture: string | Phaser.Textures.Texture,
         frame: string | number | undefined,
         name: string,
-        job: PlayerJob
+        job: PlayerJob,
+        id?: number
     ) {
         super(
             scene,
@@ -34,7 +35,8 @@ export default class PlayerCharacter extends Unit {
             texture,
             frame,
             name,
-            job
+            job,
+            id
         );
         this.stats = this.gameScene.player.stats;
         this.equipment = this.gameScene.player.equipment;
@@ -57,19 +59,45 @@ export default class PlayerCharacter extends Unit {
     }
 
     public applyHPChange(hpChangeAmount: number): number {
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                const unitToUpdate = player.combatState.heroes.find(unit => unit.id === this.id);
+
+                if (unitToUpdate !== undefined) {
+                    if (hpChangeAmount < 0) {
+                        unitToUpdate.stats.currentHP = Math.min(unitToUpdate.stats.maxHP, unitToUpdate.stats.currentHP - hpChangeAmount);
+                    }
+                    else {
+                        unitToUpdate.stats.currentHP -= hpChangeAmount;
+                    }
+                    if (unitToUpdate.stats.currentHP <= 0) {
+                        unitToUpdate.stats.currentHP = 0;
+                    }
+                }
+
+                return player;
+            }
+        );
+
         return super.applyHPChange(hpChangeAmount, this.battleScene.player1HPText);
     }
 
     public calculateAttackDamage(target: (PlayerCharacter | Enemy | BotCharacter)): number {
-        return Math.max(
+        console.log(`calculating ${this.name}'s damage.`);
+        console.log('formula: Math.max(1, Math.floor(actorStrength - (defenderDefense / 2) * randomModifier))');
+        const actorStrength = this.getCombinedStat('strength');
+        const defenderDefense = target.stats.defense;
+        const damageAfterDefense = actorStrength - (defenderDefense / 2);
+        const randomModifier = Phaser.Math.FloatBetween(0.34, 0.52);
+        const finalAttackDamage = Math.max(
             1,
             Math.floor(
-                (this.getCombinedStat('strength') - (target.stats.defense / 2)) * Phaser.Math.FloatBetween(
-                    0.34,
-                    0.52
-                )
+                damageAfterDefense * randomModifier
             )
         );
+        console.log({actorStrength, defenderDefense, damageAfterDefense, randomModifier, finalAttackDamage});
+        return finalAttackDamage;
     }
 
     public calculateCriticalStrikeDamage() {
@@ -101,7 +129,7 @@ export default class PlayerCharacter extends Unit {
     ): number {
         const target = data.target;
         // TODO: REDIRECT THE PLAYER'S ATTACK IF THEIR INTENDED TARGET IS NOT ALIVE AND THERE IS STILL > 0 ENEMIES LIVING
-        if (!target.living) return 0;
+        if (!target.isLiving()) return 0;
         let runtimeInMS = 0;
 
         if (data.action === 'attack') {
@@ -133,8 +161,7 @@ export default class PlayerCharacter extends Unit {
         else if (data.action === 'Power Strike') {
 
             for (const abilityButton of this.battleUIScene.abilityButtons) {
-                abilityButton.destroy();
-                abilityButton.buttonText.destroy();
+                abilityButton.destroyUIActionButton();
             }
             this.battleUIScene.abilityButtons = [];
 
@@ -215,15 +242,14 @@ export default class PlayerCharacter extends Unit {
         else if (data.action === 'Guard') {
 
             for (const abilityButton of this.battleUIScene.abilityButtons) {
-                abilityButton.destroy();
-                abilityButton.buttonText.destroy();
+                abilityButton.destroyUIActionButton();
             }
             this.battleUIScene.abilityButtons = [];
 
             this.battleUIScene.destroyAbilityButtons();
             this.battleUIScene.generateAbilityButtons();
 
-            if (data.target.living) {
+            if (data.target.isLiving()) {
                 // battle scene needs to store an array of passive effects. it needs to know the actor and the
                 //  target for each effect as well as the ability itself. each passive effect must have a number of
                 //  active turns before it expires at the top of each round, the passive effects are iterated over,
@@ -265,18 +291,25 @@ export default class PlayerCharacter extends Unit {
             //  and regenerate the inventory list
 
             const inventoryIndex = this.battleUIScene.inventoryIndex;
+
+            this.saveAndLoadScene.db.players.update(
+                0,
+                (player: IPlayer) => {
+                    player.inventory.splice(inventoryIndex, 1);
+                }
+            );
+
             this.inventory.splice(inventoryIndex, 1);
 
             for (const inventoryButton of this.battleUIScene.inventoryButtons) {
-                inventoryButton.destroy();
-                inventoryButton.buttonText.destroy();
+                inventoryButton.destroyUIActionButton();
             }
             this.battleUIScene.inventoryButtons = [];
 
             this.battleUIScene.destroyInventoryButtons();
             this.battleUIScene.generateInventoryButtons();
 
-            if (data.target.living) {
+            if (data.target.isLiving()) {
 
                 // calculate the exact amount healed, announce it in a message
                 runtimeInMS += 2000;

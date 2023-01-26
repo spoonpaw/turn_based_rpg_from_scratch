@@ -1,6 +1,7 @@
 import {clone} from 'lodash';
 
 import Bot from '../classes/Bot';
+import {IPlayer} from '../classes/GameDatabase';
 import GameMessage from '../classes/GameMessage';
 import Item from '../classes/Item';
 import Innkeeper from '../classes/npcs/Innkeeper';
@@ -12,6 +13,7 @@ import eventsCenter from '../utils/EventsCenter';
 import {updateCancelButton} from '../utils/updateCancelButton';
 import GameScene from './GameScene';
 import MusicScene from './MusicScene';
+import SaveAndLoadScene from './SaveAndLoadScene';
 import SFXScene from './SFXScene';
 
 export default class UIScene extends Phaser.Scene {
@@ -106,6 +108,7 @@ export default class UIScene extends Phaser.Scene {
     private nameText!: Phaser.GameObjects.Text;
     private invisiblePlayer1Button!: Phaser.GameObjects.Rectangle;
     private invisiblePlayer2Button!: Phaser.GameObjects.Rectangle;
+    private saveAndLoadScene!: SaveAndLoadScene;
 
     public constructor() {
         super('UI');
@@ -114,6 +117,8 @@ export default class UIScene extends Phaser.Scene {
     public create() {
         this.musicScene = <MusicScene>this.scene.get('Music');
         this.sfxScene = <SFXScene>this.scene.get('SFX');
+
+        this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
 
         this.cursors = this.input.keyboard!.createCursorKeys();
         this.setupFrames();
@@ -129,24 +134,21 @@ export default class UIScene extends Phaser.Scene {
 
     public destroyEquipmentButtons() {
         for (const equipmentButton of this.equipmentButtons) {
-            equipmentButton.destroy();
-            equipmentButton.buttonText.destroy();
+            equipmentButton.destroyUIActionButton();
         }
         this.equipmentButtons = [];
     }
 
     public destroyInventoryButtons() {
         for (const inventoryButton of this.inventoryButtons) {
-            inventoryButton.destroy();
-            inventoryButton.buttonText.destroy();
+            inventoryButton.destroyUIActionButton();
         }
         this.inventoryButtons = [];
     }
 
     public destroyMerchantInventoryButtons() {
         for (const merchantInventoryButton of this.merchantInventoryButtons) {
-            merchantInventoryButton.destroy();
-            merchantInventoryButton.buttonText.destroy();
+            merchantInventoryButton.destroyUIActionButton();
         }
         this.merchantInventoryButtons = [];
 
@@ -197,13 +199,11 @@ export default class UIScene extends Phaser.Scene {
                                 Minimum Level: ${helmet?.minimumLevel}`
                     );
                     this.inventoryAndAbilityDetailText.setVisible(true);
-                    this.unequipButton.setVisible(true);
-                    this.unequipButton.buttonText.setVisible(true);
+                    this.unequipButton.showActionButton();
                 }
             );
         }
-        this.headItemButton.setVisible(false);
-        this.headItemButton.buttonText.setVisible(false);
+        this.headItemButton.hideActionButton();
         this.equipmentButtons.push(this.headItemButton);
 
         if (!this.gameScene.player.equipment.body) {
@@ -248,13 +248,11 @@ export default class UIScene extends Phaser.Scene {
                                 Minimum Level: ${bodyArmor?.minimumLevel}`);
 
                     this.inventoryAndAbilityDetailText.setVisible(true);
-                    this.unequipButton.setVisible(true);
-                    this.unequipButton.buttonText.setVisible(true);
+                    this.unequipButton.showActionButton();
                 }
             );
         }
-        this.bodyItemButton.setVisible(false);
-        this.bodyItemButton.buttonText.setVisible(false);
+        this.bodyItemButton.hideActionButton();
         this.equipmentButtons.push(this.bodyItemButton);
 
         if (!this.gameScene.player.equipment.weapon) {
@@ -299,13 +297,11 @@ export default class UIScene extends Phaser.Scene {
                                 Minimum Level: ${weapon?.minimumLevel}`);
 
                     this.inventoryAndAbilityDetailText.setVisible(true);
-                    this.unequipButton.setVisible(true);
-                    this.unequipButton.buttonText.setVisible(true);
+                    this.unequipButton.showActionButton();
                 }
             );
         }
-        this.mainHandItemButton.setVisible(false);
-        this.mainHandItemButton.buttonText.setVisible(false);
+        this.mainHandItemButton.hideActionButton();
         this.equipmentButtons.push(this.mainHandItemButton);
 
         if (!this.gameScene.player.equipment.offhand) {
@@ -351,13 +347,11 @@ export default class UIScene extends Phaser.Scene {
                                 Minimum Level: ${offhand?.minimumLevel}`);
 
                     this.inventoryAndAbilityDetailText.setVisible(true);
-                    this.unequipButton.setVisible(true);
-                    this.unequipButton.buttonText.setVisible(true);
+                    this.unequipButton.showActionButton();
                 }
             );
         }
-        this.offHandItemButton.setVisible(false);
-        this.offHandItemButton.buttonText.setVisible(false);
+        this.offHandItemButton.hideActionButton();
         this.equipmentButtons.push(this.offHandItemButton);
     }
 
@@ -384,9 +378,8 @@ export default class UIScene extends Phaser.Scene {
                         }
                     }
                     this.inventoryAndAbilityDetailFrame.setVisible(true);
-                    this.purchaseItemButton.setVisible(true);
-                    this.purchaseItemButton.buttonText.setText(`Purchase for ${item.cost} gold`);
-                    this.purchaseItemButton.buttonText.setVisible(true);
+                    this.purchaseItemButton.changeButtonText(`Purchase for ${item.cost} gold`);
+                    this.purchaseItemButton.showActionButton();
 
                     this.updateAndShowCancelButton(10, 460, 'Cancel', true);
 
@@ -431,52 +424,39 @@ export default class UIScene extends Phaser.Scene {
         this.commandMenuText.setVisible(false);
         this.selectedItemAndAbilityCommandText.setVisible(false);
         this.cancelMenuFrame.setVisible(false);
-        this.cancelButton.setVisible(false);
-        this.cancelButton.buttonText.setVisible(false);
+        this.cancelButton.hideActionButton();
         this.subInventoryAndAbilityMenuFrame.setVisible(false);
         this.inventoryAndAbilityMenuFrame.setVisible(false);
         this.goldFrame.setVisible(false);
         this.coinIcon.setVisible(false);
         this.coinText.setVisible(false);
         this.inventoryAndAbilityDetailFrame.setVisible(false);
-        this.useItemButton.setVisible(false);
-        this.useItemButton.buttonText.setVisible(false);
-        this.dropButton.setVisible(false);
-        this.dropButton.buttonText.setVisible(false);
-        this.equipButton.setVisible(false);
-        this.equipButton.buttonText.setVisible(false);
+        this.useItemButton.hideActionButton();
+        this.dropButton.hideActionButton();
+        this.equipButton.hideActionButton();
         this.inventoryAndAbilityDetailText.setVisible(false);
         this.confirmSelectedAbilityOrItemFrame.setVisible(false);
         this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-        this.selectedItemAndAbilityIcon.setVisible(false);
-        this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+        this.selectedItemAndAbilityIcon.hideActionButton();
         this.leftSideDialogFrame.setVisible(false);
         this.leftSideDialogText.setVisible(false);
         this.rightSideDialogFrame.setVisible(false);
         this.rightSideDialogText.setVisible(false);
         this.rightSideDialogOptionsFrame.setVisible(false);
-        this.yesButton.setVisible(false);
-        this.yesButton.buttonText.setVisible(false);
-        this.noButton.setVisible(false);
-        this.noButton.buttonText.setVisible(false);
-        this.purchaseItemButton.setVisible(false);
-        this.purchaseItemButton.buttonText.setVisible(false);
-        this.buyButton.setVisible(false);
-        this.buyButton.buttonText.setVisible(false);
-        this.sellButton.setVisible(false);
-        this.sellButton.buttonText.setVisible(false);
-        this.sellItemButton.setVisible(false);
-        this.sellItemButton.buttonText.setVisible(false);
-        this.unequipButton.setVisible(false);
-        this.unequipButton.buttonText.setVisible(false);
+        this.yesButton.hideActionButton();
+        this.noButton.hideActionButton();
+        this.purchaseItemButton.hideActionButton();
+        this.buyButton.hideActionButton();
+        this.sellButton.hideActionButton();
+        this.sellItemButton.hideActionButton();
+        this.unequipButton.hideActionButton();
         this.characterDetailDisplay.setVisible(false);
         this.characterDetailDisplayFrame.setVisible(false);
         this.nameText.setVisible(false);
 
         for (const subInventoryButton of this.subInventoryButtons) {
             if (subInventoryButton.visible) {
-                subInventoryButton.setVisible(false);
-                subInventoryButton.buttonText.setVisible(false);
+                subInventoryButton.hideActionButton();
             }
         }
 
@@ -486,15 +466,12 @@ export default class UIScene extends Phaser.Scene {
 
         for (const subAbilityButton of this.subAbilityButtons) {
             if (subAbilityButton.visible) {
-                subAbilityButton.setVisible(false);
-                subAbilityButton.buttonText.setVisible(false);
+                subAbilityButton.hideActionButton();
             }
         }
 
-        this.player1CharacterButton.setVisible(false);
-        this.player1CharacterButton.buttonText.setVisible(false);
-        this.player2CharacterButton.setVisible(false);
-        this.player2CharacterButton.buttonText.setVisible(false);
+        this.player1CharacterButton.hideActionButton();
+        this.player2CharacterButton.hideActionButton();
 
         for (const equipmentString of this.equipmentStrings) {
             if (equipmentString.visible) {
@@ -504,8 +481,7 @@ export default class UIScene extends Phaser.Scene {
 
         for (const equipmentButton of this.equipmentButtons) {
             if (equipmentButton.visible) {
-                equipmentButton.setVisible(false);
-                equipmentButton.buttonText.setVisible(false);
+                equipmentButton.hideActionButton();
             }
         }
 
@@ -609,7 +585,8 @@ export default class UIScene extends Phaser.Scene {
         this.player2hpText.setText(`HP: ${hp}/${maxHP}`);
     }
 
-    private calculateTilNextLevel(playerOrBot: Player|Bot): number {
+    private calculateTilNextLevel(playerOrBot: Player|Bot): number | string {
+        if (playerOrBot.level >= this.gameScene.MAX_LEVEL) return 'MAX';
         const currentExp = playerOrBot.experience;
         let currentLevel = playerOrBot.level;
         const nextLevel = currentLevel + 1;
@@ -624,8 +601,7 @@ export default class UIScene extends Phaser.Scene {
 
     private destroyInventoryToSellButtons() {
         for (const inventoryToSellButton of this.inventoryToSellButtons) {
-            inventoryToSellButton.destroy();
-            inventoryToSellButton.buttonText.destroy();
+            inventoryToSellButton.destroyUIActionButton();
         }
         this.inventoryToSellButtons = [];
 
@@ -661,12 +637,9 @@ export default class UIScene extends Phaser.Scene {
                     //  if equipment, show stats and equip button
                     if (item.type === 'consumable') {
                         this.inventoryAndAbilityDetailText.setText(item.description);
-                        this.equipButton.setVisible(false);
-                        this.equipButton.buttonText.setVisible(false);
-                        this.useItemButton.setVisible(true);
-                        this.useItemButton.buttonText.setVisible(true);
-                        this.dropButton.setVisible(true);
-                        this.dropButton.buttonText.setVisible(true);
+                        this.equipButton.hideActionButton();
+                        this.useItemButton.showActionButton();
+                        this.dropButton.showActionButton();
 
                     }
                     else if (
@@ -683,20 +656,16 @@ export default class UIScene extends Phaser.Scene {
                                 Classes: ${item.classes},
                                 Minimum Level: ${item.minimumLevel}`
                         );
-                        this.useItemButton.setVisible(false);
-                        this.useItemButton.buttonText.setVisible(false);
-                        this.dropButton.setVisible(true);
-                        this.dropButton.buttonText.setVisible(true);
-                        this.equipButton.setVisible(true);
-                        this.equipButton.buttonText.setVisible(true);
+                        this.useItemButton.hideActionButton();
+                        this.dropButton.showActionButton();
+                        this.equipButton.showActionButton();
                     }
                     this.inventoryAndAbilityDetailText.setVisible(true);
 
                     this.updateAndShowCancelButton(353, 357, 'Cancel', false);
                 }
             );
-            inventoryButton.setVisible(false);
-            inventoryButton.buttonText.setVisible(false);
+            inventoryButton.hideActionButton();
 
             this.inventoryButtons.push(inventoryButton);
         }
@@ -724,9 +693,8 @@ export default class UIScene extends Phaser.Scene {
                     }
 
                     this.inventoryAndAbilityDetailFrame.setVisible(true);
-                    this.sellItemButton.setVisible(true);
-                    this.sellItemButton.buttonText.setText(`Sell for ${item.sellPrice} gold`);
-                    this.sellItemButton.buttonText.setVisible(true);
+                    this.sellItemButton.changeButtonText(`Sell for ${item.sellPrice} gold`);
+                    this.sellItemButton.showActionButton();
 
                     this.updateAndShowCancelButton(10, 460, 'Cancel', true);
 
@@ -749,8 +717,7 @@ export default class UIScene extends Phaser.Scene {
 
                 }
             );
-            inventoryToSellButton.setVisible(false);
-            inventoryToSellButton.buttonText.setVisible(false);
+            inventoryToSellButton.hideActionButton();
 
             this.inventoryToSellButtons.push(inventoryToSellButton);
         }
@@ -762,23 +729,17 @@ export default class UIScene extends Phaser.Scene {
         this.subInventoryAndAbilityMenuFrame.setVisible(false);
         this.inventoryAndAbilityDetailFrame.setVisible(false);
         this.inventoryAndAbilityDetailText.setVisible(false);
-        this.purchaseItemButton.setVisible(false);
-        this.purchaseItemButton.buttonText.setVisible(false);
-        this.buyButton.setVisible(false);
-        this.buyButton.buttonText.setVisible(false);
-        this.sellButton.setVisible(false);
-        this.sellButton.buttonText.setVisible(false);
-        this.sellItemButton.setVisible(false);
-        this.sellItemButton.buttonText.setVisible(false);
+        this.purchaseItemButton.hideActionButton();
+        this.buyButton.hideActionButton();
+        this.sellButton.hideActionButton();
+        this.sellItemButton.hideActionButton();
 
         for (const inventoryToSellButton of this.inventoryToSellButtons) {
-            inventoryToSellButton.setVisible(false);
-            inventoryToSellButton.buttonText.setVisible(false);
+            inventoryToSellButton.hideActionButton();
         }
 
         for (const merchantInventoryButton of this.merchantInventoryButtons) {
-            merchantInventoryButton.setVisible(false);
-            merchantInventoryButton.buttonText.setVisible(false);
+            merchantInventoryButton.hideActionButton();
         }
     }
 
@@ -797,28 +758,33 @@ export default class UIScene extends Phaser.Scene {
                 // setting the interaction state from the use button
                 // get inventory slot number from interaction state
                 const selectedItemIndex = Number(this.interactionState.split('selectinginventoryaction')[1]);
+
+                this.saveAndLoadScene.db.players.update(
+                    0,
+                    (player: IPlayer) => {
+                        player.inventory.splice(selectedItemIndex, 1);
+                        return player;
+                    }
+                );
+
+
                 this.gameScene.player.inventory.splice(selectedItemIndex, 1);
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
                 this.inventoryAndAbilityDetailText.setVisible(false);
-                this.equipButton.setVisible(false);
-                this.equipButton.buttonText.setVisible(false);
-                this.useItemButton.setVisible(false);
-                this.useItemButton.buttonText.setVisible(false);
-                this.dropButton.setVisible(false);
-                this.dropButton.buttonText.setVisible(false);
+                this.equipButton.hideActionButton();
+                this.useItemButton.hideActionButton();
+                this.dropButton.hideActionButton();
 
                 this.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
                 this.destroyInventoryButtons();
                 this.generateInventoryButtons();
                 for (const inventoryButton of this.inventoryButtons) {
-                    inventoryButton.setVisible(true);
-                    inventoryButton.buttonText.setVisible(true);
+                    inventoryButton.showActionButton();
                 }
             }
         );
-        this.dropButton.setVisible(false);
-        this.dropButton.buttonText.setVisible(false);
+        this.dropButton.hideActionButton();
 
         this.interactButton = new UIActionButton(
             this,
@@ -832,8 +798,7 @@ export default class UIScene extends Phaser.Scene {
                 return;
             }
         );
-        this.interactButton.setVisible(false);
-        this.interactButton.buttonText.setVisible(false);
+        this.interactButton.hideActionButton();
 
         this.yesButton = new UIActionButton(
             this,
@@ -846,8 +811,7 @@ export default class UIScene extends Phaser.Scene {
                 eventsCenter.emit('yes');
             }
         );
-        this.yesButton.setVisible(false);
-        this.yesButton.buttonText.setVisible(false);
+        this.yesButton.hideActionButton();
 
         this.noButton = new UIActionButton(
             this,
@@ -872,10 +836,8 @@ export default class UIScene extends Phaser.Scene {
                 this.leftSideDialogText.setText('');
                 this.leftSideDialogText.setVisible(false);
                 this.rightSideDialogOptionsFrame.setVisible(false);
-                this.yesButton.setVisible(false);
-                this.yesButton.buttonText.setVisible(false);
-                this.noButton.setVisible(false);
-                this.noButton.buttonText.setVisible(false);
+                this.yesButton.hideActionButton();
+                this.noButton.hideActionButton();
                 this.characterDetailDisplay.setVisible(false);
                 this.characterDetailDisplayFrame.setVisible(false);
 
@@ -883,8 +845,7 @@ export default class UIScene extends Phaser.Scene {
                 this.gameScene.input.keyboard!.resetKeys();
             }
         );
-        this.noButton.setVisible(false);
-        this.noButton.buttonText.setVisible(false);
+        this.noButton.hideActionButton();
 
         this.cancelButton = new UIActionButton(
             this,
@@ -898,8 +859,7 @@ export default class UIScene extends Phaser.Scene {
             }
         );
 
-        this.cancelButton.setVisible(false);
-        this.cancelButton.buttonText.setVisible(false);
+        this.cancelButton.hideActionButton();
 
         this.selectedItemAndAbilityIcon = new UIActionButton(
             this,
@@ -912,8 +872,7 @@ export default class UIScene extends Phaser.Scene {
                 return;
             }
         );
-        this.selectedItemAndAbilityIcon.setVisible(false);
-        this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+        this.selectedItemAndAbilityIcon.hideActionButton();
 
         this.sellItemButton = new UIActionButton(
             this,
@@ -931,8 +890,32 @@ export default class UIScene extends Phaser.Scene {
                     const itemIndex = this.interactionState.split('merchantsellitem')[1];
                     const itemToSell = this.gameScene.player.inventory[Number(itemIndex)];
                     const sellPrice = itemToSell.sellPrice;
+
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.inventory.splice(
+                                Number(
+                                    itemIndex
+                                ),
+                                1
+                            );
+                            return player;
+                        }
+                    );
+
                     this.gameScene.player.inventory.splice(Number(itemIndex), 1);
-                    this.gameScene.player.gold += sellPrice;
+
+                    const newGoldAmount = this.gameScene.player.gold + sellPrice;
+
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        {
+                            gold: newGoldAmount
+                        }
+                    );
+
+                    this.gameScene.player.gold = newGoldAmount;
 
                     this.hideMerchantFrames();
                     this.leftSideDialogFrame.setVisible(true);
@@ -946,8 +929,7 @@ export default class UIScene extends Phaser.Scene {
             }
         );
 
-        this.sellItemButton.setVisible(false);
-        this.sellItemButton.buttonText.setVisible(false);
+        this.sellItemButton.hideActionButton();
 
         this.purchaseItemButton = new UIActionButton(
             this,
@@ -975,21 +957,41 @@ export default class UIScene extends Phaser.Scene {
                         this.showMerchantRejection('You haven\'t enough coin!');
                     }
                     else {
-                        this.gameScene.player.gold -= selectedItem.cost;
-                        this.gameScene.player.inventory.push(
-                            new Item(
-                                selectedItem.key,
-                                selectedItem.activekey,
-                                selectedItem.name,
-                                selectedItem.type,
-                                selectedItem.cost,
-                                selectedItem.sellPrice,
-                                selectedItem.description,
-                                undefined,
-                                selectedItem.classes,
-                                selectedItem.minimumLevel,
-                                selectedItem.stats
-                            ));
+                        // buy the item!
+                        const newGoldAmount = this.gameScene.player.gold - selectedItem.cost;
+
+                        const purchasedItem = new Item(
+                            selectedItem.key,
+                            selectedItem.activekey,
+                            selectedItem.name,
+                            selectedItem.type,
+                            selectedItem.cost,
+                            selectedItem.sellPrice,
+                            selectedItem.description,
+                            undefined,
+                            selectedItem.classes,
+                            selectedItem.minimumLevel,
+                            selectedItem.stats
+                        );
+
+                        this.saveAndLoadScene.db.players.update(
+                            0,
+                            {
+                                gold: newGoldAmount
+                            }
+                        );
+
+                        this.gameScene.player.gold = newGoldAmount;
+
+                        this.saveAndLoadScene.db.players.update(
+                            0,
+                            (player: IPlayer) => {
+                                player.inventory.push(purchasedItem);
+                                return player;
+                            }
+                        );
+
+                        this.gameScene.player.inventory.push(purchasedItem);
 
                         // hide all the merchant related frames
                         this.hideMerchantFrames();
@@ -1003,8 +1005,7 @@ export default class UIScene extends Phaser.Scene {
             }
         );
 
-        this.purchaseItemButton.setVisible(false);
-        this.purchaseItemButton.buttonText.setVisible(false);
+        this.purchaseItemButton.hideActionButton();
 
         this.useItemButton = new UIActionButton(
             this,
@@ -1024,18 +1025,12 @@ export default class UIScene extends Phaser.Scene {
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
                 this.subInventoryAndAbilityMenuFrame.setVisible(false);
                 this.inventoryAndAbilityDetailText.setVisible(false);
-                this.subInventoryBagButton.setVisible(false);
-                this.subInventoryBagButton.buttonText.setVisible(false);
-                this.subInventoryEquipmentButton.setVisible(false);
-                this.subInventoryEquipmentButton.buttonText.setVisible(false);
-                this.subInventoryQuestButton.setVisible(false);
-                this.subInventoryQuestButton.buttonText.setVisible(false);
-                this.useItemButton.setVisible(false);
-                this.useItemButton.buttonText.setVisible(false);
-                this.dropButton.setVisible(false);
-                this.dropButton.buttonText.setVisible(false);
-                this.selectedItemAndAbilityIcon.setVisible(true);
-                this.selectedItemAndAbilityIcon.buttonText.setVisible(true);
+                this.subInventoryBagButton.hideActionButton();
+                this.subInventoryEquipmentButton.hideActionButton();
+                this.subInventoryQuestButton.hideActionButton();
+                this.useItemButton.hideActionButton();
+                this.dropButton.hideActionButton();
+                this.selectedItemAndAbilityIcon.showActionButton();
 
                 this.confirmSelectedAbilityOrItemFrame.setVisible(true);
                 this.confirmSelectedAbilityOrItemFrameB.setVisible(true);
@@ -1044,16 +1039,14 @@ export default class UIScene extends Phaser.Scene {
                 this.selectedItemAndAbilityCommandText.setVisible(true);
 
                 for (const inventoryButton of this.inventoryButtons) {
-                    inventoryButton.setVisible(false);
-                    inventoryButton.buttonText.setVisible(false);
+                    inventoryButton.hideActionButton();
                 }
 
                 this.updateAndShowCancelButton(698, 430, 'Cancel', true);
 
             }
         );
-        this.useItemButton.setVisible(false);
-        this.useItemButton.buttonText.setVisible(false);
+        this.useItemButton.hideActionButton();
 
         this.unequipButton = new UIActionButton(
             this,
@@ -1086,27 +1079,33 @@ export default class UIScene extends Phaser.Scene {
                     const itemToUnequipStats = clone(this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment]!.stats);
                     itemToUnequip.stats = itemToUnequipStats;
 
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.equipment[slotToUnequip as keyof typeof player.equipment] = undefined;
+                            player.inventory.push(itemToUnequip);
+                            return player;
+                        }
+                    );
+
                     this.gameScene.player.equipment[slotToUnequip as keyof typeof this.gameScene.player.equipment] = undefined;
                     this.gameScene.player.inventory.push(itemToUnequip);
                     this.destroyEquipmentButtons();
                     this.generateEquipmentButtons();
 
                     for (const equipmentButton of this.equipmentButtons) {
-                        equipmentButton.setVisible(true);
-                        equipmentButton.buttonText.setVisible(true);
+                        equipmentButton.showActionButton();
                     }
 
                     this.inventoryAndAbilityDetailFrame.setVisible(false);
                     this.inventoryAndAbilityDetailText.setVisible(false);
-                    this.unequipButton.setVisible(false);
-                    this.unequipButton.buttonText.setVisible(false);
+                    this.unequipButton.hideActionButton();
 
                     this.updateAndShowCancelButton(315, 315, 'Cancel', true);
                 }
             }
         );
-        this.unequipButton.setVisible(false);
-        this.unequipButton.buttonText.setVisible(false);
+        this.unequipButton.hideActionButton();
 
         this.equipButton = new UIActionButton(
             this,
@@ -1124,43 +1123,105 @@ export default class UIScene extends Phaser.Scene {
                 //  refer to
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
                 this.inventoryAndAbilityDetailText.setVisible(false);
-                this.equipButton.setVisible(false);
-                this.equipButton.buttonText.setVisible(false);
-                this.dropButton.setVisible(false);
-                this.dropButton.buttonText.setVisible(false);
+                this.equipButton.hideActionButton();
+                this.dropButton.hideActionButton();
 
                 this.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
                 const itemToEquip = this.gameScene.player.inventory[inventorySlotNumber];
+
+                this.saveAndLoadScene.db.players.update(
+                    0,
+                    (player: IPlayer) => {
+                        player.inventory.splice(
+                            inventorySlotNumber,
+                            1
+                        );
+                        return player;
+                    }
+                );
+
                 this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
 
                 if (itemToEquip.type === 'weapon') {
                     // check if there's already a weapon equipped
                     if (this.gameScene.player.equipment.weapon) {
                         // if there is, add it back to the inventory at the same index as the item being equipped
+                        this.saveAndLoadScene.db.players.update(
+                            0,
+                            (player: IPlayer) => {
+                                player.inventory.splice(
+                                    inventorySlotNumber,
+                                    0,
+                                    this.gameScene.player.equipment.weapon as Item
+                                );
+                                return player;
+                            }
+                        );
                         this.gameScene.player.inventory.splice(
                             inventorySlotNumber,
                             0,
                             this.gameScene.player.equipment.weapon
                         );
                     }
+
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.equipment.weapon = itemToEquip;
+                            return player;
+                        }
+                    );
                     this.gameScene.player.equipment.weapon = itemToEquip;
                 }
 
                 else if (itemToEquip.type === 'helmet') {
                     if (this.gameScene.player.equipment.head) {
+
+                        this.saveAndLoadScene.db.players.update(
+                            0,
+                            (player: IPlayer) => {
+                                player.inventory.splice(
+                                    inventorySlotNumber,
+                                    0,
+                                    this.gameScene.player.equipment.head as Item
+                                );
+                                return player;
+                            }
+                        );
+
                         this.gameScene.player.inventory.splice(
                             inventorySlotNumber,
                             0,
                             this.gameScene.player.equipment.head
                         );
                     }
+
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.equipment.head = itemToEquip;
+                            return player;
+                        }
+                    );
                     this.gameScene.player.equipment.head = itemToEquip;
                 }
 
                 else if (itemToEquip.type === 'offhand') {
                     // check if there's already an offhand equipped
                     if (this.gameScene.player.equipment.offhand) {
+
+                        this.saveAndLoadScene.db.players.update(
+                            0,
+                            (player: IPlayer) => {
+                                player.inventory.splice(
+                                    inventorySlotNumber,
+                                    0,
+                                    this.gameScene.player.equipment.offhand as Item
+                                );
+                                return player;
+                            }
+                        );
                         // if there is, add it back to the inventory at the same index as the item being equipped
                         this.gameScene.player.inventory.splice(
                             inventorySlotNumber,
@@ -1168,31 +1229,56 @@ export default class UIScene extends Phaser.Scene {
                             this.gameScene.player.equipment.offhand
                         );
                     }
+
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.equipment.offhand = itemToEquip;
+                            return player;
+                        }
+                    );
+
                     this.gameScene.player.equipment.offhand = itemToEquip;
                 }
 
                 else if (itemToEquip.type === 'bodyarmor') {
                     if (this.gameScene.player.equipment.body) {
+                        this.saveAndLoadScene.db.players.update(
+                            0,
+                            (player: IPlayer) => {
+                                player.inventory.splice(
+                                    inventorySlotNumber,
+                                    0,
+                                    this.gameScene.player.equipment.body as Item
+                                );
+                                return player;
+                            }
+                        );
                         this.gameScene.player.inventory.splice(
                             inventorySlotNumber,
                             0,
                             this.gameScene.player.equipment.body
                         );
                     }
+                    this.saveAndLoadScene.db.players.update(
+                        0,
+                        (player: IPlayer) => {
+                            player.equipment.body = itemToEquip;
+                            return player;
+                        }
+                    );
                     this.gameScene.player.equipment.body = itemToEquip;
                 }
 
                 this.destroyInventoryButtons();
                 this.generateInventoryButtons();
                 for (const inventoryButton of this.inventoryButtons) {
-                    inventoryButton.setVisible(true);
-                    inventoryButton.buttonText.setVisible(true);
+                    inventoryButton.showActionButton();
                 }
                 this.interactionState = 'inventory';
             }
         );
-        this.equipButton.setVisible(false);
-        this.equipButton.buttonText.setVisible(false);
+        this.equipButton.hideActionButton();
 
         this.buyButton = new UIActionButton(
             this,
@@ -1209,10 +1295,8 @@ export default class UIScene extends Phaser.Scene {
 
                 this.inventoryAndAbilityDetailText.setVisible(false);
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
-                this.purchaseItemButton.setVisible(false);
-                this.purchaseItemButton.buttonText.setVisible(false);
-                this.sellItemButton.setVisible(false);
-                this.sellItemButton.buttonText.setVisible(false);
+                this.purchaseItemButton.hideActionButton();
+                this.sellItemButton.hideActionButton();
 
                 this.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
@@ -1227,8 +1311,7 @@ export default class UIScene extends Phaser.Scene {
                 this.interactionState = 'merchantbuy';
             }
         );
-        this.buyButton.setVisible(false);
-        this.buyButton.buttonText.setVisible(false);
+        this.buyButton.hideActionButton();
 
         this.sellButton = new UIActionButton(
             this,
@@ -1251,22 +1334,18 @@ export default class UIScene extends Phaser.Scene {
 
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
                 this.inventoryAndAbilityDetailText.setVisible(false);
-                this.purchaseItemButton.setVisible(false);
-                this.purchaseItemButton.buttonText.setVisible(false);
-                this.sellItemButton.setVisible(false);
-                this.sellItemButton.buttonText.setVisible(false);
+                this.purchaseItemButton.hideActionButton();
+                this.sellItemButton.hideActionButton();
 
                 this.destroyMerchantInventoryButtons();
                 this.destroyInventoryToSellButtons();
                 this.generateInventoryToSellButtons();
                 for (const inventoryToSellButton of this.inventoryToSellButtons) {
-                    inventoryToSellButton.setVisible(true);
-                    inventoryToSellButton.buttonText.setVisible(true);
+                    inventoryToSellButton.showActionButton();
                 }
             }
         );
-        this.sellButton.setVisible(false);
-        this.sellButton.buttonText.setVisible(false);
+        this.sellButton.hideActionButton();
 
         // START SUBINVENTORY BAG BUTTONS SECTION
 
@@ -1290,14 +1369,10 @@ export default class UIScene extends Phaser.Scene {
 
                 this.inventoryAndAbilityDetailText.setVisible(false);
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
-                this.useItemButton.setVisible(false);
-                this.useItemButton.buttonText.setVisible(false);
-                this.dropButton.setVisible(false);
-                this.dropButton.buttonText.setVisible(false);
-                this.equipButton.setVisible(false);
-                this.equipButton.buttonText.setVisible(false);
-                this.unequipButton.setVisible(false);
-                this.unequipButton.buttonText.setVisible(false);
+                this.useItemButton.hideActionButton();
+                this.dropButton.hideActionButton();
+                this.equipButton.hideActionButton();
+                this.unequipButton.hideActionButton();
 
                 this.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
@@ -1305,20 +1380,17 @@ export default class UIScene extends Phaser.Scene {
                     equipmentString.setVisible(false);
                 }
                 for (const equipmentButton of this.equipmentButtons) {
-                    equipmentButton.setVisible(false);
-                    equipmentButton.buttonText.setVisible(false);
+                    equipmentButton.hideActionButton();
                 }
                 this.destroyInventoryButtons();
                 this.generateInventoryButtons();
                 for (const inventoryButton of this.inventoryButtons) {
                     inventoryButton.deselect();
-                    inventoryButton.setVisible(true);
-                    inventoryButton.buttonText.setVisible(true);
+                    inventoryButton.showActionButton();
                 }
             }
         );
-        this.subInventoryBagButton.setVisible(false);
-        this.subInventoryBagButton.buttonText.setVisible(false);
+        this.subInventoryBagButton.hideActionButton();
 
         this.subInventoryButtons.push(this.subInventoryBagButton);
 
@@ -1340,12 +1412,9 @@ export default class UIScene extends Phaser.Scene {
 
                 this.inventoryAndAbilityDetailFrame.setVisible(false);
                 this.inventoryAndAbilityDetailText.setVisible(false);
-                this.useItemButton.setVisible(false);
-                this.useItemButton.buttonText.setVisible(false);
-                this.dropButton.setVisible(false);
-                this.dropButton.buttonText.setVisible(false);
-                this.equipButton.setVisible(false);
-                this.equipButton.buttonText.setVisible(false);
+                this.useItemButton.hideActionButton();
+                this.dropButton.hideActionButton();
+                this.equipButton.hideActionButton();
 
                 for (const equipmentString of this.equipmentStrings) {
                     equipmentString.setVisible(true);
@@ -1356,15 +1425,13 @@ export default class UIScene extends Phaser.Scene {
                 this.generateEquipmentButtons();
 
                 for (const equipmentButton of this.equipmentButtons) {
-                    equipmentButton.setVisible(true);
-                    equipmentButton.buttonText.setVisible(true);
+                    equipmentButton.showActionButton();
                 }
 
                 this.updateAndShowCancelButton(315, 315, 'Cancel', true);
             }
         );
-        this.subInventoryEquipmentButton.setVisible(false);
-        this.subInventoryEquipmentButton.buttonText.setVisible(false);
+        this.subInventoryEquipmentButton.hideActionButton();
 
         this.subInventoryButtons.push(this.subInventoryEquipmentButton);
 
@@ -1381,8 +1448,7 @@ export default class UIScene extends Phaser.Scene {
                 return;
             }
         );
-        this.subInventoryQuestButton.setVisible(false);
-        this.subInventoryQuestButton.buttonText.setVisible(false);
+        this.subInventoryQuestButton.hideActionButton();
 
         this.subInventoryButtons.push(this.subInventoryQuestButton);
 
@@ -1401,8 +1467,7 @@ export default class UIScene extends Phaser.Scene {
                 return;
             }
         );
-        this.subAbilityButton.setVisible(false);
-        this.subAbilityButton.buttonText.setVisible(false);
+        this.subAbilityButton.hideActionButton();
 
         this.subAbilityButtons.push(this.subAbilityButton);
 
@@ -1428,8 +1493,7 @@ export default class UIScene extends Phaser.Scene {
                 this.updateCharacterSheetStrings(this.gameScene.player);
             }
         );
-        this.player1CharacterButton.setVisible(false);
-        this.player1CharacterButton.buttonText.setVisible(false);
+        this.player1CharacterButton.hideActionButton();
 
         this.player2CharacterButton = new UIActionButton(
             this,
@@ -1450,8 +1514,7 @@ export default class UIScene extends Phaser.Scene {
                 this.updateCharacterSheetStrings(this.gameScene.bots[0]);
             }
         );
-        this.player2CharacterButton.setVisible(false);
-        this.player2CharacterButton.buttonText.setVisible(false);
+        this.player2CharacterButton.hideActionButton();
 
         this.player3CharacterButton = new UIActionButton(
             this,
@@ -1470,8 +1533,7 @@ export default class UIScene extends Phaser.Scene {
                 this.player3CharacterButton.select();
             }
         );
-        this.player3CharacterButton.setVisible(false);
-        this.player3CharacterButton.buttonText.setVisible(false);
+        this.player3CharacterButton.hideActionButton();
 
         // END SUBCHARACTER SHEET BUTTONS SECTION
         // END BUTTON SECTION
@@ -1624,16 +1686,14 @@ export default class UIScene extends Phaser.Scene {
 
                 this.inventoryAndAbilityMenuFrame.setVisible(true);
                 for (const inventoryButton of this.inventoryButtons) {
-                    inventoryButton.setVisible(true);
-                    inventoryButton.buttonText.setVisible(true);
+                    inventoryButton.showActionButton();
                 }
 
                 this.subInventoryAndAbilityMenuFrame.setVisible(true);
-                this.subInventoryBagButton.buttonText.setText('Inventory');
+                this.subInventoryBagButton.changeButtonText('Inventory');
 
                 for (const subInventoryButton of this.subInventoryButtons) {
-                    subInventoryButton.setVisible(true);
-                    subInventoryButton.buttonText.setVisible(true);
+                    subInventoryButton.showActionButton();
                 }
 
                 this.inventoryButton.select();
@@ -1699,6 +1759,23 @@ export default class UIScene extends Phaser.Scene {
                 this.player2ButtonCallback();
             });
 
+
+        if (this.gameScene.bots.length > 0) {
+            this.player2hpText.setText(`HP: ${this.gameScene.bots[0].stats.currentHP ?? '0'}/${this.gameScene.bots[0].stats.maxHP ?? '0'}`);
+
+            const currentResource = this.gameScene.bots[0].stats.currentResource;
+            const maxResource = this.gameScene.bots[0].stats.maxResource;
+
+            this.player2ManaText.setText(`Vim: ${currentResource}/${maxResource}`);
+
+            this.player2Button.setVisible(true);
+            this.player2hpText.setVisible(true);
+            this.player2HeartIcon.setVisible(true);
+            this.player2ManaText.setVisible(true);
+            this.player2ManaIcon.setVisible(true);
+        }
+
+
         this.abilityButton = new UIActionButton(
             this,
             800,
@@ -1745,8 +1822,7 @@ export default class UIScene extends Phaser.Scene {
 
                 this.subAbilityButton.select();
                 for (const subAbilityButton of this.subAbilityButtons) {
-                    subAbilityButton.setVisible(true);
-                    subAbilityButton.buttonText.setVisible(true);
+                    subAbilityButton.showActionButton();
                 }
 
                 this.updateAndShowCancelButton(315, 315, 'Cancel', true);
@@ -1793,8 +1869,7 @@ export default class UIScene extends Phaser.Scene {
                 this.subInventoryAndAbilityMenuFrame.setVisible(true);
 
                 this.player1CharacterButton.select();
-                this.player1CharacterButton.setVisible(true);
-                this.player1CharacterButton.buttonText.setVisible(true);
+                this.player1CharacterButton.showActionButton();
 
                 this.goldFrame.setVisible(true);
                 this.nameText.setVisible(true);
@@ -1805,8 +1880,7 @@ export default class UIScene extends Phaser.Scene {
                 // if there are bots, show buttons to show their character sheets.
 
                 if (this.gameScene.bots.length > 0) {
-                    this.player2CharacterButton.setVisible(true);
-                    this.player2CharacterButton.buttonText.setVisible(true);
+                    this.player2CharacterButton.showActionButton();
                 }
 
                 this.updateAndShowCancelButton(315, 315, 'Cancel', true);
@@ -2139,14 +2213,17 @@ export default class UIScene extends Phaser.Scene {
     }
 
     private player1ButtonCallback() {
-        // console.log({
-        //     playerExperience: this.gameScene.player.experience,
-        //     botExperience: this.gameScene.bots[0]?.experience,
-        //     npcs: this.gameScene.npcs,
-        //     playerTilePosition: this.gameScene.player.getTilePos(),
-        //     botPath: this.gameScene.bots[0]?.path,
-        //     botCoords: this.gameScene.bots[0]?.getTilePos(),
-        // });
+        console.log({
+            saveIndex: 0,
+            playerExperience: this.gameScene.player.experience,
+            botExperience: this.gameScene.bots[0]?.experience,
+            npcs: this.gameScene.npcs,
+            playerTilePosition: this.gameScene.player.getTilePos(),
+            botPath: this.gameScene.bots[0]?.path,
+            botCoords: this.gameScene.bots[0]?.getTilePos(),
+            playerCurrentHP: this.gameScene.player.stats.currentHP,
+            playerMaxHP: this.gameScene.player.stats.maxHP
+        });
         // uncomment to log interaction state by clicking player portrait
         if (this.interactionState.startsWith('inventoryaction')) {
             const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
@@ -2154,17 +2231,23 @@ export default class UIScene extends Phaser.Scene {
             // using inventory slot number ${inventorySlotNumber} on hero
             this.gameScene.input.keyboard!.enabled = false;
             this.cancelMenuFrame.setVisible(false);
-            this.cancelButton.setVisible(false);
-            this.cancelButton.buttonText.setVisible(false);
+            this.cancelButton.hideActionButton();
             this.confirmSelectedAbilityOrItemFrame.setVisible(false);
             this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-            this.selectedItemAndAbilityIcon.setVisible(false);
-            this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+            this.selectedItemAndAbilityIcon.hideActionButton();
             this.commandMenuText.setVisible(false);
             this.selectedItemAndAbilityCommandText.setVisible(false);
 
             this.inventoryButton.deselect();
             this.interactionState = 'handlinghealthpotionselect';
+
+            this.saveAndLoadScene.db.players.update(
+                0,
+                (player: IPlayer) => {
+                    player.inventory.splice(inventorySlotNumber, 1);
+                    return player;
+                }
+            );
 
             this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
 
@@ -2205,18 +2288,23 @@ export default class UIScene extends Phaser.Scene {
             this.gameScene.input.keyboard!.enabled = false;
 
             this.cancelMenuFrame.setVisible(false);
-            this.cancelButton.setVisible(false);
-            this.cancelButton.buttonText.setVisible(false);
+            this.cancelButton.hideActionButton();
             this.confirmSelectedAbilityOrItemFrame.setVisible(false);
             this.confirmSelectedAbilityOrItemFrameB.setVisible(false);
-            this.selectedItemAndAbilityIcon.setVisible(false);
-            this.selectedItemAndAbilityIcon.buttonText.setVisible(false);
+            this.selectedItemAndAbilityIcon.hideActionButton();
             this.commandMenuText.setVisible(false);
             this.selectedItemAndAbilityCommandText.setVisible(false);
 
             this.inventoryButton.deselect();
             this.interactionState = 'handlinghealthpotionselect';
 
+            this.saveAndLoadScene.db.players.update(
+                0,
+                (player: IPlayer) => {
+                    player.inventory.splice(inventorySlotNumber, 1);
+                    return player;
+                }
+            );
             this.gameScene.player.inventory.splice(inventorySlotNumber, 1);
 
             // finish using the item -> affect the target, delete item from bag

@@ -48,13 +48,11 @@ export default class Merchant extends NPC {
         this.uiScene.subInventoryAndAbilityMenuFrame.setVisible(true);
 
         this.uiScene.buyButton.select();
-        this.uiScene.buyButton.setVisible(true);
-        this.uiScene.buyButton.buttonText.setText('Buy');
-        this.uiScene.buyButton.buttonText.setVisible(true);
+        this.uiScene.buyButton.changeButtonText('Buy');
+        this.uiScene.buyButton.showActionButton();
 
         this.uiScene.sellButton.deselect();
-        this.uiScene.sellButton.setVisible(true);
-        this.uiScene.sellButton.buttonText.setVisible(true);
+        this.uiScene.sellButton.showActionButton();
 
         this.uiScene.updateAndShowCancelButton(315, 315, 'Cancel', true);
 
@@ -77,33 +75,25 @@ export default class Merchant extends NPC {
             this.uiScene.coinIcon.setVisible(false);
             this.uiScene.coinText.setVisible(false);
             this.uiScene.subInventoryAndAbilityMenuFrame.setVisible(false);
-            this.uiScene.buyButton.setVisible(false);
-            this.uiScene.buyButton.buttonText.setVisible(false);
-            this.uiScene.sellButton.setVisible(false);
-            this.uiScene.sellButton.buttonText.setVisible(false);
+            this.uiScene.buyButton.hideActionButton();
+            this.uiScene.sellButton.hideActionButton();
             this.uiScene.cancelMenuFrame.setVisible(false);
-            this.uiScene.cancelButton.setVisible(false);
-            this.uiScene.cancelButton.buttonText.setVisible(false);
+            this.uiScene.cancelButton.hideActionButton();
             this.uiScene.inventoryAndAbilityDetailFrame.setVisible(false);
             this.uiScene.inventoryAndAbilityDetailText.setVisible(false);
-            this.uiScene.purchaseItemButton.setVisible(false);
-            this.uiScene.purchaseItemButton.buttonText.setVisible(false);
-            this.uiScene.sellItemButton.setVisible(false);
-            this.uiScene.sellItemButton.buttonText.setVisible(false);
+            this.uiScene.purchaseItemButton.hideActionButton();
+            this.uiScene.sellItemButton.hideActionButton();
 
             this.uiScene.cancelMenuFrame.setVisible(false);
-            this.uiScene.cancelButton.setVisible(false);
-            this.uiScene.cancelButton.buttonText.setVisible(false);
+            this.uiScene.cancelButton.hideActionButton();
 
             for (const merchantButton of this.uiScene.merchantInventoryButtons) {
-                merchantButton.setVisible(false);
-                merchantButton.buttonText.setVisible(false);
+                merchantButton.hideActionButton();
             }
 
             for (const inventoryToSellButton of this.uiScene.inventoryToSellButtons) {
                 if (inventoryToSellButton.visible) {
-                    inventoryToSellButton.setVisible(false);
-                    inventoryToSellButton.buttonText.setVisible(false);
+                    inventoryToSellButton.hideActionButton();
                     inventoryToSellButton.deselect();
                 }
             }

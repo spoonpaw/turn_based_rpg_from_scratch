@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import BattleScene from '../scenes/BattleScene';
 import BattleUIScene from '../scenes/BattleUIScene';
 import GameScene from '../scenes/GameScene';
+import SaveAndLoadScene from '../scenes/SaveAndLoadScene';
 import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
@@ -20,12 +21,13 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         weapon: undefined
     };
     public inventory: Item[] = [];
-    public living: boolean;
+    // public living: boolean;
     abstract stats: Stats;
     abstract key: string;
     protected battleScene: BattleScene;
     protected battleUIScene: BattleUIScene;
     protected gameScene: GameScene;
+    protected saveAndLoadScene!: SaveAndLoadScene;
 
     protected constructor(
         public scene: Phaser.Scene,
@@ -34,7 +36,8 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         texture: string | Phaser.Textures.Texture,
         frame: string | number | undefined,
         public name: string,
-        public job: PlayerJob | MonsterJob
+        public job: PlayerJob | MonsterJob,
+        id?: number
     ) {
         super(scene, x, y, texture, frame);
 
@@ -42,18 +45,14 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         this.gameScene = <GameScene>this.scene.scene.get('Game');
         this.battleScene = <BattleScene>this.scene.scene.get('Battle');
         this.battleUIScene = <BattleUIScene>this.scene.scene.get('BattleUI');
+        this.saveAndLoadScene = <SaveAndLoadScene>this.scene.scene.get('SaveAndLoad');
 
-        this.living = true;
+        // this.living = true;
 
-        this.id = this.battleScene.generateID();
+        if (id) this.id = id;
+        else this.id = this.battleScene.generateID();
     }
-
-    // abstract applyHPChange(hpChangeAmount: number): number;
-
     abstract getInitiative(): number;
-
-    // abstract updateSceneOnReceivingDamage(): void;
-
     protected selectAbilityOrItem(actionIndex: number, actionType: 'ability' | 'item'): void {
         this.battleUIScene.hideAbilitySelectionUI();
 
@@ -140,7 +139,6 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
         if (this.stats.currentHP <= 0) {
             this.stats.currentHP = 0;
-            this.living = false;
         }
 
         // setting up the ui hp
@@ -159,5 +157,9 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
             const inventorySlotNumber = Number(this.battleScene.interactionState.split('inventoryaction')[1]);
             this.selectAbilityOrItem(inventorySlotNumber, 'item');
         }
+    }
+
+    public isLiving(): boolean {
+        return this.stats.currentHP > 0;
     }
 }

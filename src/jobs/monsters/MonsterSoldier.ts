@@ -4,7 +4,7 @@ import {IBaseStatBlock, IStatIncreases} from '../../types/Advancement';
 const monsterSoldierBaseStats: IBaseStatBlock = {
     level: 1,
     xp: 0,
-    strength: 7,
+    strength: 6,
     agility: 1,
     vitality: 5,
     intellect: 1,

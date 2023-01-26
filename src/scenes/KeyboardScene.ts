@@ -99,8 +99,7 @@ export default class KeyboardScene extends Phaser.Scene {
         );
 
         if (data.purpose === 'playernameselect') {
-            this.rejectButton.setVisible(false);
-            this.rejectButton.buttonText.setVisible(false);
+            this.rejectButton.hideActionButton();
         }
 
         this.spaceButton = this.add.text(
@@ -227,7 +226,16 @@ export default class KeyboardScene extends Phaser.Scene {
                         color: '#fff',
                         fontFamily: 'CustomFont'
                     })
-                    .setOrigin(0.5, 0.5)
+                    .setOrigin(0.5, 0.5);
+
+                this.add.rectangle(
+                    62 + (60 * colIndex) + (16 * rowIndex),
+                    413 + (55 * rowIndex),
+                    40,
+                    50,
+                    0xFF0000,
+                    0
+                )
                     .setInteractive()
                     .on(
                         'pointerdown',
@@ -235,6 +243,7 @@ export default class KeyboardScene extends Phaser.Scene {
                             this.inputLetter(char);
                         }
                     );
+                // .setDepth(2);
             }
         }
     }

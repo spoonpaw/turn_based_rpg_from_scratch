@@ -1,11 +1,13 @@
 import GameScene from './GameScene';
 import Camera = Phaser.Cameras.Scene2D.Camera;
 import MusicScene from './MusicScene';
+import SaveAndLoadScene from './SaveAndLoadScene';
 
 export default class GameOverScene extends Phaser.Scene {
     private gameOverText!: Phaser.GameObjects.Text;
     private musicScene!: MusicScene;
     private gameScene!: GameScene;
+    private saveAndLoadScene!: SaveAndLoadScene;
 
     public constructor() {
         super('GameOver');
@@ -14,6 +16,7 @@ export default class GameOverScene extends Phaser.Scene {
     public create() {
         this.gameScene = <GameScene>this.scene.get('Game');
         this.musicScene = <MusicScene>this.scene.get('Music');
+        this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
         const phaserImage = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'title');
         phaserImage.displayHeight = this.sys.canvas.height;
         phaserImage.displayWidth = this.sys.canvas.width;
@@ -41,7 +44,7 @@ export default class GameOverScene extends Phaser.Scene {
         this.scene.scene.tweens.add({
             targets: pressAnyKeyText,
             duration: 1500,
-            repeat: true,
+            repeat: -1,
             loop: true,
             alpha: 0,
             yoyo: true
