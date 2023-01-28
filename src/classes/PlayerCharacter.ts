@@ -137,6 +137,8 @@ export default class PlayerCharacter extends Unit {
             target: Enemy | PlayerCharacter | BotCharacter;
         }
     ): number {
+        console.log('running the player\'s turn!!!!');
+
         const target = data.target;
         // TODO: REDIRECT THE PLAYER'S ATTACK IF THEIR INTENDED TARGET IS NOT ALIVE AND THERE IS STILL > 0 ENEMIES LIVING
         if (!target.isLiving()) return 0;

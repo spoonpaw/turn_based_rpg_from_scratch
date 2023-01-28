@@ -163,7 +163,7 @@ export class Enemy extends Unit {
 
     public runTurn(): number {
 
-        console.log('running the bot\'s turn!!!!');
+        console.log('running the enemy\'s turn!!!!');
 
         let runtimeInMS = 0;
 

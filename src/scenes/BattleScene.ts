@@ -336,9 +336,22 @@ export default class BattleScene extends Phaser.Scene {
 
     private gameOverTest() {
         // check if all the heroes are dead (players and bots)
-        return this.heroes.every((value) => {
-            return !value.isLiving();
+        console.log('testing whether each hero is dead from the game over scene! (it\'s not working!)');
+        console.log({
+            heroesArray: this.heroes
         });
+        let allHeroesAreDead = true;
+        for (const hero of this.heroes) {
+            if (hero.isLiving()) {
+                allHeroesAreDead = false;
+            }
+        }
+
+        return allHeroesAreDead;
+        // return this.heroes.every((unit) => {
+        //     console.log(`unit name: ${unit.name} | unit currentHP: ${unit.currentHP}`);
+        //     return !unit.isLiving();
+        // });
     }
 
     private getStatIncrease(stat: keyof IStatIncreases, level: number): number {
@@ -557,6 +570,14 @@ export default class BattleScene extends Phaser.Scene {
                 return player;
             }
         );
+
+        // TODO: alter this. it is problematic due to the fact that if the player exits before the turn has ended, the battle hasn't
+        //  had a chance to properly conclude, saving its required data to the database so it can be immeadiately loaded
+        //  if the game is refreshed, move the check and all game over database logic to the methods where hp is
+        //  being altered, as that is the key property to monitor for changes. it must send the signal to cut
+        //  the battle scene short with the messages as triggered below and send the player to the game over screen
+        //  as usual.
+        //  ALL PARTY MEMBERS AT ZERO HP = GAME OVER.
 
         if (this.gameOverTest()) {
             this.time.addEvent({

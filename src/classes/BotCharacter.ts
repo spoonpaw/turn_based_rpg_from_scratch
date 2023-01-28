@@ -94,6 +94,7 @@ export default class BotCharacter extends Unit {
         return super.applyHPChange(hpChangeAmount, this.battleScene.player2HPText);
     }
     public runTurn(): number {
+        console.log('running the bot\'s turn!!!!');
         // just attack enemy 1
         const target = this.battleScene.enemies[0];
         if (!target.isLiving()) return 0;
