@@ -1,7 +1,7 @@
 import Dexie from 'dexie';
 
 import {IAbility} from '../abilities/abilities';
-import Stats from '../stats/Stats';
+// import Stats from '../stats/Stats';
 import {Direction} from '../types/Direction';
 import Item from './Item';
 import {Job} from './Jobs/Job';
@@ -11,7 +11,9 @@ export interface DBUnit {
     job: Job,
     id: number,
     key: string,
-    stats: Stats,
+    // stats: Stats,
+    currentHP: number,
+    currentResource: number,
     equipment: {
         body: Item | undefined,
         head: Item | undefined,
@@ -28,12 +30,15 @@ export interface IPlayer {
     job: Job,
     gold: number,
     experience: number,
-    stats: Stats,
+    currentHP: number,
+    currentResource: number,
+    // stats: Stats,
     bots: Array<{
         name: string,
         job: Job,
         experience: number,
-        stats: Stats,
+        currentHP: number,
+        currentResource: number,
         texture: string,
         position: Phaser.Math.Vector2,
         facing: Direction,

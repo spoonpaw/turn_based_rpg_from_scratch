@@ -110,33 +110,33 @@ export default class Innkeeper extends NPC {
                     );
                     this.gameScene.player.gold = newGoldAmount;
                     this.uiScene.coinText.setText(`${this.gameScene.player.gold} gp`);
-                    const newHP = this.gameScene.player.stats.maxHP;
+                    const newHP = this.gameScene.player.maxHP;
                     this.saveAndLoadScene.db.players.update(
                         0,
                         (player: IPlayer) => {
-                            player.stats.currentHP = newHP;
+                            player.currentHP = newHP;
                             return player;
                         }
                     );
-                    this.gameScene.player.stats.currentHP = newHP;
+                    this.gameScene.player.currentHP = newHP;
                     if (this.gameScene.bots.length > 0) {
-                        const newHP = this.gameScene.bots[0].stats.maxHP;
+                        const newHP = this.gameScene.bots[0].maxHP;
                         this.saveAndLoadScene.db.players.update(
                             0,
                             (player: IPlayer) => {
-                                player.bots[0].stats.currentHP = newHP;
+                                player.bots[0].currentHP = newHP;
                                 return player;
                             }
                         );
 
-                        this.gameScene.bots[0].stats.currentHP = newHP;
+                        this.gameScene.bots[0].currentHP = newHP;
                         this.uiScene.updatePlayer2HP(
-                            this.gameScene.bots[0].stats.currentHP,
-                            this.gameScene.bots[0].stats.maxHP
+                            this.gameScene.bots[0].currentHP,
+                            this.gameScene.bots[0].maxHP
                         );
                     }
-                    this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
-                    this.uiScene.updateResource(this.gameScene.player.stats.currentResource, this.gameScene.player.stats.maxResource);
+                    this.uiScene.updateHP(this.gameScene.player.currentHP, this.gameScene.player.maxHP);
+                    this.uiScene.updateResource(this.gameScene.player.currentResource, this.gameScene.player.maxResource);
                 }
             });
 

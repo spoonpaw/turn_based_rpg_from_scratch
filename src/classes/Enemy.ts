@@ -14,6 +14,8 @@ import PlayerCharacter from './PlayerCharacter';
 import Unit from './Unit';
 
 export class Enemy extends Unit {
+    currentHP: number;
+    currentResource: number;
     public damageTween!: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
     public equipment: Equipment = {
         body: undefined,
@@ -73,6 +75,8 @@ export class Enemy extends Unit {
             0,
             0
         );
+        this.currentHP = this.stats.currentHP;
+        this.currentResource = this.stats.currentResource;
 
         this.key = enemy?.key ?? '???';
 
@@ -100,20 +104,19 @@ export class Enemy extends Unit {
 
                 if (unitToUpdate !== undefined) {
                     if (hpChangeAmount < 0) {
-                        unitToUpdate.stats.currentHP = Math.min(unitToUpdate.stats.maxHP, unitToUpdate.stats.currentHP - hpChangeAmount);
+                        unitToUpdate.currentHP = Math.min(this.stats.maxHP, unitToUpdate.currentHP - hpChangeAmount);
                     }
                     else {
-                        unitToUpdate.stats.currentHP -= hpChangeAmount;
+                        unitToUpdate.currentHP -= hpChangeAmount;
                     }
-                    if (unitToUpdate.stats.currentHP <= 0) {
-                        unitToUpdate.stats.currentHP = 0;
+                    if (unitToUpdate.currentHP <= 0) {
+                        unitToUpdate.currentHP = 0;
                     }
                 }
 
                 return player;
             }
         );
-
 
         // handle the math of taking damage,
         this.stats.currentHP -= hpChangeAmount;
@@ -129,14 +132,13 @@ export class Enemy extends Unit {
         return Math.max(
             1,
             Math.floor(
-                (this.stats.strength - (target.getCombinedStat('defense') / 2)) *
+                (this.stats.strength - (target.defense / 2)) *
                 Phaser.Math.FloatBetween(
                     0.39, 0.59
                 )
             )
         );
     }
-
 
     public calculateCriticalStrikeDamage() {
         return Math.max(
@@ -331,5 +333,37 @@ export class Enemy extends Unit {
                     ability.resourceCost < this.stats.currentResource
             );
         });
+    }
+
+    private calculateStat(stat: keyof Stats): number {
+        return this.stats[stat];
+    }
+
+    public get maxHP() {
+        return this.calculateStat('vitality') * 2;
+    }
+
+    public get agility() {
+        return this.calculateStat('agility');
+    }
+
+    public get vitality() {
+        return this.calculateStat('vitality');
+    }
+
+    public get intellect() {
+        return this.calculateStat('intellect');
+    }
+
+    public get luck() {
+        return this.calculateStat('luck');
+    }
+
+    public get strength() {
+        return this.calculateStat('strength');
+    }
+
+    public get defense() {
+        return this.calculateStat('defense');
     }
 }

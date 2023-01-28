@@ -1,6 +1,7 @@
+import monsterSoldier from '../jobs/monsters/MonsterSoldier';
 import GameScene from '../scenes/GameScene';
 import UIScene from '../scenes/UIScene';
-import Stats from '../stats/Stats';
+import {IBaseStatBlock, IStatIncreases} from '../types/Advancement';
 import {Direction} from '../types/Direction';
 import GameActor from './GameActor';
 import {MonsterJob} from './Jobs/MonsterJob';
@@ -19,8 +20,10 @@ export default class Bot extends GameActor{
         sprite: Phaser.GameObjects.Sprite,
         experience: number,
         species: string,
-        public type: MonsterJob,
-        stats?: Stats
+        public job: MonsterJob,
+        public currentHP: number,
+        public currentResource: number
+        // stats?: Stats
     ) {
         super(
             name,
@@ -43,7 +46,7 @@ export default class Bot extends GameActor{
             startingPositionY * GameScene.TILE_SIZE + offsetY
         );
         this.sprite.setFrame(1);
-        this.stats = stats ?? this.createStats(this.type);
+        // this.stats = stats ?? this.createStats(this.type);
 
         // Initialize this.tilePos here
         this.tilePos = new Vector2(startingPositionX, startingPositionY);
@@ -135,11 +138,54 @@ export default class Bot extends GameActor{
             Math.max(
                 1,
                 Math.ceil(
-                    this.LEVELING_RATE * Math.sqrt(
+                    this.gameScene.BOT_LEVELING_RATE * Math.sqrt(
                         this.experience
                     )
                 )
             )
         );
+    }
+
+    private calculateStat(stat: keyof IBaseStatBlock & keyof IStatIncreases): number {
+        let statValue = monsterSoldier.baseStats[stat];
+        if (this.level > 1) {
+            for (let i = 2; i <= this.level; i++) {
+                const incrementAmount = monsterSoldier.statIncreases[stat].find(
+                    (incrementRange) => {
+                        return incrementRange.range[0] <= i && i <= incrementRange.range[1];
+                    }
+                )?.increment as number;
+                statValue += incrementAmount;
+            }
+        }
+        return statValue;
+    }
+
+    public get maxHP() {
+        return this.calculateStat('vitality') * 2;
+    }
+
+    public get agility() {
+        return this.calculateStat('agility');
+    }
+
+    public get vitality() {
+        return this.calculateStat('vitality');
+    }
+
+    public get intellect() {
+        return this.calculateStat('intellect');
+    }
+
+    public get luck() {
+        return this.calculateStat('luck');
+    }
+
+    public get strength() {
+        return this.calculateStat('strength');
+    }
+
+    public get defense() {
+        return this.calculateStat('agility') / 2;
     }
 }

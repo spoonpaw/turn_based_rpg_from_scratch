@@ -1,6 +1,7 @@
+import playerSoldier from '../jobs/players/PlayerSoldier';
 import GameScene from '../scenes/GameScene';
 import UIScene from '../scenes/UIScene';
-import Stats from '../stats/Stats';
+import {IBaseStatBlock, IStatIncreases} from '../types/Advancement';
 import {Direction} from '../types/Direction';
 import {Equipment} from '../types/Equipment';
 import GameActor from './GameActor';
@@ -8,9 +9,9 @@ import Item from './Item';
 import {PlayerJob} from './Jobs/PlayerJob';
 
 export default class Player extends GameActor{
-    public LEVELING_RATE = 0.3;
     private uiScene!: UIScene;
     private gameScene!: GameScene;
+    public maxResource = 100;
     constructor(
         name: string,
         sprite: Phaser.GameObjects.Sprite,
@@ -18,10 +19,11 @@ export default class Player extends GameActor{
         public gold: number,
         experience: number,
         species: string,
-        public type: PlayerJob,
+        public job: PlayerJob,
         public inventory: Item[],
         public equipment: Equipment,
-        stats?: Stats
+        public currentHP: number,
+        public currentResource: number
     ) {
         super(
             name,
@@ -41,7 +43,6 @@ export default class Player extends GameActor{
             tilePos.y * GameScene.TILE_SIZE + offsetY
         );
         this.sprite.setFrame(1);
-        this.stats = stats ?? this.createStats(this.type);
 
         this.sprite.setInteractive();
 
@@ -74,13 +75,13 @@ export default class Player extends GameActor{
         this.sprite.anims.play(direction);
     }
 
-    get level() {
+    public get level() {
         return Math.min(
             this.gameScene.MAX_LEVEL,
             Math.max(
                 1,
                 Math.ceil(
-                    this.LEVELING_RATE * Math.sqrt(
+                    this.gameScene.PLAYER_LEVELING_RATE * Math.sqrt(
                         this.experience
                     )
                 )
@@ -88,4 +89,75 @@ export default class Player extends GameActor{
         );
     }
 
+    private calculateStat(stat: (keyof IBaseStatBlock & keyof IStatIncreases) | 'defense'): number {
+        let derivedStat;
+        if (stat === 'defense') {
+            derivedStat = 'defense';
+            stat = 'agility';
+        }
+        let statValue = playerSoldier.baseStats[stat];
+        if (this.level > 1) {
+            for (let i = 2; i <= this.level; i++) {
+                const incrementAmount = playerSoldier.statIncreases[stat].find(
+                    (incrementRange) => {
+                        return incrementRange.range[0] <= i && i <= incrementRange.range[1];
+                    }
+                )?.increment as number;
+                statValue += incrementAmount;
+            }
+        }
+
+        const totalEquipmentBonus = this.getTotalEquipmentBonus(stat);
+        if (derivedStat === 'defense') {
+            const derivedStatEquipmentBonus = this.getTotalEquipmentBonus(derivedStat);
+            return ((statValue + totalEquipmentBonus) / 2) + derivedStatEquipmentBonus;
+        }
+        return statValue + totalEquipmentBonus;
+    }
+
+    private getTotalEquipmentBonus(stat: (keyof IBaseStatBlock & keyof IStatIncreases) | 'defense'): number {
+        let totalBonus = 0;
+        for (const key in this.equipment) {
+            const item = this.equipment[key];
+            if (item) {
+                totalBonus += this.getEquipmentStat(item, stat);
+            }
+        }
+        return totalBonus;
+    }
+
+    private getEquipmentStat(equipment: Item, stat: (keyof IBaseStatBlock & keyof IStatIncreases) | 'defense'): number {
+        if (!equipment || !equipment.stats) {
+            return 0;
+        }
+        return equipment.stats[stat];
+    }
+
+    public get maxHP() {
+        return this.calculateStat('vitality') * 2;
+    }
+
+    public get agility() {
+        return this.calculateStat('agility');
+    }
+
+    public get vitality() {
+        return this.calculateStat('vitality');
+    }
+
+    public get intellect() {
+        return this.calculateStat('intellect');
+    }
+
+    public get luck() {
+        return this.calculateStat('luck');
+    }
+
+    public get strength() {
+        return this.calculateStat('strength');
+    }
+
+    public get defense() {
+        return this.calculateStat('defense');
+    }
 }

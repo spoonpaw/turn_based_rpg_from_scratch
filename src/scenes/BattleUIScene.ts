@@ -188,7 +188,7 @@ export default class BattleUIScene extends Phaser.Scene {
 
     public generateAbilityButtons() {
 
-        const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
+        const availableAbilities = this.battleScene.gameScene.player.job.skills.filter(ability => {
             return ability.levelAttained <= this.battleScene.gameScene.player.level;
         });
 
@@ -208,7 +208,7 @@ export default class BattleUIScene extends Phaser.Scene {
                     // display text here describing the selected ability
                     this.battleScene.interactionState = `selectingabilityaction${index}`;
                     const selectedAbilityIndex = Number(this.battleScene.interactionState.split('selectingabilityaction')[1]);
-                    const selectedAbility = this.battleScene.gameScene.player.type.skills[selectedAbilityIndex];
+                    const selectedAbility = this.battleScene.gameScene.player.job.skills[selectedAbilityIndex];
                     this.inventoryAndAbilityDetailFrame.setVisible(true);
                     this.inventoryAndAbilityDetailText.setText(selectedAbility.description);
                     this.inventoryAndAbilityDetailText.setVisible(true);
@@ -341,6 +341,7 @@ export default class BattleUIScene extends Phaser.Scene {
             }
             else {
                 console.log('LOADING A MIDFIGHT BATTLE!!!!!!');
+                // TODO: FIX THIS GLITCH -> SOMETIMES THIS BRANCH IS GETTING EXECUTED WHEN IT SHOULD NOT BE
                 this.loadingBattleMidFight = false;
                 console.log('looking for the target from the battle scene that matches the save data target!');
                 console.log({
@@ -789,7 +790,7 @@ export default class BattleUIScene extends Phaser.Scene {
 
 
 
-                const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
+                const availableAbilities = this.battleScene.gameScene.player.job.skills.filter(ability => {
                     return ability.levelAttained <= this.battleScene.gameScene.player.level;
                 });
 

@@ -593,7 +593,21 @@ export default class UIScene extends Phaser.Scene {
         let expCounter = 0;
         while (currentLevel < nextLevel) {
             expCounter++;
-            currentLevel = Math.max(1, Math.ceil(playerOrBot.LEVELING_RATE * Math.sqrt(currentExp + expCounter)));
+            let levelingrate;
+            if (playerOrBot instanceof Player) {
+                levelingrate = this.gameScene.PLAYER_LEVELING_RATE;
+            }
+            else {
+                levelingrate = this.gameScene.BOT_LEVELING_RATE;
+            }
+            currentLevel = Math.max(
+                1,
+                Math.ceil(
+                    levelingrate * Math.sqrt(
+                        currentExp + expCounter
+                    )
+                )
+            );
         }
         return expCounter;
 
@@ -702,9 +716,9 @@ export default class UIScene extends Phaser.Scene {
                     item.type === 'helmet') {
                         this.inventoryAndAbilityDetailText.setText(
                             `${item.description}\n\n
-                            Strength: ${item.stats!.strength}, Agility: ${item.stats!.agility},
-                                Vitality: ${item.stats!.vitality}, Intellect: ${item.stats!.intellect},
-                                Luck: ${item.stats!.luck}, Defense: ${item.stats!.defense},
+                            Strength: ${item.stats?.strength}, Agility: ${item.stats?.agility},
+                                Vitality: ${item.stats?.vitality}, Intellect: ${item.stats?.intellect},
+                                Luck: ${item.stats?.luck}, Defense: ${item.stats?.defense},
                                 Classes: ${item.classes},
                                 Minimum Level: ${item.minimumLevel}`
                         );
@@ -1579,11 +1593,8 @@ export default class UIScene extends Phaser.Scene {
         this.player2ManaIcon = this.add.image(330, 663, 'mana');
         this.player2ManaIcon.setVisible(false);
 
-        let currentResource;
-        let maxResource;
-
-        currentResource = this.gameScene.player.stats.currentResource;
-        maxResource = this.gameScene.player.stats.maxResource;
+        const currentResource = this.gameScene.player.currentResource;
+        const maxResource = 100;
 
         // player 1 mana text
         this.manaText = this.add.text(
@@ -1594,13 +1605,13 @@ export default class UIScene extends Phaser.Scene {
             .setStroke('#000000', 2)
             .setResolution(3);
 
-        currentResource = this.gameScene.bots[0]?.stats.currentResource;
-        maxResource = this.gameScene.bots[0]?.stats.maxResource;
+        const currentBotResource = this.gameScene.bots[0]?.currentResource ?? 0;
+        const maxBotResource = 100;
 
         this.player2ManaText = this.add.text(
             345,
             647,
-            `Vim: ${currentResource}/${maxResource}`,
+            `Vim: ${currentBotResource}/${maxBotResource}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(3);
@@ -1610,7 +1621,7 @@ export default class UIScene extends Phaser.Scene {
         this.hpText = this.add.text(
             115,
             620,
-            `HP: ${this.gameScene.player.stats.currentHP}/${this.gameScene.player.stats.maxHP}`,
+            `HP: ${this.gameScene.player.currentHP}/${this.gameScene.player.maxHP}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'})
             .setStroke('#000000', 2)
             .setResolution(3);
@@ -1618,7 +1629,7 @@ export default class UIScene extends Phaser.Scene {
         this.player2hpText = this.add.text(
             345,
             620,
-            `HP: ${this.gameScene.bots[0]?.stats.currentHP ?? '0'}/${this.gameScene.bots[0]?.stats.maxHP ?? '0'}`,
+            `HP: ${this.gameScene.bots[0]?.currentHP ?? '0'}/${this.gameScene.bots[0]?.maxHP ?? '0'}`,
             {fontSize: '32px', color: '#ffffff', fontFamily: 'CustomFont'}
         )
             .setStroke('#000000', 2)
@@ -1761,10 +1772,10 @@ export default class UIScene extends Phaser.Scene {
 
 
         if (this.gameScene.bots.length > 0) {
-            this.player2hpText.setText(`HP: ${this.gameScene.bots[0].stats.currentHP ?? '0'}/${this.gameScene.bots[0].stats.maxHP ?? '0'}`);
+            this.player2hpText.setText(`HP: ${this.gameScene.bots[0].currentHP ?? '0'}/${this.gameScene.bots[0].maxHP ?? '0'}`);
 
-            const currentResource = this.gameScene.bots[0].stats.currentResource;
-            const maxResource = this.gameScene.bots[0].stats.maxResource;
+            const currentResource = this.gameScene.bots[0].currentResource ?? 0;
+            const maxResource = 100;
 
             this.player2ManaText.setText(`Vim: ${currentResource}/${maxResource}`);
 
@@ -2081,7 +2092,7 @@ export default class UIScene extends Phaser.Scene {
 
         // START CHARACTER SHEET STRING SECTION
 
-        this.classString = this.add.text(540, 185, `Class: ${player.type.name}`, {
+        this.classString = this.add.text(540, 185, `Class: ${player.job.name}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2097,7 +2108,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.levelString.setVisible(false);
 
-        this.hitPointString = this.add.text(540, 257, `Hit Points: ${player.stats.currentHP}/${player.stats.maxHP}`, {
+        this.hitPointString = this.add.text(540, 257, `Hit Points: ${player.currentHP}/${player.maxHP}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2113,7 +2124,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.manaPointString.setVisible(false);
 
-        this.strengthString = this.add.text(540, 329, `Strength: ${Math.floor(player.getCombinedStat('strength'))}`, {
+        this.strengthString = this.add.text(540, 329, `Strength: ${Math.floor(player.strength)}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2121,7 +2132,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.strengthString.setVisible(false);
 
-        this.agilityString = this.add.text(540, 365, `Agility: ${Math.floor(player.stats.agility)}`, {
+        this.agilityString = this.add.text(540, 365, `Agility: ${Math.floor(player.agility)}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2129,7 +2140,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.agilityString.setVisible(false);
 
-        this.vitalityString = this.add.text(540, 401, `Vitality: ${Math.floor(player.stats.vitality)}`, {
+        this.vitalityString = this.add.text(540, 401, `Vitality: ${Math.floor(player.vitality)}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2137,7 +2148,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.vitalityString.setVisible(false);
 
-        this.intellectString = this.add.text(540, 437, `Intellect: ${Math.floor(player.stats.intellect)}`, {
+        this.intellectString = this.add.text(540, 437, `Intellect: ${Math.floor(player.intellect)}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2145,7 +2156,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.intellectString.setVisible(false);
 
-        this.luckString = this.add.text(540, 473, `Luck: ${Math.floor(player.stats.luck)}`, {
+        this.luckString = this.add.text(540, 473, `Luck: ${Math.floor(player.luck)}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2153,7 +2164,7 @@ export default class UIScene extends Phaser.Scene {
             .setResolution(3);
         this.luckString.setVisible(false);
 
-        this.defenseString = this.add.text(540, 509, `Defense: ${player.getCombinedStat('defense')}`, {
+        this.defenseString = this.add.text(540, 509, `Defense: ${player.defense}`, {
             fontSize: '48px',
             color: '#fff',
             fontFamily: 'CustomFont'
@@ -2183,7 +2194,7 @@ export default class UIScene extends Phaser.Scene {
         let className = '';
         if (playerOrBot instanceof Player) {
             classIdentifier = 'Class';
-            className = playerOrBot.type.properName;
+            className = playerOrBot.job.properName;
         }
         else if (playerOrBot instanceof Bot) {
             classIdentifier = 'Type';
@@ -2191,14 +2202,14 @@ export default class UIScene extends Phaser.Scene {
         }
         this.classString.setText(`${classIdentifier}: ${className}`);
         this.levelString.setText(`Level: ${playerOrBot.level}`);
-        this.hitPointString.setText(`Hit Points: ${playerOrBot.stats.currentHP}/${playerOrBot.stats.maxHP}`);
-        this.manaPointString.setText(`Vim: ${playerOrBot.stats.currentResource}/${playerOrBot.stats.maxResource}`);
-        this.strengthString.setText(`Strength: ${Math.floor(playerOrBot.getCombinedStat('strength'))}`);
-        this.agilityString.setText(`Agility: ${Math.floor(playerOrBot.stats.agility)}`);
-        this.vitalityString.setText(`Vitality: ${Math.floor(playerOrBot.stats.vitality)}`);
-        this.intellectString.setText(`Intellect: ${Math.floor(playerOrBot.stats.intellect)}`);
-        this.luckString.setText(`Luck: ${Math.floor(playerOrBot.stats.luck)}`);
-        this.defenseString.setText(`Defense: ${Math.floor(playerOrBot.getCombinedStat('defense'))}`);
+        this.hitPointString.setText(`Hit Points: ${playerOrBot.currentHP}/${playerOrBot.maxHP}`);
+        this.manaPointString.setText(`Vim: ${playerOrBot.currentResource}/${100}`);
+        this.strengthString.setText(`Strength: ${Math.floor(playerOrBot.strength)}`);
+        this.agilityString.setText(`Agility: ${Math.floor(playerOrBot.agility)}`);
+        this.vitalityString.setText(`Vitality: ${Math.floor(playerOrBot.vitality)}`);
+        this.intellectString.setText(`Intellect: ${Math.floor(playerOrBot.intellect)}`);
+        this.luckString.setText(`Luck: ${Math.floor(playerOrBot.luck)}`);
+        this.defenseString.setText(`Defense: ${Math.floor(playerOrBot.defense)}`);
         this.tillNextLevelString.setText(`Till Next Level: ${this.calculateTilNextLevel(playerOrBot)}`);
 
     }
@@ -2221,8 +2232,8 @@ export default class UIScene extends Phaser.Scene {
             playerTilePosition: this.gameScene.player.getTilePos(),
             botPath: this.gameScene.bots[0]?.path,
             botCoords: this.gameScene.bots[0]?.getTilePos(),
-            playerCurrentHP: this.gameScene.player.stats.currentHP,
-            playerMaxHP: this.gameScene.player.stats.maxHP
+            playerCurrentHP: this.gameScene.player.currentHP,
+            playerMaxHP: this.gameScene.player.maxHP
         });
         // uncomment to log interaction state by clicking player portrait
         if (this.interactionState.startsWith('inventoryaction')) {
@@ -2258,10 +2269,10 @@ export default class UIScene extends Phaser.Scene {
 
             const actualAmountHealed = Math.min(
                 30,
-                this.gameScene.player.stats.maxHP - this.gameScene.player.stats.currentHP
+                this.gameScene.player.maxHP - this.gameScene.player.currentHP
             );
-            this.gameScene.player.stats.currentHP += actualAmountHealed;
-            this.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
+            this.gameScene.player.currentHP += actualAmountHealed;
+            this.updateHP(this.gameScene.player.currentHP, this.gameScene.player.maxHP);
 
             this.sfxScene.playSound('potion');
             eventsCenter.emit('GameMessage', `${this.gameScene.player.name} uses a health potion on ${this.gameScene.player.name}, healing them for ${actualAmountHealed} HP.`);
@@ -2314,11 +2325,11 @@ export default class UIScene extends Phaser.Scene {
 
             const actualAmountHealed = Math.min(
                 30,
-                this.gameScene.bots[0].stats.maxHP - this.gameScene.bots[0].stats.currentHP
+                this.gameScene.bots[0].maxHP - this.gameScene.bots[0].currentHP
             );
 
-            this.gameScene.bots[0].stats.currentHP += actualAmountHealed;
-            this.updatePlayer2HP(this.gameScene.bots[0].stats.currentHP, this.gameScene.bots[0].stats.maxHP);
+            this.gameScene.bots[0].currentHP += actualAmountHealed;
+            this.updatePlayer2HP(this.gameScene.bots[0].currentHP, this.gameScene.bots[0].maxHP);
 
             this.sfxScene.playSound('potion');
             eventsCenter.emit('GameMessage', `${this.gameScene.player.name} uses a health potion on ${this.gameScene.bots[0].name}, healing them for ${actualAmountHealed} HP.`);
