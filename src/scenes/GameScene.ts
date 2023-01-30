@@ -86,7 +86,6 @@ export default class GameScene extends Phaser.Scene {
     public MAX_LEVEL = 5;
     public PLAYER_LEVELING_RATE = 0.3;
     public BOT_LEVELING_RATE = 0.4;
-    private loadBattle = false;
 
     public constructor() {
         super('Game');
@@ -125,7 +124,7 @@ export default class GameScene extends Phaser.Scene {
             this.saveAndLoadScene.getPlayerByIndex(0).then((player: IPlayer) => {
                 console.log('loading the player data from the database');
                 console.log({storedTilemap: player.currentTilemap});
-                this.loadBattle = player.inCombat;
+                console.log(`setting this.loadBattle to player.inCombat (${player.inCombat})`);
                 const levelData = levels[player.currentTilemap];
                 this.nonHostileSpace = !levelData.hostile;
                 if (!player.inCombat) this.musicScene.changeSong(levelData.music);
@@ -312,13 +311,22 @@ export default class GameScene extends Phaser.Scene {
 
         this.input.keyboard!.enabled = true;
 
-        this.gamePadScene?.scene.restart();
-
-        if (this.operatingSystem === 'mobile' && !this.loadBattle) {
-            // launching the game pad scene
-            this.scene.launch('GamePad');
-            this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
+        if (this.gamePadScene) {
+            console.log('restarting the gamepad scene');
+            this.gamePadScene.scene.restart();
         }
+        if (this.operatingSystem === 'mobile') {
+            this.saveAndLoadScene.db.players.get(0)
+                .then((player) => {
+                    if (player?.inCombat) {
+                        console.log('launching the gamepad scene');
+                        // launching the game pad scene
+                        this.scene.launch('GamePad');
+                        this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
+                    }
+                });
+        }
+
         // if data is empty then the game just started so load the player in the spawn location
         if (data.nameData) {
             console.log('entering the game scene\'s create method\'s if (namedata) branch');
@@ -911,7 +919,6 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public wake() {
-        this.loadBattle = false;
         this.encounter_counter = 0;
         this.musicScene.changeSong('overworld');
         this.uiScene.scene.bringToTop();
