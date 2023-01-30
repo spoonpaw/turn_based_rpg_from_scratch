@@ -14,8 +14,6 @@ import PlayerCharacter from './PlayerCharacter';
 import Unit from './Unit';
 
 export class Enemy extends Unit {
-    currentHP: number;
-    currentResource: number;
     public damageTween!: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
     public equipment: Equipment = {
         body: undefined,
@@ -26,6 +24,7 @@ export class Enemy extends Unit {
     public inventory: Item[] = [];
     public key!: string;
     public stats!: Stats;
+    private _currentHP!: number;
 
     constructor(
         public scene: BattleScene,
@@ -75,8 +74,6 @@ export class Enemy extends Unit {
             0,
             0
         );
-        this.currentHP = this.stats.currentHP;
-        this.currentResource = this.stats.currentResource;
 
         this.key = enemy?.key ?? '???';
 
@@ -95,34 +92,12 @@ export class Enemy extends Unit {
         });
     }
 
-    applyHPChange(hpChangeAmount: number): number {
+    public applyHPChange(hpChangeAmount: number): number {
 
-        this.saveAndLoadScene.db.players.update(
-            0,
-            (player: IPlayer) => {
-                const unitToUpdate = player.combatState.enemies.find(unit => unit.id === this.id);
-
-                if (unitToUpdate !== undefined) {
-                    if (hpChangeAmount < 0) {
-                        unitToUpdate.currentHP = Math.min(this.stats.maxHP, unitToUpdate.currentHP - hpChangeAmount);
-                    }
-                    else {
-                        unitToUpdate.currentHP -= hpChangeAmount;
-                    }
-                    if (unitToUpdate.currentHP <= 0) {
-                        unitToUpdate.currentHP = 0;
-                    }
-                }
-
-                return player;
-            }
-        );
-
-        // handle the math of taking damage,
-        this.stats.currentHP -= hpChangeAmount;
-        if (this.stats.currentHP <= 0) {
-            this.stats.currentHP = 0;
-            // this.living = false;
+        this.currentHP -= hpChangeAmount;
+        if (this.currentHP <= 0) {
+            this.currentHP = 0;
+            this.battleScene.endBattleBackEndActions();
         }
         this.updateSceneOnReceivingDamage();
         return 0;
@@ -132,7 +107,7 @@ export class Enemy extends Unit {
         return Math.max(
             1,
             Math.floor(
-                (this.stats.strength - (target.defense / 2)) *
+                (this.strength - (target.defense / 2)) *
                 Phaser.Math.FloatBetween(
                     0.39, 0.59
                 )
@@ -144,7 +119,7 @@ export class Enemy extends Unit {
         return Math.max(
             1,
             Math.floor(
-                this.stats.strength * (Phaser.Math.Between(54, 64) / 64)
+                this.strength * (Phaser.Math.Between(54, 64) / 64)
             )
         );
     }
@@ -158,7 +133,7 @@ export class Enemy extends Unit {
     }
 
     public getInitiative(): number {
-        return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
+        return this.agility * Phaser.Math.FloatBetween(0, 1);
     }
 
     public runTurn(): number {
@@ -265,7 +240,7 @@ export class Enemy extends Unit {
             if (guardOnTarget) {
                 if (this.evadeTest()) {
                     this.battleScene.sfxScene.playSound('dodge');
-                    eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted and dodged the attack!`);
+                    eventsCenter.emit('Message', `${this.name} attacks ${initialTarget.name}. ${target.name} intercepts and dodges the attack!`);
                     runtimeInMS += 2000;
                     return runtimeInMS;
                 }
@@ -276,10 +251,10 @@ export class Enemy extends Unit {
                         // If the IDs match, reduce the damage taken by 15%
                         damage *= 0.85;
                         damage = Math.floor(damage);
-                        eventsCenter.emit('Message', `${this.name} attacked ${target.name}, who fought defensively and took ${damage} damage.`);
+                        eventsCenter.emit('Message', `${this.name} attacks ${target.name}, who fights defensively and takes ${damage} damage.`);
                     }
                     else {
-                        eventsCenter.emit('Message', `${this.name} attacked ${initialTarget.name}. ${target.name} intercepted the attack taking ${damage} damage.`);
+                        eventsCenter.emit('Message', `${this.name} attacks ${initialTarget.name}. ${target.name} intercepts the attack taking ${damage} damage.`);
 
                     }
                     target.applyHPChange(damage);
@@ -289,14 +264,14 @@ export class Enemy extends Unit {
             else {
                 if (this.evadeTest()) {
                     this.battleScene.sfxScene.playSound('dodge');
-                    eventsCenter.emit('Message', `${this.name} attacked ${target.name}. ${target.name} dodged the attack!`);
+                    eventsCenter.emit('Message', `${this.name} attacks ${target.name}. ${target.name} dodges the attack!`);
                     runtimeInMS += 2000;
                     return runtimeInMS;
                 }
                 else {
                     this.battleScene.sfxScene.playSound('attack');
                     damage = this.calculateAttackDamage(target);
-                    eventsCenter.emit('Message', `${this.name} attacked ${target.name} for ${damage} HP!`);
+                    eventsCenter.emit('Message', `${this.name} attacks ${target.name} for ${damage} HP!`);
                     target.applyHPChange(damage);
                     runtimeInMS += 2000;
                 }
@@ -315,7 +290,7 @@ export class Enemy extends Unit {
                     ) &&
                     ability.targets.includes('enemies')
                 ) &&
-                ability.resourceCost < this.stats.currentResource
+                ability.resourceCost < this.currentResource
             );
         }) as IAbility;
     }
@@ -330,7 +305,7 @@ export class Enemy extends Unit {
                     ) &&
                     ability.targets.includes('enemies')
                 ) &&
-                    ability.resourceCost < this.stats.currentResource
+                    ability.resourceCost < this.currentResource
             );
         });
     }
@@ -366,4 +341,26 @@ export class Enemy extends Unit {
     public get defense() {
         return this.calculateStat('defense');
     }
+    public get currentHP() {
+
+        return this.stats.currentHP;
+    }
+    public set currentHP(newValue) {
+        console.log(`changing hp on the enemy character!!! old value: ${this._currentHP}, new value: ${newValue}`);
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                player.combatState.units.find(unit => unit.id === this.id)!.currentHP = newValue;
+                return player;
+            }
+        );
+        this.stats.currentHP = newValue;
+    }
+    public get currentResource() {
+        return this.stats.currentResource;
+    }
+    public set currentResource(resource) {
+        this.stats.currentResource = resource;
+    }
+
 }

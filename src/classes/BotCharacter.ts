@@ -10,7 +10,8 @@ import PlayerCharacter from './PlayerCharacter';
 import Unit from './Unit';
 
 export default class BotCharacter extends Unit {
-    public currentHP: number;
+    private _currentHP!: number;
+    // public currentHP: number;
     public currentResource: number;
     public damageTween!: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
     public equipment: Equipment = {
@@ -46,8 +47,8 @@ export default class BotCharacter extends Unit {
         // TODO: there needs to be a logical way of figuring
         //  out which bot this list is meant to reflect.
         //  for now we can just use this this.gameScene.bots[0]
-        // this.stats = this.gameScene.bots[0].stats;
         this.currentHP = this.gameScene.bots[0].currentHP;
+
         this.currentResource = this.gameScene.bots[0].currentResource;
         this.name = this.gameScene.bots[0].name;
 
@@ -67,29 +68,6 @@ export default class BotCharacter extends Unit {
     }
 
     public applyHPChange(hpChangeAmount: number): number {
-
-        this.saveAndLoadScene.db.players.update(
-            0,
-            (player: IPlayer) => {
-
-                const unitToUpdate = player.combatState.heroes.find(unit => unit.id === this.id);
-
-                if (unitToUpdate !== undefined) {
-                    if (hpChangeAmount < 0) {
-                        unitToUpdate.currentHP = Math.min(this.maxHP, this.currentHP - hpChangeAmount);
-                    }
-                    else {
-                        this.currentHP -= hpChangeAmount;
-                    }
-                    if (this.currentHP <= 0) {
-                        this.currentHP = 0;
-                    }
-                }
-
-                return player;
-            }
-        );
-
 
         return super.applyHPChange(hpChangeAmount, this.battleScene.player2HPText);
     }
@@ -203,5 +181,25 @@ export default class BotCharacter extends Unit {
 
     public get defense() {
         return this.calculateStat('agility') / 2;
+    }
+
+    public set currentHP(newValue: number) {
+        console.log(`changing hp on the bot character!!! old value: ${this._currentHP}, new value: ${newValue}`);
+        // console.trace();
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                const unit = player.combatState.units.find(unit => unit.id === this.id);
+                if (unit) {
+                    unit.currentHP = newValue;
+                }
+                return player;
+            }
+        );
+        this._currentHP = newValue;
+    }
+
+    public get currentHP(): number {
+        return this._currentHP;
     }
 }

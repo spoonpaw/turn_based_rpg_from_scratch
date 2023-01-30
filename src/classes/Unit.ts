@@ -93,23 +93,28 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         }
     }
 
-    applyHPChange(hpChangeAmount: number, hpText: Phaser.GameObjects.Text) {
+    public applyHPChange(hpChangeAmount: number, hpText: Phaser.GameObjects.Text) {
         const initialCharacterHP = this.currentHP;
-
+        console.log(`applying a change of hp to ${this.name}, their current hp is ${initialCharacterHP}`);
         // handle healing hp change (negative hp change signifies healing)
         if (hpChangeAmount < 0) {
             this.currentHP = Math.min(this.maxHP, this.currentHP - hpChangeAmount);
+            console.log(`${this.name} is getting healed for ${-hpChangeAmount}, now their hp is ${this.currentHP}`);
         }
 
         // apply damage
         else {
             // handle the math of taking damage,
             this.currentHP -= hpChangeAmount;
+            console.log(`${this.name} is getting damaged for ${hpChangeAmount}, now their hp is ${this.currentHP}`);
             this.updateSceneOnReceivingDamage();
         }
 
         if (this.currentHP <= 0) {
             this.currentHP = 0;
+            if (this.battleScene.gameOverTest()) {
+                this.battleScene.endBattleGameOverBackendActions();
+            }
         }
 
         // setting up the ui hp

@@ -1,9 +1,11 @@
 import monsterSoldier from '../jobs/monsters/MonsterSoldier';
 import GameScene from '../scenes/GameScene';
+import SaveAndLoadScene from '../scenes/SaveAndLoadScene';
 import UIScene from '../scenes/UIScene';
 import {IBaseStatBlock, IStatIncreases} from '../types/Advancement';
 import {Direction} from '../types/Direction';
 import GameActor from './GameActor';
+import {IPlayer} from './GameDatabase';
 import {MonsterJob} from './Jobs/MonsterJob';
 import Vector2 = Phaser.Math.Vector2;
 
@@ -14,14 +16,15 @@ export default class Bot extends GameActor{
     public gameScene: GameScene;
     public path: Phaser.Math.Vector2[] = [];
     public startedMoving = false;
+    private saveAndLoadScene: SaveAndLoadScene;
 
     constructor(
         name: string,
         sprite: Phaser.GameObjects.Sprite,
-        experience: number,
+        _experience: number,
         species: string,
         public job: MonsterJob,
-        public currentHP: number,
+        private _currentHP: number,
         public currentResource: number
         // stats?: Stats
     ) {
@@ -29,9 +32,10 @@ export default class Bot extends GameActor{
             name,
             sprite,
             species,
-            experience
+            _experience
         );
 
+        this.saveAndLoadScene = <SaveAndLoadScene>sprite.scene.scene.get('SaveAndLoad');
         this.gameScene = <GameScene>sprite.scene.scene.get('Game');
         this.uiScene = <UIScene>sprite.scene.scene.get('UI');
 
@@ -187,5 +191,36 @@ export default class Bot extends GameActor{
 
     public get defense() {
         return this.calculateStat('agility') / 2;
+    }
+
+
+
+    public get currentHP() {
+        return this._currentHP;
+    }
+
+    public set currentHP(currentHP) {
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                player.bots[0].currentHP = currentHP;
+                return player;
+            }
+        );
+        this._currentHP = currentHP;
+    }
+
+    public set experience(experience) {
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                player.bots[0].experience += experience;
+                return player;
+            }
+        );
+        this._experience = experience;
+    }
+    public get experience() {
+        return this._experience;
     }
 }

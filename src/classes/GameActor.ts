@@ -8,7 +8,7 @@ export default class GameActor {
         public name: string,
         public sprite: Phaser.GameObjects.Sprite,
         public species: string,
-        public experience: number
+        protected _experience: number
     ) {
 
     }

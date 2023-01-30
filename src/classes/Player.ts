@@ -1,5 +1,6 @@
 import playerSoldier from '../jobs/players/PlayerSoldier';
 import GameScene from '../scenes/GameScene';
+import SaveAndLoadScene from '../scenes/SaveAndLoadScene';
 import UIScene from '../scenes/UIScene';
 import {IBaseStatBlock, IStatIncreases} from '../types/Advancement';
 import {Direction} from '../types/Direction';
@@ -12,25 +13,27 @@ export default class Player extends GameActor{
     private uiScene!: UIScene;
     private gameScene!: GameScene;
     public maxResource = 100;
+    private saveAndLoadScene!: SaveAndLoadScene;
     constructor(
         name: string,
         sprite: Phaser.GameObjects.Sprite,
         public tilePos: Phaser.Math.Vector2,
-        public gold: number,
-        experience: number,
-        species: string,
+        private _gold: number,
+        _experience: number,
+        public species: string,
         public job: PlayerJob,
         public inventory: Item[],
         public equipment: Equipment,
-        public currentHP: number,
+        private _currentHP: number,
         public currentResource: number
     ) {
         super(
             name,
             sprite,
             species,
-            experience
+            _experience
         );
+        this.saveAndLoadScene = <SaveAndLoadScene>this.sprite.scene.scene.get('SaveAndLoad');
         this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
         this.gameScene = <GameScene>this.sprite.scene.scene.get('Game');
 
@@ -159,5 +162,40 @@ export default class Player extends GameActor{
 
     public get defense() {
         return this.calculateStat('defense');
+    }
+
+    public get gold() {
+        return this._gold;
+    }
+
+    public set gold(gold) {
+        this.saveAndLoadScene.db.players.update(
+            0,
+            {gold}
+        );
+        this._gold = gold;
+    }
+
+    public get currentHP() {
+        return this._currentHP;
+    }
+
+    public set currentHP(currentHP) {
+        this.saveAndLoadScene.db.players.update(
+            0,
+            {currentHP}
+        );
+        this._currentHP = currentHP;
+    }
+
+    public set experience(experience) {
+        this.saveAndLoadScene.db.players.update(
+            0,
+            {experience}
+        );
+        this._experience = experience;
+    }
+    public get experience() {
+        return this._experience;
     }
 }

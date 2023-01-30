@@ -920,16 +920,7 @@ export default class UIScene extends Phaser.Scene {
 
                     this.gameScene.player.inventory.splice(Number(itemIndex), 1);
 
-                    const newGoldAmount = this.gameScene.player.gold + sellPrice;
-
-                    this.saveAndLoadScene.db.players.update(
-                        0,
-                        {
-                            gold: newGoldAmount
-                        }
-                    );
-
-                    this.gameScene.player.gold = newGoldAmount;
+                    this.gameScene.player.gold = this.gameScene.player.gold + sellPrice;
 
                     this.hideMerchantFrames();
                     this.leftSideDialogFrame.setVisible(true);
@@ -972,8 +963,6 @@ export default class UIScene extends Phaser.Scene {
                     }
                     else {
                         // buy the item!
-                        const newGoldAmount = this.gameScene.player.gold - selectedItem.cost;
-
                         const purchasedItem = new Item(
                             selectedItem.key,
                             selectedItem.activekey,
@@ -988,14 +977,7 @@ export default class UIScene extends Phaser.Scene {
                             selectedItem.stats
                         );
 
-                        this.saveAndLoadScene.db.players.update(
-                            0,
-                            {
-                                gold: newGoldAmount
-                            }
-                        );
-
-                        this.gameScene.player.gold = newGoldAmount;
+                        this.gameScene.player.gold = this.gameScene.player.gold - selectedItem.cost;
 
                         this.saveAndLoadScene.db.players.update(
                             0,

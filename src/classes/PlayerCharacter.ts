@@ -13,7 +13,7 @@ import {PlayerJob} from './Jobs/PlayerJob';
 import Unit from './Unit';
 
 export default class PlayerCharacter extends Unit {
-    public currentHP: number;
+    private _currentHP!: number;
     public currentResource: number;
     public damageTween!: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
     public equipment: Equipment;
@@ -65,27 +65,6 @@ export default class PlayerCharacter extends Unit {
     }
 
     public applyHPChange(hpChangeAmount: number): number {
-        this.saveAndLoadScene.db.players.update(
-            0,
-            (player: IPlayer) => {
-                const unitToUpdate = player.combatState.heroes.find(unit => unit.id === this.id);
-
-                if (unitToUpdate !== undefined) {
-                    if (hpChangeAmount < 0) {
-                        unitToUpdate.currentHP = Math.min(this.maxHP, unitToUpdate.currentHP - hpChangeAmount);
-                    }
-                    else {
-                        unitToUpdate.currentHP -= hpChangeAmount;
-                    }
-                    if (unitToUpdate.currentHP <= 0) {
-                        unitToUpdate.currentHP = 0;
-                    }
-                }
-
-                return player;
-            }
-        );
-
         return super.applyHPChange(hpChangeAmount, this.battleScene.player1HPText);
     }
 
@@ -308,6 +287,7 @@ export default class PlayerCharacter extends Unit {
                 0,
                 (player: IPlayer) => {
                     player.inventory.splice(inventoryIndex, 1);
+                    return player;
                 }
             );
 
@@ -413,4 +393,25 @@ export default class PlayerCharacter extends Unit {
     public get defense() {
         return this.calculateStat('defense');
     }
+
+    set currentHP(newValue: number) {
+        console.log(`changing hp on the player character!!! old value: ${this._currentHP}, new value: ${newValue}`);
+        // console.trace();
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                const unit = player.combatState.units.find(unit => unit.id === this.id);
+                if (unit) {
+                    unit.currentHP = newValue;
+                }
+                return player;
+            }
+        );
+        this._currentHP = newValue;
+    }
+
+    get currentHP(): number {
+        return this._currentHP;
+    }
+
 }

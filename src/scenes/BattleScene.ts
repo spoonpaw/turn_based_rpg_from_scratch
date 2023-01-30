@@ -13,7 +13,7 @@ import {enemies} from '../enemies/enemies';
 import MonsterSoldier from '../jobs/monsters/MonsterSoldier';
 import playerSoldier from '../jobs/players/PlayerSoldier';
 import {levels} from '../levels/Levels';
-import { IStatIncreases } from '../types/Advancement';
+import {IStatIncreases} from '../types/Advancement';
 import eventsCenter from '../utils/EventsCenter';
 import BattleUIScene from './BattleUIScene';
 import GameScene from './GameScene';
@@ -200,21 +200,30 @@ export default class BattleScene extends Phaser.Scene {
         return !this.enemies.some(enemy => enemy.isLiving());
     }
 
-    public endBattle(): void {
-
-        this.saveAndLoadScene.db.players.update(
-            0,
-            {inCombat: false}
-        );
-
+    private endBattleFrontEndActions() {
         this.battleUIScene.disableAllActionButtons();
-        // send the player info to the game scene ui
+        for (const unit of this.heroes) {
+            if (unit instanceof PlayerCharacter) {
+                const gameScenePlayer = this.gameScene.player;
 
-        this.sendPlayerInfoToGameScene();
+                eventsCenter.emit(
+                    'updateResource',
+                    gameScenePlayer.currentResource,
+                    gameScenePlayer.maxResource
+                );
 
-        this.clearStateAndRemoveSprites();
-
-        // sleep the ui
+                this.uiScene.updateHP(
+                    gameScenePlayer.currentHP,
+                    gameScenePlayer.maxHP
+                );
+            }
+            else {
+                const bot = this.gameScene.bots[0];
+                // unit must be a bot character at this point
+                this.uiScene.updatePlayer2HP(bot.currentHP, bot.maxHP);
+            }
+        }
+        this.removeSprites();
         this.scene.sleep('BattleUI');
 
         this.gameScene.input.keyboard!.enabled = true;
@@ -223,7 +232,124 @@ export default class BattleScene extends Phaser.Scene {
         this.scene.switch('Game');
     }
 
-    private clearStateAndRemoveSprites() {
+    public endBattleBackEndActions() {
+        this.saveAndLoadScene.db.players.update(
+            0,
+            {inCombat: false}
+        );
+        for (const unit of this.heroes) {
+            if (unit instanceof PlayerCharacter) {
+                const gameScenePlayer = this.gameScene.player;
+                gameScenePlayer.currentHP = unit.currentHP;
+
+                if (gameScenePlayer.currentHP <= 0) {
+                    gameScenePlayer.currentHP = 1;
+                }
+
+                let goldAmount = 0;
+                let experienceAmount = 0;
+
+                for (const enemy of this.enemies) {
+                    const enemyData = enemies.find(obj => {
+                        return obj.key === enemy.texture.key;
+                    });
+                    goldAmount += enemyData?.gold ?? 0;
+                    experienceAmount += enemyData?.experience ?? 0;
+                }
+
+                if (this.interactionState === 'handlingrunselect') {
+                    goldAmount = 0;
+                    experienceAmount = 0;
+                }
+
+                gameScenePlayer.gold = gameScenePlayer.gold + goldAmount;
+
+                const newExperienceAmount = gameScenePlayer.experience + experienceAmount;
+
+                gameScenePlayer.experience = newExperienceAmount;
+            }
+            else {
+                const bot = this.gameScene.bots[0];
+                // unit must be a bot character at this point
+                bot.currentHP = unit.currentHP;
+                if (bot.currentHP <= 0) {
+                    bot.currentHP = 1;
+                }
+
+                let experienceAmount = 0;
+
+                for (const enemy of this.enemies) {
+                    const enemyData = enemies.find(obj => {
+                        return obj.key === enemy.texture.key;
+                    });
+                    experienceAmount += enemyData?.experience ?? 0;
+                }
+
+                // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
+                let newLevel = Math.max(
+                    1,
+                    Math.ceil(
+                        bot.LEVELING_RATE * Math.sqrt(
+                            bot.experience + experienceAmount
+                        )
+                    )
+                );
+
+                while (newLevel > this.gameScene.player.level) {
+                    // find the maximum whole number amount of gold that can be
+                    //  received by the bot without exceeding amount required to get to
+                    //  a level exceeding that of the player
+                    experienceAmount -= 1;
+                    newLevel = Math.max(
+                        1,
+                        Math.ceil(
+                            bot.LEVELING_RATE * Math.sqrt(
+                                bot.experience + experienceAmount
+                            )
+                        )
+                    );
+                    if (experienceAmount === 0) break;
+                }
+
+                if (this.interactionState === 'handlingrunselect') {
+                    experienceAmount = 0;
+                }
+
+                const newExperienceAmount = bot.experience + experienceAmount;
+
+                bot.experience = newExperienceAmount;
+
+            }
+        }
+        this.clearState();
+    }
+
+
+    // public endBattle(): void {
+    //
+    //     this.saveAndLoadScene.db.players.update(
+    //         0,
+    //         {inCombat: false}
+    //     );
+    //
+    //     this.battleUIScene.disableAllActionButtons();
+    //     // send the player info to the game scene ui
+    //
+    //     this.sendPlayerInfoToGameScene();
+    //
+    //     this.clearState();
+    //     this.removeSprites();
+    //
+    //     // sleep the ui
+    //     this.scene.sleep('BattleUI');
+    //
+    //     this.gameScene.input.keyboard!.enabled = true;
+    //
+    //     // return to game scene and sleep current battle scene
+    //     this.scene.switch('Game');
+    // }
+
+    private clearState() {
         this.saveAndLoadScene.db.players.update(
             0,
             (player: IPlayer) => {
@@ -242,6 +368,9 @@ export default class BattleScene extends Phaser.Scene {
                 };
             }
         );
+    }
+
+    private removeSprites() {
         // clear state, remove sprites
         this.heroes.length = 0;
         this.enemies.length = 0;
@@ -258,33 +387,19 @@ export default class BattleScene extends Phaser.Scene {
         this.interactionState = 'init';
     }
 
-    private endBattleGameOver(): void {
-
+    public endBattleGameOverBackendActions(): void {
         this.saveAndLoadScene.db.players.update(
             0,
             {inCombat: false}
         );
 
-        // change to game over music
-        this.musicScene.changeSong('gameover');
-
         // cut gold in half, set hit points to full, cut to game over screen, respawn
-        eventsCenter.emit('Message', 'Thou art vanquished!');
-        const newGoldAmount = Math.floor(this.gameScene.player.gold / 2);
-        this.saveAndLoadScene.db.players.update(
-            0,
-            {
-                gold: newGoldAmount
-            }
-        );
-        this.gameScene.player.gold = newGoldAmount;
-        eventsCenter.emit('updateResource', this.gameScene.player.currentResource, this.gameScene.player.maxResource);
+        this.gameScene.player.gold = Math.floor(this.gameScene.player.gold / 2);
 
         const newHP = this.gameScene.player.maxHP;
         this.saveAndLoadScene.db.players.update(
             0,
             (player: IPlayer) => {
-                player.currentHP = newHP;
                 player.position.x = levels['overworld']['spawnCoords'][0].x;
                 player.position.y = levels['overworld']['spawnCoords'][0].y;
                 return player;
@@ -293,19 +408,21 @@ export default class BattleScene extends Phaser.Scene {
         this.gameScene.player.currentHP = newHP;
         if (this.gameScene.bots.length > 0) {
             const newBotHP = this.gameScene.bots[0].maxHP;
-            this.saveAndLoadScene.db.players.update(
-                0,
-                (player: IPlayer) => {
-                    if (player.bots.length > 0) {
-                        player.bots[0].currentHP = newBotHP;
-                    }
-                }
-            );
             this.gameScene.bots[0].currentHP = newBotHP;
+        }
+        this.clearState();
+    }
+
+    public endBattleGameOverFrontEndActions(): void {
+        // change to game over music
+        this.musicScene.changeSong('gameover');
+        eventsCenter.emit('Message', 'Thou art vanquished!');
+        eventsCenter.emit('updateResource', this.gameScene.player.currentResource, this.gameScene.player.maxResource);
+        if (this.gameScene.bots.length > 0) {
+            const newBotHP = this.gameScene.bots[0].maxHP;
             this.uiScene.player2hpText.setText(`HP: ${newBotHP}/${newBotHP}`);
         }
         this.uiScene.updateHP(this.gameScene.player.currentHP, this.gameScene.player.maxHP);
-
         this.time.addEvent({
             delay: 1000,
             callback: () => {
@@ -319,7 +436,7 @@ export default class BattleScene extends Phaser.Scene {
 
         this.cameras.main.once('camerafadeoutcomplete', () => {
 
-            this.clearStateAndRemoveSprites();
+            this.removeSprites();
 
             // sleep the ui
             this.scene.sleep('BattleUI');
@@ -334,16 +451,22 @@ export default class BattleScene extends Phaser.Scene {
         });
     }
 
-    private gameOverTest() {
+    public gameOverTest() {
         // check if all the heroes are dead (players and bots)
-        console.log('testing whether each hero is dead from the game over scene! (it\'s not working!)');
+        console.log('testing whether each hero is dead from the game over test method! (it\'s not working!)');
         console.log({
             heroesArray: this.heroes
         });
         let allHeroesAreDead = true;
         for (const hero of this.heroes) {
+            console.log(`checking if ${hero.name} is dead.`);
             if (hero.isLiving()) {
+                console.log(`${hero.name} appears to be living. their current hp is ${hero.currentHP}`);
                 allHeroesAreDead = false;
+            }
+            else {
+                console.log(`${hero.name} appears to be dead. their current hp is ${hero.currentHP}`);
+                continue;
             }
         }
 
@@ -373,7 +496,12 @@ export default class BattleScene extends Phaser.Scene {
             0,
             (player: IPlayer) => {
                 console.log('getting the target from the action select to store in the db');
-                console.log({playerCombatStateUnits: player.combatState.units, dataTarget: data.target});
+                console.log(
+                    {
+                        playerCombatStateUnits: player.combatState.units,
+                        dataTarget: data.target
+                    }
+                );
                 const saveTarget = player.combatState.units.find(unit => unit.id === data.target.id);
 
 
@@ -456,10 +584,11 @@ export default class BattleScene extends Phaser.Scene {
                 // run was successful, exit combat
                 // deliver the successful retreat message and exit the battle
                 eventsCenter.emit('Message', 'You have successfully retreated.');
+                this.endBattleBackEndActions();
                 this.sfxScene.playSound('runaway');
                 this.time.addEvent({
                     delay: 2000,
-                    callback: this.endBattle,
+                    callback: this.endBattleFrontEndActions,
                     callbackScope: this
                 });
                 return;
@@ -522,6 +651,7 @@ export default class BattleScene extends Phaser.Scene {
         console.log({roundUnits: this.roundUnits, turnIndex: this.turnIndex});
         const currentUnit = this.roundUnits[this.turnIndex];
         console.log({currentUnit});
+        console.log({currentUnitCurrentHP: currentUnit.currentHP});
         if (currentUnit instanceof Enemy) {
             // the enemy is going to use an ability (default physical attack)
             if (currentUnit.isLiving()) {
@@ -573,7 +703,7 @@ export default class BattleScene extends Phaser.Scene {
 
         // TODO: alter this. it is problematic due to the fact that if the player exits before the turn has ended, the battle hasn't
         //  had a chance to properly conclude, saving its required data to the database so it can be immeadiately loaded
-        //  if the game is refreshed, move the check and all game over database logic to the methods where hp is
+        //  if the game is refreshed, move the check and all gameover database logic to the methods where hp is
         //  being altered, as that is the key property to monitor for changes. it must send the signal to cut
         //  the battle scene short with the messages as triggered below and send the player to the game over screen
         //  as usual.
@@ -582,7 +712,7 @@ export default class BattleScene extends Phaser.Scene {
         if (this.gameOverTest()) {
             this.time.addEvent({
                 delay: turnRunTime,
-                callback: this.endBattleGameOver,
+                callback: this.endBattleGameOverFrontEndActions,
                 callbackScope: this
             });
         }
@@ -605,159 +735,106 @@ export default class BattleScene extends Phaser.Scene {
         }
     }
 
-    private sendPlayerInfoToGameScene(): void {
-        for (const unit of this.heroes) {
-            if (unit instanceof PlayerCharacter) {
-                const gameScenePlayer = this.gameScene.player;
-                this.saveAndLoadScene.db.players.update(
-                    0,
-                    (player: IPlayer) => {
-                        player.currentHP = unit.currentHP;
-                        return player;
-                    }
-                );
-                gameScenePlayer.currentHP = unit.currentHP;
-
-                if (gameScenePlayer.currentHP <= 0) {
-                    this.saveAndLoadScene.db.players.update(
-                        0,
-                        (player: IPlayer) => {
-                            player.currentHP = 1;
-                            return player;
-                        }
-                    );
-                    gameScenePlayer.currentHP = 1;
-                }
-
-                let goldAmount = 0;
-                let experienceAmount = 0;
-
-                for (const enemy of this.enemies) {
-                    const enemyData = enemies.find(obj => {
-                        return obj.key === enemy.texture.key;
-                    });
-                    goldAmount += enemyData?.gold ?? 0;
-                    experienceAmount += enemyData?.experience ?? 0;
-                }
-
-                if (this.interactionState === 'handlingrunselect') {
-                    goldAmount = 0;
-                    experienceAmount = 0;
-                }
-
-                const newGoldAmount = gameScenePlayer.gold + goldAmount;
-
-                this.saveAndLoadScene.db.players.update(
-                    0, {
-                        gold: newGoldAmount
-                    }
-                );
-
-                gameScenePlayer.gold = newGoldAmount;
-
-                eventsCenter.emit('updateResource', gameScenePlayer.currentResource, gameScenePlayer.maxResource);
-
-                const newExperienceAmount = gameScenePlayer.experience + experienceAmount;
-
-                this.saveAndLoadScene.db.players.update(
-                    0,
-                    {
-                        experience: newExperienceAmount
-                    }
-                );
-
-                gameScenePlayer.experience = newExperienceAmount;
-
-                this.uiScene.updateHP(gameScenePlayer.currentHP, gameScenePlayer.maxHP);
-
-                eventsCenter.emit('updateXP', gameScenePlayer.experience);
-            }
-            else {
-                const bot = this.gameScene.bots[0];
-                // unit must be a bot character at this point
-                this.saveAndLoadScene.db.players.update(
-                    0,
-                    (player: IPlayer) => {
-                        player.bots[0].currentHP = unit.currentHP;
-                        return player;
-                    }
-                );
-                bot.currentHP = unit.currentHP;
-                if (bot.currentHP <= 0) {
-                    this.saveAndLoadScene.db.players.update(
-                        0,
-                        (player: IPlayer) => {
-                            player.currentHP = 1;
-                            return player;
-                        }
-                    );
-                    bot.currentHP = 1;
-                }
-
-                let experienceAmount = 0;
-
-                for (const enemy of this.enemies) {
-                    const enemyData = enemies.find(obj => {
-                        return obj.key === enemy.texture.key;
-                    });
-                    experienceAmount += enemyData?.experience ?? 0;
-                }
-
-                // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
-                let newLevel = Math.max(
-                    1,
-                    Math.ceil(
-                        bot.LEVELING_RATE * Math.sqrt(
-                            bot.experience + experienceAmount
-                        )
-                    )
-                );
-
-                while (newLevel > this.gameScene.player.level) {
-                    // find the maximum whole number amount of gold that can be
-                    //  received by the bot without exceeding amount required to get to
-                    //  a level exceeding that of the player
-                    experienceAmount -= 1;
-                    newLevel = Math.max(
-                        1,
-                        Math.ceil(
-                            bot.LEVELING_RATE * Math.sqrt(
-                                bot.experience + experienceAmount
-                            )
-                        )
-                    );
-                    if (experienceAmount === 0) break;
-                }
-
-                if (this.interactionState === 'handlingrunselect') {
-                    experienceAmount = 0;
-                }
-
-                const newExperienceAmount = bot.experience + experienceAmount;
-
-                this.saveAndLoadScene.db.players.update(
-                    0,
-                    (player: IPlayer) => {
-                        player.bots[0].experience = newExperienceAmount;
-                        return player;
-                    }
-                );
-
-                bot.experience = newExperienceAmount;
-
-                newLevel = Math.max(
-                    1,
-                    Math.ceil(
-                        bot.LEVELING_RATE * Math.sqrt(
-                            bot.experience
-                        )
-                    )
-                );
-
-                this.uiScene.updatePlayer2HP(bot.currentHP, bot.maxHP);
-            }
-        }
-    }
+    // private sendPlayerInfoToGameScene(): void {
+    //     for (const unit of this.heroes) {
+    //         if (unit instanceof PlayerCharacter) {
+    //             const gameScenePlayer = this.gameScene.player;
+    //             gameScenePlayer.currentHP = unit.currentHP;
+    //
+    //             if (gameScenePlayer.currentHP <= 0) {
+    //                 gameScenePlayer.currentHP = 1;
+    //             }
+    //
+    //             let goldAmount = 0;
+    //             let experienceAmount = 0;
+    //
+    //             for (const enemy of this.enemies) {
+    //                 const enemyData = enemies.find(obj => {
+    //                     return obj.key === enemy.texture.key;
+    //                 });
+    //                 goldAmount += enemyData?.gold ?? 0;
+    //                 experienceAmount += enemyData?.experience ?? 0;
+    //             }
+    //
+    //             if (this.interactionState === 'handlingrunselect') {
+    //                 goldAmount = 0;
+    //                 experienceAmount = 0;
+    //             }
+    //
+    //             gameScenePlayer.gold = gameScenePlayer.gold + goldAmount;
+    //
+    //             eventsCenter.emit('updateResource', gameScenePlayer.currentResource, gameScenePlayer.maxResource);
+    //
+    //             const newExperienceAmount = gameScenePlayer.experience + experienceAmount;
+    //
+    //             gameScenePlayer.experience = newExperienceAmount;
+    //
+    //             this.uiScene.updateHP(gameScenePlayer.currentHP, gameScenePlayer.maxHP);
+    //         }
+    //         else {
+    //             const bot = this.gameScene.bots[0];
+    //             // unit must be a bot character at this point
+    //             bot.currentHP = unit.currentHP;
+    //             if (bot.currentHP <= 0) {
+    //                 bot.currentHP = 1;
+    //             }
+    //
+    //             let experienceAmount = 0;
+    //
+    //             for (const enemy of this.enemies) {
+    //                 const enemyData = enemies.find(obj => {
+    //                     return obj.key === enemy.texture.key;
+    //                 });
+    //                 experienceAmount += enemyData?.experience ?? 0;
+    //             }
+    //
+    //             // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
+    //             let newLevel = Math.max(
+    //                 1,
+    //                 Math.ceil(
+    //                     bot.LEVELING_RATE * Math.sqrt(
+    //                         bot.experience + experienceAmount
+    //                     )
+    //                 )
+    //             );
+    //
+    //             while (newLevel > this.gameScene.player.level) {
+    //                 // find the maximum whole number amount of gold that can be
+    //                 //  received by the bot without exceeding amount required to get to
+    //                 //  a level exceeding that of the player
+    //                 experienceAmount -= 1;
+    //                 newLevel = Math.max(
+    //                     1,
+    //                     Math.ceil(
+    //                         bot.LEVELING_RATE * Math.sqrt(
+    //                             bot.experience + experienceAmount
+    //                         )
+    //                     )
+    //                 );
+    //                 if (experienceAmount === 0) break;
+    //             }
+    //
+    //             if (this.interactionState === 'handlingrunselect') {
+    //                 experienceAmount = 0;
+    //             }
+    //
+    //             const newExperienceAmount = bot.experience + experienceAmount;
+    //
+    //             bot.experience = newExperienceAmount;
+    //
+    //             newLevel = Math.max(
+    //                 1,
+    //                 Math.ceil(
+    //                     bot.LEVELING_RATE * Math.sqrt(
+    //                         bot.experience
+    //                     )
+    //                 )
+    //             );
+    //
+    //             this.uiScene.updatePlayer2HP(bot.currentHP, bot.maxHP);
+    //         }
+    //     }
+    // }
 
     private shortenTextByPixel(phasertext: Phaser.GameObjects.Text, maxpixel: number): Phaser.GameObjects.Text {
         while (phasertext.width > maxpixel) {
@@ -987,8 +1064,8 @@ export default class BattleScene extends Phaser.Scene {
                 return obj.key === enemyUnit.key;
             })!.stats
         );
-        enemy.stats.currentHP = enemyUnit.currentHP;
-        enemy.stats.currentResource = enemyUnit.currentResource;
+        enemy.currentHP = enemyUnit.currentHP;
+        enemy.currentResource = enemyUnit.currentResource;
         this.add.existing(enemy);
 
         this.heroes = [soldier];
@@ -1313,10 +1390,10 @@ export default class BattleScene extends Phaser.Scene {
 
         this.turnIndex = -1;
         // check for victory or game over state
-        if (this.interactionState === 'gameover') {
-            this.endBattleGameOver();
-            return;
-        }
+        // if (this.interactionState === 'gameover') {
+        //     this.endBattleGameOver();
+        //     return;
+        // }
 
         this.battleUIScene.disableAllActionButtons();
 
@@ -1390,7 +1467,7 @@ export default class BattleScene extends Phaser.Scene {
 
             this.time.addEvent({
                 delay: 4000 + levelUpDelay,
-                callback: this.endBattle,
+                callback: this.endBattleFrontEndActions,
                 callbackScope: this
             });
             return;
