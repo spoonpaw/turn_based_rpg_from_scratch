@@ -2,7 +2,6 @@ import GameScene from '../../scenes/GameScene';
 import SaveAndLoadScene from '../../scenes/SaveAndLoadScene';
 import UIScene from '../../scenes/UIScene';
 import eventsCenter from '../../utils/EventsCenter';
-import {IPlayer} from '../GameDatabase';
 import NPC from './NPC';
 
 export default class Innkeeper extends NPC {
@@ -101,42 +100,18 @@ export default class Innkeeper extends NPC {
                 }
                 else {
                     this.uiScene.leftSideDialogText.setText('Innkeeper:\nThank thee! Thou appeareth well rested.');
-                    const newGoldAmount = this.gameScene.player.gold - 3;
-
-                    this.saveAndLoadScene.db.players.update(
-                        0, {
-                            gold: newGoldAmount
-                        }
-                    );
-                    this.gameScene.player.gold = newGoldAmount;
+                    this.gameScene.player.gold = this.gameScene.player.gold - 3;
                     this.uiScene.coinText.setText(`${this.gameScene.player.gold} gp`);
-                    const newHP = this.gameScene.player.stats.maxHP;
-                    this.saveAndLoadScene.db.players.update(
-                        0,
-                        (player: IPlayer) => {
-                            player.stats.currentHP = newHP;
-                            return player;
-                        }
-                    );
-                    this.gameScene.player.stats.currentHP = newHP;
+                    this.gameScene.player.currentHP = this.gameScene.player.maxHP;
                     if (this.gameScene.bots.length > 0) {
-                        const newHP = this.gameScene.bots[0].stats.maxHP;
-                        this.saveAndLoadScene.db.players.update(
-                            0,
-                            (player: IPlayer) => {
-                                player.bots[0].stats.currentHP = newHP;
-                                return player;
-                            }
-                        );
-
-                        this.gameScene.bots[0].stats.currentHP = newHP;
+                        this.gameScene.bots[0].currentHP = this.gameScene.bots[0].maxHP;
                         this.uiScene.updatePlayer2HP(
-                            this.gameScene.bots[0].stats.currentHP,
-                            this.gameScene.bots[0].stats.maxHP
+                            this.gameScene.bots[0].currentHP,
+                            this.gameScene.bots[0].maxHP
                         );
                     }
-                    this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
-                    this.uiScene.updateResource(this.gameScene.player.stats.currentResource, this.gameScene.player.stats.maxResource);
+                    this.uiScene.updateHP(this.gameScene.player.currentHP, this.gameScene.player.maxHP);
+                    this.uiScene.updateResource(this.gameScene.player.currentResource, this.gameScene.player.maxResource);
                 }
             });
 

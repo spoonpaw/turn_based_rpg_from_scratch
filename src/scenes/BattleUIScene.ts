@@ -45,7 +45,7 @@ export default class BattleUIScene extends Phaser.Scene {
     private useItemButton!: UIActionButton;
     private key1!: Phaser.Input.Keyboard.Key;
     private spaceKey!: Phaser.Input.Keyboard.Key;
-    private loadingBattleMidFight = false;
+    private loadingBattleMidRound = false;
     private saveData?: { enemies: DBUnit[]; heroes: DBUnit[]; passiveEffects: { actor: DBUnit; target: DBUnit; ability: IAbility; turnDurationRemaining: number }[]; units: DBUnit[]; roundUnits: DBUnit[]; turnIndex: number; roundIndex: number; action: string; target: DBUnit | undefined; actionType: string; escaped: boolean | undefined } | undefined;
 
     public constructor() {
@@ -121,7 +121,7 @@ export default class BattleUIScene extends Phaser.Scene {
             }
             // TODO: FIX THIS. THIS IS GETTING SET TO TRUE UNDER CIRCUMSTANCES WHEN IT SHOULD NOT. THE PROBLEM
             //  MAY BE UPSTREAM OF THIS.
-            this.loadingBattleMidFight = data.savedCombatState.turnIndex > 0;
+            this.loadingBattleMidRound = data.savedCombatState.turnIndex > 0;
         }
         this.musicScene = <MusicScene>this.scene.get('Music');
         this.battleScene = <BattleScene>this.scene.get('Battle');
@@ -188,7 +188,7 @@ export default class BattleUIScene extends Phaser.Scene {
 
     public generateAbilityButtons() {
 
-        const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
+        const availableAbilities = this.battleScene.gameScene.player.job.skills.filter(ability => {
             return ability.levelAttained <= this.battleScene.gameScene.player.level;
         });
 
@@ -208,7 +208,7 @@ export default class BattleUIScene extends Phaser.Scene {
                     // display text here describing the selected ability
                     this.battleScene.interactionState = `selectingabilityaction${index}`;
                     const selectedAbilityIndex = Number(this.battleScene.interactionState.split('selectingabilityaction')[1]);
-                    const selectedAbility = this.battleScene.gameScene.player.type.skills[selectedAbilityIndex];
+                    const selectedAbility = this.battleScene.gameScene.player.job.skills[selectedAbilityIndex];
                     this.inventoryAndAbilityDetailFrame.setVisible(true);
                     this.inventoryAndAbilityDetailText.setText(selectedAbility.description);
                     this.inventoryAndAbilityDetailText.setVisible(true);
@@ -319,29 +319,23 @@ export default class BattleUIScene extends Phaser.Scene {
 
     private initiateBattleUI() {
         this.hideUIFrames();
-
-        if (!this.battleScene.checkForVictory()) {
-            eventsCenter.removeListener('MessageClose');
-            eventsCenter.on('MessageClose', this.messageCloseHandler, this);
-
-            eventsCenter.emit('Message', `A ${this.battleScene.enemies[0].name} approaches.`);
-        }
-        else {
-            this.battleScene.endBattle();
-        }
+        eventsCenter.removeListener('MessageClose');
+        eventsCenter.on('MessageClose', this.messageCloseHandler, this);
+        eventsCenter.emit('Message', `A ${this.battleScene.enemies[0].name} approaches.`);
     }
 
     private messageCloseHandler() {
         // TODO i suspect something is messed up in this method
         eventsCenter.removeListener('MessageClose');
         if (this.battleScene.interactionState === 'init') {
-            if (!this.loadingBattleMidFight) {
+            if (!this.loadingBattleMidRound) {
                 this.showCommandAndHotkeyFrames();
                 this.battleScene.interactionState = 'mainselect';
             }
             else {
                 console.log('LOADING A MIDFIGHT BATTLE!!!!!!');
-                this.loadingBattleMidFight = false;
+                // TODO: FIX THIS GLITCH -> SOMETIMES THIS BRANCH IS GETTING EXECUTED WHEN IT SHOULD NOT BE
+                this.loadingBattleMidRound = false;
                 console.log('looking for the target from the battle scene that matches the save data target!');
                 console.log({
                     battleSceneUnits: this.battleScene.units,
@@ -789,7 +783,7 @@ export default class BattleUIScene extends Phaser.Scene {
 
 
 
-                const availableAbilities = this.battleScene.gameScene.player.type.skills.filter(ability => {
+                const availableAbilities = this.battleScene.gameScene.player.job.skills.filter(ability => {
                     return ability.levelAttained <= this.battleScene.gameScene.player.level;
                 });
 

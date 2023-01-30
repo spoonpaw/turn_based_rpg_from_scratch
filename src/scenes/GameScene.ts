@@ -26,7 +26,7 @@
 
 // TODO: add a sign that can be read
 
-import _, {clone} from 'lodash';
+import {clone} from 'lodash';
 
 import Bot from '../classes/Bot';
 import BotGridPhysics from '../classes/BotGridPhysics';
@@ -84,6 +84,8 @@ export default class GameScene extends Phaser.Scene {
     private saveAndLoadScene!: SaveAndLoadScene;
     private firstUpdateRun = false;
     public MAX_LEVEL = 5;
+    public PLAYER_LEVELING_RATE = 0.3;
+    public BOT_LEVELING_RATE = 0.4;
 
     public constructor() {
         super('Game');
@@ -119,7 +121,7 @@ export default class GameScene extends Phaser.Scene {
             this.itemMerchant = undefined;
             this.botScientist = undefined;
 
-            this.saveAndLoadScene.getPlayerByIndex(0).then(player => {
+            this.saveAndLoadScene.getPlayerByIndex(0).then((player: IPlayer) => {
                 console.log('loading the player data from the database');
                 console.log({storedTilemap: player.currentTilemap});
                 const levelData = levels[player.currentTilemap];
@@ -147,64 +149,24 @@ export default class GameScene extends Phaser.Scene {
                     layer?.setDepth(i);
                 }
 
-                let spawnCoords = new Phaser.Math.Vector2(
-                    player.position.x,
-                    player.position.y
-                );
-                const playerStats = _.clone(player.stats);
-                let playerGold = player.gold;
-                let botStats;
-                if (player.bots.length > 0) {
-                    botStats = _.clone(player.bots[0].stats);
-                }
-                const someHeroesAreAlive = player.combatState.heroes.some((hero: DBUnit) => hero.stats.currentHP > 0);
-                console.log('checking if the player disconnected while in combat');
-                if (player.inCombat && !someHeroesAreAlive) {
-                    this.musicScene.changeSong(levelData.music);
-
-                    console.log('apparently the player disconnected while in combat');
-                    console.log('healing the player and the bot');
-                    console.log('removing half their gold');
-                    spawnCoords = new Phaser.Math.Vector2(
-                        levels['overworld']['spawnCoords'][0].x,
-                        levels['overworld']['spawnCoords'][0].y
-                    );
-
-                    playerStats.currentHP = playerStats.maxHP;
-                    playerGold = Math.floor(player.gold / 2);
-                    if (player.bots.length > 0) {
-                        botStats.currentHP = botStats.maxHP;
-                    }
-                    this.saveAndLoadScene.db.players.update(
-                        0,
-                        (player: IPlayer) => {
-                            if (player.bots.length > 0) {
-                                player.bots[0].stats.currentHP = player.bots[0].stats.maxHP;
-                            }
-                            player.stats.currentHP = player.stats.maxHP;
-                            player.inCombat = false;
-                            player.gold = playerGold;
-                            player.position.x = levels['overworld']['spawnCoords'][0].x;
-                            player.position.y = levels['overworld']['spawnCoords'][0].y;
-                            return player;
-                        }
-                    );
-                }
-
                 const playerSprite = this.add.sprite(0, 0, player.texture);
                 playerSprite.setDepth(2);
                 this.cameras.main.startFollow(playerSprite);
                 this.player = new Player(
                     player.name,
                     playerSprite,
-                    spawnCoords,
-                    playerGold,
+                    new Phaser.Math.Vector2(
+                        player.position.x,
+                        player.position.y
+                    ),
+                    player.gold,
                     player.experience,
                     'Human',
                     playerSoldierJob,
                     player.inventory,
                     player.equipment,
-                    playerStats
+                    player.currentHP,
+                    player.currentResource
                 );
                 this.scene.launch('UI');
 
@@ -221,7 +183,8 @@ export default class GameScene extends Phaser.Scene {
                             bot.experience,
                             'Red Bot',
                             MonsterSoldier,
-                            botStats
+                            bot.currentHP,
+                            bot.currentResource
                         )
                     );
                     this.setupBotGridPhysics();
@@ -317,6 +280,7 @@ export default class GameScene extends Phaser.Scene {
                 this.playerTileY = this.player.getTilePos().y;
                 this.movedFromSpawn = false;
 
+                const someHeroesAreAlive = player.combatState.heroes.some((hero: DBUnit) => hero.currentHP > 0);
                 if (player.inCombat && someHeroesAreAlive) {
                     // TODO: if the heroes are all dead just take the gold
                     //  and put the player back at spawn. don't start the
@@ -422,7 +386,6 @@ export default class GameScene extends Phaser.Scene {
                 weapon: undefined
             };
 
-
             this.player = new Player(
                 data.nameData,
                 playerSprite,
@@ -435,7 +398,9 @@ export default class GameScene extends Phaser.Scene {
                 'Human',
                 playerSoldierJob,
                 [],
-                emptyEquipment
+                emptyEquipment,
+                playerSoldierJob.baseStats.vitality * 2,
+                100
             );
 
             //upload the player interface to the client database
@@ -463,12 +428,14 @@ export default class GameScene extends Phaser.Scene {
                 inCombat: false,
                 inventory: this.player.inventory,
                 name: data.nameData,
-                job: this.player.type,
+                job: this.player.job,
                 position: new Phaser.Math.Vector2(
                     12,
                     14
                 ),
-                stats: this.player.stats,
+                currentHP: this.player.currentHP,
+                currentResource: this.player.currentResource,
+                // stats: this.player.stats,
                 texture: this.player.sprite.texture.key
 
             });
@@ -626,7 +593,9 @@ export default class GameScene extends Phaser.Scene {
                 playerSoldierJob,
                 this.player.inventory,
                 this.player.equipment,
-                this.player.stats
+                this.player.currentHP,
+                this.player.currentResource
+                // this.player.stats
             );
             this.setupPlayerGridPhysics();
 
@@ -634,7 +603,8 @@ export default class GameScene extends Phaser.Scene {
             if (this.bots.length > 0) {
                 // Spawn the bot!
                 const botClone = clone(this.bots[0]);
-                const botCloneStats = clone(this.bots[0].stats);
+                const botCurrentHP = this.bots[0].currentHP;
+                const botCurrentResource = this.bots[0].currentResource;
 
                 const botSprite = this.add.sprite(0, 0, botClone.sprite.texture);
                 botSprite.setDepth(1);
@@ -643,8 +613,9 @@ export default class GameScene extends Phaser.Scene {
                     botSprite,
                     botClone.experience,
                     botClone.species,
-                    botClone.type,
-                    botCloneStats
+                    botClone.job,
+                    botCurrentHP,
+                    botCurrentResource
                 );
                 this.bots[0] = bot;
 

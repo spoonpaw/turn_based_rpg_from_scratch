@@ -142,15 +142,17 @@ export default class extends NPC {
                 botSprite,
                 0,
                 'Red Bot',
-                monsterSoldierJob
+                monsterSoldierJob,
+                monsterSoldierJob.baseStats.vitality * 2,
+                100
             );
             this.gameScene.bots.push(redBot);
             // set all the player2 ui elements to visible with red bot's stats
 
-            this.uiScene.player2hpText.setText(`HP: ${redBot.stats.currentHP ?? '0'}/${redBot.stats.maxHP ?? '0'}`);
+            this.uiScene.player2hpText.setText(`HP: ${redBot.currentHP ?? '0'}/${redBot.maxHP ?? '0'}`);
 
-            const currentResource = redBot.stats.currentResource;
-            const maxResource = redBot.stats.maxResource;
+            const currentResource = redBot.currentResource;
+            const maxResource = 100;
 
             this.uiScene.player2ManaText.setText(`Vim: ${currentResource}/${maxResource}`);
 
@@ -165,11 +167,12 @@ export default class extends NPC {
                 job: MonsterSoldier,
                 species: 'Red Bot',
                 experience: 0,
-                stats: redBot.stats,
                 texture: 'redbot',
                 position: this.gameScene.player.getTilePos(),
                 facing: Direction.DOWN,
                 inCombat: false,
+                currentHP: redBot.currentHP,
+                currentResource: 100,
                 equipment: {
                     body: undefined,
                     head: undefined,

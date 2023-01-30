@@ -4,7 +4,6 @@ import BattleScene from '../scenes/BattleScene';
 import BattleUIScene from '../scenes/BattleUIScene';
 import GameScene from '../scenes/GameScene';
 import SaveAndLoadScene from '../scenes/SaveAndLoadScene';
-import Stats from '../stats/Stats';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import Item from './Item';
@@ -22,8 +21,11 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
     };
     public inventory: Item[] = [];
     // public living: boolean;
-    abstract stats: Stats;
+    // abstract stats: Stats;
+    abstract currentHP: number;
+    abstract currentResource: number;
     abstract key: string;
+    abstract maxHP: number;
     protected battleScene: BattleScene;
     protected battleUIScene: BattleUIScene;
     protected gameScene: GameScene;
@@ -60,7 +62,7 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         if (actionType === 'ability') {
 
             // gets a list of all the abilities that the player character has learned and is currently able to use, based on their level
-            availableActions = this.battleScene.gameScene.player.type.skills
+            availableActions = this.battleScene.gameScene.player.job.skills
                 .filter(ability => ability.levelAttained <= this.battleScene.gameScene.player.level)
                 .map(ability => ability.name);
         }
@@ -77,7 +79,7 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
 
     public updateSceneOnReceivingDamage(): void {
         // take care of flashing the enemy sprite if it gets damaged or hiding it if it dies.
-        if (this.stats.currentHP <= 0) {
+        if (this.currentHP <= 0) {
             this.setVisible(false);
         }
         else {
@@ -91,61 +93,35 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
         }
     }
 
-    public getCombinedStat(stat: keyof typeof this.stats): number {
-        const baseStat = this.stats[stat];
-        let weaponBonus = 0;
-        if (this.equipment.weapon) {
-            weaponBonus += this.equipment.weapon.stats![stat as keyof typeof this.equipment.weapon.stats];
-        }
-
-        let headBonus = 0;
-        if (this.equipment.head) {
-            headBonus += this.equipment.head.stats![stat as keyof typeof this.equipment.head.stats];
-        }
-
-        let bodyBonus = 0;
-        if (this.equipment.body) {
-            bodyBonus += this.equipment.body.stats![stat as keyof typeof this.equipment.body.stats];
-        }
-
-        let offHandBonus = 0;
-        if (this.equipment.offhand) {
-            offHandBonus += this.equipment.offhand.stats![stat as keyof typeof this.equipment.offhand.stats];
-        }
-
-        const totalEquipmentBonus = weaponBonus + headBonus + bodyBonus + offHandBonus;
-
-        if (stat === 'defense') {
-            return (this.stats.agility / 2) + totalEquipmentBonus;
-        }
-
-        return baseStat + totalEquipmentBonus;
-    }
-
-    applyHPChange(hpChangeAmount: number, hpText: Phaser.GameObjects.Text) {
-        const initialCharacterHP = this.stats.currentHP;
-
+    public applyHPChange(hpChangeAmount: number, hpText: Phaser.GameObjects.Text) {
+        const initialCharacterHP = this.currentHP;
+        console.log(`applying a change of hp to ${this.name}, their current hp is ${initialCharacterHP}`);
         // handle healing hp change (negative hp change signifies healing)
         if (hpChangeAmount < 0) {
-            this.stats.currentHP = Math.min(this.stats.maxHP, this.stats.currentHP - hpChangeAmount);
+            this.currentHP = Math.min(this.maxHP, this.currentHP - hpChangeAmount);
+            console.log(`${this.name} is getting healed for ${-hpChangeAmount}, now their hp is ${this.currentHP}`);
         }
 
         // apply damage
         else {
             // handle the math of taking damage,
-            this.stats.currentHP -= hpChangeAmount;
+            this.currentHP -= hpChangeAmount;
+            console.log(`${this.name} is getting damaged for ${hpChangeAmount}, now their hp is ${this.currentHP}`);
             this.updateSceneOnReceivingDamage();
         }
 
-        if (this.stats.currentHP <= 0) {
-            this.stats.currentHP = 0;
+        if (this.currentHP <= 0) {
+            this.currentHP = 0;
+            if (this.battleScene.gameOverTest()) {
+                this.battleScene.endBattleGameOverBackendActions();
+            }
         }
 
         // setting up the ui hp
-        hpText.setText(`HP: ${this.stats.currentHP}/${this.stats.maxHP}`);
+        hpText.setText(`HP: ${this.currentHP}/${this.maxHP}`);
 
         // return actual hp change
-        return this.stats.currentHP - initialCharacterHP;
+        return this.currentHP - initialCharacterHP;
     }
 
     protected unitButtonCallback() {
@@ -160,6 +136,6 @@ export default abstract class Unit extends Phaser.GameObjects.Sprite {
     }
 
     public isLiving(): boolean {
-        return this.stats.currentHP > 0;
+        return this.currentHP > 0;
     }
 }

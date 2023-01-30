@@ -1,20 +1,24 @@
 import {abilities, IAbility} from '../abilities/abilities';
 import {items} from '../items/items';
+import playerSoldier from '../jobs/players/PlayerSoldier';
 import BattleScene from '../scenes/BattleScene';
-import Stats from '../stats/Stats';
+import {IBaseStatBlock, IStatIncreases} from '../types/Advancement';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import BotCharacter from './BotCharacter';
 import {Enemy} from './Enemy';
 import {IPlayer} from './GameDatabase';
+import Item from './Item';
 import {PlayerJob} from './Jobs/PlayerJob';
 import Unit from './Unit';
 
 export default class PlayerCharacter extends Unit {
+    private _currentHP!: number;
+    public currentResource: number;
     public damageTween!: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
     public equipment: Equipment;
     // public inventory!: Item[];
-    public stats!: Stats;
+    // public stats!: Stats;
     public key!: string;
     private invisiblePlayerButton!: Phaser.GameObjects.Rectangle;
 
@@ -38,7 +42,9 @@ export default class PlayerCharacter extends Unit {
             job,
             id
         );
-        this.stats = this.gameScene.player.stats;
+        // this.stats = this.gameScene.player.stats;
+        this.currentHP = this.gameScene.player.currentHP;
+        this.currentResource = this.gameScene.player.currentResource;
         this.equipment = this.gameScene.player.equipment;
         this.inventory = this.gameScene.player.inventory;
         this.key = 'PlayerSoldier';
@@ -59,35 +65,14 @@ export default class PlayerCharacter extends Unit {
     }
 
     public applyHPChange(hpChangeAmount: number): number {
-        this.saveAndLoadScene.db.players.update(
-            0,
-            (player: IPlayer) => {
-                const unitToUpdate = player.combatState.heroes.find(unit => unit.id === this.id);
-
-                if (unitToUpdate !== undefined) {
-                    if (hpChangeAmount < 0) {
-                        unitToUpdate.stats.currentHP = Math.min(unitToUpdate.stats.maxHP, unitToUpdate.stats.currentHP - hpChangeAmount);
-                    }
-                    else {
-                        unitToUpdate.stats.currentHP -= hpChangeAmount;
-                    }
-                    if (unitToUpdate.stats.currentHP <= 0) {
-                        unitToUpdate.stats.currentHP = 0;
-                    }
-                }
-
-                return player;
-            }
-        );
-
         return super.applyHPChange(hpChangeAmount, this.battleScene.player1HPText);
     }
 
     public calculateAttackDamage(target: (PlayerCharacter | Enemy | BotCharacter)): number {
         console.log(`calculating ${this.name}'s damage.`);
         console.log('formula: Math.max(1, Math.floor(actorStrength - (defenderDefense / 2) * randomModifier))');
-        const actorStrength = this.getCombinedStat('strength');
-        const defenderDefense = target.stats.defense;
+        const actorStrength = this.strength;
+        const defenderDefense = target.defense;
         const damageAfterDefense = actorStrength - (defenderDefense / 2);
         const randomModifier = Phaser.Math.FloatBetween(0.34, 0.52);
         const finalAttackDamage = Math.max(
@@ -104,9 +89,13 @@ export default class PlayerCharacter extends Unit {
         return Math.max(
             1,
             Math.floor(
-                this.stats.strength * (Phaser.Math.Between(54, 64) / 64)
+                this.strength * (Phaser.Math.Between(54, 64) / 64)
             )
         );
+    }
+
+    public get level() {
+        return this.gameScene.player.level;
     }
 
     public criticalStrikeTest(): boolean {
@@ -118,7 +107,7 @@ export default class PlayerCharacter extends Unit {
     }
 
     public getInitiative(): number {
-        return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
+        return this.agility * Phaser.Math.FloatBetween(0, 1);
     }
 
     public runTurn(
@@ -127,6 +116,8 @@ export default class PlayerCharacter extends Unit {
             target: Enemy | PlayerCharacter | BotCharacter;
         }
     ): number {
+        console.log('running the player\'s turn!!!!');
+
         const target = data.target;
         // TODO: REDIRECT THE PLAYER'S ATTACK IF THEIR INTENDED TARGET IS NOT ALIVE AND THERE IS STILL > 0 ENEMIES LIVING
         if (!target.isLiving()) return 0;
@@ -296,6 +287,7 @@ export default class PlayerCharacter extends Unit {
                 0,
                 (player: IPlayer) => {
                     player.inventory.splice(inventoryIndex, 1);
+                    return player;
                 }
             );
 
@@ -329,6 +321,97 @@ export default class PlayerCharacter extends Unit {
         }
 
         return runtimeInMS;
+    }
+
+    private calculateStat(stat: (keyof IBaseStatBlock & keyof IStatIncreases) | 'defense'): number {
+        let derivedStat;
+        if (stat === 'defense') {
+            derivedStat = 'defense';
+            stat = 'agility';
+        }
+        let statValue = playerSoldier.baseStats[stat];
+        if (this.level > 1) {
+            for (let i = 2; i <= this.level; i++) {
+                const incrementAmount = playerSoldier.statIncreases[stat].find(
+                    (incrementRange) => {
+                        return incrementRange.range[0] <= i && i <= incrementRange.range[1];
+                    }
+                )?.increment as number;
+                statValue += incrementAmount;
+            }
+        }
+
+        const totalEquipmentBonus = this.getTotalEquipmentBonus(stat);
+        if (derivedStat === 'defense') {
+            const derivedStatEquipmentBonus = this.getTotalEquipmentBonus(derivedStat);
+            return ((statValue + totalEquipmentBonus) / 2) + derivedStatEquipmentBonus;
+        }
+        return statValue + totalEquipmentBonus;
+    }
+
+    private getTotalEquipmentBonus(stat: (keyof IBaseStatBlock & keyof IStatIncreases) | 'defense'): number {
+        let totalBonus = 0;
+        for (const key in this.equipment) {
+            const item = this.equipment[key];
+            if (item) {
+                totalBonus += this.getEquipmentStat(item, stat);
+            }
+        }
+        return totalBonus;
+    }
+
+    private getEquipmentStat(equipment: Item, stat: (keyof IBaseStatBlock & keyof IStatIncreases) | 'defense'): number {
+        if (!equipment || !equipment.stats) {
+            return 0;
+        }
+        return equipment.stats[stat];
+    }
+    public get maxHP() {
+        return this.calculateStat('vitality') * 2;
+    }
+
+    public get agility() {
+        return this.calculateStat('agility');
+    }
+
+    public get vitality() {
+        return this.calculateStat('vitality');
+    }
+
+    public get intellect() {
+        return this.calculateStat('intellect');
+    }
+
+    public get luck() {
+        return this.calculateStat('luck');
+    }
+
+    public get strength() {
+        return this.calculateStat('strength');
+    }
+
+    public get defense() {
+        return this.calculateStat('defense');
+    }
+
+    set currentHP(newValue: number) {
+        console.log(`changing hp on the player character!!! old value: ${this._currentHP}, new value: ${newValue}`);
+        // console.trace();
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                const unit = player.combatState.units.find(unit => unit.id === this.id);
+                if (unit) {
+                    unit.currentHP = newValue;
+                }
+                return player;
+            }
+        );
+        this._currentHP = newValue;
+    }
+
+    get currentHP(): number {
+        return this._currentHP;
     }
 
 }

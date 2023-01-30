@@ -2,6 +2,8 @@
 //  i load the game with zero HP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
+import _ from 'lodash';
+
 import {abilities, IAbility} from '../abilities/abilities';
 import BotCharacter from '../classes/BotCharacter';
 import {Enemy} from '../classes/Enemy';
@@ -9,9 +11,9 @@ import {DBUnit, IPlayer} from '../classes/GameDatabase';
 import PlayerCharacter from '../classes/PlayerCharacter';
 import {enemies} from '../enemies/enemies';
 import MonsterSoldier from '../jobs/monsters/MonsterSoldier';
-import soldier from '../jobs/players/PlayerSoldier';
+import playerSoldier from '../jobs/players/PlayerSoldier';
 import {levels} from '../levels/Levels';
-import { IStatIncreases } from '../types/Advancement';
+import {IStatIncreases} from '../types/Advancement';
 import eventsCenter from '../utils/EventsCenter';
 import BattleUIScene from './BattleUIScene';
 import GameScene from './GameScene';
@@ -132,7 +134,7 @@ export default class BattleScene extends Phaser.Scene {
             Math.max(
                 1,
                 Math.ceil(
-                    this.gameScene.player.LEVELING_RATE * Math.sqrt(
+                    this.gameScene.PLAYER_LEVELING_RATE * Math.sqrt(
                         this.gameScene.player.experience + experienceAmount
                     )
                 )
@@ -198,21 +200,30 @@ export default class BattleScene extends Phaser.Scene {
         return !this.enemies.some(enemy => enemy.isLiving());
     }
 
-    public endBattle(): void {
-
-        this.saveAndLoadScene.db.players.update(
-            0,
-            {inCombat: false}
-        );
-
+    private endBattleFrontEndActions() {
         this.battleUIScene.disableAllActionButtons();
-        // send the player info to the game scene ui
+        for (const unit of this.heroes) {
+            if (unit instanceof PlayerCharacter) {
+                const gameScenePlayer = this.gameScene.player;
 
-        this.sendPlayerInfoToGameScene();
+                eventsCenter.emit(
+                    'updateResource',
+                    gameScenePlayer.currentResource,
+                    gameScenePlayer.maxResource
+                );
 
-        this.clearStateAndRemoveSprites();
-
-        // sleep the ui
+                this.uiScene.updateHP(
+                    gameScenePlayer.currentHP,
+                    gameScenePlayer.maxHP
+                );
+            }
+            else {
+                const bot = this.gameScene.bots[0];
+                // unit must be a bot character at this point
+                this.uiScene.updatePlayer2HP(bot.currentHP, bot.maxHP);
+            }
+        }
+        this.removeSprites();
         this.scene.sleep('BattleUI');
 
         this.gameScene.input.keyboard!.enabled = true;
@@ -221,7 +232,124 @@ export default class BattleScene extends Phaser.Scene {
         this.scene.switch('Game');
     }
 
-    private clearStateAndRemoveSprites() {
+    public endBattleBackEndActions() {
+        this.saveAndLoadScene.db.players.update(
+            0,
+            {inCombat: false}
+        );
+        for (const unit of this.heroes) {
+            if (unit instanceof PlayerCharacter) {
+                const gameScenePlayer = this.gameScene.player;
+                gameScenePlayer.currentHP = unit.currentHP;
+
+                if (gameScenePlayer.currentHP <= 0) {
+                    gameScenePlayer.currentHP = 1;
+                }
+
+                let goldAmount = 0;
+                let experienceAmount = 0;
+
+                for (const enemy of this.enemies) {
+                    const enemyData = enemies.find(obj => {
+                        return obj.key === enemy.texture.key;
+                    });
+                    goldAmount += enemyData?.gold ?? 0;
+                    experienceAmount += enemyData?.experience ?? 0;
+                }
+
+                if (this.interactionState === 'handlingrunselect') {
+                    goldAmount = 0;
+                    experienceAmount = 0;
+                }
+
+                gameScenePlayer.gold = gameScenePlayer.gold + goldAmount;
+
+                const newExperienceAmount = gameScenePlayer.experience + experienceAmount;
+
+                gameScenePlayer.experience = newExperienceAmount;
+            }
+            else {
+                const bot = this.gameScene.bots[0];
+                // unit must be a bot character at this point
+                bot.currentHP = unit.currentHP;
+                if (bot.currentHP <= 0) {
+                    bot.currentHP = 1;
+                }
+
+                let experienceAmount = 0;
+
+                for (const enemy of this.enemies) {
+                    const enemyData = enemies.find(obj => {
+                        return obj.key === enemy.texture.key;
+                    });
+                    experienceAmount += enemyData?.experience ?? 0;
+                }
+
+                // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
+                let newLevel = Math.max(
+                    1,
+                    Math.ceil(
+                        bot.LEVELING_RATE * Math.sqrt(
+                            bot.experience + experienceAmount
+                        )
+                    )
+                );
+
+                while (newLevel > this.gameScene.player.level) {
+                    // find the maximum whole number amount of gold that can be
+                    //  received by the bot without exceeding amount required to get to
+                    //  a level exceeding that of the player
+                    experienceAmount -= 1;
+                    newLevel = Math.max(
+                        1,
+                        Math.ceil(
+                            bot.LEVELING_RATE * Math.sqrt(
+                                bot.experience + experienceAmount
+                            )
+                        )
+                    );
+                    if (experienceAmount === 0) break;
+                }
+
+                if (this.interactionState === 'handlingrunselect') {
+                    experienceAmount = 0;
+                }
+
+                const newExperienceAmount = bot.experience + experienceAmount;
+
+                bot.experience = newExperienceAmount;
+
+            }
+        }
+        this.clearState();
+    }
+
+
+    // public endBattle(): void {
+    //
+    //     this.saveAndLoadScene.db.players.update(
+    //         0,
+    //         {inCombat: false}
+    //     );
+    //
+    //     this.battleUIScene.disableAllActionButtons();
+    //     // send the player info to the game scene ui
+    //
+    //     this.sendPlayerInfoToGameScene();
+    //
+    //     this.clearState();
+    //     this.removeSprites();
+    //
+    //     // sleep the ui
+    //     this.scene.sleep('BattleUI');
+    //
+    //     this.gameScene.input.keyboard!.enabled = true;
+    //
+    //     // return to game scene and sleep current battle scene
+    //     this.scene.switch('Game');
+    // }
+
+    private clearState() {
         this.saveAndLoadScene.db.players.update(
             0,
             (player: IPlayer) => {
@@ -240,6 +368,9 @@ export default class BattleScene extends Phaser.Scene {
                 };
             }
         );
+    }
+
+    private removeSprites() {
         // clear state, remove sprites
         this.heroes.length = 0;
         this.enemies.length = 0;
@@ -256,54 +387,42 @@ export default class BattleScene extends Phaser.Scene {
         this.interactionState = 'init';
     }
 
-    private endBattleGameOver(): void {
-
+    public endBattleGameOverBackendActions(): void {
         this.saveAndLoadScene.db.players.update(
             0,
             {inCombat: false}
         );
 
-        // change to game over music
-        this.musicScene.changeSong('gameover');
-
         // cut gold in half, set hit points to full, cut to game over screen, respawn
-        eventsCenter.emit('Message', 'Thou art vanquished!');
-        const newGoldAmount = Math.floor(this.gameScene.player.gold / 2);
-        this.saveAndLoadScene.db.players.update(
-            0,
-            {
-                gold: newGoldAmount
-            }
-        );
-        this.gameScene.player.gold = newGoldAmount;
-        eventsCenter.emit('updateResource', this.gameScene.player.stats.currentResource, this.gameScene.player.stats.maxResource);
+        this.gameScene.player.gold = Math.floor(this.gameScene.player.gold / 2);
 
-        const newHP = this.gameScene.player.stats.maxHP;
+        const newHP = this.gameScene.player.maxHP;
         this.saveAndLoadScene.db.players.update(
             0,
             (player: IPlayer) => {
-                player.stats.currentHP = newHP;
                 player.position.x = levels['overworld']['spawnCoords'][0].x;
                 player.position.y = levels['overworld']['spawnCoords'][0].y;
                 return player;
             }
         );
-        this.gameScene.player.stats.currentHP = newHP;
+        this.gameScene.player.currentHP = newHP;
         if (this.gameScene.bots.length > 0) {
-            const newBotHP = this.gameScene.bots[0].stats.maxHP;
-            this.saveAndLoadScene.db.players.update(
-                0,
-                (player: IPlayer) => {
-                    if (player.bots.length > 0) {
-                        player.bots[0].stats.currentHP = newBotHP;
-                    }
-                }
-            );
-            this.gameScene.bots[0].stats.currentHP = newBotHP;
+            const newBotHP = this.gameScene.bots[0].maxHP;
+            this.gameScene.bots[0].currentHP = newBotHP;
+        }
+        this.clearState();
+    }
+
+    public endBattleGameOverFrontEndActions(): void {
+        // change to game over music
+        this.musicScene.changeSong('gameover');
+        eventsCenter.emit('Message', 'Thou art vanquished!');
+        eventsCenter.emit('updateResource', this.gameScene.player.currentResource, this.gameScene.player.maxResource);
+        if (this.gameScene.bots.length > 0) {
+            const newBotHP = this.gameScene.bots[0].maxHP;
             this.uiScene.player2hpText.setText(`HP: ${newBotHP}/${newBotHP}`);
         }
-        this.uiScene.updateHP(this.gameScene.player.stats.currentHP, this.gameScene.player.stats.maxHP);
-
+        this.uiScene.updateHP(this.gameScene.player.currentHP, this.gameScene.player.maxHP);
         this.time.addEvent({
             delay: 1000,
             callback: () => {
@@ -317,7 +436,7 @@ export default class BattleScene extends Phaser.Scene {
 
         this.cameras.main.once('camerafadeoutcomplete', () => {
 
-            this.clearStateAndRemoveSprites();
+            this.removeSprites();
 
             // sleep the ui
             this.scene.sleep('BattleUI');
@@ -332,15 +451,34 @@ export default class BattleScene extends Phaser.Scene {
         });
     }
 
-    private gameOverTest() {
+    public gameOverTest() {
         // check if all the heroes are dead (players and bots)
-        return this.heroes.every((value) => {
-            return !value.isLiving();
+        console.log('testing whether each hero is dead from the game over test method! (it\'s not working!)');
+        console.log({
+            heroesArray: this.heroes
         });
+        let allHeroesAreDead = true;
+        for (const hero of this.heroes) {
+            console.log(`checking if ${hero.name} is dead.`);
+            if (hero.isLiving()) {
+                console.log(`${hero.name} appears to be living. their current hp is ${hero.currentHP}`);
+                allHeroesAreDead = false;
+            }
+            else {
+                console.log(`${hero.name} appears to be dead. their current hp is ${hero.currentHP}`);
+                continue;
+            }
+        }
+
+        return allHeroesAreDead;
+        // return this.heroes.every((unit) => {
+        //     console.log(`unit name: ${unit.name} | unit currentHP: ${unit.currentHP}`);
+        //     return !unit.isLiving();
+        // });
     }
 
     private getStatIncrease(stat: keyof IStatIncreases, level: number): number {
-        const statIncreaseRangeIncrementObject = soldier.statIncreases[stat].find(obj => {
+        const statIncreaseRangeIncrementObject = playerSoldier.statIncreases[stat].find(obj => {
             return obj.range[0] <= level && level <= obj.range[1];
         });
         return statIncreaseRangeIncrementObject?.increment ?? 0;
@@ -358,7 +496,12 @@ export default class BattleScene extends Phaser.Scene {
             0,
             (player: IPlayer) => {
                 console.log('getting the target from the action select to store in the db');
-                console.log({playerCombatStateUnits: player.combatState.units, dataTarget: data.target});
+                console.log(
+                    {
+                        playerCombatStateUnits: player.combatState.units,
+                        dataTarget: data.target
+                    }
+                );
                 const saveTarget = player.combatState.units.find(unit => unit.id === data.target.id);
 
 
@@ -441,10 +584,11 @@ export default class BattleScene extends Phaser.Scene {
                 // run was successful, exit combat
                 // deliver the successful retreat message and exit the battle
                 eventsCenter.emit('Message', 'You have successfully retreated.');
+                this.endBattleBackEndActions();
                 this.sfxScene.playSound('runaway');
                 this.time.addEvent({
                     delay: 2000,
-                    callback: this.endBattle,
+                    callback: this.endBattleFrontEndActions,
                     callbackScope: this
                 });
                 return;
@@ -507,6 +651,7 @@ export default class BattleScene extends Phaser.Scene {
         console.log({roundUnits: this.roundUnits, turnIndex: this.turnIndex});
         const currentUnit = this.roundUnits[this.turnIndex];
         console.log({currentUnit});
+        console.log({currentUnitCurrentHP: currentUnit.currentHP});
         if (currentUnit instanceof Enemy) {
             // the enemy is going to use an ability (default physical attack)
             if (currentUnit.isLiving()) {
@@ -537,7 +682,8 @@ export default class BattleScene extends Phaser.Scene {
                                 job: passiveEffect.actor.job,
                                 id: passiveEffect.actor.id,
                                 key: passiveEffect.actor.key,
-                                stats: passiveEffect.actor.stats,
+                                currentHP: passiveEffect.actor.currentHP,
+                                currentResource: passiveEffect.actor.currentResource,
                                 equipment: {
                                     body: passiveEffect.actor.equipment.body,
                                     head: passiveEffect.actor.equipment.head,
@@ -555,10 +701,18 @@ export default class BattleScene extends Phaser.Scene {
             }
         );
 
+        // TODO: alter this. it is problematic due to the fact that if the player exits before the turn has ended, the battle hasn't
+        //  had a chance to properly conclude, saving its required data to the database so it can be immeadiately loaded
+        //  if the game is refreshed, move the check and all gameover database logic to the methods where hp is
+        //  being altered, as that is the key property to monitor for changes. it must send the signal to cut
+        //  the battle scene short with the messages as triggered below and send the player to the game over screen
+        //  as usual.
+        //  ALL PARTY MEMBERS AT ZERO HP = GAME OVER.
+
         if (this.gameOverTest()) {
             this.time.addEvent({
                 delay: turnRunTime,
-                callback: this.endBattleGameOver,
+                callback: this.endBattleGameOverFrontEndActions,
                 callbackScope: this
             });
         }
@@ -581,242 +735,106 @@ export default class BattleScene extends Phaser.Scene {
         }
     }
 
-    private sendPlayerInfoToGameScene(): void {
-        for (const unit of this.heroes) {
-            if (unit instanceof PlayerCharacter) {
-                const gameScenePlayer = this.gameScene.player;
-                this.saveAndLoadScene.db.players.update(
-                    0,
-                    (player: IPlayer) => {
-                        player.stats.currentHP = unit.stats.currentHP;
-                        return player;
-                    }
-                );
-                gameScenePlayer.stats.currentHP = unit.stats.currentHP;
-
-                if (gameScenePlayer.stats.currentHP <= 0) {
-                    this.saveAndLoadScene.db.players.update(
-                        0,
-                        (player: IPlayer) => {
-                            player.stats.currentHP = 1;
-                            return player;
-                        }
-                    );
-                    gameScenePlayer.stats.currentHP = 1;
-                }
-
-                let goldAmount = 0;
-                let experienceAmount = 0;
-
-                for (const enemy of this.enemies) {
-                    const enemyData = enemies.find(obj => {
-                        return obj.key === enemy.texture.key;
-                    });
-                    goldAmount += enemyData?.gold ?? 0;
-                    experienceAmount += enemyData?.experience ?? 0;
-                }
-
-                if (this.interactionState === 'handlingrunselect') {
-                    goldAmount = 0;
-                    experienceAmount = 0;
-                }
-
-                const newGoldAmount = gameScenePlayer.gold + goldAmount;
-
-                this.saveAndLoadScene.db.players.update(
-                    0, {
-                        gold: newGoldAmount
-                    }
-                );
-
-                gameScenePlayer.gold = newGoldAmount;
-
-                eventsCenter.emit('updateResource', gameScenePlayer.stats.currentResource, gameScenePlayer.stats.maxResource);
-
-                const currentLevel = gameScenePlayer.level;
-
-                const newExperienceAmount = gameScenePlayer.experience + experienceAmount;
-
-                this.saveAndLoadScene.db.players.update(
-                    0,
-                    {
-                        experience: newExperienceAmount
-                    }
-                );
-
-                gameScenePlayer.experience = newExperienceAmount;
-
-                const newLevel = Math.max(
-                    1,
-                    Math.ceil(
-                        gameScenePlayer.LEVELING_RATE * Math.sqrt(
-                            gameScenePlayer.experience
-                        )
-                    )
-                );
-
-                if (currentLevel < newLevel) {
-                    // soldiers have a flat vim amount
-                    let maxResourceIncrease;
-                    if (unit.job.properName === 'Soldier') {
-                        maxResourceIncrease = 0;
-                    }
-                    else {
-                        maxResourceIncrease = this.getStatIncrease('intellect', newLevel) * 2;
-                    }
-
-                    const newStats = {
-                        strength: gameScenePlayer.stats.strength + this.getStatIncrease('strength', newLevel),
-                        agility: gameScenePlayer.stats.agility + this.getStatIncrease('agility', newLevel),
-                        vitality: gameScenePlayer.stats.vitality + this.getStatIncrease('vitality', newLevel),
-                        intellect: gameScenePlayer.stats.intellect + this.getStatIncrease('intellect', newLevel),
-                        luck: gameScenePlayer.stats.luck + this.getStatIncrease('luck', newLevel),
-                        currentHP: unit.stats.currentHP, // getting the stat from the battle
-                        maxHP: gameScenePlayer.stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
-                        currentResource: unit.stats.currentResource, // getting the stat from the battle
-                        maxResource: gameScenePlayer.stats.maxResource + maxResourceIncrease,
-                        attack: gameScenePlayer.stats.attack + this.getStatIncrease('strength', newLevel),
-                        defense: gameScenePlayer.stats.defense + this.getStatIncrease('agility', newLevel) / 2
-                    };
-
-                    this.saveAndLoadScene.db.players.update(
-                        0,
-                        {
-                            stats: newStats
-                        }
-                    );
-
-                    gameScenePlayer.stats = newStats;
-                }
-                this.uiScene.updateHP(gameScenePlayer.stats.currentHP, gameScenePlayer.stats.maxHP);
-
-                eventsCenter.emit('updateXP', gameScenePlayer.experience);
-            }
-
-            else {
-                const bot = this.gameScene.bots[0];
-                // unit must be a bot character at this point
-                this.saveAndLoadScene.db.players.update(
-                    0,
-                    (player: IPlayer) => {
-                        player.bots[0].stats.currentHP = unit.stats.currentHP;
-                        return player;
-                    }
-                );
-                bot.stats.currentHP = unit.stats.currentHP;
-                if (bot.stats.currentHP <= 0) {
-                    this.saveAndLoadScene.db.players.update(
-                        0,
-                        (player: IPlayer) => {
-                            player.stats.currentHP = 1;
-                            return player;
-                        }
-                    );
-                    bot.stats.currentHP = 1;
-                }
-
-                const currentLevel = bot.level;
-
-                let experienceAmount = 0;
-
-                for (const enemy of this.enemies) {
-                    const enemyData = enemies.find(obj => {
-                        return obj.key === enemy.texture.key;
-                    });
-                    experienceAmount += enemyData?.experience ?? 0;
-                }
-
-                // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
-                let newLevel = Math.max(
-                    1,
-                    Math.ceil(
-                        bot.LEVELING_RATE * Math.sqrt(
-                            bot.experience + experienceAmount
-                        )
-                    )
-                );
-
-                while (newLevel > this.gameScene.player.level) {
-                    // find the maximum whole number amount of gold that can be
-                    //  received by the bot without exceeding amount required to get to
-                    //  a level exceeding that of the player
-                    experienceAmount -= 1;
-                    newLevel = Math.max(
-                        1,
-                        Math.ceil(
-                            bot.LEVELING_RATE * Math.sqrt(
-                                bot.experience + experienceAmount
-                            )
-                        )
-                    );
-                    if (experienceAmount === 0) break;
-                }
-
-                if (this.interactionState === 'handlingrunselect') {
-                    experienceAmount = 0;
-                }
-
-                const newExperienceAmount = bot.experience + experienceAmount;
-
-                this.saveAndLoadScene.db.players.update(
-                    0,
-                    (player: IPlayer) => {
-                        player.bots[0].experience = newExperienceAmount;
-                        return player;
-                    }
-                );
-
-                bot.experience = newExperienceAmount;
-
-                newLevel = Math.max(
-                    1,
-                    Math.ceil(
-                        bot.LEVELING_RATE * Math.sqrt(
-                            bot.experience
-                        )
-                    )
-                );
-
-                if (currentLevel < newLevel) {
-
-                    // soldiers have a flat vim amount
-                    let maxResourceIncrease;
-                    if (unit.job.properName === 'Soldier') {
-                        maxResourceIncrease = 0;
-                    }
-                    else {
-                        maxResourceIncrease = this.getStatIncrease('intellect', newLevel) * 2;
-                    }
-
-                    const newStats = {
-                        strength: bot.stats.strength + this.getStatIncrease('strength', newLevel),
-                        agility: bot.stats.agility + this.getStatIncrease('agility', newLevel),
-                        vitality: bot.stats.vitality + this.getStatIncrease('vitality', newLevel),
-                        intellect: bot.stats.intellect + this.getStatIncrease('intellect', newLevel),
-                        luck: bot.stats.luck + this.getStatIncrease('luck', newLevel),
-                        currentHP: unit.stats.currentHP,
-                        maxHP: bot.stats.maxHP + this.getStatIncrease('vitality', newLevel) * 2,
-                        currentResource: unit.stats.currentResource,
-                        maxResource: bot.stats.maxResource + maxResourceIncrease,
-                        attack: bot.stats.attack + this.getStatIncrease('strength', newLevel),
-                        defense: bot.stats.defense + this.getStatIncrease('agility', newLevel) / 2
-                    };
-
-                    this.saveAndLoadScene.db.players.update(
-                        0,
-                        (player: IPlayer) => {
-                            player.bots[0].stats = newStats;
-                            return player;
-                        }
-                    );
-
-                    bot.stats = newStats;
-
-                }
-                this.uiScene.updatePlayer2HP(bot.stats.currentHP, bot.stats.maxHP);
-            }
-        }
-    }
+    // private sendPlayerInfoToGameScene(): void {
+    //     for (const unit of this.heroes) {
+    //         if (unit instanceof PlayerCharacter) {
+    //             const gameScenePlayer = this.gameScene.player;
+    //             gameScenePlayer.currentHP = unit.currentHP;
+    //
+    //             if (gameScenePlayer.currentHP <= 0) {
+    //                 gameScenePlayer.currentHP = 1;
+    //             }
+    //
+    //             let goldAmount = 0;
+    //             let experienceAmount = 0;
+    //
+    //             for (const enemy of this.enemies) {
+    //                 const enemyData = enemies.find(obj => {
+    //                     return obj.key === enemy.texture.key;
+    //                 });
+    //                 goldAmount += enemyData?.gold ?? 0;
+    //                 experienceAmount += enemyData?.experience ?? 0;
+    //             }
+    //
+    //             if (this.interactionState === 'handlingrunselect') {
+    //                 goldAmount = 0;
+    //                 experienceAmount = 0;
+    //             }
+    //
+    //             gameScenePlayer.gold = gameScenePlayer.gold + goldAmount;
+    //
+    //             eventsCenter.emit('updateResource', gameScenePlayer.currentResource, gameScenePlayer.maxResource);
+    //
+    //             const newExperienceAmount = gameScenePlayer.experience + experienceAmount;
+    //
+    //             gameScenePlayer.experience = newExperienceAmount;
+    //
+    //             this.uiScene.updateHP(gameScenePlayer.currentHP, gameScenePlayer.maxHP);
+    //         }
+    //         else {
+    //             const bot = this.gameScene.bots[0];
+    //             // unit must be a bot character at this point
+    //             bot.currentHP = unit.currentHP;
+    //             if (bot.currentHP <= 0) {
+    //                 bot.currentHP = 1;
+    //             }
+    //
+    //             let experienceAmount = 0;
+    //
+    //             for (const enemy of this.enemies) {
+    //                 const enemyData = enemies.find(obj => {
+    //                     return obj.key === enemy.texture.key;
+    //                 });
+    //                 experienceAmount += enemyData?.experience ?? 0;
+    //             }
+    //
+    //             // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
+    //             let newLevel = Math.max(
+    //                 1,
+    //                 Math.ceil(
+    //                     bot.LEVELING_RATE * Math.sqrt(
+    //                         bot.experience + experienceAmount
+    //                     )
+    //                 )
+    //             );
+    //
+    //             while (newLevel > this.gameScene.player.level) {
+    //                 // find the maximum whole number amount of gold that can be
+    //                 //  received by the bot without exceeding amount required to get to
+    //                 //  a level exceeding that of the player
+    //                 experienceAmount -= 1;
+    //                 newLevel = Math.max(
+    //                     1,
+    //                     Math.ceil(
+    //                         bot.LEVELING_RATE * Math.sqrt(
+    //                             bot.experience + experienceAmount
+    //                         )
+    //                     )
+    //                 );
+    //                 if (experienceAmount === 0) break;
+    //             }
+    //
+    //             if (this.interactionState === 'handlingrunselect') {
+    //                 experienceAmount = 0;
+    //             }
+    //
+    //             const newExperienceAmount = bot.experience + experienceAmount;
+    //
+    //             bot.experience = newExperienceAmount;
+    //
+    //             newLevel = Math.max(
+    //                 1,
+    //                 Math.ceil(
+    //                     bot.LEVELING_RATE * Math.sqrt(
+    //                         bot.experience
+    //                     )
+    //                 )
+    //             );
+    //
+    //             this.uiScene.updatePlayer2HP(bot.currentHP, bot.maxHP);
+    //         }
+    //     }
+    // }
 
     private shortenTextByPixel(phasertext: Phaser.GameObjects.Text, maxpixel: number): Phaser.GameObjects.Text {
         while (phasertext.width > maxpixel) {
@@ -868,8 +886,8 @@ export default class BattleScene extends Phaser.Scene {
             actionType: string
         escaped: boolean | undefined
     }   ): void {
-        const enemiesStillLiving = savedCombatState.enemies.some(enemy => enemy.stats.currentHP > 0);
-        const heroesStillLiving = savedCombatState.heroes.some(hero => hero.stats.currentHP > 0);
+        const enemiesStillLiving = savedCombatState.enemies.some(enemy => enemy.currentHP > 0);
+        const heroesStillLiving = savedCombatState.heroes.some(hero => hero.currentHP > 0);
 
         console.log('loading the battle from a saved state!!!!!');
 
@@ -922,11 +940,12 @@ export default class BattleScene extends Phaser.Scene {
                 this.gameScene.bots[0].sprite.texture,
                 0,
                 this.gameScene.bots[0].name,
-                this.gameScene.bots[0].type,
+                this.gameScene.bots[0].job,
                 botHero.id
             );
-            this.player2.stats = botHero.stats;
-            if (this.player2.stats.currentHP <= 0) this.player2.setVisible(false);
+            this.player2.currentHP = botHero.currentHP;
+            this.player2.currentResource = botHero.currentResource;
+            if (this.player2.currentHP <= 0) this.player2.setVisible(false);
             this.add.existing(this.player2);
 
             this.shortenTextByPixel(
@@ -952,15 +971,15 @@ export default class BattleScene extends Phaser.Scene {
             this.player2HPText = this.add.text(
                 534,
                 645,
-                `HP: ${this.player2.stats.currentHP}/${this.player2.stats.maxHP}`, {
+                `HP: ${this.player2.currentHP}/${this.player2.maxHP}`, {
                     fontSize: '35px',
                     color: '#fff',
                     fontFamily: 'CustomFont'
                 })
                 .setResolution(3);
 
-            const currentResource = botHero.stats.currentResource;
-            const maxResource = botHero.stats.maxResource;
+            const currentResource = botHero.currentResource;
+            const maxResource = 100;
 
             this.player2MPText = this.add.text(534, 670, `Vim: ${currentResource}/${maxResource}`, {
                 fontSize: '35px',
@@ -979,11 +998,12 @@ export default class BattleScene extends Phaser.Scene {
             'hero',
             0,
             this.gameScene.player.name,
-            this.gameScene.player.type,
+            this.gameScene.player.job,
             playerHero.id
         );
-        soldier.stats = playerHero.stats;
-        if (soldier.stats.currentHP <= 0) soldier.setVisible(false);
+        soldier.currentHP = playerHero.currentHP;
+        soldier.currentResource = playerHero.currentResource;
+        if (soldier.currentHP <= 0) soldier.setVisible(false);
         this.add.existing(soldier);
 
         this.shortenTextByPixel(
@@ -1003,7 +1023,7 @@ export default class BattleScene extends Phaser.Scene {
         this.player1HPText = this.add.text(
             300,
             645,
-            `HP: ${soldier.stats.currentHP}/${soldier.stats.maxHP}`, {
+            `HP: ${soldier.currentHP}/${soldier.maxHP}`, {
                 fontSize: '35px',
                 color: '#fff',
                 fontFamily: 'CustomFont'
@@ -1011,8 +1031,8 @@ export default class BattleScene extends Phaser.Scene {
             .setResolution(3);
 
 
-        const currentResource = soldier.stats.currentResource;
-        const maxResource = soldier.stats.maxResource;
+        const currentResource = soldier.currentResource;
+        const maxResource = 100;
         this.player1MPText = this.add.text(
             300,
             670,
@@ -1039,7 +1059,13 @@ export default class BattleScene extends Phaser.Scene {
             })!.skills,
             enemyUnit.id
         );
-        enemy.stats = enemyUnit.stats;
+        enemy.stats = _.clone(
+            enemies.find(obj => {
+                return obj.key === enemyUnit.key;
+            })!.stats
+        );
+        enemy.currentHP = enemyUnit.currentHP;
+        enemy.currentResource = enemyUnit.currentResource;
         this.add.existing(enemy);
 
         this.heroes = [soldier];
@@ -1133,7 +1159,7 @@ export default class BattleScene extends Phaser.Scene {
                 this.gameScene.bots[0].sprite.texture,
                 0,
                 this.gameScene.bots[0].name,
-                this.gameScene.bots[0].type
+                this.gameScene.bots[0].job
             );
             this.add.existing(this.player2);
 
@@ -1160,15 +1186,15 @@ export default class BattleScene extends Phaser.Scene {
             this.player2HPText = this.add.text(
                 534,
                 645,
-                `HP: ${this.gameScene.bots[0].stats.currentHP}/${this.gameScene.bots[0].stats.maxHP}`, {
+                `HP: ${this.gameScene.bots[0].currentHP}/${this.gameScene.bots[0].maxHP}`, {
                     fontSize: '35px',
                     color: '#fff',
                     fontFamily: 'CustomFont'
                 })
                 .setResolution(3);
 
-            const currentResource = this.gameScene.bots[0].stats.currentResource;
-            const maxResource = this.gameScene.bots[0].stats.maxResource;
+            const currentResource = this.gameScene.bots[0].currentResource;
+            const maxResource = 100;
             this.player2MPText = this.add.text(534, 670, `Vim: ${currentResource}/${maxResource}`, {
                 fontSize: '35px',
                 color: '#fff',
@@ -1186,7 +1212,7 @@ export default class BattleScene extends Phaser.Scene {
             'hero',
             0,
             this.gameScene.player.name,
-            this.gameScene.player.type
+            this.gameScene.player.job
         );
 
         this.add.existing(soldier);
@@ -1208,15 +1234,15 @@ export default class BattleScene extends Phaser.Scene {
         this.player1HPText = this.add.text(
             300,
             645,
-            `HP: ${this.gameScene.player.stats.currentHP}/${this.gameScene.player.stats.maxHP}`, {
+            `HP: ${this.gameScene.player.currentHP}/${this.gameScene.player.maxHP}`, {
                 fontSize: '35px',
                 color: '#fff',
                 fontFamily: 'CustomFont'
             })
             .setResolution(3);
 
-        const currentResource = this.gameScene.player.stats.currentResource;
-        const maxResource = this.gameScene.player.stats.maxResource;
+        const currentResource = this.gameScene.player.currentResource;
+        const maxResource = this.gameScene.player.maxResource;
         this.player1MPText = this.add.text(
             300,
             670,
@@ -1260,7 +1286,8 @@ export default class BattleScene extends Phaser.Scene {
                     job: soldier.job,
                     id: soldier.id,
                     key: soldier.key,
-                    stats: soldier.stats,
+                    currentHP: soldier.currentHP,
+                    currentResource: soldier.currentResource,
                     equipment: {
                         body: soldier.equipment.body,
                         head: soldier.equipment.head,
@@ -1279,7 +1306,8 @@ export default class BattleScene extends Phaser.Scene {
                         job: this.player2.job,
                         id: this.player2.id,
                         key: this.player2.key,
-                        stats: this.player2.stats,
+                        currentHP: this.player2.currentHP,
+                        currentResource: this.player2.currentResource,
                         equipment: {
                             body: undefined,
                             head: undefined,
@@ -1298,7 +1326,8 @@ export default class BattleScene extends Phaser.Scene {
                     job: enemy.job,
                     id: enemy.id,
                     key: enemy.key,
-                    stats: enemy.stats,
+                    currentHP: enemy.currentHP,
+                    currentResource: enemy.currentResource,
                     equipment: {
                         body: undefined,
                         head: undefined,
@@ -1361,10 +1390,10 @@ export default class BattleScene extends Phaser.Scene {
 
         this.turnIndex = -1;
         // check for victory or game over state
-        if (this.interactionState === 'gameover') {
-            this.endBattleGameOver();
-            return;
-        }
+        // if (this.interactionState === 'gameover') {
+        //     this.endBattleGameOver();
+        //     return;
+        // }
 
         this.battleUIScene.disableAllActionButtons();
 
@@ -1408,7 +1437,7 @@ export default class BattleScene extends Phaser.Scene {
                         // at the same time that this happens, update the battle scene max hp
 
                         this.player1HPText.setText(
-                            `HP: ${this.heroes[0].stats.currentHP}/${this.heroes[0].stats.maxHP + this.getStatIncrease(
+                            `HP: ${this.heroes[0].currentHP}/${this.heroes[0].maxHP + this.getStatIncrease(
                                 'vitality',
                                 levelUpData.newLevel
                             ) * 2}`
@@ -1427,7 +1456,7 @@ export default class BattleScene extends Phaser.Scene {
                         );
 
                         this.player2HPText.setText(
-                            `HP: ${this.gameScene.bots[0].stats.currentHP}/${this.gameScene.bots[0].stats.maxHP + this.getStatIncrease(
+                            `HP: ${this.gameScene.bots[0].currentHP}/${this.gameScene.bots[0].maxHP + this.getStatIncrease(
                                 'vitality',
                                 player2LevelUpData.newLevel
                             ) * 2}`
@@ -1438,7 +1467,7 @@ export default class BattleScene extends Phaser.Scene {
 
             this.time.addEvent({
                 delay: 4000 + levelUpDelay,
-                callback: this.endBattle,
+                callback: this.endBattleFrontEndActions,
                 callbackScope: this
             });
             return;

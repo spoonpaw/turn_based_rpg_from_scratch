@@ -1,5 +1,6 @@
+import monsterSoldier from '../jobs/monsters/MonsterSoldier';
 import BattleScene from '../scenes/BattleScene';
-import Stats from '../stats/Stats';
+import {IBaseStatBlock, IStatIncreases} from '../types/Advancement';
 import {Equipment} from '../types/Equipment';
 import eventsCenter from '../utils/EventsCenter';
 import {Enemy} from './Enemy';
@@ -9,7 +10,9 @@ import PlayerCharacter from './PlayerCharacter';
 import Unit from './Unit';
 
 export default class BotCharacter extends Unit {
-
+    private _currentHP!: number;
+    // public currentHP: number;
+    public currentResource: number;
     public damageTween!: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
     public equipment: Equipment = {
         body: undefined,
@@ -17,7 +20,6 @@ export default class BotCharacter extends Unit {
         offhand: undefined,
         weapon: undefined
     };
-    public stats!: Stats;
     public key!: string;
     private invisibleBotButton!: Phaser.GameObjects.Rectangle;
 
@@ -45,7 +47,9 @@ export default class BotCharacter extends Unit {
         // TODO: there needs to be a logical way of figuring
         //  out which bot this list is meant to reflect.
         //  for now we can just use this this.gameScene.bots[0]
-        this.stats = this.gameScene.bots[0].stats;
+        this.currentHP = this.gameScene.bots[0].currentHP;
+
+        this.currentResource = this.gameScene.bots[0].currentResource;
         this.name = this.gameScene.bots[0].name;
 
         this.invisibleBotButton = this.scene.add.rectangle(
@@ -65,32 +69,10 @@ export default class BotCharacter extends Unit {
 
     public applyHPChange(hpChangeAmount: number): number {
 
-        this.saveAndLoadScene.db.players.update(
-            0,
-            (player: IPlayer) => {
-
-                const unitToUpdate = player.combatState.heroes.find(unit => unit.id === this.id);
-
-                if (unitToUpdate !== undefined) {
-                    if (hpChangeAmount < 0) {
-                        unitToUpdate.stats.currentHP = Math.min(unitToUpdate.stats.maxHP, unitToUpdate.stats.currentHP - hpChangeAmount);
-                    }
-                    else {
-                        unitToUpdate.stats.currentHP -= hpChangeAmount;
-                    }
-                    if (unitToUpdate.stats.currentHP <= 0) {
-                        unitToUpdate.stats.currentHP = 0;
-                    }
-                }
-
-                return player;
-            }
-        );
-
-
         return super.applyHPChange(hpChangeAmount, this.battleScene.player2HPText);
     }
     public runTurn(): number {
+        console.log('running the bot\'s turn!!!!');
         // just attack enemy 1
         const target = this.battleScene.enemies[0];
         if (!target.isLiving()) return 0;
@@ -120,14 +102,14 @@ export default class BotCharacter extends Unit {
     }
 
     public getInitiative(): number {
-        return this.stats.agility * Phaser.Math.FloatBetween(0, 1);
+        return this.agility * Phaser.Math.FloatBetween(0, 1);
     }
 
     public calculateAttackDamage(target: (PlayerCharacter | Enemy | BotCharacter)): number {
         console.log(`calculating ${this.name}'s damage.`);
         console.log('formula: Math.max(1, Math.floor(actorStrength - (defenderDefense / 2) * randomModifier))');
-        const actorStrength = this.getCombinedStat('strength');
-        const defenderDefense = target.stats.defense;
+        const actorStrength = this.strength;
+        const defenderDefense = target.defense;
         const damageAfterDefense = actorStrength - (defenderDefense / 2);
         const randomModifier = Phaser.Math.FloatBetween(0.34, 0.52);
         const finalAttackDamage = Math.max(
@@ -153,8 +135,71 @@ export default class BotCharacter extends Unit {
         return Math.max(
             1,
             Math.floor(
-                this.stats.strength * (Phaser.Math.Between(54, 64) / 64)
+                this.strength * (Phaser.Math.Between(54, 64) / 64)
             )
         );
+    }
+
+    private calculateStat(stat: keyof IBaseStatBlock & keyof IStatIncreases): number {
+        let statValue = monsterSoldier.baseStats[stat];
+        if (this.gameScene.bots[0].level > 1) {
+            for (let i = 2; i <= this.gameScene.bots[0].level; i++) {
+                const incrementAmount = monsterSoldier.statIncreases[stat].find(
+                    (incrementRange) => {
+                        return incrementRange.range[0] <= i && i <= incrementRange.range[1];
+                    }
+                )?.increment as number;
+                statValue += incrementAmount;
+            }
+        }
+        return statValue;
+    }
+
+    public get maxHP() {
+        return this.calculateStat('vitality') * 2;
+    }
+
+    public get agility() {
+        return this.calculateStat('agility');
+    }
+
+    public get vitality() {
+        return this.calculateStat('vitality');
+    }
+
+    public get intellect() {
+        return this.calculateStat('intellect');
+    }
+
+    public get luck() {
+        return this.calculateStat('luck');
+    }
+
+    public get strength() {
+        return this.calculateStat('strength');
+    }
+
+    public get defense() {
+        return this.calculateStat('agility') / 2;
+    }
+
+    public set currentHP(newValue: number) {
+        console.log(`changing hp on the bot character!!! old value: ${this._currentHP}, new value: ${newValue}`);
+        // console.trace();
+        this.saveAndLoadScene.db.players.update(
+            0,
+            (player: IPlayer) => {
+                const unit = player.combatState.units.find(unit => unit.id === this.id);
+                if (unit) {
+                    unit.currentHP = newValue;
+                }
+                return player;
+            }
+        );
+        this._currentHP = newValue;
+    }
+
+    public get currentHP(): number {
+        return this._currentHP;
     }
 }

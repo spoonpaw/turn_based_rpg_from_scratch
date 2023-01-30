@@ -55,7 +55,7 @@ export default class GameOverScene extends Phaser.Scene {
 
         const gameScene = <GameScene>this.scene.get('Game');
 
-        gameScene.player.stats.currentHP = gameScene.player.stats.maxHP;
+        gameScene.player.currentHP = gameScene.player.maxHP;
 
         this.setupKeyListeners();
 
@@ -76,7 +76,6 @@ export default class GameOverScene extends Phaser.Scene {
     }
 
     public setupKeyListeners() {
-
         this.input.keyboard!.enabled = true;
         this.input.enabled = true;
         this.cameras.main.removeListener('camerafadeincomplete');
@@ -95,7 +94,7 @@ export default class GameOverScene extends Phaser.Scene {
     public wake() {
         this.cameras.main.fadeIn(3000);
         const gameScene = <GameScene>this.scene.get('Game');
-        gameScene.player.stats.currentHP = gameScene.player.stats.maxHP;
+        gameScene.player.currentHP = gameScene.player.maxHP;
         gameScene.scene.restart();
         this.cameras.main.removeListener('camerafadeincomplete');
         this.cameras.main.once('camerafadeincomplete', () => {
