@@ -1661,8 +1661,6 @@ export default class UIScene extends Phaser.Scene {
                 ) {
                     this.selectCancel();
                 }
-                // this.sfxScene.playSound('select');
-                // this.gameScene.gamePadScene?.scene.stop();
 
                 // query and build the inventory
                 //  buttons right when this button is pressed!

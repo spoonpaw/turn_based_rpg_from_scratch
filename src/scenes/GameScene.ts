@@ -86,6 +86,7 @@ export default class GameScene extends Phaser.Scene {
     public MAX_LEVEL = 5;
     public PLAYER_LEVELING_RATE = 0.3;
     public BOT_LEVELING_RATE = 0.4;
+    private loadBattle = false;
 
     public constructor() {
         super('Game');
@@ -124,6 +125,7 @@ export default class GameScene extends Phaser.Scene {
             this.saveAndLoadScene.getPlayerByIndex(0).then((player: IPlayer) => {
                 console.log('loading the player data from the database');
                 console.log({storedTilemap: player.currentTilemap});
+                this.loadBattle = player.inCombat;
                 const levelData = levels[player.currentTilemap];
                 this.nonHostileSpace = !levelData.hostile;
                 if (!player.inCombat) this.musicScene.changeSong(levelData.music);
@@ -312,7 +314,7 @@ export default class GameScene extends Phaser.Scene {
 
         this.gamePadScene?.scene.restart();
 
-        if (this.operatingSystem === 'mobile') {
+        if (this.operatingSystem === 'mobile' && !this.loadBattle) {
             // launching the game pad scene
             this.scene.launch('GamePad');
             this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
@@ -909,6 +911,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public wake() {
+        this.loadBattle = false;
         this.encounter_counter = 0;
         this.musicScene.changeSong('overworld');
         this.uiScene.scene.bringToTop();
