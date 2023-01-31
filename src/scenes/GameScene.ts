@@ -316,9 +316,12 @@ export default class GameScene extends Phaser.Scene {
             this.gamePadScene.scene.restart();
         }
         if (this.operatingSystem === 'mobile') {
+            console.log('player appears to be on mobile');
             this.saveAndLoadScene.db.players.get(0)
                 .then((player) => {
-                    if (player?.inCombat) {
+                    console.log('checking if player is in combat');
+                    console.log({inCombat: player?.inCombat});
+                    if (player?.inCombat !== true) {
                         console.log('launching the gamepad scene');
                         // launching the game pad scene
                         this.scene.launch('GamePad');
