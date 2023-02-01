@@ -1,7 +1,3 @@
-// TODO: fix this glitch: if i close the game on the game over screen
-//  i load the game with zero HP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
 import _ from 'lodash';
 
 import {abilities, IAbility} from '../abilities/abilities';
@@ -665,7 +661,7 @@ export default class BattleScene extends Phaser.Scene {
             }
         }
 
-        // TODO: store a snapshot of the combat after each turn is run
+        // store a snapshot of the combat after each turn is run
         this.saveAndLoadScene.db.players.update(
             0,
             (player: IPlayer) => {
@@ -700,14 +696,6 @@ export default class BattleScene extends Phaser.Scene {
                 return player;
             }
         );
-
-        // TODO: alter this. it is problematic due to the fact that if the player exits before the turn has ended, the battle hasn't
-        //  had a chance to properly conclude, saving its required data to the database so it can be immeadiately loaded
-        //  if the game is refreshed, move the check and all gameover database logic to the methods where hp is
-        //  being altered, as that is the key property to monitor for changes. it must send the signal to cut
-        //  the battle scene short with the messages as triggered below and send the player to the game over screen
-        //  as usual.
-        //  ALL PARTY MEMBERS AT ZERO HP = GAME OVER.
 
         if (this.gameOverTest()) {
             this.time.addEvent({
