@@ -150,6 +150,21 @@ export default class Bot extends GameActor{
         );
     }
 
+    public getLevelFromExperience(experienceAmount: number) {
+        return Math.min(
+            this.gameScene.MAX_LEVEL,
+            Math.max(
+                1,
+                Math.ceil(
+                    this.gameScene.BOT_LEVELING_RATE * Math.sqrt(
+                        this.experience + experienceAmount
+                    )
+                )
+            )
+        );
+    }
+
+
     private calculateStat(stat: keyof IBaseStatBlock & keyof IStatIncreases): number {
         let statValue = monsterSoldier.baseStats[stat];
         if (this.level > 1) {

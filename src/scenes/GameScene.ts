@@ -60,7 +60,6 @@ export default class GameScene extends Phaser.Scene {
     private movedFromSpawn!: boolean;
     private nonHostileSpace!: boolean;
     private lastPlayerDirection!: Direction;
-    // private botGridControls!: BotGridControls;
     private encounter_counter = 0;
     private saveAndLoadScene!: SaveAndLoadScene;
     private firstUpdateRun = false;

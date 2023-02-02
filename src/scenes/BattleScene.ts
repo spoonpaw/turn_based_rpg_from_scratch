@@ -115,81 +115,73 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private checkForPlayer1LevelUp(): { levelUp: boolean, newLevel: number } {
-        let experienceAmount = 0;
-
-        for (const enemy of this.enemies) {
-            const enemyData = enemies.find(obj => {
-                return obj.key === enemy.texture.key;
-            });
-            experienceAmount += enemyData?.experience ?? 0;
+        const gameScenePlayer = this.gameScene.player;
+        console.log('checkForPlayer1LevelUp method started');
+        if (gameScenePlayer.level === 1) {
+            return {levelUp: false, newLevel: 1};
         }
+        else {
+            // get the total exp from the enemies
+            let experienceAmount = 0;
 
-        const currentLevel = this.gameScene.player.level;
-        const newLevel = Math.min(
-            this.gameScene.MAX_LEVEL,
-            Math.max(
-                1,
-                Math.ceil(
-                    this.gameScene.PLAYER_LEVELING_RATE * Math.sqrt(
-                        this.gameScene.player.experience + experienceAmount
-                    )
-                )
-            )
-        );
+            for (const enemy of this.enemies) {
+                const enemyData = enemies.find(obj => {
+                    return obj.key === enemy.texture.key;
+                });
+                experienceAmount += enemyData?.experience ?? 0;
+                console.log(`Experience amount after adding enemy's experience: ${experienceAmount}`);
+            }
 
-        return {levelUp: newLevel > currentLevel, newLevel};
+            // get the player's current level
+            const currentLevel = gameScenePlayer.level;
+            console.log(`Current player level: ${currentLevel}`);
+            console.log(`Current player experience: ${gameScenePlayer.experience}`);
+
+            const newLevel = gameScenePlayer.getLevelFromExperience(-experienceAmount);
+            console.log(`New player level: ${newLevel}`);
+
+            console.log('checkForPlayer1LevelUp method finished');
+            return {levelUp: newLevel < currentLevel, newLevel: currentLevel};
+
+        }
     }
 
-    private checkForPlayer2LevelUp(player1LevelData: {
+    private checkForPlayer2LevelUp(): {
         levelUp: boolean,
         newLevel: number
-    }): {
-        levelUp: boolean,
-        newLevel: number
-    } {
-        // Initialize the `experienceAmount` variable to 0
-        let experienceAmount = 0;
-
-        // Loop through the `enemies` array
-        for (const enemy of this.enemies) {
-            // Find the enemy data for the current enemy
-            const enemyData = enemies.find(obj => {
-                // Return the enemy data if the `key` property matches the enemy's texture key
-                return obj.key === enemy.texture.key;
-            });
-
-            // Add the enemy's experience to the `experienceAmount` variable
-            experienceAmount += enemyData?.experience ?? 0;
-        }
-
+        } {
         // Get the bot player from the game scene
         const bot = this.gameScene.bots[0];
 
         // Get the bot's current level
         const currentLevel = bot.level;
 
-        // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
-        let newLevel = Math.min(
-            this.gameScene.MAX_LEVEL,
-            Math.max(
-                1,
-                Math.ceil(
-                    bot.LEVELING_RATE * Math.sqrt(
-                        this.gameScene.bots[0].experience + experienceAmount
-                    )
-                )
-            )
-        );
-
-        // Check if the new level exceeds the player's current level
-        if (newLevel > player1LevelData.newLevel) {
-            // If the new level exceeds the player's current level, set the new level to the player's current level
-            newLevel = player1LevelData.newLevel;
+        if (currentLevel === 1) {
+            return {levelUp: false, newLevel: bot.level};
         }
+        else {
+            // Initialize the `experienceAmount` variable to 0
+            let experienceAmount = 0;
 
-        // Return an object containing a boolean `levelUp` that indicates whether
-        // the player leveled up, and a number `newLevel` representing the new level of the player.
-        return { levelUp: newLevel > currentLevel, newLevel };
+            // Loop through the `enemies` array
+            for (const enemy of this.enemies) {
+                // Find the enemy data for the current enemy
+                const enemyData = enemies.find(obj => {
+                    // Return the enemy data if the `key` property matches the enemy's texture key
+                    return obj.key === enemy.texture.key;
+                });
+
+                // Add the enemy's experience to the `experienceAmount` variable
+                experienceAmount += enemyData?.experience ?? 0;
+            }
+
+            // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
+            const newLevel = bot.getLevelFromExperience(-experienceAmount);
+
+            // Return an object containing a boolean `levelUp` that indicates whether
+            // the player leveled up, and a number `newLevel` representing the new level of the player.
+            return {levelUp: newLevel < currentLevel, newLevel: currentLevel};
+        }
     }
 
     public checkForVictory(): boolean {
@@ -233,6 +225,18 @@ export default class BattleScene extends Phaser.Scene {
             0,
             {inCombat: false}
         );
+        this.heroes.sort((a, b) => {
+            if (a instanceof PlayerCharacter && !(b instanceof PlayerCharacter)) {
+                return -1;
+            }
+            else if (!(a instanceof PlayerCharacter) && b instanceof PlayerCharacter) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        });
+
         for (const unit of this.heroes) {
             if (unit instanceof PlayerCharacter) {
                 const gameScenePlayer = this.gameScene.player;
@@ -262,7 +266,9 @@ export default class BattleScene extends Phaser.Scene {
 
                 const newExperienceAmount = gameScenePlayer.experience + experienceAmount;
 
+                console.log(`incrementing the player's experience! new exp amount: ${newExperienceAmount}`);
                 gameScenePlayer.experience = newExperienceAmount;
+                console.log(`player's new level: ${gameScenePlayer.level}`);
             }
             else {
                 const bot = this.gameScene.bots[0];
@@ -282,7 +288,7 @@ export default class BattleScene extends Phaser.Scene {
                 }
 
                 // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
-                let newLevel = Math.max(
+                const newLevel = Math.max(
                     1,
                     Math.ceil(
                         bot.LEVELING_RATE * Math.sqrt(
@@ -291,20 +297,8 @@ export default class BattleScene extends Phaser.Scene {
                     )
                 );
 
-                while (newLevel > this.gameScene.player.level) {
-                    // find the maximum whole number amount of gold that can be
-                    //  received by the bot without exceeding amount required to get to
-                    //  a level exceeding that of the player
-                    experienceAmount -= 1;
-                    newLevel = Math.max(
-                        1,
-                        Math.ceil(
-                            bot.LEVELING_RATE * Math.sqrt(
-                                bot.experience + experienceAmount
-                            )
-                        )
-                    );
-                    if (experienceAmount === 0) break;
+                if (newLevel > this.gameScene.player.level) {
+                    experienceAmount = 0;
                 }
 
                 if (this.interactionState === 'handlingrunselect') {
@@ -319,31 +313,6 @@ export default class BattleScene extends Phaser.Scene {
         }
         this.clearState();
     }
-
-
-    // public endBattle(): void {
-    //
-    //     this.saveAndLoadScene.db.players.update(
-    //         0,
-    //         {inCombat: false}
-    //     );
-    //
-    //     this.battleUIScene.disableAllActionButtons();
-    //     // send the player info to the game scene ui
-    //
-    //     this.sendPlayerInfoToGameScene();
-    //
-    //     this.clearState();
-    //     this.removeSprites();
-    //
-    //     // sleep the ui
-    //     this.scene.sleep('BattleUI');
-    //
-    //     this.gameScene.input.keyboard!.enabled = true;
-    //
-    //     // return to game scene and sleep current battle scene
-    //     this.scene.switch('Game');
-    // }
 
     private clearState() {
         this.saveAndLoadScene.db.players.update(
@@ -449,7 +418,7 @@ export default class BattleScene extends Phaser.Scene {
 
     public gameOverTest() {
         // check if all the heroes are dead (players and bots)
-        console.log('testing whether each hero is dead from the game over test method! (it\'s not working!)');
+        console.log('testing whether each hero is dead from the game over test method!');
         console.log({
             heroesArray: this.heroes
         });
@@ -467,10 +436,6 @@ export default class BattleScene extends Phaser.Scene {
         }
 
         return allHeroesAreDead;
-        // return this.heroes.every((unit) => {
-        //     console.log(`unit name: ${unit.name} | unit currentHP: ${unit.currentHP}`);
-        //     return !unit.isLiving();
-        // });
     }
 
     private getStatIncrease(stat: keyof IStatIncreases, level: number): number {
@@ -722,107 +687,6 @@ export default class BattleScene extends Phaser.Scene {
             });
         }
     }
-
-    // private sendPlayerInfoToGameScene(): void {
-    //     for (const unit of this.heroes) {
-    //         if (unit instanceof PlayerCharacter) {
-    //             const gameScenePlayer = this.gameScene.player;
-    //             gameScenePlayer.currentHP = unit.currentHP;
-    //
-    //             if (gameScenePlayer.currentHP <= 0) {
-    //                 gameScenePlayer.currentHP = 1;
-    //             }
-    //
-    //             let goldAmount = 0;
-    //             let experienceAmount = 0;
-    //
-    //             for (const enemy of this.enemies) {
-    //                 const enemyData = enemies.find(obj => {
-    //                     return obj.key === enemy.texture.key;
-    //                 });
-    //                 goldAmount += enemyData?.gold ?? 0;
-    //                 experienceAmount += enemyData?.experience ?? 0;
-    //             }
-    //
-    //             if (this.interactionState === 'handlingrunselect') {
-    //                 goldAmount = 0;
-    //                 experienceAmount = 0;
-    //             }
-    //
-    //             gameScenePlayer.gold = gameScenePlayer.gold + goldAmount;
-    //
-    //             eventsCenter.emit('updateResource', gameScenePlayer.currentResource, gameScenePlayer.maxResource);
-    //
-    //             const newExperienceAmount = gameScenePlayer.experience + experienceAmount;
-    //
-    //             gameScenePlayer.experience = newExperienceAmount;
-    //
-    //             this.uiScene.updateHP(gameScenePlayer.currentHP, gameScenePlayer.maxHP);
-    //         }
-    //         else {
-    //             const bot = this.gameScene.bots[0];
-    //             // unit must be a bot character at this point
-    //             bot.currentHP = unit.currentHP;
-    //             if (bot.currentHP <= 0) {
-    //                 bot.currentHP = 1;
-    //             }
-    //
-    //             let experienceAmount = 0;
-    //
-    //             for (const enemy of this.enemies) {
-    //                 const enemyData = enemies.find(obj => {
-    //                     return obj.key === enemy.texture.key;
-    //                 });
-    //                 experienceAmount += enemyData?.experience ?? 0;
-    //             }
-    //
-    //             // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
-    //             let newLevel = Math.max(
-    //                 1,
-    //                 Math.ceil(
-    //                     bot.LEVELING_RATE * Math.sqrt(
-    //                         bot.experience + experienceAmount
-    //                     )
-    //                 )
-    //             );
-    //
-    //             while (newLevel > this.gameScene.player.level) {
-    //                 // find the maximum whole number amount of gold that can be
-    //                 //  received by the bot without exceeding amount required to get to
-    //                 //  a level exceeding that of the player
-    //                 experienceAmount -= 1;
-    //                 newLevel = Math.max(
-    //                     1,
-    //                     Math.ceil(
-    //                         bot.LEVELING_RATE * Math.sqrt(
-    //                             bot.experience + experienceAmount
-    //                         )
-    //                     )
-    //                 );
-    //                 if (experienceAmount === 0) break;
-    //             }
-    //
-    //             if (this.interactionState === 'handlingrunselect') {
-    //                 experienceAmount = 0;
-    //             }
-    //
-    //             const newExperienceAmount = bot.experience + experienceAmount;
-    //
-    //             bot.experience = newExperienceAmount;
-    //
-    //             newLevel = Math.max(
-    //                 1,
-    //                 Math.ceil(
-    //                     bot.LEVELING_RATE * Math.sqrt(
-    //                         bot.experience
-    //                     )
-    //                 )
-    //             );
-    //
-    //             this.uiScene.updatePlayer2HP(bot.currentHP, bot.maxHP);
-    //         }
-    //     }
-    // }
 
     private shortenTextByPixel(phasertext: Phaser.GameObjects.Text, maxpixel: number): Phaser.GameObjects.Text {
         while (phasertext.width > maxpixel) {
@@ -1397,7 +1261,7 @@ export default class BattleScene extends Phaser.Scene {
 
             let player2LevelUpData = {levelUp: false, newLevel: 0};
             if (this.gameScene.bots.length > 0) {
-                player2LevelUpData = this.checkForPlayer2LevelUp(levelUpData);
+                player2LevelUpData = this.checkForPlayer2LevelUp();
                 if (player2LevelUpData.levelUp) {
                     levelUpDelay += 2000;
                 }
@@ -1425,10 +1289,7 @@ export default class BattleScene extends Phaser.Scene {
                         // at the same time that this happens, update the battle scene max hp
 
                         this.player1HPText.setText(
-                            `HP: ${this.heroes[0].currentHP}/${this.heroes[0].maxHP + this.getStatIncrease(
-                                'vitality',
-                                levelUpData.newLevel
-                            ) * 2}`
+                            `HP: ${this.heroes[0].currentHP}/${this.heroes[0].maxHP}`
                         );
                     }
                 });
@@ -1444,10 +1305,7 @@ export default class BattleScene extends Phaser.Scene {
                         );
 
                         this.player2HPText.setText(
-                            `HP: ${this.gameScene.bots[0].currentHP}/${this.gameScene.bots[0].maxHP + this.getStatIncrease(
-                                'vitality',
-                                player2LevelUpData.newLevel
-                            ) * 2}`
+                            `HP: ${this.gameScene.bots[0].currentHP}/${this.gameScene.bots[0].maxHP}`
                         );
                     }
                 });
