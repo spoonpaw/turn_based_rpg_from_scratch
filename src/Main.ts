@@ -24,6 +24,7 @@ const config: Phaser.Types.Core.GameConfig = {
     scale: {
         mode: ScaleModes.FIT
     },
+    disableContextMenu: true,
     physics: {
         default: 'arcade',
         arcade: {
