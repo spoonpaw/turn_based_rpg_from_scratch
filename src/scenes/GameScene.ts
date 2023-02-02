@@ -320,6 +320,11 @@ export default class GameScene extends Phaser.Scene {
             this.uiScene.scene.bringToTop();
             this.musicScene.scene.bringToTop();
 
+            console.log('launching the gamepad scene');
+            // launching the game pad scene
+            this.scene.launch('GamePad');
+            this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
+
             this.musicScene.changeSong('town');
             if (this.musicScene.gameOverSong.isPlaying) {
                 this.musicScene.changeSong('overworld');
