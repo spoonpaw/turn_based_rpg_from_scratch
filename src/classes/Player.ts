@@ -92,6 +92,21 @@ export default class Player extends GameActor{
         );
     }
 
+    public getLevelFromExperience(experienceAmount: number) {
+        console.log('Experience amount: ', experienceAmount);
+        const totalExperience = this.experience + experienceAmount;
+        console.log('Total experience: ', totalExperience);
+        let level = this.gameScene.PLAYER_LEVELING_RATE * Math.sqrt(totalExperience);
+        console.log('Level (before rounding): ', level);
+        level = Math.ceil(level);
+        console.log('Level (after rounding): ', level);
+        level = Math.max(1, level);
+        console.log('Level (after applying min boundary): ', level);
+        level = Math.min(this.gameScene.MAX_LEVEL, level);
+        console.log('Level (after applying max boundary): ', level);
+        return level;
+    }
+
     private calculateStat(stat: (keyof IBaseStatBlock & keyof IStatIncreases) | 'defense'): number {
         let derivedStat;
         if (stat === 'defense') {
@@ -189,6 +204,7 @@ export default class Player extends GameActor{
     }
 
     public set experience(experience) {
+        console.log(`setting the player experience to ${experience}`);
         this.saveAndLoadScene.db.players.update(
             0,
             {experience}
