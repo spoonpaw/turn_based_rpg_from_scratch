@@ -1,22 +1,3 @@
-// TODO: if i refresh quickly from game over in combat scene, the bot doesn't get his health back!!
-//  to reproduce, just refresh when the screen says thou art vanquished
-
-
-// TODO: LOAD THE PLAYER INTO THEIR SAVED BATTLE IF THEY ARE LOADED INTO A COMBAT SCENE!!!!!!!
-
-
-// TODO: FIX THIS -> when the player enters a new level, they must store the
-//  player's tile coordinates as being the same as the new levels spawn coordinates...
-//  or something... the issue is this: if i close the game one step east and one step south
-//  of the town, when i open the game again, i am on the overworld but up out of bounds on
-//  top of a mountain. seems really tough to reproduce this error, not sure if it's fixed
-//  or if i'm still missing something. haven't seen this glitch in a while. not sure
-//  if it's fixed or not
-
-// TODO: i saw a glitch where the font wasn't getting applied to the loading string at the
-//  beginning of the game. haven't seen it reoccur for a moment, not sure if it's fixed or not
-
-// TODO: STORE EXPERIENCE POINTS, STATS, EQUIPMENT, AND INVENTORY WHEN THEY CHANGE!!
 
 // TODO: add an npc who walks in a predescribed pattern and will stop and speak when interacted with
 
@@ -283,9 +264,6 @@ export default class GameScene extends Phaser.Scene {
 
                 const someHeroesAreAlive = player.combatState.heroes.some((hero: DBUnit) => hero.currentHP > 0);
                 if (player.inCombat && someHeroesAreAlive) {
-                    // TODO: if the heroes are all dead just take the gold
-                    //  and put the player back at spawn. don't start the
-                    //  battle.
                     this.scene.launch('Battle', {
                         loadBattleData: true,
                         savedCombatState: player.combatState
@@ -341,6 +319,11 @@ export default class GameScene extends Phaser.Scene {
             this.scene.launch('UI');
             this.uiScene.scene.bringToTop();
             this.musicScene.scene.bringToTop();
+
+            console.log('launching the gamepad scene');
+            // launching the game pad scene
+            this.scene.launch('GamePad');
+            this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
 
             this.musicScene.changeSong('town');
             if (this.musicScene.gameOverSong.isPlaying) {

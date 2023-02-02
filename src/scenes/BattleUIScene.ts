@@ -110,8 +110,6 @@ export default class BattleUIScene extends Phaser.Scene {
         }
     ) {
 
-        // TODO: FIX THIS -> THE BRANCH IS GETTING ENTERED EVEN WHEN THE PLAYER IS PLAYING FROM THE GAME SCENE
-        //  I.E. UNDER CIRCUMSTANCES IN WHICH THE SAVE DATA SHOULD NOT BE GETTING LOADED WHATSOEVER
         if (data?.savedCombatState && data?.loadFromSave) {
             data.loadFromSave = false;
             this.saveData = data.savedCombatState;
@@ -119,8 +117,6 @@ export default class BattleUIScene extends Phaser.Scene {
                 data.savedCombatState.turnIndex = 0;
                 data.savedCombatState.roundIndex++;
             }
-            // TODO: FIX THIS. THIS IS GETTING SET TO TRUE UNDER CIRCUMSTANCES WHEN IT SHOULD NOT. THE PROBLEM
-            //  MAY BE UPSTREAM OF THIS.
             this.loadingBattleMidRound = data.savedCombatState.turnIndex > 0;
         }
         this.musicScene = <MusicScene>this.scene.get('Music');
@@ -325,7 +321,6 @@ export default class BattleUIScene extends Phaser.Scene {
     }
 
     private messageCloseHandler() {
-        // TODO i suspect something is messed up in this method
         eventsCenter.removeListener('MessageClose');
         if (this.battleScene.interactionState === 'init') {
             if (!this.loadingBattleMidRound) {
@@ -334,7 +329,6 @@ export default class BattleUIScene extends Phaser.Scene {
             }
             else {
                 console.log('LOADING A MIDFIGHT BATTLE!!!!!!');
-                // TODO: FIX THIS GLITCH -> SOMETIMES THIS BRANCH IS GETTING EXECUTED WHEN IT SHOULD NOT BE
                 this.loadingBattleMidRound = false;
                 console.log('looking for the target from the battle scene that matches the save data target!');
                 console.log({
