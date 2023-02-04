@@ -1322,7 +1322,7 @@ export default class BattleScene extends Phaser.Scene {
                         );
 
                         this.player2HPText.setText(
-                            `HP: ${this.gameScene.bots[0].currentHP}/${this.gameScene.bots[0].maxHP}`
+                            `HP: ${this.heroes[1].currentHP}/${this.gameScene.bots[0].maxHP}`
                         );
                     }
                 });
