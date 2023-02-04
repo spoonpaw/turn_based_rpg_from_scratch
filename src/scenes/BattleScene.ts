@@ -208,17 +208,15 @@ export default class BattleScene extends Phaser.Scene {
                     gameScenePlayer.maxResource
                 );
 
-                // if the unit died in battle, they will have been healed on the game scene,
-                //  so we use the battle scene unit's current health
                 this.uiScene.updateHP(
-                    unit.currentHP,
+                    gameScenePlayer.currentHP,
                     gameScenePlayer.maxHP
                 );
             }
             else {
                 const bot = this.gameScene.bots[0];
                 // unit must be a bot character at this point
-                this.uiScene.updatePlayer2HP(unit.currentHP, bot.maxHP);
+                this.uiScene.updatePlayer2HP(bot.currentHP, bot.maxHP);
             }
         }
         this.removeSprites();
