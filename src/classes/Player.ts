@@ -94,9 +94,9 @@ export default class Player extends GameActor{
 
     public getLevelFromExperience(experienceAmount: number) {
         console.log('Experience amount: ', experienceAmount);
-        const totalExperience = this.experience + experienceAmount;
-        console.log('Total experience: ', totalExperience);
-        let level = this.gameScene.PLAYER_LEVELING_RATE * Math.sqrt(totalExperience);
+        // const totalExperience = this.experience + experienceAmount;
+        // console.log('Total experience: ', totalExperience);
+        let level = this.gameScene.PLAYER_LEVELING_RATE * Math.sqrt(experienceAmount);
         console.log('Level (before rounding): ', level);
         level = Math.ceil(level);
         console.log('Level (after rounding): ', level);
@@ -214,4 +214,16 @@ export default class Player extends GameActor{
     public get experience() {
         return this._experience;
     }
+
+    public getMaxExperience() {
+        let i = 1;
+        let level = this.getLevelFromExperience(i);
+
+        while (level < this.gameScene.MAX_LEVEL) {
+            i++;
+            level = this.getLevelFromExperience(i);
+        }
+        return i;
+    }
+
 }

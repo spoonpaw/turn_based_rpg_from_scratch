@@ -10,7 +10,7 @@ import {MonsterJob} from './Jobs/MonsterJob';
 import Vector2 = Phaser.Math.Vector2;
 
 export default class Bot extends GameActor{
-    public LEVELING_RATE = 0.4;
+    // public LEVELING_RATE = 0.4;
     public tilePos!: Phaser.Math.Vector2;
     private uiScene: UIScene;
     public gameScene: GameScene;
@@ -157,7 +157,7 @@ export default class Bot extends GameActor{
                 1,
                 Math.ceil(
                     this.gameScene.BOT_LEVELING_RATE * Math.sqrt(
-                        this.experience + experienceAmount
+                        experienceAmount
                     )
                 )
             )
@@ -229,7 +229,7 @@ export default class Bot extends GameActor{
         this.saveAndLoadScene.db.players.update(
             0,
             (player: IPlayer) => {
-                player.bots[0].experience += experience;
+                player.bots[0].experience = experience;
                 return player;
             }
         );
@@ -238,4 +238,16 @@ export default class Bot extends GameActor{
     public get experience() {
         return this._experience;
     }
+
+    public getMaxExperience() {
+        let i = 1;
+        let level = this.getLevelFromExperience(i);
+
+        while (level < this.gameScene.MAX_LEVEL) {
+            i++;
+            level = this.getLevelFromExperience(i);
+        }
+        return i;
+    }
+
 }
