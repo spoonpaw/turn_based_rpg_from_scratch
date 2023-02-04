@@ -273,7 +273,7 @@ export default class BattleScene extends Phaser.Scene {
 
                     gameScenePlayer.gold = gameScenePlayer.gold + goldAmount;
                 }
-                const newExperienceAmount = Math.min(gameScenePlayer.experience + experienceAmount, gameScenePlayer.getMaxExperience());
+                const newExperienceAmount = Math.min(gameScenePlayer.experience + experienceAmount, gameScenePlayer.maxExperience);
 
                 console.log(`incrementing the player's experience! new exp amount: ${newExperienceAmount}`);
                 this.playerExperienceGain = newExperienceAmount - gameScenePlayer.experience;
@@ -321,7 +321,7 @@ export default class BattleScene extends Phaser.Scene {
                     }
                 }
 
-                const newExperienceAmount = Math.min(bot.experience + experienceAmount, bot.getMaxExperience());
+                const newExperienceAmount = Math.min(bot.experience + experienceAmount, bot.maxExperience);
 
                 this.botExperienceGain = newExperienceAmount - bot.experience;
                 bot.experience = newExperienceAmount;
