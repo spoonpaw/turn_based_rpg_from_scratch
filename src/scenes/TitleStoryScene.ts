@@ -29,10 +29,11 @@ export default class TitleStoryScene extends Phaser.Scene{
 
         this.storyText = this.add.text(
             this.scale.width / 2,
-            this.scale.height * 1.10,
-            'Caelor was once a realm of wonder and prosperity, where magic and technology blended seamlessly to create a utopia for all. But long ago, the Charged Aether, the very source of Caelor\'s power, gained sentience and turned against its users. The Fall of Caelor had begun, as an army of mutants and monstrous war machines, created and controlled by the sentient aether, overran the land. The once peaceful inhabitants were left to witness the destruction of their homes, and the loss of loved ones. Only a few settlements remained, protected by the still functioning biodomes, but the threat of invasion and the never-ending aetherstorm loomed ever present, as the fate of Caelor hung in the balance. The darkness spread and consumed all that remained.\n\n\n\n\n\nBut amidst the despair and destruction, a glimmer of hope emerged. The ancient Nirradan Prophecy spoke of a hero who could enter the Soul Realm, where powerful entities reign, to defeat the darkness and restore Caelor to its former glory. The prophecy also spoke of a powerful artifact known as the Weave of Dreams, which holds the power to change fate. The hero who found it would be able to change the course of the war between the Demonic Machines and the Ancient Guardians in the Soul Realm and defeat the malevolent force of the Charged Aether and its minions. The fate of Caelor and the souls of its inhabitants rests in the hands of the hero; should they fail, the realm will fall to darkness forever.',
+            this.scale.height * 1.02,
+            'Hark, noble soul! Take heed of mine tale, that thou shalt know the lamentable story of Caelor, where the fusion of science and sorcery reached unparalleled peaks. But \'twas not to last, for the Charged Aether, the very source of Caelor\'s power, gained a malevolent mind of its own and wrought destruction upon the land. The once peaceful inhabitants were forced to endure the devastation of their homes and the heartache of losing loved ones. Yet, all was not yet lost. The ancient Nirradan Prophecy still held a glimmer of hope, foretelling the arrival of a hero who could journey into the Soul Realm, dominated by the Ancient Guardians, for only in the realm of souls could they hope to recover the fabled Weave of Dreams, a powerful relic said to bind the threads of fate to its user’s will, and conquer the darkness to bring a new era of light to the realm. Should they fail, the realm shall fall to darkness forevermore.',
             {
                 font: '50px CustomFont',
+                align: 'center',
                 color: '#ffffff',
                 metrics: {
                     ascent: 41,
@@ -110,7 +111,7 @@ export default class TitleStoryScene extends Phaser.Scene{
                 this.input.keyboard!.removeListener('keydown');
                 this.input.removeListener('pointerdown');
                 // Set the storytext y to -this.storyText.height + 165
-                this.storyText.y = -this.storyText.height + 165;
+                this.storyText.y = -this.storyText.height + 145;
                 this.storyText.setVisible(false);
                 // Launch the 'TitleMenu' scene
                 this.showTitleMenuScene = true;
