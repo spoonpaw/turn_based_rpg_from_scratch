@@ -48,6 +48,8 @@ export default class BattleScene extends Phaser.Scene {
     private player2MenuFrame!: Phaser.GameObjects.Image;
     private saveAndLoadScene!: SaveAndLoadScene;
     private player2MPText!: Phaser.GameObjects.Text;
+    private playerExperienceGain!: number;
+    private botExperienceGain!: number;
 
     public constructor() {
         super('Battle');
@@ -120,6 +122,9 @@ export default class BattleScene extends Phaser.Scene {
         if (gameScenePlayer.level === 1) {
             return {levelUp: false, newLevel: 1};
         }
+        else if (this.playerExperienceGain === 0) {
+            return {levelUp: false, newLevel: gameScenePlayer.level};
+        }
         else {
             // get the total exp from the enemies
             let experienceAmount = 0;
@@ -137,7 +142,7 @@ export default class BattleScene extends Phaser.Scene {
             console.log(`Current player level: ${currentLevel}`);
             console.log(`Current player experience: ${gameScenePlayer.experience}`);
 
-            const newLevel = gameScenePlayer.getLevelFromExperience(-experienceAmount);
+            const newLevel = gameScenePlayer.getLevelFromExperience(gameScenePlayer.experience - experienceAmount);
             console.log(`New player level: ${newLevel}`);
 
             console.log('checkForPlayer1LevelUp method finished');
@@ -159,6 +164,9 @@ export default class BattleScene extends Phaser.Scene {
         if (currentLevel === 1) {
             return {levelUp: false, newLevel: bot.level};
         }
+        else if (this.botExperienceGain === 0) {
+            return {levelUp: false, newLevel: bot.level};
+        }
         else {
             // Initialize the `experienceAmount` variable to 0
             let experienceAmount = 0;
@@ -176,7 +184,7 @@ export default class BattleScene extends Phaser.Scene {
             }
 
             // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
-            const newLevel = bot.getLevelFromExperience(-experienceAmount);
+            const newLevel = bot.getLevelFromExperience(bot.experience - experienceAmount);
 
             // Return an object containing a boolean `levelUp` that indicates whether
             // the player leveled up, and a number `newLevel` representing the new level of the player.
@@ -249,24 +257,26 @@ export default class BattleScene extends Phaser.Scene {
                 let goldAmount = 0;
                 let experienceAmount = 0;
 
-                for (const enemy of this.enemies) {
-                    const enemyData = enemies.find(obj => {
-                        return obj.key === enemy.texture.key;
-                    });
-                    goldAmount += enemyData?.gold ?? 0;
-                    experienceAmount += enemyData?.experience ?? 0;
-                }
-
                 if (this.interactionState === 'handlingrunselect') {
                     goldAmount = 0;
                     experienceAmount = 0;
                 }
 
-                gameScenePlayer.gold = gameScenePlayer.gold + goldAmount;
+                else {
+                    for (const enemy of this.enemies) {
+                        const enemyData = enemies.find(obj => {
+                            return obj.key === enemy.texture.key;
+                        });
+                        goldAmount += enemyData?.gold ?? 0;
+                        experienceAmount += enemyData?.experience ?? 0;
+                    }
 
-                const newExperienceAmount = gameScenePlayer.experience + experienceAmount;
+                    gameScenePlayer.gold = gameScenePlayer.gold + goldAmount;
+                }
+                const newExperienceAmount = Math.min(gameScenePlayer.experience + experienceAmount, gameScenePlayer.getMaxExperience());
 
                 console.log(`incrementing the player's experience! new exp amount: ${newExperienceAmount}`);
+                this.playerExperienceGain = newExperienceAmount - gameScenePlayer.experience;
                 gameScenePlayer.experience = newExperienceAmount;
                 console.log(`player's new level: ${gameScenePlayer.level}`);
             }
@@ -278,31 +288,42 @@ export default class BattleScene extends Phaser.Scene {
                     bot.currentHP = 1;
                 }
 
+                console.log('initializing bot experience (0)');
                 let experienceAmount = 0;
-
-                for (const enemy of this.enemies) {
-                    const enemyData = enemies.find(obj => {
-                        return obj.key === enemy.texture.key;
-                    });
-                    experienceAmount += enemyData?.experience ?? 0;
-                }
-
-                // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
-                let newLevel = bot.getLevelFromExperience(
-                    bot.experience + experienceAmount
-                );
-
-                while (newLevel > this.gameScene.player.level) {
-                    experienceAmount -= 1;
-                    newLevel = bot.getLevelFromExperience(experienceAmount);
-                }
 
                 if (this.interactionState === 'handlingrunselect') {
                     experienceAmount = 0;
                 }
+                else {
+                    for (const enemy of this.enemies) {
+                        const enemyData = enemies.find(obj => {
+                            return obj.key === enemy.texture.key;
+                        });
+                        experienceAmount += enemyData?.experience ?? 0;
+                        console.log(`bot experience calculated from enemies: ${experienceAmount}`);
+                    }
 
-                const newExperienceAmount = bot.experience + experienceAmount;
+                    // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
+                    let newLevel = bot.getLevelFromExperience(
+                        bot.experience + experienceAmount
+                    );
+                    console.log(`calculated bot level accounting for new experience points: ${newLevel}`);
+                    let newLevelExceedsPlayersCurrentLevel = newLevel > this.gameScene.player.level;
+                    console.log(`new bot level exceeds player's current level: ${newLevelExceedsPlayersCurrentLevel}`);
+                    while (newLevelExceedsPlayersCurrentLevel) {
+                        experienceAmount -= 1;
+                        console.log(`decrementing experience amount, new experience amount: ${experienceAmount}`);
+                        newLevel = bot.getLevelFromExperience(bot.experience + experienceAmount);
+                        console.log(`calculated bot level accounting for new experience points: ${newLevel}`);
+                        newLevelExceedsPlayersCurrentLevel = newLevel > this.gameScene.player.level;
+                        console.log(`new bot level exceeds player's current level: ${newLevelExceedsPlayersCurrentLevel}`);
 
+                    }
+                }
+
+                const newExperienceAmount = Math.min(bot.experience + experienceAmount, bot.getMaxExperience());
+
+                this.botExperienceGain = newExperienceAmount - bot.experience;
                 bot.experience = newExperienceAmount;
 
             }

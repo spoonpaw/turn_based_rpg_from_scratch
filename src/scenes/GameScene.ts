@@ -71,7 +71,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     checkForRandomEncounter(): boolean {
-        const randNum = Phaser.Math.RND.between(0, 8);
+        const randNum = Phaser.Math.RND.between(0, 6);
         return randNum === 0;
     }
 
@@ -394,6 +394,7 @@ export default class GameScene extends Phaser.Scene {
                 'Human',
                 playerSoldierJob,
                 [],
+                // aBunchOfPotions,
                 emptyEquipment,
                 playerSoldierJob.baseStats.vitality * 2,
                 100
