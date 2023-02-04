@@ -288,17 +288,13 @@ export default class BattleScene extends Phaser.Scene {
                 }
 
                 // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
-                const newLevel = Math.max(
-                    1,
-                    Math.ceil(
-                        bot.LEVELING_RATE * Math.sqrt(
-                            bot.experience + experienceAmount
-                        )
-                    )
+                let newLevel = bot.getLevelFromExperience(
+                    bot.experience + experienceAmount
                 );
 
-                if (newLevel > this.gameScene.player.level) {
-                    experienceAmount = 0;
+                while (newLevel > this.gameScene.player.level) {
+                    experienceAmount -= 1;
+                    newLevel = bot.getLevelFromExperience(experienceAmount);
                 }
 
                 if (this.interactionState === 'handlingrunselect') {
