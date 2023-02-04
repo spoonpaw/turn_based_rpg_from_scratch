@@ -14,6 +14,7 @@ export default class Player extends GameActor{
     private gameScene!: GameScene;
     public maxResource = 100;
     private saveAndLoadScene!: SaveAndLoadScene;
+    public maxExperience: number;
     constructor(
         name: string,
         sprite: Phaser.GameObjects.Sprite,
@@ -36,6 +37,8 @@ export default class Player extends GameActor{
         this.saveAndLoadScene = <SaveAndLoadScene>this.sprite.scene.scene.get('SaveAndLoad');
         this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
         this.gameScene = <GameScene>this.sprite.scene.scene.get('Game');
+
+        this.maxExperience = this.getMaxExperience();
 
         const offsetX = GameScene.TILE_SIZE / 2;
         const offsetY = GameScene.TILE_SIZE;

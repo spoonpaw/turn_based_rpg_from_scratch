@@ -17,6 +17,7 @@ export default class Bot extends GameActor{
     public path: Phaser.Math.Vector2[] = [];
     public startedMoving = false;
     private saveAndLoadScene: SaveAndLoadScene;
+    public maxExperience: number;
 
     constructor(
         name: string,
@@ -38,6 +39,8 @@ export default class Bot extends GameActor{
         this.saveAndLoadScene = <SaveAndLoadScene>sprite.scene.scene.get('SaveAndLoad');
         this.gameScene = <GameScene>sprite.scene.scene.get('Game');
         this.uiScene = <UIScene>sprite.scene.scene.get('UI');
+        
+        this.maxExperience = this.getMaxExperience();
 
         const offsetX = GameScene.TILE_SIZE / 2;
         const offsetY = GameScene.TILE_SIZE;
