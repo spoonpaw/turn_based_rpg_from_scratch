@@ -62,7 +62,6 @@ export default class GameScene extends Phaser.Scene {
     private lastPlayerDirection!: Direction;
     private encounter_counter = 0;
     private saveAndLoadScene!: SaveAndLoadScene;
-    private firstUpdateRun = false;
     public MAX_LEVEL = 5;
     public PLAYER_LEVELING_RATE = 0.3;
     public BOT_LEVELING_RATE = 0.4;
@@ -319,10 +318,12 @@ export default class GameScene extends Phaser.Scene {
             this.uiScene.scene.bringToTop();
             this.musicScene.scene.bringToTop();
 
-            console.log('launching the gamepad scene');
-            // launching the game pad scene
-            this.scene.launch('GamePad');
-            this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
+            if (this.operatingSystem === 'mobile') {
+                console.log('launching the gamepad scene');
+                // launching the game pad scene
+                this.scene.launch('GamePad');
+                this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
+            }
 
             this.musicScene.changeSong('town');
             if (this.musicScene.gameOverSong.isPlaying) {
