@@ -67,9 +67,6 @@ export default class UIActionButton extends Phaser.GameObjects.Container {
                 .setOrigin(0, 0)
                 .setInteractive()
                 .on('pointerdown', () => {
-                    console.log('button pressed');
-                    console.log(`button key: ${this.key}`);
-                    console.log(`button text: ${this.buttonText?.text}`);
                     this.targetCallback();
                 });
         }
@@ -77,9 +74,6 @@ export default class UIActionButton extends Phaser.GameObjects.Container {
         this.add(this.button);
 
         this.button.on('pointerdown', () => {
-            console.log('button pressed');
-            console.log(`button key: ${this.key}`);
-            console.log(`button text: ${this.buttonText?.text}`);
             this.targetCallback();
         });
     }

@@ -14,7 +14,6 @@ export default class Player extends GameActor{
     private gameScene!: GameScene;
     public maxResource = 100;
     private saveAndLoadScene!: SaveAndLoadScene;
-    public maxExperience: number;
     constructor(
         name: string,
         sprite: Phaser.GameObjects.Sprite,
@@ -37,8 +36,6 @@ export default class Player extends GameActor{
         this.saveAndLoadScene = <SaveAndLoadScene>this.sprite.scene.scene.get('SaveAndLoad');
         this.uiScene = <UIScene>this.sprite.scene.scene.get('UI');
         this.gameScene = <GameScene>this.sprite.scene.scene.get('Game');
-
-        this.maxExperience = this.getMaxExperience();
 
         const offsetX = GameScene.TILE_SIZE / 2;
         const offsetY = GameScene.TILE_SIZE;
@@ -82,31 +79,34 @@ export default class Player extends GameActor{
     }
 
     public get level() {
-        return Math.min(
-            this.gameScene.MAX_LEVEL,
-            Math.max(
-                1,
-                Math.ceil(
-                    this.gameScene.PLAYER_LEVELING_RATE * Math.sqrt(
-                        this.experience
-                    )
-                )
-            )
-        );
+        // Find the square root of the experience property
+        const sqrtExp = Math.sqrt(this.experience);
+
+        // Calculate the level based on the square root of the experience and PLAYER_LEVELING_RATE
+        let level = sqrtExp * this.gameScene.gameConfig.PLAYER_LEVELING_RATE;
+
+        // Round up the level to the nearest integer
+        level = Math.ceil(level);
+
+        // Ensure the level is at least 1
+        if (level < 1) {
+            level = 1;
+        }
+
+        // Ensure the level is not greater than MAX_LEVEL
+        if (level > this.gameScene.gameConfig.MAX_UNIT_LEVEL) {
+            level = this.gameScene.gameConfig.MAX_UNIT_LEVEL;
+        }
+
+        // Return the final calculated level
+        return level;
     }
 
     public getLevelFromExperience(experienceAmount: number) {
-        console.log('Experience amount: ', experienceAmount);
-        // const totalExperience = this.experience + experienceAmount;
-        // console.log('Total experience: ', totalExperience);
-        let level = this.gameScene.PLAYER_LEVELING_RATE * Math.sqrt(experienceAmount);
-        console.log('Level (before rounding): ', level);
+        let level = this.gameScene.gameConfig.PLAYER_LEVELING_RATE * Math.sqrt(experienceAmount);
         level = Math.ceil(level);
-        console.log('Level (after rounding): ', level);
         level = Math.max(1, level);
-        console.log('Level (after applying min boundary): ', level);
-        level = Math.min(this.gameScene.MAX_LEVEL, level);
-        console.log('Level (after applying max boundary): ', level);
+        level = Math.min(this.gameScene.gameConfig.MAX_UNIT_LEVEL, level);
         return level;
     }
 
@@ -207,7 +207,6 @@ export default class Player extends GameActor{
     }
 
     public set experience(experience) {
-        console.log(`setting the player experience to ${experience}`);
         this.saveAndLoadScene.db.players.update(
             0,
             {experience}
@@ -216,17 +215,6 @@ export default class Player extends GameActor{
     }
     public get experience() {
         return this._experience;
-    }
-
-    public getMaxExperience() {
-        let i = 1;
-        let level = this.getLevelFromExperience(i);
-
-        while (level < this.gameScene.MAX_LEVEL) {
-            i++;
-            level = this.getLevelFromExperience(i);
-        }
-        return i;
     }
 
 }

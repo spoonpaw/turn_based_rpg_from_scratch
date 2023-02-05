@@ -11,7 +11,6 @@ import Unit from './Unit';
 
 export default class BotCharacter extends Unit {
     private _currentHP!: number;
-    // public currentHP: number;
     public currentResource: number;
     public damageTween!: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
     public equipment: Equipment = {
@@ -72,7 +71,6 @@ export default class BotCharacter extends Unit {
         return super.applyHPChange(hpChangeAmount, this.battleScene.player2HPText);
     }
     public runTurn(): number {
-        console.log('running the bot\'s turn!!!!');
         // just attack enemy 1
         const target = this.battleScene.enemies[0];
         if (!target.isLiving()) return 0;
@@ -106,8 +104,6 @@ export default class BotCharacter extends Unit {
     }
 
     public calculateAttackDamage(target: (PlayerCharacter | Enemy | BotCharacter)): number {
-        console.log(`calculating ${this.name}'s damage.`);
-        console.log('formula: Math.max(1, Math.floor(actorStrength - (defenderDefense / 2) * randomModifier))');
         const actorStrength = this.strength;
         const defenderDefense = target.defense;
         const damageAfterDefense = actorStrength - (defenderDefense / 2);
@@ -118,7 +114,6 @@ export default class BotCharacter extends Unit {
                 damageAfterDefense * randomModifier
             )
         );
-        console.log({actorStrength, defenderDefense, damageAfterDefense, randomModifier, finalAttackDamage});
         return finalAttackDamage;
     }
 
@@ -184,7 +179,6 @@ export default class BotCharacter extends Unit {
     }
 
     public set currentHP(newValue: number) {
-        console.log(`changing hp on the bot character!!! old value: ${this._currentHP}, new value: ${newValue}`);
         // console.trace();
         this.saveAndLoadScene.db.players.update(
             0,

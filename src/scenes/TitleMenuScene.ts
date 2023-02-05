@@ -4,10 +4,8 @@ import SaveAndLoadScene from './SaveAndLoadScene';
 import SFXScene from './SFXScene';
 
 export default class TitleMenuScene extends Phaser.Scene{
-    // private backgroundRectangle!: Phaser.GameObjects.Rectangle;
     private musicScene!: MusicScene;
     private sfxScene!: SFXScene;
-    // private newGameOrLoadFrame!: Phaser.GameObjects.Image;
     private newGameButton!: UIActionButton;
     private loadGameButton!: UIActionButton;
     private saveAndLoadScene!: SaveAndLoadScene;

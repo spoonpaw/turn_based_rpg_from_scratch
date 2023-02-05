@@ -62,9 +62,13 @@ export default class GameScene extends Phaser.Scene {
     private lastPlayerDirection!: Direction;
     private encounter_counter = 0;
     private saveAndLoadScene!: SaveAndLoadScene;
-    public MAX_LEVEL = 5;
-    public PLAYER_LEVELING_RATE = 0.3;
-    public BOT_LEVELING_RATE = 0.4;
+    public gameConfig!: {
+        MAX_UNIT_LEVEL: number;
+        PLAYER_LEVELING_RATE: number;
+        BOT_LEVELING_RATE: number;
+        PLAYER_MAX_EXPERIENCE: number;
+        BOT_MAX_EXPERIENCE: number;
+    };
 
     public constructor() {
         super('Game');
@@ -82,13 +86,18 @@ export default class GameScene extends Phaser.Scene {
             levelData?: ILevelData;
             loadFromSave?: boolean;
         }) {
-        console.log('entering game scene init method');
+        this.gameConfig = this.game.config as unknown as {
+            MAX_UNIT_LEVEL: number;
+            PLAYER_LEVELING_RATE: number;
+            BOT_LEVELING_RATE: number;
+            PLAYER_MAX_EXPERIENCE: number;
+            BOT_MAX_EXPERIENCE: number;
+        };
         this.saveIndex = 0;
         this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
         this.uiScene = <UIScene>this.scene.get('UI');
         this.musicScene = <MusicScene>this.scene.get('Music');
         if (data.loadFromSave) {
-            console.log('entering game scene init method\'s if(loadfromsave) branch');
             // load the game info from dexie
             this.uiScene.scene.bringToTop();
 
@@ -101,9 +110,6 @@ export default class GameScene extends Phaser.Scene {
             this.botScientist = undefined;
 
             this.saveAndLoadScene.getPlayerByIndex(0).then((player: IPlayer) => {
-                console.log('loading the player data from the database');
-                console.log({storedTilemap: player.currentTilemap});
-                console.log(`setting this.loadBattle to player.inCombat (${player.inCombat})`);
                 const levelData = levels[player.currentTilemap];
                 this.nonHostileSpace = !levelData.hostile;
                 if (!player.inCombat) this.musicScene.changeSong(levelData.music);
@@ -281,24 +287,18 @@ export default class GameScene extends Phaser.Scene {
             loadFromSave?: boolean;
         }
     ) {
-        console.log('entering the game scene\'s create method');
         this.saveIndex = 0;
         this.encounter_counter = 0;
 
         this.input.keyboard!.enabled = true;
 
         if (this.gamePadScene) {
-            console.log('restarting the gamepad scene');
             this.gamePadScene.scene.restart();
         }
         if (this.operatingSystem === 'mobile') {
-            console.log('player appears to be on mobile');
             this.saveAndLoadScene.db.players.get(0)
                 .then((player) => {
-                    console.log('checking if player is in combat');
-                    console.log({inCombat: player?.inCombat});
                     if (player?.inCombat !== true) {
-                        console.log('launching the gamepad scene');
                         // launching the game pad scene
                         this.scene.launch('GamePad');
                         this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
@@ -308,7 +308,6 @@ export default class GameScene extends Phaser.Scene {
 
         // if data is empty then the game just started so load the player in the spawn location
         if (data.nameData) {
-            console.log('entering the game scene\'s create method\'s if (namedata) branch');
             // new player created! welcome to Caelor!
             // just got the player's namedata on the initial spawn
 
@@ -319,7 +318,6 @@ export default class GameScene extends Phaser.Scene {
             this.musicScene.scene.bringToTop();
 
             if (this.operatingSystem === 'mobile') {
-                console.log('launching the gamepad scene');
                 // launching the game pad scene
                 this.scene.launch('GamePad');
                 this.gamePadScene = <GamePadScene>this.scene.get('GamePad');
@@ -536,7 +534,6 @@ export default class GameScene extends Phaser.Scene {
 
         }
         else if (data.levelData) {
-            console.log('entering the game scene\'s create method\'s else if (leveldata) branch');
 
             this.uiScene.scene.bringToTop();
 
@@ -768,7 +765,6 @@ export default class GameScene extends Phaser.Scene {
         // determine if the player is in hostile territory
 
         if (xOrYPositionChanged) {
-            console.log({x: playerPos?.x, y: playerPos?.y});
             this.movedFromSpawn = true;
             this.saveAndLoadScene.db.players.update(
                 0,

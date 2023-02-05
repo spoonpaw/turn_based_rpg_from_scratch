@@ -1,12 +1,65 @@
 import Phaser from 'phaser';
 
 export default class BootScene extends Phaser.Scene {
-
+    private gameConfig: any;
     public constructor() {
         super('Boot');
     }
 
+    private getPlayerMaxExperience() {
+        let i = 1;
+        let level = this.getPlayerLevelFromExperience(i);
+
+        while (level < this.gameConfig.MAX_UNIT_LEVEL) {
+            i++;
+            level = this.getPlayerLevelFromExperience(i);
+        }
+        return i;
+    }
+
+    private getBotMaxExperience() {
+        let i = 1;
+        let level = this.getBotLevelFromExperience(i);
+
+        while (level < this.gameConfig.MAX_UNIT_LEVEL) {
+            i++;
+            level = this.getPlayerLevelFromExperience(i);
+        }
+        return i;
+    }
+
+    public getPlayerLevelFromExperience(experienceAmount: number) {
+        let level = this.gameConfig.PLAYER_LEVELING_RATE * Math.sqrt(experienceAmount);
+        level = Math.ceil(level);
+        level = Math.max(1, level);
+        level = Math.min(this.gameConfig.MAX_UNIT_LEVEL, level);
+        return level;
+    }
+
+    public getBotLevelFromExperience(experienceAmount: number) {
+        return Math.min(
+            this.gameConfig.MAX_UNIT_LEVEL,
+            Math.max(
+                1,
+                Math.ceil(
+                    this.gameConfig.BOT_LEVELING_RATE * Math.sqrt(
+                        experienceAmount
+                    )
+                )
+            )
+        );
+    }
+
     public init() {
+
+        this.gameConfig = this.game.config;
+
+        this.gameConfig.MAX_UNIT_LEVEL = 5;
+        this.gameConfig.PLAYER_LEVELING_RATE = 0.3;
+        this.gameConfig.BOT_LEVELING_RATE = 0.4;
+
+        this.gameConfig.PLAYER_MAX_EXPERIENCE = this.getPlayerMaxExperience();
+        this.gameConfig.BOT_MAX_EXPERIENCE = this.getBotMaxExperience();
         this.scene.launch('SaveAndLoad');
     }
 

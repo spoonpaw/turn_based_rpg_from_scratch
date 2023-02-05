@@ -586,7 +586,7 @@ export default class UIScene extends Phaser.Scene {
     }
 
     private calculateTilNextLevel(playerOrBot: Player|Bot): number | string {
-        if (playerOrBot.level >= this.gameScene.MAX_LEVEL) return 'MAX';
+        if (playerOrBot.level >= this.gameScene.gameConfig.MAX_UNIT_LEVEL) return 'MAX';
         const currentExp = playerOrBot.experience;
         let currentLevel = playerOrBot.level;
         const nextLevel = currentLevel + 1;
@@ -595,10 +595,10 @@ export default class UIScene extends Phaser.Scene {
             expCounter++;
             let levelingrate;
             if (playerOrBot instanceof Player) {
-                levelingrate = this.gameScene.PLAYER_LEVELING_RATE;
+                levelingrate = this.gameScene.gameConfig.PLAYER_LEVELING_RATE;
             }
             else {
-                levelingrate = this.gameScene.BOT_LEVELING_RATE;
+                levelingrate = this.gameScene.gameConfig.BOT_LEVELING_RATE;
             }
             currentLevel = Math.max(
                 1,
@@ -2204,17 +2204,6 @@ export default class UIScene extends Phaser.Scene {
     }
 
     private player1ButtonCallback() {
-        console.log({
-            saveIndex: 0,
-            playerExperience: this.gameScene.player.experience,
-            botExperience: this.gameScene.bots[0]?.experience,
-            npcs: this.gameScene.npcs,
-            playerTilePosition: this.gameScene.player.getTilePos(),
-            botPath: this.gameScene.bots[0]?.path,
-            botCoords: this.gameScene.bots[0]?.getTilePos(),
-            playerCurrentHP: this.gameScene.player.currentHP,
-            playerMaxHP: this.gameScene.player.maxHP
-        });
         // uncomment to log interaction state by clicking player portrait
         if (this.interactionState.startsWith('inventoryaction')) {
             const inventorySlotNumber = Number(this.interactionState.split('inventoryaction')[1]);
