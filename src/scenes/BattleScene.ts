@@ -101,8 +101,6 @@ export default class BattleScene extends Phaser.Scene {
         this.sfxScene = <SFXScene>this.scene.get('SFX');
         this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
 
-        console.log('determining whether or not to start the battle!');
-        console.log({data});
         if (data?.loadBattleData) {
             this.loadBattle(data.savedCombatState);
         }
@@ -118,7 +116,6 @@ export default class BattleScene extends Phaser.Scene {
 
     private checkForPlayer1LevelUp(): { levelUp: boolean, newLevel: number } {
         const gameScenePlayer = this.gameScene.player;
-        console.log('checkForPlayer1LevelUp method started');
         if (gameScenePlayer.level === 1) {
             return {levelUp: false, newLevel: 1};
         }
@@ -134,18 +131,13 @@ export default class BattleScene extends Phaser.Scene {
                     return obj.key === enemy.texture.key;
                 });
                 experienceAmount += enemyData?.experience ?? 0;
-                console.log(`Experience amount after adding enemy's experience: ${experienceAmount}`);
             }
 
             // get the player's current level
             const currentLevel = gameScenePlayer.level;
-            console.log(`Current player level: ${currentLevel}`);
-            console.log(`Current player experience: ${gameScenePlayer.experience}`);
 
             const newLevel = gameScenePlayer.getLevelFromExperience(gameScenePlayer.experience - experienceAmount);
-            console.log(`New player level: ${newLevel}`);
 
-            console.log('checkForPlayer1LevelUp method finished');
             return {levelUp: newLevel < currentLevel, newLevel: currentLevel};
 
         }
@@ -273,12 +265,10 @@ export default class BattleScene extends Phaser.Scene {
 
                     gameScenePlayer.gold = gameScenePlayer.gold + goldAmount;
                 }
-                const newExperienceAmount = Math.min(gameScenePlayer.experience + experienceAmount, gameScenePlayer.maxExperience);
+                const newExperienceAmount = Math.min(gameScenePlayer.experience + experienceAmount, this.gameScene.gameConfig.PLAYER_MAX_EXPERIENCE);
 
-                console.log(`incrementing the player's experience! new exp amount: ${newExperienceAmount}`);
                 this.playerExperienceGain = newExperienceAmount - gameScenePlayer.experience;
                 gameScenePlayer.experience = newExperienceAmount;
-                console.log(`player's new level: ${gameScenePlayer.level}`);
             }
             else {
                 const bot = this.gameScene.bots[0];
@@ -288,7 +278,6 @@ export default class BattleScene extends Phaser.Scene {
                     bot.currentHP = 1;
                 }
 
-                console.log('initializing bot experience (0)');
                 let experienceAmount = 0;
 
                 if (this.interactionState === 'handlingrunselect') {
@@ -300,28 +289,22 @@ export default class BattleScene extends Phaser.Scene {
                             return obj.key === enemy.texture.key;
                         });
                         experienceAmount += enemyData?.experience ?? 0;
-                        console.log(`bot experience calculated from enemies: ${experienceAmount}`);
                     }
 
                     // Calculate the new level of the bot based on its current experience and the `experienceAmount` gained from battle
                     let newLevel = bot.getLevelFromExperience(
                         bot.experience + experienceAmount
                     );
-                    console.log(`calculated bot level accounting for new experience points: ${newLevel}`);
                     let newLevelExceedsPlayersCurrentLevel = newLevel > this.gameScene.player.level;
-                    console.log(`new bot level exceeds player's current level: ${newLevelExceedsPlayersCurrentLevel}`);
                     while (newLevelExceedsPlayersCurrentLevel) {
                         experienceAmount -= 1;
-                        console.log(`decrementing experience amount, new experience amount: ${experienceAmount}`);
                         newLevel = bot.getLevelFromExperience(bot.experience + experienceAmount);
-                        console.log(`calculated bot level accounting for new experience points: ${newLevel}`);
                         newLevelExceedsPlayersCurrentLevel = newLevel > this.gameScene.player.level;
-                        console.log(`new bot level exceeds player's current level: ${newLevelExceedsPlayersCurrentLevel}`);
 
                     }
                 }
 
-                const newExperienceAmount = Math.min(bot.experience + experienceAmount, bot.maxExperience);
+                const newExperienceAmount = Math.min(bot.experience + experienceAmount, this.gameScene.gameConfig.BOT_MAX_EXPERIENCE);
 
                 this.botExperienceGain = newExperienceAmount - bot.experience;
                 bot.experience = newExperienceAmount;
@@ -435,19 +418,12 @@ export default class BattleScene extends Phaser.Scene {
 
     public gameOverTest() {
         // check if all the heroes are dead (players and bots)
-        console.log('testing whether each hero is dead from the game over test method!');
-        console.log({
-            heroesArray: this.heroes
-        });
         let allHeroesAreDead = true;
         for (const hero of this.heroes) {
-            console.log(`checking if ${hero.name} is dead.`);
             if (hero.isLiving()) {
-                console.log(`${hero.name} appears to be living. their current hp is ${hero.currentHP}`);
                 allHeroesAreDead = false;
             }
             else {
-                console.log(`${hero.name} appears to be dead. their current hp is ${hero.currentHP}`);
                 continue;
             }
         }
@@ -473,13 +449,6 @@ export default class BattleScene extends Phaser.Scene {
         this.saveAndLoadScene.db.players.update(
             0,
             (player: IPlayer) => {
-                console.log('getting the target from the action select to store in the db');
-                console.log(
-                    {
-                        playerCombatStateUnits: player.combatState.units,
-                        dataTarget: data.target
-                    }
-                );
                 const saveTarget = player.combatState.units.find(unit => unit.id === data.target.id);
 
 
@@ -625,11 +594,7 @@ export default class BattleScene extends Phaser.Scene {
         );
 
         let turnRunTime = 0;
-        console.log('assigning the value to current unit on the battle scene!');
-        console.log({roundUnits: this.roundUnits, turnIndex: this.turnIndex});
         const currentUnit = this.roundUnits[this.turnIndex];
-        console.log({currentUnit});
-        console.log({currentUnitCurrentHP: currentUnit.currentHP});
         if (currentUnit instanceof Enemy) {
             // the enemy is going to use an ability (default physical attack)
             if (currentUnit.isLiving()) {
@@ -758,16 +723,12 @@ export default class BattleScene extends Phaser.Scene {
         const enemiesStillLiving = savedCombatState.enemies.some(enemy => enemy.currentHP > 0);
         const heroesStillLiving = savedCombatState.heroes.some(hero => hero.currentHP > 0);
 
-        console.log('loading the battle from a saved state!!!!!');
-
         this.musicScene.scene.bringToTop();
 
         this.uiScene.selectCancel();
         this.gameScene.gamePadScene?.scene.stop();
         this.uiScene.scene.sendToBack();
 
-        console.log('setting the turn index to the value of saved combat state turn index minus one');
-        console.log({savedTurnIndex: savedCombatState.turnIndex, savedTurnIndexMinusOne: savedCombatState.turnIndex - 1});
         if (savedCombatState.turnIndex >= savedCombatState.roundUnits.length) {
             this.turnIndex = -1;
         }
@@ -964,7 +925,6 @@ export default class BattleScene extends Phaser.Scene {
     }
 
     private startBattle(): void {
-        console.log('starting the battle!!');
         // let count = 0;
         // this.children.each(gameObject => {
         //     if (gameObject.active) {

@@ -17,8 +17,6 @@ export default class PlayerCharacter extends Unit {
     public currentResource: number;
     public damageTween!: Phaser.Tweens.Tween | Phaser.Tweens.Tween[];
     public equipment: Equipment;
-    // public inventory!: Item[];
-    // public stats!: Stats;
     public key!: string;
     private invisiblePlayerButton!: Phaser.GameObjects.Rectangle;
 
@@ -69,8 +67,6 @@ export default class PlayerCharacter extends Unit {
     }
 
     public calculateAttackDamage(target: (PlayerCharacter | Enemy | BotCharacter)): number {
-        console.log(`calculating ${this.name}'s damage.`);
-        console.log('formula: Math.max(1, Math.floor(actorStrength - (defenderDefense / 2) * randomModifier))');
         const actorStrength = this.strength;
         const defenderDefense = target.defense;
         const damageAfterDefense = actorStrength - (defenderDefense / 2);
@@ -81,7 +77,6 @@ export default class PlayerCharacter extends Unit {
                 damageAfterDefense * randomModifier
             )
         );
-        console.log({actorStrength, defenderDefense, damageAfterDefense, randomModifier, finalAttackDamage});
         return finalAttackDamage;
     }
 
@@ -116,8 +111,6 @@ export default class PlayerCharacter extends Unit {
             target: Enemy | PlayerCharacter | BotCharacter;
         }
     ): number {
-        console.log('running the player\'s turn!!!!');
-
         const target = data.target;
         // TODO: REDIRECT THE PLAYER'S ATTACK IF THEIR INTENDED TARGET IS NOT ALIVE AND THERE IS STILL > 0 ENEMIES LIVING
         if (!target.isLiving()) return 0;
@@ -395,7 +388,6 @@ export default class PlayerCharacter extends Unit {
     }
 
     set currentHP(newValue: number) {
-        console.log(`changing hp on the player character!!! old value: ${this._currentHP}, new value: ${newValue}`);
         // console.trace();
         this.saveAndLoadScene.db.players.update(
             0,

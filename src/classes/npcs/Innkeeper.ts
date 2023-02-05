@@ -27,8 +27,6 @@ export default class Innkeeper extends NPC {
             this.gameScene.gamePadScene?.scene.stop();
 
             this.gameScene.input.keyboard!.enabled = false;
-            // get rid of active dialog scene, it isn't needed anymore
-            // this.gameScene.activeDialogScene = true;
             if (this.gameScene.gridPhysics.facingDirection === 'right') this.sprite.setFrame(1);
             if (this.gameScene.gridPhysics.facingDirection === 'up') this.sprite.setFrame(0);
             if (this.gameScene.gridPhysics.facingDirection === 'left') this.sprite.setFrame(2);
@@ -53,7 +51,6 @@ export default class Innkeeper extends NPC {
                 this.gameScene.gamePadScene?.scene.restart();
                 this.uiScene.interactionState = 'mainselect';
                 eventsCenter.removeListener('space');
-                // eventsCenter.removeListener('no');
 
                 this.uiScene.goldFrame.setVisible(false);
                 this.uiScene.coinIcon.setVisible(false);
@@ -84,7 +81,6 @@ export default class Innkeeper extends NPC {
             eventsCenter.removeListener('yes');
             eventsCenter.on('yes', () => {
                 this.uiScene.interactionState = 'innkeeperresponse';
-                // eventsCenter.removeListener('no');
                 eventsCenter.removeListener('yes');
                 this.uiScene.rightSideDialogOptionsFrame.setVisible(false);
                 this.uiScene.yesButton.hideActionButton();

@@ -10,14 +10,12 @@ import {MonsterJob} from './Jobs/MonsterJob';
 import Vector2 = Phaser.Math.Vector2;
 
 export default class Bot extends GameActor{
-    // public LEVELING_RATE = 0.4;
     public tilePos!: Phaser.Math.Vector2;
     private uiScene: UIScene;
     public gameScene: GameScene;
     public path: Phaser.Math.Vector2[] = [];
     public startedMoving = false;
     private saveAndLoadScene: SaveAndLoadScene;
-    public maxExperience: number;
 
     constructor(
         name: string,
@@ -27,7 +25,6 @@ export default class Bot extends GameActor{
         public job: MonsterJob,
         private _currentHP: number,
         public currentResource: number
-        // stats?: Stats
     ) {
         super(
             name,
@@ -40,8 +37,6 @@ export default class Bot extends GameActor{
         this.gameScene = <GameScene>sprite.scene.scene.get('Game');
         this.uiScene = <UIScene>sprite.scene.scene.get('UI');
         
-        this.maxExperience = this.getMaxExperience();
-
         const offsetX = GameScene.TILE_SIZE / 2;
         const offsetY = GameScene.TILE_SIZE;
 
@@ -53,7 +48,6 @@ export default class Bot extends GameActor{
             startingPositionY * GameScene.TILE_SIZE + offsetY
         );
         this.sprite.setFrame(1);
-        // this.stats = stats ?? this.createStats(this.type);
 
         // Initialize this.tilePos here
         this.tilePos = new Vector2(startingPositionX, startingPositionY);
@@ -139,27 +133,37 @@ export default class Bot extends GameActor{
         return Direction.NONE;
     }
 
-    get level() {
-        return Math.min(
-            this.gameScene.MAX_LEVEL,
-            Math.max(
-                1,
-                Math.ceil(
-                    this.gameScene.BOT_LEVELING_RATE * Math.sqrt(
-                        this.experience
-                    )
-                )
-            )
-        );
+    public get level() {
+        // Find the square root of the experience property
+        const sqrtExp = Math.sqrt(this.experience);
+
+        // Calculate the level based on the square root of the experience and PLAYER_LEVELING_RATE
+        let level = sqrtExp * this.gameScene.gameConfig.BOT_LEVELING_RATE;
+
+        // Round up the level to the nearest integer
+        level = Math.ceil(level);
+
+        // Ensure the level is at least 1
+        if (level < 1) {
+            level = 1;
+        }
+
+        // Ensure the level is not greater than MAX_LEVEL
+        if (level > this.gameScene.gameConfig.MAX_UNIT_LEVEL) {
+            level = this.gameScene.gameConfig.MAX_UNIT_LEVEL;
+        }
+
+        // Return the final calculated level
+        return level;
     }
 
     public getLevelFromExperience(experienceAmount: number) {
         return Math.min(
-            this.gameScene.MAX_LEVEL,
+            this.gameScene.gameConfig.MAX_UNIT_LEVEL,
             Math.max(
                 1,
                 Math.ceil(
-                    this.gameScene.BOT_LEVELING_RATE * Math.sqrt(
+                    this.gameScene.gameConfig.BOT_LEVELING_RATE * Math.sqrt(
                         experienceAmount
                     )
                 )
@@ -240,17 +244,6 @@ export default class Bot extends GameActor{
     }
     public get experience() {
         return this._experience;
-    }
-
-    public getMaxExperience() {
-        let i = 1;
-        let level = this.getLevelFromExperience(i);
-
-        while (level < this.gameScene.MAX_LEVEL) {
-            i++;
-            level = this.getLevelFromExperience(i);
-        }
-        return i;
     }
 
 }

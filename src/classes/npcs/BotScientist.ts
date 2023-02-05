@@ -62,7 +62,6 @@ export default class extends NPC {
                 this.gameScene.gamePadScene?.scene.restart();
                 this.uiScene.interactionState = 'mainselect';
                 eventsCenter.removeListener('space');
-                // eventsCenter.removeListener('no');
 
                 this.uiScene.leftSideDialogFrame.setVisible(false);
                 this.uiScene.leftSideDialogText.setText('');

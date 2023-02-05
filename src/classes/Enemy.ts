@@ -138,8 +138,6 @@ export class Enemy extends Unit {
 
     public runTurn(): number {
 
-        console.log('running the enemy\'s turn!!!!');
-
         let runtimeInMS = 0;
 
         // if there are enough targets to justify it and enough resources to spend, execute
@@ -199,23 +197,19 @@ export class Enemy extends Unit {
         }
         else {
             // attain random target!
-            console.log({battleSceneHeroes: this.battleScene.heroes});
             const listOfLivingTargets = this.battleScene.heroes.filter(
                 (obj) => {
                     return obj.isLiving();
                 }
             );
-            console.log({listOfLivingTargets});
 
             const randomHeroIndex = Phaser.Math.RND.between(
                 0,
                 Math.max(0, listOfLivingTargets.length - 1)
             );
-            console.log({randomHeroIndex});
 
             let target = listOfLivingTargets[randomHeroIndex];
 
-            console.log({target});
             if (!target) return 0;
 
             let damage = 0;
@@ -346,7 +340,6 @@ export class Enemy extends Unit {
         return this.stats.currentHP;
     }
     public set currentHP(newValue) {
-        console.log(`changing hp on the enemy character!!! old value: ${this._currentHP}, new value: ${newValue}`);
         this.saveAndLoadScene.db.players.update(
             0,
             (player: IPlayer) => {
