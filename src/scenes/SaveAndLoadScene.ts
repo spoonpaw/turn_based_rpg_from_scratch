@@ -40,7 +40,7 @@ export default class SaveAndLoadScene extends Phaser.Scene {
             return players[index];
         }
         catch (err) {
-            console.log(`Error occurred: ${err}`);
+            console.log(`error occurred: ${err}`);
         }
     }
 }

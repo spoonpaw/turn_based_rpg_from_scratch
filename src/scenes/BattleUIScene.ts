@@ -148,18 +148,6 @@ export default class BattleUIScene extends Phaser.Scene {
                 this.selectAttack();
             }
         }
-        if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-            console.log('space pressed on the battle ui scene!');
-            console.log({
-                battleSceneInteractionState: this.battleScene.interactionState,
-                units: this.battleScene.units,
-                heroes: this.battleScene.heroes,
-                enemies: this.battleScene.enemies,
-                roundUnits: this.battleScene.roundUnits,
-                enemyCurrentHP: this.battleScene.enemies[0].stats.currentHP,
-                maxCurrentHP: this.battleScene.enemies[0].stats.maxHP
-            });
-        }
     }
 
     public destroyInventoryButtons() {
@@ -328,13 +316,7 @@ export default class BattleUIScene extends Phaser.Scene {
                 this.battleScene.interactionState = 'mainselect';
             }
             else {
-                console.log('LOADING A MIDFIGHT BATTLE!!!!!!');
                 this.loadingBattleMidRound = false;
-                console.log('looking for the target from the battle scene that matches the save data target!');
-                console.log({
-                    battleSceneUnits: this.battleScene.units,
-                    targetId: this.saveData?.target?.id
-                });
                 const target = this.battleScene.units.find((unit) => {
                     return unit.id === this.saveData?.target?.id;
                 })!;
@@ -343,11 +325,6 @@ export default class BattleUIScene extends Phaser.Scene {
                     const bIndex = this.saveData!.roundUnits.findIndex(unit => unit.id === b.id);
                     return aIndex - bIndex;
                 });
-
-                console.log('just sorted the roundunits from the messageCloseHandler load data branch');
-                console.log({roundUnits: this.battleScene.roundUnits});
-                console.log({target});
-
 
                 this.battleScene.parseNextUnitTurn(
                     {
