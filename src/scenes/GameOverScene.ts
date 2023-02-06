@@ -17,7 +17,7 @@ export default class GameOverScene extends Phaser.Scene {
         this.gameScene = <GameScene>this.scene.get('Game');
         this.musicScene = <MusicScene>this.scene.get('Music');
         this.saveAndLoadScene = <SaveAndLoadScene>this.scene.get('SaveAndLoad');
-        const phaserImage = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'title');
+        const phaserImage = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'gameover');
         phaserImage.displayHeight = this.sys.canvas.height;
         phaserImage.displayWidth = this.sys.canvas.width;
 
@@ -58,7 +58,6 @@ export default class GameOverScene extends Phaser.Scene {
         gameScene.player.currentHP = gameScene.player.maxHP;
 
         this.setupKeyListeners();
-
     }
 
     public handleInput(camera: Camera) {

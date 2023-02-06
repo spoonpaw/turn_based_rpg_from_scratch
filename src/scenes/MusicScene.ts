@@ -22,22 +22,22 @@ export default class MusicScene extends Phaser.Scene {
         });
 
         this.overworldSong = this.sound.add('overworldsong', {
-            volume: 0.5,
+            volume: 0.25,
             loop: true
         });
 
         this.battleSong = this.sound.add('battlesong', {
-            volume: 0.30,
+            volume: 0.20,
             loop: true
         });
 
         this.gameOverSong = this.sound.add('gameoversong', {
-            volume: 0.45,
+            volume: 0.35,
             loop: true
         });
 
         this.townSong = this.sound.add('townsong', {
-            volume: 0.60,
+            volume: 0.30,
             loop: true
         });
 
