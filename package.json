@@ -21,20 +21,20 @@
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "5.18.0",
     "@typescript-eslint/parser": "5.18.0",
-    "dexie": "^3.2.2",
+    "dexie": "3.2.2",
     "ejs": "3.1.8",
     "eslint": "8.12.0",
     "express": "4.18.1",
-    "idb": "^7.1.1",
-    "lodash": "^4.17.21",
-    "phaser": "^3.60.0-beta.10",
-    "phaser-swipe": "^1.0.4",
-    "phaser3-rex-plugins": "^1.1.78",
+    "idb": "7.1.1",
+    "lodash": "4.17.21",
+    "phaser": "3.60.0-beta.10",
+    "phaser-swipe": "1.0.4",
+    "phaser3-rex-plugins": "1.1.78",
     "snowpack": "3.8.8",
     "typescript": "4.6.3"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.186",
-    "eslint-plugin-simple-import-sort": "^8.0.0"
+    "@types/lodash": "4.14.186",
+    "eslint-plugin-simple-import-sort": "8.0.0"
   }
 }
