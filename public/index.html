@@ -40,7 +40,9 @@
                         <a class="nav-link" href="https://play.afterlife-online.com" target="_blank">Play</a>
                     </li>
                     <li class="nav-item text-responsive">
-                        <a class="nav-link" href="https://github.com/spoonpaw/afterlife-online-electron/releases/tag/v1.0.0" target="_blank">Download</a>
+                        <a class="nav-link"
+                           href="https://github.com/spoonpaw/afterlife-online-electron/releases/tag/v1.0.0"
+                           target="_blank">Download</a>
                     </li>
                     <li class="nav-item text-responsive">
                         <a class="nav-link" href="https://blog.afterlife-online.com" target="_blank">Blog</a>
@@ -64,10 +66,8 @@
         <div class="container-fluid py-2">
             <h2 class="text-responsive-header-2 fw-light">Welcome to Afterlife Online: Explore a Strange and Colorful
                 World</h2>
-            <!--            <p class="col-md-8 fs-2">Enter the world of Caelor, a realm of weird science fantasy and cheesy vintage-->
             <p class="col-md-8 text-responsive">Enter the world of Caelor, a realm of weird science fantasy and cheesy
                 vintage
-                <!--            <p class="col-md-8">Enter the world of Caelor, a realm of weird science fantasy and cheesy vintage-->
                 vibes.
                 This unforgiving RPG, inspired by classics like Dragon Warrior and Final Fantasy, combines technology
                 and
@@ -87,32 +87,67 @@
     </div>
 
     <div class="mx-3 mt-3 row align-items-md-stretch">
+        <!-- Art Cell (Dark Background) -->
         <div class="col-md-6 mb-3">
-            <div class="h-100 p-4 text-bg-dark rounded-3">
-                <h2 class="text-responsive-header-2">Rad Chiptunes by Ocean Palace</h2>
-                <p class="text-responsive">With a diverse range of lo-fi and effective chip sounds, Ocean Palace's music
-                    is sure to be a standout feature of the game. Known for their skills in subtlety, dissonance, and
-                    lo-fi emotion, you can expect a cohesive and multifaceted soundtrack that will keep you coming back
-                    for more.</p>
-                <a href="https://oceanpalace.neocities.org/" target="_blank">
-                    <button class="btn btn-outline-light text-responsive" type="button">Listen To Ocean Palace</button>
-                </a>
+            <div class="d-flex flex-column h-100 p-4 bg-dark text-white rounded-3 justify-content-between">
+                <div>
+                    <h2 class="text-responsive-header-2">Pixel Artistry by Lynn Tobin</h2>
+                    <p class="text-responsive">Discover the visual heartbeat of Afterlife Online with Lynn Tobin's pixel art, blending retro charm and narrative depth.</p>
+                </div>
+                <div>
+                    <a href="https://instagram.com/lynn.tobin" target="_blank" class="text-white">
+                        <button class="btn btn-outline-light text-responsive" type="button">Explore Lynn's Art</button>
+                    </a>
+                </div>
             </div>
         </div>
+
+        <!-- Music Cell (Primary Background) -->
         <div class="col-md-6 mb-3">
-            <div class="h-100 p-4 bg-light border rounded-3">
-                <h2 class="text-responsive-header-2">Collaborate and Create with the Afterlife Online Community</h2>
-                <p class="text-responsive">Are you interested in helping bring Caelor to life? We're always looking for
-                    talented
-                    individuals to join our team and contribute their skills and ideas to the project. If you're
-                    passionate about creating games and want to be a part of our team, don't hesitate to reach out and
-                    email us.</p>
-                <a href="mailto:oceanpalace@zoho.com">
-                    <button class="btn btn-outline-secondary text-responsive" type="button">Send Us An Email</button>
-                </a>
+            <div class="d-flex flex-column h-100 p-4 bg-primary text-white rounded-3 justify-content-between">
+                <div>
+                    <h2 class="text-responsive-header-2">Rad Chiptunes by Ocean Palace</h2>
+                    <p class="text-responsive">With a diverse range of lo-fi and effective chip sounds, Ocean Palace's music is a standout feature.</p>
+                </div>
+                <div>
+                    <a href="https://oceanpalace.neocities.org/" target="_blank" class="text-white">
+                        <button class="btn btn-outline-light text-responsive" type="button">Listen To Ocean Palace</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forum Cell (Warning Background) -->
+        <div class="col-md-6 mb-3">
+            <div class="d-flex flex-column h-100 p-4 bg-warning text-dark rounded-3 justify-content-between">
+                <div>
+                    <h2 class="text-responsive-header-2">Join the Afterlife Online Forum</h2>
+                    <p class="text-responsive">Engage with the community on our official forum. Share your adventures, strategies, and art.</p>
+                </div>
+                <div>
+                    <a href="https://forum.afterlife-online.com" target="_blank">
+                        <button class="btn btn-dark text-responsive" type="button">Visit the Forum</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blog Cell (Success Background) -->
+        <div class="col-md-6 mb-3">
+            <div class="d-flex flex-column h-100 p-4 bg-success text-white rounded-3 justify-content-between">
+                <div>
+                    <h2 class="text-responsive-header-2">Afterlife Online Blog</h2>
+                    <p class="text-responsive">Dive deeper into the lore, updates, and behind-the-scenes with our official blog.</p>
+                </div>
+                <div>
+                    <a href="https://blog.afterlife-online.com" target="_blank" class="text-white">
+                        <button class="btn btn-outline-light text-responsive" type="button">Read Our Blog</button>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
+
 
 </main>
 
@@ -128,7 +163,7 @@
                     <span class="text-responsive ms-3">Afterlife Online</span>
                 </a>
                 <ul class="list-unstyled small text-muted">
-                    <li class="text-responsive mb-s">Copyright 2023 Net Artisan Collective. All rights reserved.</li>
+                    <li class="text-responsive mb-s">Copyright 2024 Net Artisan Collective. All rights reserved.</li>
                     <li class="text-responsive mb-s">Afterlife Online version 0.1 (pre-alpha).</li>
                     <li class="text-responsive mb-s">This game is in development and all content is subject to change.
                     </li>
@@ -139,12 +174,19 @@
                 <h2 class="text-responsive">Links</h2>
                 <ul class="list-unstyled">
                     <li class="text-responsive mb-2"><a href="/">Home</a></li>
-                    <li class="text-responsive mb-2"><a href="https://play.afterlife-online.com" target="_blank">Play</a></li>
-                    <li class="text-responsive mb-2"><a href="https://github.com/spoonpaw/afterlife-online-electron/releases/tag/v1.0.0" target="_blank">Download</a></li>
-                    <li class="text-responsive mb-2"><a href="https://blog.afterlife-online.com" target="_blank">Blog</a></li>
-                    <li class="text-responsive mb-2"><a href="https://forum.afterlife-online.com" target="_blank">Forum</a></li>
-                    <li class="text-responsive mb-2"><a href="https://discord.gg/VkAeKyXQuB" target="_blank">Discord</a></li>
-                    <li class="text-responsive mb-2"><a href="https://donate.stripe.com/aEU3e9dZT4df2aYcMM" target="_blank">Donate</a>
+                    <li class="text-responsive mb-2"><a href="https://play.afterlife-online.com"
+                                                        target="_blank">Play</a></li>
+                    <li class="text-responsive mb-2"><a
+                            href="https://github.com/spoonpaw/afterlife-online-electron/releases/tag/v1.0.0"
+                            target="_blank">Download</a></li>
+                    <li class="text-responsive mb-2"><a href="https://blog.afterlife-online.com"
+                                                        target="_blank">Blog</a></li>
+                    <li class="text-responsive mb-2"><a href="https://forum.afterlife-online.com"
+                                                        target="_blank">Forum</a></li>
+                    <li class="text-responsive mb-2"><a href="https://discord.gg/VkAeKyXQuB" target="_blank">Discord</a>
+                    </li>
+                    <li class="text-responsive mb-2"><a href="https://donate.stripe.com/aEU3e9dZT4df2aYcMM"
+                                                        target="_blank">Donate</a>
                     </li>
                 </ul>
             </div>
