@@ -32,14 +32,9 @@ Build output goes to `_build/`. The site is entirely static -- no server-side lo
 
 ## Deployment
 
-Hosted on **Cloudflare Pages** at `afterlife-online.com`.
+Hosted on **Cloudflare Pages** at `afterlife-online.com`. The GitHub repo is connected to Cloudflare Pages -- pushing to `master` triggers an automatic build and deploy.
 
-To deploy manually:
-
-```bash
-nvm use 20  # wrangler needs Node 20+
-npx wrangler pages deploy _build --project-name afterlife-online --branch main
-```
+Build environment: `NODE_VERSION=16` (set in Cloudflare Pages settings).
 
 The Express server in `server.js` is a legacy artifact from when this was hosted on Heroku. It is not used in production.
 
