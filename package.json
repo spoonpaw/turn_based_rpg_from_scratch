@@ -1,40 +1,25 @@
 {
-  "name": "phaser3-ts-snowpack-eslint",
-  "version": "1.0.0.220827432",
-  "description": "A modern Phaser 3 template with TypeScript, Snowpack & ESLint",
-  "main": "src/main.ts",
-  "engines": {
-    "npm": "8.3.1",
-    "node": "16.14.0"
-  },
+  "name": "afterlife-online-website",
+  "version": "1.0.0",
+  "description": "Afterlife Online website and game client",
+  "type": "module",
   "scripts": {
-    "dev": "snowpack dev",
-    "start": "node server",
-    "prebuild": "tsc && npm run lint",
-    "build": "snowpack build",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
-  "author": "paulasantamaria",
   "license": "MIT",
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "5.18.0",
-    "@typescript-eslint/parser": "5.18.0",
     "dexie": "3.2.2",
-    "ejs": "3.1.8",
-    "eslint": "8.12.0",
-    "express": "4.18.1",
     "idb": "7.1.1",
-    "lodash": "4.17.21",
+    "lodash": "^4.17.23",
     "phaser": "3.60.0-beta.10",
     "phaser-swipe": "1.0.4",
-    "phaser3-rex-plugins": "1.1.78",
-    "snowpack": "3.8.8",
-    "typescript": "4.6.3"
+    "phaser3-rex-plugins": "1.1.78"
   },
   "devDependencies": {
     "@types/lodash": "4.14.186",
-    "eslint-plugin-simple-import-sort": "8.0.0"
+    "typescript": "~5.7.0",
+    "vite": "^6.0.0"
   }
 }
