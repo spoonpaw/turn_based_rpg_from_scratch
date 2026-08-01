@@ -13,6 +13,8 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, "index.html"),
         game: resolve(__dirname, "game.html"),
+        privacy: resolve(__dirname, "privacy.html"),
+        terms: resolve(__dirname, "terms.html"),
       },
     },
   },

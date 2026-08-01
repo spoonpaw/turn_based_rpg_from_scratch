@@ -1,0 +1,96 @@
+/* Legal pages (privacy, terms): long-form prose on the landing page's
+   palette. Deliberately quieter than landing.css — no CRT roll, no
+   animation, generous line-height. Someone reading this needs to actually
+   read it. */
+
+.legal {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 140px 24px 96px;
+    font-family: var(--font-ui);
+    color: var(--ink);
+    font-size: 21px;
+    line-height: 1.7;
+}
+
+.legal h1 {
+    font-family: var(--font-display);
+    font-size: clamp(38px, 7vw, 60px);
+    color: var(--mint);
+    line-height: 1.05;
+    margin: 0 0 10px;
+    text-shadow: 0 0 18px rgba(125, 255, 212, 0.35);
+}
+
+.legal .updated {
+    color: var(--ink-dim);
+    font-size: 18px;
+    margin: 0 0 8px;
+}
+
+/* The one-line plain-English summary above each document. */
+.legal .tldr {
+    border-left: 3px solid var(--pink);
+    background: rgba(34, 18, 71, 0.6);
+    padding: 14px 18px;
+    margin: 26px 0 34px;
+    color: var(--ink-dim);
+}
+
+.legal h2 {
+    font-family: var(--font-display);
+    font-size: 30px;
+    color: var(--gold);
+    margin: 44px 0 12px;
+    line-height: 1.15;
+}
+
+.legal h3 {
+    font-family: var(--font-ui);
+    font-size: 23px;
+    color: var(--pink);
+    margin: 28px 0 8px;
+}
+
+.legal p { margin: 0 0 16px; }
+
+.legal ul { margin: 0 0 18px; padding-left: 26px; }
+.legal li { margin: 0 0 9px; }
+
+.legal a { color: var(--mint); }
+.legal a:hover { color: var(--pink); }
+
+.legal strong { color: var(--ink); }
+
+.legal table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 20px;
+    font-size: 19px;
+}
+
+.legal th,
+.legal td {
+    border: 1px solid rgba(183, 166, 227, 0.35);
+    padding: 9px 12px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.legal th { color: var(--gold); background: rgba(26, 14, 56, 0.8); }
+
+/* Wide tables scroll inside themselves rather than the page. */
+.legal .table-scroll { overflow-x: auto; margin: 0 0 20px; }
+.legal .table-scroll table { margin: 0; min-width: 460px; }
+
+.legal .contact {
+    border: 3px solid var(--frame);
+    background: linear-gradient(160deg, var(--panel) 0%, var(--night) 100%);
+    padding: 20px 22px;
+    margin: 34px 0 0;
+}
+
+@media (max-width: 640px) {
+    .legal { padding: 116px 18px 72px; font-size: 19px; }
+    .legal h2 { font-size: 26px; }
+}
