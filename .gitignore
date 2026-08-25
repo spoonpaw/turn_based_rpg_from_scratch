@@ -3,3 +3,4 @@ _build
 _tscbuild
 *.bak
 .idea
+.DS_Store
