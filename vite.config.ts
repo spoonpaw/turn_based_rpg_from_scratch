@@ -15,6 +15,7 @@ export default defineConfig({
         game: resolve(__dirname, "game.html"),
         privacy: resolve(__dirname, "privacy.html"),
         terms: resolve(__dirname, "terms.html"),
+        deleteAccount: resolve(__dirname, "delete-account.html"),
       },
     },
   },

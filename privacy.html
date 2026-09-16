@@ -42,12 +42,12 @@
 <main class="legal">
 
     <h1>Privacy Policy</h1>
-    <p class="updated">Version 2026-08-01 &middot; Last updated August 1, 2026</p>
+    <p class="updated">Version 2026-09-16 &middot; Last updated September 16, 2026</p>
 
     <p class="tldr">
-        In plain English: we store your username, email, a scrambled version of your password, and your game
-        progress. We use your email to confirm your account and to reach you about your account. We do not sell
-        your data. You can ask us to delete your account and we will.
+        In plain English: we store your username, a scrambled version of your password, and your game progress.
+        An email address is optional &mdash; if you add one, we use it only to help you recover your password. We
+        do not sell your data. You can delete your account in-game at any time.
     </p>
 
     <p>
@@ -59,13 +59,15 @@
 
     <h3>Information you give us</h3>
     <ul>
-        <li><strong>Account details</strong> — your username, your email address, and your password. Your password
-            is stored only as a salted Argon2 hash; we never store or have access to the password itself.</li>
+        <li><strong>Account details</strong> — your username and your password. Your password is stored only as a
+            salted Argon2 hash; we never store or have access to the password itself. A recovery email address,
+            only if you choose to add one in-game.</li>
         <li><strong>Consent choices</strong> — the date and time you accepted these terms, which version you
             accepted, and whether you opted in to project news.</li>
         <li><strong>Bug reports</strong> — if you submit one from inside the Game, we receive your description
-            and (if you include it) a screenshot of your game window, along with your character name, location,
-            client version, and operating system. Only send a screenshot you're comfortable sharing.</li>
+            and a screenshot of your game window, which the report attaches automatically, along with your
+            character name, location, client version, and operating system. Only send a report when you're
+            comfortable sharing what is on screen.</li>
     </ul>
 
     <h3>Information created by playing</h3>
@@ -99,8 +101,9 @@
             </thead>
             <tbody>
             <tr>
-                <td>Username, email, password hash</td>
-                <td>To create your account, log you in, and confirm you own the email address</td>
+                <td>Username, password hash; recovery email if you add one</td>
+                <td>To create your account, log you in, and &mdash; if you add an email &mdash; confirm you own it and
+                    let you reset a lost password</td>
                 <td>Performance of a contract</td>
             </tr>
             <tr>
@@ -137,9 +140,9 @@
         There are two kinds, and they are separate:
     </p>
     <ul>
-        <li><strong>Account email</strong> (confirmation codes, security notices). You cannot opt out of these
-            while you have an account — they are how the account works.</li>
-        <li><strong>Project news</strong>. Only if you ticked the optional box when registering. Every such email
+        <li><strong>Account email</strong> (verification codes, password-reset codes). Sent only if you added a
+            recovery email, and only when you ask for a code.</li>
+        <li><strong>Project news</strong>. Only if you ticked the optional box when adding a recovery email. Every such email
             includes an unsubscribe link, and you can also ask us to turn it off at any time using the contact
             address below. We will never add you to this without you asking.</li>
     </ul>
@@ -156,9 +159,10 @@
             <tr><th>Provider</th><th>What they handle</th><th>Where</th></tr>
             </thead>
             <tbody>
-            <tr><td>Hetzner</td><td>Game server hosting and the database</td><td>United States</td></tr>
+            <tr><td>Hetzner</td><td>Game server hosting and the database</td><td>Germany</td></tr>
             <tr><td>Cloudflare</td><td>Website hosting, game downloads, email routing</td><td>Global</td></tr>
             <tr><td>Resend</td><td>Sending account and news email</td><td>United States</td></tr>
+            <tr><td>Zoho</td><td>Mailbox that receives in-game bug reports</td><td>United States / EU</td></tr>
             <tr><td>itch.io</td><td>Desktop game distribution</td><td>United States</td></tr>
             <tr><td>Stripe</td><td>Voluntary donations (we never see your card details)</td><td>United States</td></tr>
             </tbody>
@@ -192,7 +196,8 @@
     <ul>
         <li>tell you what personal data we hold about you, and give you a copy;</li>
         <li>correct data that is wrong;</li>
-        <li>delete your account and its data;</li>
+        <li>delete your account and its data (in-game under Settings &rarr; Account &rarr; Delete account, or by
+            email &mdash; see <a href="/delete-account.html">how to delete your account</a>);</li>
         <li>stop sending you project news (or stop other processing based on consent);</li>
         <li>object to, or ask us to restrict, processing based on legitimate interests.</li>
     </ul>
@@ -227,7 +232,8 @@
     <div class="contact">
         <h2 style="margin-top:0">Contact</h2>
         <p style="margin-bottom:0">
-            Questions, or want your data or account deleted? Email
+            Questions, or want your data deleted? You can delete your account in-game under Settings &rarr;
+            Account. For anything else, email
             <a href="mailto:support@afterlife-online.com">support@afterlife-online.com</a>.
             We are Net Artisan Collective, operators of Afterlife Online.
         </p>
@@ -244,6 +250,7 @@
             <li><a href="/">Home</a></li>
             <li><a href="/privacy.html">Privacy</a></li>
             <li><a href="/terms.html">Terms</a></li>
+            <li><a href="/delete-account.html">Delete account</a></li>
             <li><a href="https://forum.afterlife-online.com" target="_blank" rel="noopener">Forum</a></li>
             <li><a href="https://discord.gg/VkAeKyXQuB" target="_blank" rel="noopener">Discord</a></li>
         </ul>
