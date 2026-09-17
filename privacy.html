@@ -210,7 +210,7 @@
 
     <h2>Security</h2>
     <p>
-        Passwords are stored as Argon2 hashes, never as text. The connection between the Game client and our
+        Passwords are stored as Argon2 hashes, never as text. If you tick &ldquo;Stay signed in&rdquo;, the game keeps a random sign-in token on your device instead of your password; changing your password or deleting your account revokes it. The connection between the Game client and our
         server is encrypted, and traffic to our website and download servers uses HTTPS. Confirmation codes are
         stored hashed, expire after 30 minutes, and lock out after repeated wrong guesses. No system is perfectly
         secure, so please use a password you don't use anywhere else.
